@@ -8,6 +8,7 @@ if (!process.env.DATABASE_URL) {
 }
 
 export default defineConfig({
+  schemaFilter: ["public"],
   schema: "./supabase/schema.ts",
   out: "./supabase",
   dialect: "postgresql",

@@ -7,6 +7,7 @@ import {
   integer,
   pgEnum,
   primaryKey,
+  pgSchema,
 } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 
@@ -34,16 +35,18 @@ export const unitEnum = pgEnum("unit", [
   "pinch",
 ]);
 
-// Users table (if using Supabase Auth)
-export const users = pgTable("users", {
-  id: uuid("id").primaryKey().notNull(),
-  email: text("email").notNull().unique(),
-  createdAt: timestamp("created_at", { withTimezone: true })
-    .defaultNow()
+const authSchema = pgSchema("auth");
+
+const users = authSchema.table("users", {
+  id: uuid("id").primaryKey(),
+});
+
+export const profiles = pgTable("profiles", {
+  id: serial("id").primaryKey(),
+  user_id: uuid("user_id")
+    .references(() => users.id)
     .notNull(),
-  updatedAt: timestamp("updated_at", { withTimezone: true })
-    .defaultNow()
-    .notNull(),
+  nickname: text("nickname"),
 });
 
 // Meals table
