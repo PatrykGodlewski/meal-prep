@@ -8,6 +8,7 @@ import {
   pgEnum,
   primaryKey,
   pgSchema,
+  serial,
 } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 

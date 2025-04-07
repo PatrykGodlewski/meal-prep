@@ -10,5 +10,9 @@ export default async function Home() {
     return redirect("/sign-in");
   }
 
-  return <AddMealForm />;
+  return (
+    <div>
+      <AddMealForm />
+    </div>
+  );
 }

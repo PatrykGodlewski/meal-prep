@@ -52,6 +52,20 @@ export default async function RootLayout({
                 Hello {user?.user_metadata.displayName}
               </span>
               <span className="uppercase text-xs">let's prepare a meal!</span>
+              <div className="flex items-center gap-4">
+                <Link
+                  href="/"
+                  className="text-sm border px-2 py-1 rounded-md border-white"
+                >
+                  Home
+                </Link>
+                <Link
+                  href="/meals"
+                  className="text-sm border px-2 py-1 rounded-md border-white"
+                >
+                  Meals
+                </Link>
+              </div>
             </nav>
 
             <div className="">{children}</div>

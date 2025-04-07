@@ -1,5 +1,9 @@
 "use server";
 
+import type { MealFormValues } from "@/components/form-meal";
+import { authorize } from "@/lib/authorization";
+import { db } from "@/supabase";
+import { meals, ingredients as ingredientsSchema } from "@/supabase/schema";
 import { createClient } from "@/utils/supabase/server";
 import { encodedRedirect } from "@/utils/utils";
 import { headers } from "next/headers";
@@ -152,3 +156,31 @@ export const addDisplayNameAction = async () => {
   }
   return redirect("/");
 };
+
+export async function addMealAction(data: MealFormValues) {
+  try {
+    const user = await authorize();
+    if (!user) return { success: false };
+    const { ingredients, ...mealData } = data;
+
+    const [newMeal] = await db
+      .insert(meals)
+      .values({
+        ...mealData,
+        createdBy: user.id,
+      })
+      .returning();
+
+    await db.insert(ingredientsSchema).values(
+      data.ingredients.map((ingredient) => ({
+        ...ingredient,
+        mealId: newMeal.id,
+      })),
+    );
+
+    return { success: true };
+  } catch (error) {
+    console.error("Server error:", error);
+    return { success: false, error: "Failed to add meal" };
+  }
+}

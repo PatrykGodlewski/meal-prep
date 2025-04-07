@@ -1,10 +1,10 @@
 "use client";
 
-import { useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Plus, X } from "lucide-react";
+import { useTransition } from "react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -19,68 +19,119 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
+import { toast } from "@/hooks/use-toast";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
+import { mealCategoryEnum, unitEnum } from "@/supabase/schema";
+import { addMealAction } from "@/app/actions";
 
-// Define the form schema with Zod
+const mealCategories = z.enum(mealCategoryEnum.enumValues);
+const unitTypes = z.enum(unitEnum.enumValues);
+
 const formSchema = z.object({
   name: z.string().min(2, {
     message: "Meal name must be at least 2 characters.",
   }),
   description: z.string().min(10, {
-    message: "Preparation description must be at least 10 characters.",
+    message: "Description must be at least 10 characters.",
   }),
+  instructions: z.string().optional(),
+  prepTimeMinutes: z.coerce
+    .number()
+    .int()
+    .positive()
+    .optional()
+    .nullable()
+    .transform((val) => (val === null ? undefined : val)),
+  cookTimeMinutes: z.coerce
+    .number()
+    .int()
+    .positive()
+    .optional()
+    .nullable()
+    .transform((val) => (val === null ? undefined : val)),
+  servings: z.coerce
+    .number()
+    .int()
+    .positive()
+    .optional()
+    .nullable()
+    .transform((val) => (val === null ? undefined : val)),
+  category: mealCategories.optional(),
+  imageUrl: z.string().url().optional().or(z.literal("")),
+  isPublic: z.boolean().default(false),
   ingredients: z.array(
     z.object({
       name: z.string().min(1, { message: "Ingredient name is required" }),
       quantity: z.string().min(1, { message: "Quantity is required" }),
-      unit: z.string().optional(),
+      unit: unitTypes.optional(),
+      isOptional: z.boolean().default(false),
+      notes: z.string().optional(),
     }),
   ),
 });
 
-type FormValues = z.infer<typeof formSchema>;
+export type MealFormValues = z.infer<typeof formSchema>;
+
+const DEFAULT_VALUES = {
+  name: "",
+  description: "",
+  instructions: "",
+  prepTimeMinutes: undefined,
+  cookTimeMinutes: undefined,
+  servings: undefined,
+  category: undefined,
+  imageUrl: "",
+  isPublic: false,
+  ingredients: [
+    {
+      name: "",
+      quantity: "",
+      unit: undefined,
+      isOptional: false,
+      notes: "",
+    },
+  ],
+};
 
 export default function AddMealForm() {
-  const form = useForm<FormValues>({
+  const [isPending, startTransition] = useTransition();
+
+  const form = useForm({
     resolver: zodResolver(formSchema),
-    defaultValues: {
-      name: "",
-      description: "",
-      ingredients: [{ name: "", quantity: "", unit: "" }],
-    },
+    defaultValues: DEFAULT_VALUES,
   });
 
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  // Get the ingredients array from the form
   const { fields, append, remove } = useFieldArray({
     control: form.control,
     name: "ingredients",
   });
 
-  async function onSubmit(values: FormValues) {
-    setIsSubmitting(true);
+  function onSubmit(values: MealFormValues) {
+    startTransition(async () => {
+      const result = await addMealAction(values);
 
-    try {
-      // Here you would typically send the data to your API
-      console.log(values);
+      if (result.success) {
+        form.reset(DEFAULT_VALUES);
 
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      // Reset the form after successful submission
-      form.reset({
-        name: "",
-        description: "",
-        ingredients: [{ name: "", quantity: "", unit: "" }],
-      });
-
-      alert("Meal added successfully!");
-    } catch (error) {
-      console.error("Error submitting form:", error);
-      alert("Failed to add meal. Please try again.");
-    } finally {
-      setIsSubmitting(false);
-    }
+        toast({
+          title: "Success",
+          description: "Meal added successfully!",
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: result.error || "Something went wrong",
+          variant: "destructive",
+        });
+      }
+    });
   }
 
   return (
@@ -89,18 +140,67 @@ export default function AddMealForm() {
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Meal Name*</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Enter meal name" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="category"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Category</FormLabel>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select a category" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {mealCategoryEnum.enumValues.map((category) => (
+                        <SelectItem
+                          key={category}
+                          value={category}
+                          className="capitalize"
+                        >
+                          {category}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+
           <FormField
             control={form.control}
-            name="name"
+            name="description"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Meal Name</FormLabel>
+                <FormLabel>Description*</FormLabel>
                 <FormControl>
-                  <Input placeholder="Enter meal name" {...field} />
+                  <Textarea
+                    placeholder="Brief description of the meal"
+                    className="min-h-20"
+                    {...field}
+                  />
                 </FormControl>
-                <FormDescription>
-                  The name of your delicious meal.
-                </FormDescription>
                 <FormMessage />
               </FormItem>
             )}
@@ -108,13 +208,13 @@ export default function AddMealForm() {
 
           <FormField
             control={form.control}
-            name="description"
+            name="instructions"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Preparation Description</FormLabel>
+                <FormLabel>Instructions</FormLabel>
                 <FormControl>
                   <Textarea
-                    placeholder="Describe how to prepare this meal"
+                    placeholder="Step-by-step instructions for preparing the meal"
                     className="min-h-32"
                     {...field}
                   />
@@ -127,14 +227,143 @@ export default function AddMealForm() {
             )}
           />
 
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <FormField
+              control={form.control}
+              name="prepTimeMinutes"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Prep Time (minutes)</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      placeholder="15"
+                      {...field}
+                      value={field.value || ""}
+                      onChange={(e) => {
+                        const value =
+                          e.target.value === ""
+                            ? undefined
+                            : Number.parseInt(e.target.value);
+                        field.onChange(value);
+                      }}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="cookTimeMinutes"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Cook Time (minutes)</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      placeholder="30"
+                      {...field}
+                      value={field.value || ""}
+                      onChange={(e) => {
+                        const value =
+                          e.target.value === ""
+                            ? undefined
+                            : Number.parseInt(e.target.value);
+                        field.onChange(value);
+                      }}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="servings"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Servings</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      placeholder="4"
+                      {...field}
+                      value={field.value || ""}
+                      onChange={(e) => {
+                        const value =
+                          e.target.value === ""
+                            ? undefined
+                            : Number.parseInt(e.target.value);
+                        field.onChange(value);
+                      }}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+
+          <FormField
+            control={form.control}
+            name="imageUrl"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Image URL</FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder="https://example.com/image.jpg"
+                    {...field}
+                  />
+                </FormControl>
+                <FormDescription>
+                  Provide a URL to an image of the meal.
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="isPublic"
+            render={({ field }) => (
+              <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                <FormControl>
+                  <Checkbox
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                  />
+                </FormControl>
+                <div className="space-y-1 leading-none">
+                  <FormLabel>Make this meal public</FormLabel>
+                  <FormDescription>
+                    Public meals can be viewed by other users.
+                  </FormDescription>
+                </div>
+              </FormItem>
+            )}
+          />
+
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <h3 className="text-lg font-medium">Ingredients</h3>
+              <h3 className="text-lg font-medium">Ingredients*</h3>
               <Button
                 type="button"
                 variant="outline"
                 size="sm"
-                onClick={() => append({ name: "", quantity: "", unit: "" })}
+                onClick={() =>
+                  append({
+                    name: "",
+                    quantity: "",
+                    unit: undefined,
+                    isOptional: false,
+                    notes: "",
+                  })
+                }
                 className="flex items-center gap-1"
               >
                 <Plus className="h-4 w-4" />
@@ -163,13 +392,13 @@ export default function AddMealForm() {
                     )}
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                     <FormField
                       control={form.control}
                       name={`ingredients.${index}.name`}
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Name</FormLabel>
+                          <FormLabel>Name*</FormLabel>
                           <FormControl>
                             <Input placeholder="e.g., Flour" {...field} />
                           </FormControl>
@@ -178,14 +407,63 @@ export default function AddMealForm() {
                       )}
                     />
 
+                    <div className="grid grid-cols-2 gap-2">
+                      <FormField
+                        control={form.control}
+                        name={`ingredients.${index}.quantity`}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Quantity*</FormLabel>
+                            <FormControl>
+                              <Input placeholder="e.g., 2" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={form.control}
+                        name={`ingredients.${index}.unit`}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Unit</FormLabel>
+                            <Select
+                              onValueChange={field.onChange}
+                              defaultValue={field.value}
+                            >
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Select" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                {unitEnum.enumValues.map((unit) => (
+                                  <SelectItem key={unit} value={unit}>
+                                    {unit}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <FormField
                       control={form.control}
-                      name={`ingredients.${index}.quantity`}
+                      name={`ingredients.${index}.notes`}
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Quantity</FormLabel>
+                          <FormLabel>Notes</FormLabel>
                           <FormControl>
-                            <Input placeholder="e.g., 2" {...field} />
+                            <Input
+                              placeholder="e.g., finely chopped"
+                              {...field}
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -194,14 +472,18 @@ export default function AddMealForm() {
 
                     <FormField
                       control={form.control}
-                      name={`ingredients.${index}.unit`}
+                      name={`ingredients.${index}.isOptional`}
                       render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Unit (optional)</FormLabel>
+                        <FormItem className="flex flex-row items-start space-x-3 space-y-0 mt-8">
                           <FormControl>
-                            <Input placeholder="e.g., cups" {...field} />
+                            <Checkbox
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
+                            />
                           </FormControl>
-                          <FormMessage />
+                          <div className="space-y-1 leading-none">
+                            <FormLabel>Optional ingredient</FormLabel>
+                          </div>
                         </FormItem>
                       )}
                     />
@@ -211,8 +493,8 @@ export default function AddMealForm() {
             ))}
           </div>
 
-          <Button type="submit" className="w-full" disabled={isSubmitting}>
-            {isSubmitting ? "Adding Meal..." : "Add Meal"}
+          <Button type="submit" className="w-full" disabled={isPending}>
+            {isPending ? "Adding Meal..." : "Add Meal"}
           </Button>
         </form>
       </Form>
