@@ -1,4 +1,4 @@
-import WeekPlannerPage from "@/components/server-components/week-planner";
+import WeekPlannerPage from "@/features/meal-planner/week-planner";
 import { authorize } from "@/lib/authorization";
 import { redirect } from "next/navigation";
 

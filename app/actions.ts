@@ -1,7 +1,6 @@
 "use server";
 
 import type { MealFormValues } from "@/components/form-meal";
-import { MealPlanDay } from "@/components/server-components/week-planner";
 import { authorize } from "@/lib/authorization";
 import { db } from "@/supabase";
 import {
@@ -17,6 +16,7 @@ import {
 import { createClient } from "@/utils/supabase/server";
 import { encodedRedirect } from "@/utils/utils";
 import { MealCategory } from "@/validators";
+import { WeeklyPlanClientInput } from "@/validators/mealPlanner";
 import { addDays, format, getDay, startOfWeek } from "date-fns";
 import { and, eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
@@ -415,21 +415,15 @@ export async function generateWeeklyMealPlan(startDate: Date): Promise<void> {
   console.log("Weekly meal plan generated successfully.");
 }
 
-export async function getMealPlanForWeek(
-  startDate: Date,
-): Promise<MealPlanDay[]> {
-  const daysOfWeekNames = dayEnum.enumValues;
-  // Ensure startDate is actually the Monday of its week
-  const mondayStart = startOfWeek(startDate, { weekStartsOn: 1 });
-  const weekDates = Array.from({ length: 7 }, (_, i) =>
-    addDays(mondayStart, i),
-  );
+export async function getMealPlansDataForCurrentWeek(): Promise<WeeklyPlanClientInput> {
+  const startDate = startOfWeek(new Date(), { weekStartsOn: 1 });
+  const weekDates = Array.from({ length: 7 }, (_, i) => addDays(startDate, i));
 
   const mealPlansForWeek = await Promise.all(
-    weekDates.map(async (date): Promise<MealPlanDay> => {
+    weekDates.map(async (date): Promise<WeeklyPlanClientInput[number]> => {
       const formattedDate = format(date, "yyyy-MM-dd");
       const dayIndex = getDay(date);
-      const dayName = daysOfWeekNames[dayIndex];
+      const dayName = dayEnum.enumValues[dayIndex];
 
       const mealPlanResult = await db
         .select({ id: mealPlans.id })
@@ -438,7 +432,11 @@ export async function getMealPlanForWeek(
         .limit(1);
 
       if (!mealPlanResult || mealPlanResult.length === 0) {
-        return { date, dayName, meals: [] };
+        return {
+          dateString: date.toISOString(), // Pass as ISO string
+          dayName: dayName,
+          meals: [],
+        };
       }
 
       const mealPlanId = mealPlanResult[0].id;
@@ -460,16 +458,23 @@ export async function getMealPlanForWeek(
           category: pm.category as MealCategory,
         }));
 
-      return { date, dayName, meals: mealsForDay };
+      return {
+        dateString: date.toISOString(), // Pass as ISO string
+        dayName: dayName,
+        meals: mealsForDay,
+      };
     }),
   );
 
-  // Ensure Monday-Sunday order
-  const sortedPlan = mealPlansForWeek.sort(
-    (a, b) => getDay(a.date) - getDay(b.date),
-  );
-  if (getDay(sortedPlan[0].date) === 0) {
-    sortedPlan.push(sortedPlan.shift()!);
-  }
+  // Ensure Monday-Sunday order based on dayName index
+  const sortedPlan = mealPlansForWeek.sort((a, b) => {
+    const dayA = dayEnum.enumValues.indexOf(a.dayName);
+    const dayB = dayEnum.enumValues.indexOf(b.dayName);
+    // Adjust index for sorting (Mon=1, ..., Sun=7)
+    const sortA = dayA === 0 ? 7 : dayA;
+    const sortB = dayB === 0 ? 7 : dayB;
+    return sortA - sortB;
+  });
+
   return sortedPlan;
 }
