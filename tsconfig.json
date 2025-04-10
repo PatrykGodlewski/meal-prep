@@ -1,38 +1,41 @@
 {
   "compilerOptions": {
-    "target": "es2022",        // Target a specific ECMAScript version supported by Node.js 22
+    "target": "es2024", // Target a specific ECMAScript version supported by Node.js 22
     "lib": [
-      "dom",                   // Include DOM types for browser-based code
-      "dom.iterable",          // Include iterable DOM types
-      "es2022"                // Specific ECMAScript version (align with target)
+      "dom", // Include DOM types for browser-based code
+      "dom.iterable", // Include iterable DOM types
+      "es2024" // Specific ECMAScript version (align with target)
     ],
-    "allowJs": true,          // Allow JavaScript files to be compiled (for mixed projects)
-    "skipLibCheck": true,     // Skip checking declaration files (helps with dependency conflicts)
-    "strict": true,            // Enable strict type checking
+    "allowJs": true, // Allow JavaScript files to be compiled (for mixed projects)
+    "skipLibCheck": true, // Skip checking declaration files (helps with dependency conflicts)
+    "strict": true, // Enable strict type checking
     "forceConsistentCasingInFileNames": true, // Enforce consistent file casing
-    "noEmit": true,           // Don't emit (generate) JavaScript files (Next.js handles this)
-    "esModuleInterop": true,  // Interop between CommonJS and ES modules
-    "module": "commonjs",       // Use CommonJS module system (for seeders, more compatible)
-    "moduleResolution": "node",  // Resolve modules using Node.js-style resolution
+    "noEmit": true, // Don't emit (generate) JavaScript files (Next.js handles this)
+    "esModuleInterop": true, // Interop between CommonJS and ES modules
+    "module": "commonjs", // Use CommonJS module system (for seeders, more compatible)
+    "moduleResolution": "node", // Resolve modules using Node.js-style resolution
     "resolveJsonModule": true, // Enable importing JSON files as modules
-    "isolatedModules": true,    // Ensure each module can be compiled independently (required by Next.js)
-    "jsx": "preserve",          // Preserve JSX syntax (Next.js handles JSX transformation)
-    "incremental": true,        // Enable incremental compilation for faster builds
+    "isolatedModules": true, // Ensure each module can be compiled independently (required by Next.js)
+    "jsx": "preserve", // Preserve JSX syntax (Next.js handles JSX transformation)
+    "incremental": true, // Enable incremental compilation for faster builds
     "plugins": [
       {
-        "name": "next"           // Enable Next.js TypeScript plugin
+        "name": "next" // Enable Next.js TypeScript plugin
       }
     ],
     "paths": {
-      "@/*": ["./*"]          // Define path aliases for easier imports
+      "@/*": [
+        "./*"
+      ] // Define path aliases for easier imports
     }
   },
   "include": [
-    "next-env.d.ts",         // Include Next.js environment declaration file
-    "**/*.ts",                // Include all TypeScript files
-    "**/*.tsx",               // Include all TypeScript React files
-    ".next/types/**/*.ts"     // Include Next.js generated type files
+    "next-env.d.ts", // Include Next.js environment declaration file
+    "**/*.ts", // Include all TypeScript files
+    "**/*.tsx", // Include all TypeScript React files
+    ".next/types/**/*.ts" // Include Next.js generated type files
   ],
-  "exclude": ["node_modules"] // Exclude node_modules directory
+  "exclude": [
+    "node_modules"
+  ] // Exclude node_modules directory
 }
-

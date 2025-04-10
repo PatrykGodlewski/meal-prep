@@ -1,21 +1,23 @@
 "use server";
 
 import type { MealFormValues } from "@/components/form-meal";
+import { MealPlanDay } from "@/components/server-components/week-planner";
 import { authorize } from "@/lib/authorization";
 import { db } from "@/supabase";
 import {
+  dayEnum,
   meals,
   ingredients as ingredientsSchema,
   type Meal,
   type Ingredient,
   mealCategoryEnum,
-  type dayEnum,
   mealPlans,
   plannedMeals,
 } from "@/supabase/schema";
 import { createClient } from "@/utils/supabase/server";
 import { encodedRedirect } from "@/utils/utils";
-import { addDays, format, startOfWeek } from "date-fns";
+import { MealCategory } from "@/validators";
+import { addDays, format, getDay, startOfWeek } from "date-fns";
 import { and, eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
@@ -411,4 +413,63 @@ export async function generateWeeklyMealPlan(startDate: Date): Promise<void> {
   }
 
   console.log("Weekly meal plan generated successfully.");
+}
+
+export async function getMealPlanForWeek(
+  startDate: Date,
+): Promise<MealPlanDay[]> {
+  const daysOfWeekNames = dayEnum.enumValues;
+  // Ensure startDate is actually the Monday of its week
+  const mondayStart = startOfWeek(startDate, { weekStartsOn: 1 });
+  const weekDates = Array.from({ length: 7 }, (_, i) =>
+    addDays(mondayStart, i),
+  );
+
+  const mealPlansForWeek = await Promise.all(
+    weekDates.map(async (date): Promise<MealPlanDay> => {
+      const formattedDate = format(date, "yyyy-MM-dd");
+      const dayIndex = getDay(date);
+      const dayName = daysOfWeekNames[dayIndex];
+
+      const mealPlanResult = await db
+        .select({ id: mealPlans.id })
+        .from(mealPlans)
+        .where(eq(mealPlans.date, formattedDate))
+        .limit(1);
+
+      if (!mealPlanResult || mealPlanResult.length === 0) {
+        return { date, dayName, meals: [] };
+      }
+
+      const mealPlanId = mealPlanResult[0].id;
+      const plannedMealsResult = await db
+        .select({
+          mealId: plannedMeals.mealId,
+          category: plannedMeals.category,
+          mealName: meals.name,
+        })
+        .from(plannedMeals)
+        .where(eq(plannedMeals.mealPlanId, mealPlanId))
+        .leftJoin(meals, eq(plannedMeals.mealId, meals.id));
+
+      const mealsForDay = plannedMealsResult
+        .filter((pm) => pm.mealName !== null)
+        .map((pm) => ({
+          id: pm.mealId ?? `unknown-${Math.random()}`,
+          name: pm.mealName ?? "Meal Not Found",
+          category: pm.category as MealCategory,
+        }));
+
+      return { date, dayName, meals: mealsForDay };
+    }),
+  );
+
+  // Ensure Monday-Sunday order
+  const sortedPlan = mealPlansForWeek.sort(
+    (a, b) => getDay(a.date) - getDay(b.date),
+  );
+  if (getDay(sortedPlan[0].date) === 0) {
+    sortedPlan.push(sortedPlan.shift()!);
+  }
+  return sortedPlan;
 }
