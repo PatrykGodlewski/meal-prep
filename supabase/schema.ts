@@ -9,19 +9,30 @@ import {
   primaryKey,
   pgSchema,
   serial,
+  date,
 } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
+import { sql } from "drizzle-orm";
 
-// Optional: Create an enum for meal categories
+const authSchema = pgSchema("auth");
+
 export const mealCategoryEnum = pgEnum("meal_category", [
   "breakfast",
   "lunch",
   "dinner",
   "snack",
-  "dessert",
 ]);
 
-// Optional: Create an enum for measurement units
+export const dayEnum = pgEnum("day", [
+  "monday",
+  "tuesday",
+  "wednesday",
+  "thursday",
+  "friday",
+  "saturday",
+  "sunday",
+]);
+
 export const unitEnum = pgEnum("unit", [
   "g",
   "kg",
@@ -36,21 +47,18 @@ export const unitEnum = pgEnum("unit", [
   "pinch",
 ]);
 
-const authSchema = pgSchema("auth");
-
-const users = authSchema.table("users", {
+export const users = authSchema.table("users", {
   id: uuid("id").primaryKey(),
 });
 
 export const profiles = pgTable("profiles", {
   id: serial("id").primaryKey(),
-  user_id: uuid("user_id")
+  userId: uuid("user_id")
     .references(() => users.id)
     .notNull(),
   nickname: text("nickname"),
 });
 
-// Meals table
 export const meals = pgTable("meals", {
   id: uuid("id").defaultRandom().primaryKey().notNull(),
   name: text("name").notNull(),
@@ -73,7 +81,37 @@ export const meals = pgTable("meals", {
     .notNull(),
 });
 
-// Ingredients table
+export const mealPlans = pgTable("meal_plans", {
+  id: serial("id").primaryKey(),
+  userId: uuid("user_id")
+    .references(() => users.id)
+    .notNull(),
+  date: date("date").notNull(),
+  day: dayEnum("day").notNull(),
+});
+
+export const plannedMeals = pgTable(
+  "planned_meals",
+  {
+    mealPlanId: integer("meal_plan_id")
+      .references(() => mealPlans.id)
+      .notNull(),
+    mealId: uuid("meal_id")
+      .references(() => meals.id)
+      .notNull(),
+    category: mealCategoryEnum("category").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => {
+    return [primaryKey({ columns: [table.mealPlanId, table.mealId] })];
+  },
+);
+
 export const ingredients = pgTable("ingredients", {
   id: uuid("id").defaultRandom().primaryKey().notNull(),
   mealId: uuid("meal_id")
@@ -89,7 +127,6 @@ export const ingredients = pgTable("ingredients", {
     .notNull(),
 });
 
-// Optional: Tags table for categorizing meals
 export const tags = pgTable("tags", {
   id: uuid("id").defaultRandom().primaryKey().notNull(),
   name: text("name").notNull().unique(),
@@ -98,7 +135,6 @@ export const tags = pgTable("tags", {
     .notNull(),
 });
 
-// Optional: Junction table for many-to-many relationship between meals and tags
 export const mealsTags = pgTable(
   "meals_tags",
   {
@@ -113,13 +149,10 @@ export const mealsTags = pgTable(
       .notNull(),
   },
   (table) => {
-    return {
-      pk: primaryKey({ columns: [table.mealId, table.tagId] }),
-    };
+    return [primaryKey({ columns: [table.mealId, table.tagId] })];
   },
 );
 
-// Define relationships
 export const mealsRelations = relations(meals, ({ many, one }) => ({
   ingredients: many(ingredients),
   tags: many(mealsTags),
@@ -151,7 +184,25 @@ export const mealsTagsRelations = relations(mealsTags, ({ one }) => ({
   }),
 }));
 
-// Export types for type safety
+export const mealPlansRelations = relations(mealPlans, ({ one, many }) => ({
+  user: one(users, {
+    fields: [mealPlans.userId],
+    references: [users.id],
+  }),
+  plannedMeals: many(plannedMeals),
+}));
+
+export const plannedMealsRelations = relations(plannedMeals, ({ one }) => ({
+  mealPlan: one(mealPlans, {
+    fields: [plannedMeals.mealPlanId],
+    references: [mealPlans.id],
+  }),
+  meal: one(meals, {
+    fields: [plannedMeals.mealId],
+    references: [meals.id],
+  }),
+}));
+
 export type Meal = typeof meals.$inferSelect;
 export type NewMeal = typeof meals.$inferInsert;
 
@@ -160,3 +211,9 @@ export type NewIngredient = typeof ingredients.$inferInsert;
 
 export type Tag = typeof tags.$inferSelect;
 export type NewTag = typeof tags.$inferInsert;
+
+export type MealPlan = typeof mealPlans.$inferSelect;
+export type NewMealPlan = typeof mealPlans.$inferInsert;
+
+export type PlannedMeal = typeof plannedMeals.$inferSelect;
+export type NewPlannedMeal = typeof plannedMeals.$inferInsert;

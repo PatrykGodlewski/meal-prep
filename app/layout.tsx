@@ -1,5 +1,3 @@
-import DeployButton from "@/components/deploy-button";
-import { EnvVarWarning } from "@/components/env-var-warning";
 import HeaderAuth from "@/components/header-auth";
 import { ThemeSwitcher } from "@/components/theme-switcher";
 import { hasEnvVars } from "@/utils/supabase/check-env-vars";
@@ -31,7 +29,6 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const user = await authorize();
-  console.log(user);
 
   return (
     <html lang="en" className={geistSans.className} suppressHydrationWarning>

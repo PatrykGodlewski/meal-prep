@@ -1,6 +1,5 @@
-import AddMealForm from "@/components/form-meal";
+import WeekPlanner from "@/components/week-planner";
 import { authorize } from "@/lib/authorization";
-import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
 
 export default async function Home() {
@@ -12,7 +11,8 @@ export default async function Home() {
 
   return (
     <div>
-      <AddMealForm />
+      <WeekPlanner />
+      {"TODO: create a todo buy basket list"}
     </div>
   );
 }

@@ -26,7 +26,7 @@ async function getMeals() {
           const authorProfile = await db
             .select()
             .from(profiles)
-            .where(eq(profiles.user_id, meal.createdBy))
+            .where(eq(profiles.userId, meal.createdBy))
             .limit(1);
 
           if (authorProfile.length > 0 && authorProfile[0].nickname) {
@@ -56,15 +56,15 @@ export default async function MealsPage() {
     return (
       <div className="container mx-auto py-12 px-4">
         <h1 className="text-3xl font-bold mb-8">Meals</h1>
-        <div className="bg-gray-50 rounded-lg p-8 text-center">
-          <h2 className="text-xl font-medium text-gray-700 mb-2">
+        <div className="bg-neutral-50 rounded-lg p-8 text-center">
+          <h2 className="text-xl font-medium text-neutral-700 mb-2">
             No meals found
           </h2>
-          <p className="text-gray-500 mb-6">
+          <p className="text-neutral-500 mb-6">
             Start by adding your first meal recipe.
           </p>
           <Link
-            href="/"
+            href="/meals/add"
             className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
           >
             Add New Meal
@@ -79,7 +79,7 @@ export default async function MealsPage() {
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-3xl font-bold">Meals</h1>
         <Link
-          href="/"
+          href="/meals/add"
           className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
         >
           Add New Meal
@@ -105,8 +105,8 @@ function MealCard({ meal, author }: Props) {
 
   return (
     <Link href={`/meals/${meal.id}`}>
-      <div className="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow">
-        <div className="relative h-48 w-full bg-gray-200">
+      <div className="bg-neutral-700 rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow">
+        <div className="relative h-48 w-full bg-neutral-200">
           {meal.imageUrl ? (
             <Image
               src={meal.imageUrl}
@@ -115,26 +115,26 @@ function MealCard({ meal, author }: Props) {
               className="object-cover"
             />
           ) : (
-            <div className="flex items-center justify-center h-full bg-gray-100">
-              <UtensilsCrossed className="h-12 w-12 text-gray-400" />
+            <div className="flex items-center justify-center h-full bg-neutral-400">
+              <UtensilsCrossed className="h-12 w-12 text-neutral-600" />
             </div>
           )}
           {meal.category && (
-            <span className="absolute top-2 right-2 bg-blue-600 text-white text-xs px-2 py-1 rounded-full">
+            <span className="absolute uppercase top-2 right-2 bg-blue-600 text-white text-xs px-2 py-1 rounded-full">
               {meal.category}
             </span>
           )}
         </div>
 
         <div className="p-4">
-          <h2 className="text-xl font-semibold mb-2 line-clamp-1">
+          <h2 className="text-2xl font-semibold mb-2 line-clamp-1">
             {meal.name}
           </h2>
-          <p className="text-gray-600 text-sm mb-4 line-clamp-2">
+          <p className="text-neutral-300 text-sm mb-4 line-clamp-2">
             {meal.description}
           </p>
 
-          <div className="flex items-center text-sm text-gray-500 mb-3">
+          <div className="flex items-center text-sm text-neutral-400 mb-3">
             <span className="flex items-center mr-4">
               <Clock className="h-4 w-4 mr-1" />
               {totalTime > 0 ? `${totalTime} min` : "N/A"}
@@ -149,12 +149,12 @@ function MealCard({ meal, author }: Props) {
           </div>
 
           <div className="flex justify-between items-center">
-            <div className="flex items-center text-sm text-gray-500">
+            <div className="flex items-center text-sm text-neutral-400">
               <ChefHat className="h-4 w-4 mr-1" />
               <span>By {author}</span>
             </div>
 
-            <span className="text-xs text-gray-400">
+            <span className="text-xs text-neutral-400">
               {new Date(meal.createdAt).toLocaleDateString()}
             </span>
           </div>

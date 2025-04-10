@@ -30,6 +30,7 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { mealCategoryEnum, unitEnum } from "@/supabase/schema";
 import { addMealAction } from "@/app/actions";
+import { useRouter } from "next/navigation";
 
 const mealCategories = z.enum(mealCategoryEnum.enumValues);
 const unitTypes = z.enum(unitEnum.enumValues);
@@ -102,6 +103,7 @@ const DEFAULT_VALUES = {
 
 export default function AddMealForm() {
   const [isPending, startTransition] = useTransition();
+  const router = useRouter();
 
   const form = useForm({
     resolver: zodResolver(formSchema),
@@ -119,7 +121,7 @@ export default function AddMealForm() {
 
       if (result.success) {
         form.reset(DEFAULT_VALUES);
-
+        router.push(`/meals/${result.mealId}`);
         toast({
           title: "Success",
           description: "Meal added successfully!",
