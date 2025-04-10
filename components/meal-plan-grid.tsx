@@ -15,22 +15,24 @@ import {
   parseISO,
   isValid,
   getDay,
-} from "date-fns"; // Added getDay
+} from "date-fns";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Loader2, ChevronLeft, ChevronRight } from "lucide-react";
-import { generateWeeklyMealPlan, getMealPlanForWeek } from "@/app/actions";
+import { generateWeeklyMealPlan, getMealPlanForWeek } from "@/app/actions"; // Server Actions
 import { useToast } from "@/hooks/use-toast";
 import {
-  MealPlanDayInternalSchema,
-  type MealPlanDayInternal,
-  type WeeklyPlanClientInput,
+  MealPlanDayInternalSchema, // Zod schema for ONE internal day
+  type MealPlanDayInternal, // Type for ONE internal day
+  type WeeklyPlanClientInput, // Type for the raw array from server
 } from "@/validators/mealPlanner"; // Adjust path
 
+// --- Component Props ---
 interface MealPlanGridProps {
   initialMealPlansData: WeeklyPlanClientInput | null | undefined;
 }
 
+// --- Constants ---
 const daysOfWeekNames = [
   "Sunday",
   "Monday",
@@ -40,27 +42,27 @@ const daysOfWeekNames = [
   "Friday",
   "Saturday",
 ];
+const DATE_FORMAT_KEY = "yyyy-MM-dd"; // For cache keys and map lookups
+const DATE_FORMAT_DISPLAY_HEADER = "MMMM do";
+const DATE_FORMAT_DISPLAY_CARD = "MMM dd";
 
+// --- Helper Functions ---
 const getMonday = (date: Date): Date => {
-  if (!isValid(date)) {
-    return startOfWeek(new Date(), { weekStartsOn: 1 });
-  }
-  return startOfWeek(date, { weekStartsOn: 1 });
+  return isValid(date)
+    ? startOfWeek(date, { weekStartsOn: 1 })
+    : startOfWeek(new Date(), { weekStartsOn: 1 });
 };
 
-// --- Zod Parsing Function (Revised as above) ---
-const parseWithZod = (
+// Parses raw server data into internal format using Zod, resilient to individual day failures
+const parseAndSortWeekData = (
   clientData: WeeklyPlanClientInput | null | undefined,
 ): MealPlanDayInternal[] => {
-  // Always return an array
-  if (!clientData || !Array.isArray(clientData)) {
-    return [];
-  }
-  const parsedData: MealPlanDayInternal[] = [];
-  for (const day of clientData) {
+  if (!clientData || !Array.isArray(clientData)) return [];
+
+  const parsedData = clientData.reduce((acc: MealPlanDayInternal[], day) => {
     const result = MealPlanDayInternalSchema.safeParse(day);
     if (result.success) {
-      parsedData.push(result.data);
+      acc.push(result.data);
     } else {
       console.warn(
         "Zod parsing failed for a day:",
@@ -69,123 +71,160 @@ const parseWithZod = (
         day,
       );
     }
-  }
-  const sortedData = [...parsedData].sort((a, b) => {
+    return acc;
+  }, []);
+
+  // Sort Mon-Sun
+  return parsedData.sort((a, b) => {
     const dayA = daysOfWeekNames.indexOf(a.dayName);
     const dayB = daysOfWeekNames.indexOf(b.dayName);
     const sortA = dayA === 0 ? 7 : dayA;
     const sortB = dayB === 0 ? 7 : dayB;
     return sortA - sortB;
   });
-  return sortedData; // Return successfully parsed days, potentially empty array
 };
-// --- End Zod Parsing Function ---
 
-// --- Function to create the base 7-day structure ---
+// Creates the base 7-day structure for a given week start
 const createBaseWeekStructure = (startDate: Date): MealPlanDayInternal[] => {
   const mondayStart = getMonday(startDate);
-  const weekDays: MealPlanDayInternal[] = [];
-  for (let i = 0; i < 7; i++) {
+  return Array.from({ length: 7 }).map((_, i) => {
     const currentDate = addDays(mondayStart, i);
     const dayIndex = getDay(currentDate);
-    weekDays.push({
+    return {
       date: currentDate,
       dayName: daysOfWeekNames[dayIndex],
-      meals: [], // Start with empty meals
-    });
-  }
-  const sortedWeek = weekDays.sort((a, b) => {
-    const dayA = daysOfWeekNames.indexOf(a.dayName);
-    const dayB = daysOfWeekNames.indexOf(b.dayName);
-    const sortA = dayA === 0 ? 7 : dayA;
-    const sortB = dayB === 0 ? 7 : dayB;
-    return sortA - sortB;
+      meals: [],
+    };
   });
-  return sortedWeek;
 };
-// --- End Base Structure Function ---
 
+// --- Sub-Components ---
+interface DayCardProps {
+  planDay: MealPlanDayInternal;
+  isLoading: boolean;
+}
+
+const DayCard: React.FC<DayCardProps> = React.memo(({ planDay, isLoading }) => {
+  if (!isValid(planDay.date)) {
+    return (
+      <Card className="shadow-sm flex flex-col min-h-[150px] border-red-500">
+        <CardHeader className="p-3">
+          <CardTitle className="text-sm text-red-600">Data Error</CardTitle>
+        </CardHeader>
+        <CardContent className="p-3 text-xs text-red-500">
+          Invalid date encountered.
+        </CardContent>
+      </Card>
+    );
+  }
+
+  return (
+    <Card
+      className={`shadow-sm flex flex-col min-h-[150px] ${isLoading ? "opacity-50" : ""}`}
+    >
+      <CardHeader className="p-3">
+        <CardTitle className="flex items-center justify-between text-sm font-medium">
+          <span>{planDay.dayName}</span>
+          <span className="text-xs text-gray-500">
+            {format(planDay.date, DATE_FORMAT_DISPLAY_CARD)}
+          </span>
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="p-3 space-y-2 flex-grow">
+        <ul className="space-y-1 text-xs">
+          {planDay.meals.length > 0 ? (
+            planDay.meals.map((meal) => (
+              <li
+                key={`${planDay.date.toISOString()}-${meal.category}-${meal.id}`}
+              >
+                <span className="font-semibold capitalize">
+                  {meal.category}:
+                </span>{" "}
+                {meal.name}
+              </li>
+            ))
+          ) : (
+            <li className="text-center text-gray-400 italic pt-4">
+              No meals planned
+            </li>
+          )}
+        </ul>
+      </CardContent>
+    </Card>
+  );
+});
+DayCard.displayName = "DayCard"; // For better debugging
+
+// --- Main Component ---
 const MealPlanGrid: React.FC<MealPlanGridProps> = ({
   initialMealPlansData,
 }) => {
   const { toast } = useToast();
   const isMounted = useRef(false);
 
-  // --- State ---
+  // Cache: Stores parsed MealPlanDayInternal[] keyed by week start ISO string
   const [planCache, setPlanCache] = useState<
     Map<string, MealPlanDayInternal[]>
   >(() => {
     const cache = new Map<string, MealPlanDayInternal[]>();
-    const parsedInitial = parseWithZod(initialMealPlansData); // Returns [] on failure
+    const parsedInitial = parseAndSortWeekData(initialMealPlansData); // Returns [] on failure
     if (parsedInitial.length > 0) {
       const initialKey = getMonday(parsedInitial[0].date).toISOString();
       cache.set(initialKey, parsedInitial);
     }
-    // Even if initial data is bad/empty, the cache starts empty, which is fine.
     return cache;
   });
 
+  // Determine initial start date based on cache or current date
   const initialStartDate = useMemo(() => {
     const initialKey = Array.from(planCache.keys())[0];
     return initialKey ? parseISO(initialKey) : getMonday(new Date());
   }, [planCache]);
 
+  // State for the currently viewed week's start date
   const [displayedWeekStart, setDisplayedWeekStart] =
     useState<Date>(initialStartDate);
 
-  // --- Derive Display Plan (Merge Base + Cache) ---
-  const displayPlan = useMemo(() => {
-    const baseStructure = createBaseWeekStructure(displayedWeekStart);
-    const cachedData = planCache.get(displayedWeekStart.toISOString()); // Might be [] or MealPlanDayInternal[]
-
-    if (!cachedData || cachedData.length === 0) {
-      return baseStructure; // Use base if cache is empty/missing
-    }
-
-    // Create a map of the cached data for efficient lookup
-    const cachedMap = new Map<string, MealPlanDayInternal>();
-    cachedData.forEach((day) => {
-      if (isValid(day.date)) {
-        // Ensure date is valid before formatting
-        cachedMap.set(format(day.date, "yyyy-MM-dd"), day);
-      }
-    });
-
-    // Merge: Map over base, replace with cached data if found
-    return baseStructure.map((baseDay) => {
-      const dateKey = format(baseDay.date, "yyyy-MM-dd");
-      return cachedMap.get(dateKey) || baseDay; // Use cached or default to base
-    });
-  }, [planCache, displayedWeekStart]);
-  // --- End Derive Display Plan ---
-
+  // State for loading indicators
   const [isGenerating, setIsGenerating] = useState(false);
   const [isNavigating, setIsNavigating] = useState(false);
-  // --- End State ---
 
   // Effect to update cache if initial props change after mount
   useEffect(() => {
     if (isMounted.current) {
-      const newParsedData = parseWithZod(initialMealPlansData); // Returns [] on failure
+      const newParsedData = parseAndSortWeekData(initialMealPlansData);
       if (newParsedData.length > 0) {
-        // Only update cache if there's valid parsed data
         const dataWeekStart = getMonday(newParsedData[0].date);
         const dataKey = dataWeekStart.toISOString();
-        // Update cache only if new data is different from cached data for that week
-        if (
-          JSON.stringify(planCache.get(dataKey)) !==
-          JSON.stringify(newParsedData)
-        ) {
-          console.log("Updating cache from new props for week:", dataKey);
-          setPlanCache((prev) => new Map(prev).set(dataKey, newParsedData));
-        }
+        // Update cache if data differs (simple overwrite is fine)
+        setPlanCache((prev) => new Map(prev).set(dataKey, newParsedData));
       }
     } else {
       isMounted.current = true;
     }
-  }, [initialMealPlansData, planCache]);
+  }, [initialMealPlansData]); // Only depends on the prop
 
-  // --- Data Loading Logic ---
+  // --- Derived State for Display ---
+  const displayPlan = useMemo(() => {
+    const baseStructure = createBaseWeekStructure(displayedWeekStart);
+    const cachedWeekData = planCache.get(displayedWeekStart.toISOString()); // Array or undefined
+
+    if (!cachedWeekData || cachedWeekData.length === 0) {
+      return baseStructure; // Use base if cache is empty/missing
+    }
+
+    const cachedMap = new Map(
+      cachedWeekData.map((day) => [format(day.date, DATE_FORMAT_KEY), day]),
+    );
+
+    return baseStructure.map(
+      (baseDay) =>
+        cachedMap.get(format(baseDay.date, DATE_FORMAT_KEY)) || baseDay,
+    );
+  }, [planCache, displayedWeekStart]);
+  // --- End Derived State ---
+
+  // --- Data Loading Callback ---
   const loadWeekData = useCallback(
     async (startDate: Date) => {
       if (!isValid(startDate)) {
@@ -201,50 +240,48 @@ const MealPlanGrid: React.FC<MealPlanGridProps> = ({
       const dateKey = targetMonday.toISOString();
 
       if (planCache.has(dateKey)) {
-        setDisplayedWeekStart(targetMonday);
-        return; // Use cached data (displayPlan updates via useMemo)
+        setDisplayedWeekStart(targetMonday); // Navigate even if cached
+        return;
       }
 
       setIsNavigating(true);
-      setDisplayedWeekStart(targetMonday); // Update displayed week optimistically
-      // displayPlan will show base structure via useMemo while loading
+      setDisplayedWeekStart(targetMonday); // Optimistic UI update for week title
 
       try {
         const weekDataClient = await getMealPlanForWeek(targetMonday);
-        const weekDataInternal = parseWithZod(weekDataClient); // Returns [] on failure
+        const weekDataInternal = parseAndSortWeekData(weekDataClient); // Returns [] on failure
 
-        // Update Cache with parsed data (even if empty)
+        // Update Cache (store [] if parsing failed or no data)
         setPlanCache((prev) => new Map(prev).set(dateKey, weekDataInternal));
-        // displayPlan updates automatically via useMemo
       } catch (error) {
         console.error("Error fetching week data:", error);
-        // Store empty array in cache on fetch error to prevent refetch loop
-        setPlanCache((prev) => new Map(prev).set(dateKey, []));
+        setPlanCache((prev) => new Map(prev).set(dateKey, [])); // Cache empty on error
         toast({
           title: "Error",
           description:
-            error instanceof Error
-              ? error.message
-              : "Could not load data for the selected week.",
+            error instanceof Error ? error.message : "Could not load data.",
           variant: "destructive",
         });
       } finally {
         setIsNavigating(false);
       }
     },
-    [planCache, toast],
+    [planCache, toast], // Keep dependencies minimal
   );
-  // --- End Data Loading Logic ---
+  // --- End Data Loading Callback ---
 
-  // --- Event Handlers (Keep as before) ---
-  const handleNavigateWeek = (direction: "previous" | "next") => {
-    const currentMonday = getMonday(displayedWeekStart);
-    const newStartDate =
-      direction === "previous"
-        ? subDays(currentMonday, 7)
-        : addDays(currentMonday, 7);
-    loadWeekData(newStartDate);
-  };
+  // --- Event Handlers ---
+  const handleNavigateWeek = useCallback(
+    (direction: "previous" | "next") => {
+      const currentMonday = getMonday(displayedWeekStart);
+      const newStartDate =
+        direction === "previous"
+          ? subDays(currentMonday, 7)
+          : addDays(currentMonday, 7);
+      loadWeekData(newStartDate);
+    },
+    [displayedWeekStart, loadWeekData],
+  );
 
   const handleGenerateMeals = useCallback(async () => {
     setIsGenerating(true);
@@ -254,13 +291,15 @@ const MealPlanGrid: React.FC<MealPlanGridProps> = ({
       await generateWeeklyMealPlan(mondayForGeneration);
       toast({
         title: "Success",
-        description: "Meal plan generation initiated! Data will refresh.",
+        description: "Meal plan generation initiated!",
       });
+      // Clear cache for generated week to force refetch
       setPlanCache((prev) => {
         const newCache = new Map(prev);
-        newCache.delete(generationKey); // Clear cache for generated week
+        newCache.delete(generationKey);
         return newCache;
       });
+      // If viewing the generated week, trigger load after delay
       if (displayedWeekStart.toISOString() === generationKey) {
         setTimeout(() => loadWeekData(mondayForGeneration), 500);
       }
@@ -268,10 +307,7 @@ const MealPlanGrid: React.FC<MealPlanGridProps> = ({
       console.error("Error generating meal plan:", error);
       toast({
         title: "Error",
-        description:
-          error instanceof Error
-            ? error.message
-            : "Failed to generate meal plan.",
+        description: error instanceof Error ? error.message : "Failed.",
         variant: "destructive",
       });
     } finally {
@@ -281,13 +317,12 @@ const MealPlanGrid: React.FC<MealPlanGridProps> = ({
   // --- End Event Handlers ---
 
   const isLoading = isGenerating || isNavigating;
-  // Show loading overlay only when navigating AND data isn't in cache yet
   const showLoadingOverlay =
     isNavigating && !planCache.has(displayedWeekStart.toISOString());
 
   return (
     <div className="p-4">
-      {/* Navigation and Generate Button */}
+      {/* Header: Navigation & Actions */}
       <div className="mb-6 flex flex-col sm:flex-row justify-between items-center gap-4">
         <div className="flex items-center gap-2">
           <Button
@@ -299,10 +334,10 @@ const MealPlanGrid: React.FC<MealPlanGridProps> = ({
           >
             <ChevronLeft className="h-4 w-4" />
           </Button>
-          <h2 className="text-xl font-semibold text-center sm:text-left whitespace-nowrap">
+          <h2 className="text-xl font-semibold text-center sm:text-left whitespace-nowrap tabular-nums">
             Week of{" "}
             {isValid(displayedWeekStart)
-              ? format(displayedWeekStart, "MMMM do")
+              ? format(displayedWeekStart, DATE_FORMAT_DISPLAY_HEADER)
               : "Loading..."}
           </h2>
           <Button
@@ -316,77 +351,30 @@ const MealPlanGrid: React.FC<MealPlanGridProps> = ({
           </Button>
         </div>
         <Button onClick={handleGenerateMeals} disabled={isLoading}>
-          {isGenerating ? (
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-          ) : null}
+          {isGenerating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
           Generate for This Week
         </Button>
       </div>
 
-      {/* Grid Display */}
+      {/* Grid Display Area */}
       <div
         key={displayedWeekStart.toISOString()}
         className={`grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-7 gap-4 relative min-h-[200px]`}
       >
         {showLoadingOverlay && (
-          <div className="absolute inset-0 flex items-center justify-center bg-white/70 z-10 rounded-lg">
+          <div className="absolute inset-0 flex items-center justify-center bg-white/70 dark:bg-black/50 z-10 rounded-lg">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
           </div>
         )}
 
-        {/* Always map over the 7-day displayPlan */}
-        {displayPlan.map((planDay) =>
-          isValid(planDay.date) ? (
-            <Card
-              key={planDay.date.toISOString()}
-              className={`shadow-sm flex flex-col min-h-[150px] ${showLoadingOverlay ? "opacity-50" : ""}`}
-            >
-              <CardHeader className="p-3">
-                <CardTitle className="flex items-center justify-between text-sm font-medium">
-                  <span>{planDay.dayName}</span>
-                  <span className="text-xs text-gray-500">
-                    {format(planDay.date, "MMM dd")}
-                  </span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-3 space-y-2 flex-grow">
-                <ul className="space-y-1 text-xs">
-                  {planDay.meals.length > 0 ? (
-                    planDay.meals.map((meal) => (
-                      <li
-                        key={`${planDay.date.toISOString()}-${meal.category}-${meal.id}`}
-                      >
-                        <span className="font-semibold capitalize">
-                          {meal.category}:
-                        </span>{" "}
-                        {meal.name}
-                      </li>
-                    ))
-                  ) : (
-                    <li className="text-center text-gray-400 italic pt-4">
-                      No meals planned
-                    </li>
-                  )}
-                </ul>
-              </CardContent>
-            </Card>
-          ) : (
-            // Fallback for invalid date (should be rare now)
-            <Card
-              key={`invalid-${Math.random()}`}
-              className="shadow-sm flex flex-col min-h-[150px] border-red-500"
-            >
-              <CardHeader className="p-3">
-                <CardTitle className="text-sm text-red-600">
-                  Display Error
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-3 text-xs text-red-500">
-                Invalid date encountered.
-              </CardContent>
-            </Card>
-          ),
-        )}
+        {/* Always render 7 DayCard components based on displayPlan */}
+        {displayPlan.map((planDay) => (
+          <DayCard
+            key={planDay.date.toISOString()} // Use date object from merged plan
+            planDay={planDay}
+            isLoading={showLoadingOverlay} // Pass loading state for potential styling
+          />
+        ))}
       </div>
     </div>
   );

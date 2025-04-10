@@ -1,12 +1,9 @@
-import HeaderAuth from "@/components/header-auth";
-import { ThemeSwitcher } from "@/components/theme-switcher";
-import { hasEnvVars } from "@/utils/supabase/check-env-vars";
 import { Geist, Playfair_Display } from "next/font/google";
-import { ThemeProvider } from "next-themes";
 import Link from "next/link";
 import "./globals.css";
 import { authorize } from "@/lib/authorization";
 import { cn } from "@/lib/utils";
+import Providers from "./providers";
 
 export const metadata = {
   title: "Next.js and Supabase Starter Kit",
@@ -33,12 +30,7 @@ export default async function RootLayout({
   return (
     <html lang="en" className={geistSans.className} suppressHydrationWarning>
       <body className="bg-background text-foreground">
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
+        <Providers>
           <main>
             <nav
               className={cn(
@@ -71,7 +63,7 @@ export default async function RootLayout({
               Meal-prep
             </footer>
           </main>
-        </ThemeProvider>
+        </Providers>
       </body>
     </html>
   );
