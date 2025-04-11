@@ -1,24 +1,23 @@
 "use server";
 
-import type { MealFormValues } from "@/components/form-meal";
+import type { MealAddFormValues } from "@/features/meal-editor/form-meal";
+import type { MealUpdateFormValues } from "@/features/meal-editor/meal-editor-form";
+import type { MealPlanClient } from "@/features/meal-planner/types";
 import { authorize } from "@/lib/authorization";
 import { db } from "@/supabase";
 import {
-  dayEnum,
   meals,
   ingredients as ingredientsSchema,
-  type Meal,
-  type Ingredient,
-  mealCategoryEnum,
   mealPlans,
   plannedMeals,
+  mealsTags,
+  type NewIngredient,
+  type Meal,
 } from "@/supabase/schema";
 import { createClient } from "@/utils/supabase/server";
 import { encodedRedirect } from "@/utils/utils";
-import { MealCategory } from "@/validators";
-import { WeeklyPlanClientInput } from "@/validators/mealPlanner";
-import { addDays, format, getDay, startOfWeek } from "date-fns";
-import { and, eq } from "drizzle-orm";
+import { addDays, format, startOfWeek } from "date-fns";
+import { and, eq, inArray } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
@@ -172,7 +171,7 @@ export const addDisplayNameAction = async () => {
 };
 
 type Result = { success: boolean; mealId?: string; error?: string };
-export async function addMealAction(data: MealFormValues): Promise<Result> {
+export async function addMealAction(data: MealAddFormValues): Promise<Result> {
   try {
     const user = await authorize();
     if (!user) return { success: false };
@@ -199,282 +198,312 @@ export async function addMealAction(data: MealFormValues): Promise<Result> {
     return { success: false, error: "Failed to add meal" };
   }
 }
-// Define the extended meal type with ingredients and author
-type MealWithDetails = Meal & {
-  ingredients: (Ingredient | TempIngredient)[];
-  authorName: string;
-};
-
-// Define a type for temporary ingredients (with string IDs)
-type TempIngredient = Omit<Ingredient, "id"> & { id: string };
-
-interface UpdateResult {
-  success: boolean;
-  error?: string;
-}
 
 interface DeleteResult {
   success: boolean;
   error?: string;
 }
 
-export async function updateMeal(data: MealWithDetails): Promise<UpdateResult> {
-  try {
-    // Extract ingredients to handle separately
-    const { ingredients: ingredientsData, authorName, ...mealData } = data;
+interface UpdateResult {
+  success: boolean;
+  error?: string;
+  mealId?: string; // Optionally return mealId
+}
 
-    // Start a transaction
-    return await db.transaction(async (tx) => {
-      // Update the meal
+// Define a clear result type
+interface UpdateResult {
+  success: boolean;
+  error?: string;
+  mealId?: string; // Optionally return mealId
+}
+
+/**
+ * Updates a Meal record and synchronizes its associated Ingredients.
+ * Handles inserting new ingredients, updating existing ones, and deleting removed ones.
+ * Operates within a database transaction.
+ * @param data - Validated form data conforming to MealUpdateFormValues.
+ * @returns Promise<UpdateResult> indicating success or failure.
+ */
+export async function updateMeal(
+  data: MealUpdateFormValues,
+): Promise<UpdateResult> {
+  // 1. Input Validation (Basic check, Zod already validated structure)
+  if (!data?.id) {
+    return { success: false, error: "Invalid meal data: Missing ID." };
+  }
+  if (!data.ingredients || !Array.isArray(data.ingredients)) {
+    return {
+      success: false,
+      error: "Invalid meal data: Missing ingredients array.",
+    };
+  }
+
+  const {
+    ingredients: submittedIngredients,
+    id: mealId,
+    ...mealBaseData
+  } = data;
+
+  try {
+    await db.transaction(async (tx) => {
+      // 2. Update Meal Details
       await tx
         .update(meals)
         .set({
-          name: mealData.name,
-          description: mealData.description,
-          instructions: mealData.instructions,
-          prepTimeMinutes: mealData.prepTimeMinutes,
-          cookTimeMinutes: mealData.cookTimeMinutes,
-          servings: mealData.servings,
-          category: mealData.category,
-          imageUrl: mealData.imageUrl,
-          isPublic: mealData.isPublic,
+          name: mealBaseData.name,
+          description: mealBaseData.description,
+          instructions: mealBaseData.instructions,
+          prepTimeMinutes: mealBaseData.prepTimeMinutes,
+          cookTimeMinutes: mealBaseData.cookTimeMinutes,
+          servings: mealBaseData.servings,
+          category: mealBaseData.category,
+          imageUrl: mealBaseData.imageUrl,
+          isPublic: mealBaseData.isPublic,
           updatedAt: new Date(),
         })
-        .where(eq(meals.id, mealData.id));
+        .where(eq(meals.id, mealId));
 
-      // Handle ingredients
-      // First, get existing ingredients to compare
-      const existingIngredients = await tx
-        .select()
-        .from(ingredientsSchema)
-        .where(eq(ingredientsSchema.mealId, mealData.id));
+      // 3. Fetch IDs of Existing Ingredients for Comparison
+      const existingIngredientIds = (
+        await tx
+          .select({ id: ingredientsSchema.id })
+          .from(ingredientsSchema)
+          .where(eq(ingredientsSchema.mealId, mealId))
+      ).map((ing) => ing.id); // Get just the array of IDs
 
-      // Identify ingredients to delete (those in DB but not in the updated data)
-      const existingIds = existingIngredients.map((ing) => ing.id);
-      const updatedIds = ingredientsData
-        .filter((ing) => !ing.id.toString().startsWith("temp-"))
-        .map((ing) => ing.id);
+      const existingIdSet = new Set(existingIngredientIds);
+      const submittedIds = new Set<string>(); // Track IDs submitted that should be kept/updated
 
-      const idsToDelete = existingIds.filter((id) => !updatedIds.includes(id));
+      // --- Promises for concurrent execution ---
+      const insertPromises: Promise<any>[] = [];
+      const updatePromises: Promise<any>[] = [];
 
-      // Delete removed ingredients
-      if (idsToDelete.length > 0) {
-        for (const id of idsToDelete) {
-          await tx
-            .delete(ingredientsSchema)
-            .where(eq(ingredientsSchema.id, id));
-        }
-      }
+      // 4. Process Submitted Ingredients: Prepare Inserts & Updates
+      for (const submittedIng of submittedIngredients) {
+        // Prepare payload, ensuring required fields are present and optional are null if empty
+        // Explicitly type the payload for clarity and safety
+        const payload: Omit<NewIngredient, "id" | "mealId" | "createdAt"> = {
+          name: submittedIng.name, // Required by schema
+          quantity: submittedIng.quantity, // Required by schema
+          unit: submittedIng.unit || null,
+          category: submittedIng.category || null,
+          isOptional: submittedIng.isOptional ?? false,
+          notes: submittedIng.notes || null,
+        };
 
-      // Update or insert ingredients
-      for (const ingredient of ingredientsData) {
-        // Skip temporary IDs - these are new ingredients
-        if (ingredient.id.toString().startsWith("temp-")) {
-          // Insert new ingredient
-          await tx.insert(ingredientsSchema).values({
-            mealId: mealData.id,
-            name: ingredient.name,
-            quantity: ingredient.quantity,
-            unit: ingredient.unit,
-            isOptional: ingredient.isOptional,
-            notes: ingredient.notes,
-            createdAt: new Date(),
-          });
+        if (submittedIng.id && existingIdSet.has(submittedIng.id)) {
+          // --- Prepare UPDATE ---
+          submittedIds.add(submittedIng.id); // Mark as present in submission
+          updatePromises.push(
+            tx
+              .update(ingredientsSchema)
+              .set(payload)
+              .where(eq(ingredientsSchema.id, submittedIng.id)),
+          );
         } else {
-          // Update existing ingredient
-          await tx
-            .update(ingredientsSchema)
-            .set({
-              name: ingredient.name,
-              quantity: ingredient.quantity,
-              unit: ingredient.unit,
-              isOptional: ingredient.isOptional,
-              notes: ingredient.notes,
-            })
-            .where(eq(ingredientsSchema.id, ingredient.id as string));
+          // --- Prepare INSERT ---
+          // ID is missing or doesn't match an existing one for this meal
+          const insertPayload: NewIngredient = {
+            ...payload,
+            mealId: mealId, // Link to the meal
+            // Let DB handle default 'id' and 'createdAt'
+          };
+          insertPromises.push(
+            tx.insert(ingredientsSchema).values(insertPayload),
+          );
         }
       }
 
-      // Revalidate the page
-      revalidatePath(`/meals/${mealData.id}`);
-      revalidatePath("/meals");
+      // 5. Determine and Prepare Deletes
+      const idsToDelete = existingIngredientIds.filter(
+        (id) => !submittedIds.has(id),
+      );
+      let deletePromise: Promise<any> | null = null;
+      if (idsToDelete.length > 0) {
+        deletePromise = tx
+          .delete(ingredientsSchema)
+          .where(inArray(ingredientsSchema.id, idsToDelete));
+      }
 
-      return { success: true };
-    });
+      // 6. Execute DB Operations Concurrently
+      const allPromises = [...insertPromises, ...updatePromises];
+      if (deletePromise) {
+        allPromises.push(deletePromise);
+      }
+      await Promise.all(allPromises);
+
+      // 7. Revalidate Paths (after successful transaction)
+      revalidatePath(`/meals/${mealId}`);
+      revalidatePath("/meals");
+    }); // Transaction commits here if no errors were thrown
+
+    return { success: true, mealId: mealId };
   } catch (error) {
-    console.error("Error updating meal:", error);
-    return { success: false, error: "Failed to update meal" };
+    console.error("Error updating meal:", { mealId, data, error }); // Log more context
+    const message =
+      error instanceof Error
+        ? error.message
+        : "Database error occurred during update.";
+    // Consider logging the specific DB error if available (e.g., error.code)
+    return { success: false, error: message };
   }
 }
 
+// Define a clear result type
+interface DeleteResult {
+  success: boolean;
+  error?: string;
+}
+
+/**
+ * Deletes a Meal record and its associations in junction tables (plannedMeals, mealsTags).
+ * Ingredients associated with the meal will have their mealId set to NULL
+ * due to the 'on delete set null' constraint (requires schema modification and migration).
+ * @param id - The UUID string of the meal to delete.
+ * @returns Promise<DeleteResult> indicating success or failure.
+ */
 export async function deleteMeal(id: string): Promise<DeleteResult> {
+  if (!id) {
+    return { success: false, error: "Meal ID is required." };
+  }
+
   try {
-    // Start a transaction
-    return await db.transaction(async (tx) => {
-      // Delete all ingredients first (should cascade, but being explicit)
-      await tx
-        .delete(ingredientsSchema)
-        .where(eq(ingredientsSchema.mealId, id));
+    await db.transaction(async (tx) => {
+      // 1. Delete associations in plannedMeals table first
+      //    (Important if plannedMeals has FK to meals with RESTRICT/NO ACTION)
+      await tx.delete(plannedMeals).where(eq(plannedMeals.mealId, id));
 
-      // Delete the meal
-      await tx.delete(meals).where(eq(meals.id, id));
+      // 2. Delete associations in mealsTags table
+      await tx.delete(mealsTags).where(eq(mealsTags.mealId, id));
 
-      // Revalidate paths
-      revalidatePath("/meals");
+      // 3. Delete the meal itself
+      //    The 'on delete set null' constraint on ingredients.mealId
+      //    will automatically handle setting related ingredients' mealId to NULL.
+      const deleteResult = await tx
+        .delete(meals)
+        .where(eq(meals.id, id))
+        .returning({ deletedId: meals.id }); // Optional: check if something was deleted
 
-      return { success: true };
-    });
+      if (deleteResult.length === 0) {
+        // Optional: Throw error if meal wasn't found to trigger rollback
+        throw new Error(`Meal with ID ${id} not found for deletion.`);
+      }
+
+      // 4. Revalidate relevant paths after successful deletion
+      revalidatePath("/meals"); // Revalidate the list page
+      // No need to revalidate `/meals/${id}` as it won't exist anymore
+    }); // Transaction commits here if no errors were thrown
+
+    return { success: true };
   } catch (error) {
     console.error("Error deleting meal:", error);
-    return { success: false, error: "Failed to delete meal" };
+    const message =
+      error instanceof Error
+        ? error.message
+        : "Database error occurred during deletion.";
+    return { success: false, error: message };
   }
 }
 
-export async function generateWeeklyMealPlan(startDate: Date): Promise<void> {
+// Helper to create base structure (can be moved to utils)
+// Returns objects matching MealPlanDayClient structure but with empty meals
+const createEmptyWeekStructureForClient = (
+  startDate: Date,
+): MealPlanClient[] => {
+  const mondayStart = startOfWeek(startDate, { weekStartsOn: 1 });
+  return Array.from({ length: 7 }).map((_, i) => ({
+    date: addDays(mondayStart, i),
+    meals: [],
+  }));
+};
+
+/**
+ * Fetches structured meal plan data for the current week for the authorized user.
+ * Returns an array of 7 days, including empty days if no plan exists.
+ * @returns Promise<MealPlanDayClient[]> - Array of 7 days for the week.
+ */
+export async function getMealPlansDataForCurrentWeek(
+  currentWeek: Date,
+): Promise<MealPlanClient[]> {
+  // 1. Authorization
   const user = await authorize();
-  if (!user) throw new Error("User not authorized");
+  const startDate = startOfWeek(currentWeek, { weekStartsOn: 1 }); // Calculate start date once
 
-  const weekStart = startOfWeek(startDate, { weekStartsOn: 1 }); // Monday
-  const weekDates = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
-
-  // Fetch all meals from the database
-  const allMeals = await db.select().from(meals);
-
-  if (allMeals.length === 0) {
-    throw new Error("No meals available in the database to create a plan.");
+  if (!user?.id) {
+    console.error("Authorization failed in getMealPlansDataForCurrentWeek");
+    return createEmptyWeekStructureForClient(startDate); // Return empty structure
   }
+  const userId = user.id;
 
-  const mealsByCategory = Object.groupBy(
-    allMeals,
-    (meal) => meal.category ?? "uncategorized",
-  );
+  // 2. Calculate Date Range
+  const weekDates = Array.from({ length: 7 }, (_, i) => addDays(startDate, i));
+  const weekDateStrings = weekDates.map((date) => format(date, "yyyy-MM-dd"));
 
-  // Generate and Save Meal Plans for each day of the week
-  for (const date of weekDates) {
-    const day = format(
-      date,
-      "EEEE",
-    ).toLowerCase() as (typeof dayEnum.enumValues)[number];
-    const formattedDate = format(date, "yyyy-MM-dd");
-
-    // Check if a meal plan already exists for this date
-    const existingMealPlan = await db
-      .select()
+  try {
+    // 3. Fetch Meal Plans for the User within the Date Range
+    const mealPlansResult = await db
+      .select({
+        id: mealPlans.id,
+        date: mealPlans.date, // Keep date string for mapping
+      })
       .from(mealPlans)
       .where(
-        and(eq(mealPlans.userId, user.id), eq(mealPlans.date, formattedDate)),
+        and(
+          eq(mealPlans.userId, userId),
+          inArray(mealPlans.date, weekDateStrings),
+        ),
       );
 
-    if (existingMealPlan.length > 0) {
-      console.log(
-        `Meal plan already exists for ${formattedDate}. Skipping generation.`,
-      );
-      continue; // Skip to the next day
+    // If no plans exist for the week, return the base structure
+    if (mealPlansResult.length === 0) {
+      return createEmptyWeekStructureForClient(startDate);
     }
 
-    // Create a new meal plan
-    const [newMealPlan] = await db
-      .insert(mealPlans)
-      .values({
-        userId: user.id,
-        date: formattedDate,
-        day: day,
+    // 4. Prepare for Fetching Planned Meals
+    const mealPlanIdToDateMap = new Map(
+      mealPlansResult.map((p) => [p.id, p.date]),
+    );
+    const mealPlanIds = mealPlansResult.map((p) => p.id);
+
+    // 5. Fetch All Planned Meals for these Plans, Joining with Meals
+    const plannedMealsResult = await db
+      .select({
+        mealPlanId: plannedMeals.mealPlanId,
+        meal: meals,
       })
-      .returning();
+      .from(plannedMeals)
+      .innerJoin(meals, eq(plannedMeals.mealId, meals.id))
+      .where(inArray(plannedMeals.mealPlanId, mealPlanIds));
 
-    if (!newMealPlan) {
-      throw new Error(`Failed to create meal plan for ${formattedDate}.`);
+    // 6. Group Planned Meals by Date String
+    const mealsGroupedByDate = new Map<string, Meal[]>();
+    for (const { mealPlanId, meal } of plannedMealsResult) {
+      const dateString = mealPlanIdToDateMap.get(mealPlanId);
+      if (!dateString) continue;
+
+      if (mealsGroupedByDate.has(dateString)) {
+        mealsGroupedByDate.get(dateString)?.push(meal);
+      } else {
+        mealsGroupedByDate.set(dateString, [meal]);
+      }
     }
 
-    // Assign one meal of each category to the new plan
-    const plannedMealsValues = mealCategoryEnum.enumValues.map((category) => {
-      const availableMeals = mealsByCategory[category];
-      if (!availableMeals || availableMeals.length === 0) {
-        throw new Error(
-          `No ${category} meals available for ${formattedDate}.  Please add more meals.`,
-        );
-      }
-      // Select a random meal from available meals for category
-      // TODO: should be decided by algorithm best desided by preferences and settings and data of person and other THIS IS FEATURE to be implemented
-      const randomMeal =
-        availableMeals[Math.floor(Math.random() * availableMeals.length)];
+    // 7. Construct the Final 7-Day Output (without dayName)
+    const finalWeekPlan = weekDates.map((date): MealPlanClient => {
+      const dateString = format(date, "yyyy-MM-dd");
+      const mealsForDay = mealsGroupedByDate.get(dateString) || [];
 
       return {
-        mealPlanId: newMealPlan.id,
-        mealId: randomMeal.id,
-        category: category,
+        date, // Use ISO string for client
+        meals: mealsForDay,
       };
     });
 
-    // Save planned meals
-    await db.insert(plannedMeals).values(plannedMealsValues);
-
-    console.log(`Generated meal plan for ${formattedDate} successfully.`);
+    // No need to sort by dayName anymore, order comes from weekDates iteration
+    return finalWeekPlan;
+  } catch (error) {
+    console.error("Error fetching meal plan data:", error);
+    // Return empty structure on error
+    return createEmptyWeekStructureForClient(startDate);
   }
-
-  console.log("Weekly meal plan generated successfully.");
-}
-
-export async function getMealPlansDataForCurrentWeek(): Promise<WeeklyPlanClientInput> {
-  const startDate = startOfWeek(new Date(), { weekStartsOn: 1 });
-  const weekDates = Array.from({ length: 7 }, (_, i) => addDays(startDate, i));
-
-  const mealPlansForWeek = await Promise.all(
-    weekDates.map(async (date): Promise<WeeklyPlanClientInput[number]> => {
-      const formattedDate = format(date, "yyyy-MM-dd");
-      const dayIndex = getDay(date);
-      const dayName = dayEnum.enumValues[dayIndex];
-
-      const mealPlanResult = await db
-        .select({ id: mealPlans.id })
-        .from(mealPlans)
-        .where(eq(mealPlans.date, formattedDate))
-        .limit(1);
-
-      if (!mealPlanResult || mealPlanResult.length === 0) {
-        return {
-          dateString: date.toISOString(), // Pass as ISO string
-          dayName: dayName,
-          meals: [],
-        };
-      }
-
-      const mealPlanId = mealPlanResult[0].id;
-      const plannedMealsResult = await db
-        .select({
-          mealId: plannedMeals.mealId,
-          category: plannedMeals.category,
-          mealName: meals.name,
-        })
-        .from(plannedMeals)
-        .where(eq(plannedMeals.mealPlanId, mealPlanId))
-        .leftJoin(meals, eq(plannedMeals.mealId, meals.id));
-
-      const mealsForDay = plannedMealsResult
-        .filter((pm) => pm.mealName !== null)
-        .map((pm) => ({
-          id: pm.mealId ?? `unknown-${Math.random()}`,
-          name: pm.mealName ?? "Meal Not Found",
-          category: pm.category as MealCategory,
-        }));
-
-      return {
-        dateString: date.toISOString(), // Pass as ISO string
-        dayName: dayName,
-        meals: mealsForDay,
-      };
-    }),
-  );
-
-  // Ensure Monday-Sunday order based on dayName index
-  const sortedPlan = mealPlansForWeek.sort((a, b) => {
-    const dayA = dayEnum.enumValues.indexOf(a.dayName);
-    const dayB = dayEnum.enumValues.indexOf(b.dayName);
-    // Adjust index for sorting (Mon=1, ..., Sun=7)
-    const sortA = dayA === 0 ? 7 : dayA;
-    const sortB = dayB === 0 ? 7 : dayB;
-    return sortA - sortB;
-  });
-
-  return sortedPlan;
 }

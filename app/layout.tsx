@@ -34,7 +34,7 @@ export default async function RootLayout({
           <main>
             <nav
               className={cn(
-                "flex items-start justify-center gap-2 flex-col py-8 px-6 max-w-2xl mx-auto",
+                "flex items-start justify-center gap-2 flex-col py-8 px-6 container mx-auto",
               )}
             >
               <span className={cn("text-4xl font-bold", playfair.className)}>

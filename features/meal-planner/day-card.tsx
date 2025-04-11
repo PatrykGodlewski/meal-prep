@@ -1,12 +1,14 @@
-import { format, isValid } from "date-fns";
+import { format, isToday, isValid } from "date-fns";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import React from "react";
-import { MealPlanDayInternal } from "@/validators/mealPlanner";
+import { cn } from "@/lib/utils";
+import type { MealPlanClient } from "./types";
+import Link from "next/link";
 
 const DATE_FORMAT_DISPLAY_CARD = "MMM dd";
 
 interface DayCardProps {
-  planDay: MealPlanDayInternal;
+  planDay: MealPlanClient;
   isLoading: boolean;
 }
 
@@ -27,11 +29,14 @@ export const DayCard: React.FC<DayCardProps> = React.memo(
 
     return (
       <Card
-        className={`shadow-sm flex flex-col min-h-[150px] ${isLoading ? "opacity-50" : ""}`}
+        className={cn("shadow-sm flex flex-col min-h-[150px]", {
+          "opacity-50": isLoading,
+          "bg-neutral-800": isToday(planDay.date),
+        })}
       >
         <CardHeader className="p-3">
           <CardTitle className="flex items-center justify-between text-sm font-medium">
-            <span>{planDay.dayName}</span>
+            <span>{format(planDay.date, "EEEE")}</span>
             <span className="text-xs text-gray-500">
               {format(planDay.date, DATE_FORMAT_DISPLAY_CARD)}
             </span>
@@ -44,10 +49,12 @@ export const DayCard: React.FC<DayCardProps> = React.memo(
                 <li
                   key={`${planDay.date.toISOString()}-${meal.category}-${meal.id}`}
                 >
-                  <span className="font-semibold capitalize">
-                    {meal.category}:
-                  </span>{" "}
-                  {meal.name}
+                  <Link className="hover:underline" href={`/meals/${meal.id}`}>
+                    <span className="font-semibold capitalize">
+                      {meal.category}:
+                    </span>{" "}
+                    {meal.name}
+                  </Link>
                 </li>
               ))
             ) : (

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { format, addDays, subDays, isValid } from "date-fns";
 import {
   useQuery,
@@ -9,38 +9,32 @@ import {
 } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Loader2, ChevronLeft, ChevronRight } from "lucide-react";
-import {
-  generateWeeklyMealPlan,
-  getMealPlansDataForCurrentWeek,
-} from "@/app/actions";
 import { useToast } from "@/hooks/use-toast";
 import {
-  type MealPlanDayInternal,
-  type WeeklyPlanClientInput,
-} from "@/validators/mealPlanner";
-import {
   getMonday,
-  parseValidDaysFromWeekData,
   createBaseWeekStructure,
   mergeDataWithBaseStructure,
   DATE_FORMAT_DISPLAY_HEADER,
   MEAL_PLAN_QUERY_KEY_BASE,
 } from "@/features/meal-planner/utils"; // Adjust path
 import { DayCard } from "./day-card";
+import {
+  generateWeeklyMealPlan,
+  getMealPlansDataForCurrentWeek,
+} from "./actions";
+import type { MealPlanClient } from "./types";
 
-interface MealPlanGridProps {
-  initialMealPlansData: WeeklyPlanClientInput | null | undefined;
+interface Props {
+  initialMealPlansData: MealPlanClient[] | undefined;
 }
 
-const MealPlanGrid: React.FC<MealPlanGridProps> = ({
-  initialMealPlansData,
-}) => {
+export function MealPlanGrid({ initialMealPlansData }: Props) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
   const initialStartDate = useMemo(() => {
-    const parsedInitial = parseValidDaysFromWeekData(initialMealPlansData);
-    return parsedInitial.length > 0
+    const parsedInitial = initialMealPlansData;
+    return parsedInitial && parsedInitial.length > 0
       ? getMonday(parsedInitial[0].date)
       : getMonday(new Date());
   }, [initialMealPlansData]);
@@ -55,15 +49,14 @@ const MealPlanGrid: React.FC<MealPlanGridProps> = ({
   );
 
   const {
-    data: currentWeekParsedData,
+    data: currentWeek,
     isFetching,
     isError,
     error,
     isPlaceholderData, // Use this instead of manually tracking navigation loading
-  } = useQuery<WeeklyPlanClientInput | null, Error, MealPlanDayInternal[]>({
+  } = useQuery({
     queryKey: queryKey,
-    queryFn: () => getMealPlansDataForCurrentWeek(),
-    select: parseValidDaysFromWeekData,
+    queryFn: () => getMealPlansDataForCurrentWeek(displayedWeekStart),
     staleTime: 1000 * 60 * 5, // 5 minutes
     placeholderData: keepPreviousData, // Correct way to use keepPreviousData in v5+
     enabled: isValid(displayedWeekStart),
@@ -81,11 +74,13 @@ const MealPlanGrid: React.FC<MealPlanGridProps> = ({
     // initialDataUpdatedAt: initialMealPlansData ? Date.now() : undefined,
   });
 
+  console.log(currentWeek);
+
   const displayPlan = useMemo(() => {
     const baseStructure = createBaseWeekStructure(displayedWeekStart);
     // Use currentWeekParsedData which comes from the query (includes selected/parsed data)
-    return mergeDataWithBaseStructure(baseStructure, currentWeekParsedData);
-  }, [currentWeekParsedData, displayedWeekStart]);
+    return mergeDataWithBaseStructure(baseStructure, currentWeek);
+  }, [currentWeek, displayedWeekStart]);
 
   const handleNavigateWeek = useCallback((direction: "previous" | "next") => {
     setDisplayedWeekStart((prevWeekStart) => {
@@ -98,7 +93,7 @@ const MealPlanGrid: React.FC<MealPlanGridProps> = ({
 
   const handleGenerateMeals = useCallback(async () => {
     setIsGenerating(true);
-    const mondayForGeneration = getMonday(new Date());
+    const mondayForGeneration = getMonday(displayedWeekStart);
     const generationQueryKey = [
       MEAL_PLAN_QUERY_KEY_BASE,
       mondayForGeneration.toISOString(),
@@ -122,7 +117,7 @@ const MealPlanGrid: React.FC<MealPlanGridProps> = ({
     } finally {
       setIsGenerating(false);
     }
-  }, [queryClient, toast]);
+  }, [queryClient, toast, displayedWeekStart]);
 
   // isBusy includes generating state OR when fetching new data (not placeholder)
   const isBusy = isGenerating || (isFetching && !isPlaceholderData);
@@ -166,7 +161,9 @@ const MealPlanGrid: React.FC<MealPlanGridProps> = ({
 
       <div
         key={displayedWeekStart.toISOString()}
-        className={`grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-7 gap-4 relative min-h-[200px]`}
+        className={
+          "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-7 gap-4 relative min-h-[200px]"
+        }
       >
         {showLoadingOverlay && (
           <div className="absolute inset-0 flex items-center justify-center bg-white/70 dark:bg-black/50 z-10 rounded-lg">
@@ -187,13 +184,10 @@ const MealPlanGrid: React.FC<MealPlanGridProps> = ({
             <DayCard
               key={planDay.date.toISOString()}
               planDay={planDay}
-              // Card is visually "loading" if overlay is shown
               isLoading={showLoadingOverlay}
             />
           ))}
       </div>
     </div>
   );
-};
-
-export default MealPlanGrid;
+}

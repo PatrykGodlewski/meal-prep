@@ -5,10 +5,7 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       {
         protocol: "https",
-        hostname: "images.pexels.com",
-        port: "",
-        pathname: "/photos/**",
-        search: "",
+        hostname: "*", // Allow images from all domains
       },
     ],
   },

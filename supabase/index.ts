@@ -1,5 +1,5 @@
+import * as path from "node:path";
 import { config } from "dotenv";
-import * as path from "path";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 
@@ -10,5 +10,20 @@ if (!process.env.DATABASE_URL) {
   throw new Error("DATABASE_URL is not defined in .env");
 }
 
-const client = postgres(process.env.DATABASE_URL);
-export const db = drizzle({ client });
+function singleton<Value>(name: string, value: () => Value): Value {
+  const globalAny: any = global;
+  globalAny.__singletons = globalAny.__singletons || {};
+
+  if (!globalAny.__singletons[name]) {
+    globalAny.__singletons[name] = value();
+  }
+
+  return globalAny.__singletons[name];
+}
+
+function createDatabaseConnection() {
+  const client = postgres(process.env.DATABASE_URL ?? "");
+  return drizzle({ client });
+}
+
+export const db = singleton("db", createDatabaseConnection);

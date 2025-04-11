@@ -1,10 +1,10 @@
 {
   "compilerOptions": {
-    "target": "es2024", // Target a specific ECMAScript version supported by Node.js 22
+    "target": "esnext", // Target a specific ECMAScript version supported by Node.js 22
     "lib": [
       "dom", // Include DOM types for browser-based code
       "dom.iterable", // Include iterable DOM types
-      "es2024" // Specific ECMAScript version (align with target)
+      "esnext" // Specific ECMAScript version (align with target)
     ],
     "allowJs": true, // Allow JavaScript files to be compiled (for mixed projects)
     "skipLibCheck": true, // Skip checking declaration files (helps with dependency conflicts)

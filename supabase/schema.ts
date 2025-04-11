@@ -12,28 +12,17 @@ import {
   date,
 } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
-import { sql } from "drizzle-orm";
 
 const authSchema = pgSchema("auth");
 
-export const mealCategoryEnum = pgEnum("meal_category", [
+export const MEAL_CATEGORY_ENUM = pgEnum("meal_category", [
   "breakfast",
   "lunch",
   "dinner",
   "snack",
 ]);
 
-export const dayEnum = pgEnum("day", [
-  "monday",
-  "tuesday",
-  "wednesday",
-  "thursday",
-  "friday",
-  "saturday",
-  "sunday",
-]);
-
-export const unitEnum = pgEnum("unit", [
+export const UNIT_ENUM = pgEnum("unit", [
   "g",
   "kg",
   "ml",
@@ -45,6 +34,25 @@ export const unitEnum = pgEnum("unit", [
   "lb",
   "piece",
   "pinch",
+]);
+
+export const INGREDIENT_CATEGORY_ENUM = pgEnum("ingredient_category", [
+  "dairy",
+  "meat",
+  "poultry",
+  "seafood",
+  "vegetable",
+  "fruit",
+  "grain", // Includes flour, pasta, rice etc.
+  "legume", // Beans, lentils, peas
+  "nut_seed",
+  "spice_herb",
+  "fat_oil",
+  "sweetener",
+  "condiment", // Sauces, vinegar etc.
+  "beverage",
+  "baking", // Baking powder, yeast etc.
+  "other",
 ]);
 
 export const users = authSchema.table("users", {
@@ -67,7 +75,7 @@ export const meals = pgTable("meals", {
   prepTimeMinutes: integer("prep_time_minutes"),
   cookTimeMinutes: integer("cook_time_minutes"),
   servings: integer("servings"),
-  category: mealCategoryEnum("category"),
+  category: MEAL_CATEGORY_ENUM("category"),
   imageUrl: text("image_url"),
   isPublic: boolean("is_public").default(false),
   createdBy: uuid("created_by").references(() => users.id, {
@@ -87,19 +95,17 @@ export const mealPlans = pgTable("meal_plans", {
     .references(() => users.id)
     .notNull(),
   date: date("date").notNull(),
-  day: dayEnum("day").notNull(),
 });
 
 export const plannedMeals = pgTable(
   "planned_meals",
   {
     mealPlanId: integer("meal_plan_id")
-      .references(() => mealPlans.id)
+      .references(() => mealPlans.id, { onDelete: "cascade" }) // Added onDelete
       .notNull(),
     mealId: uuid("meal_id")
-      .references(() => meals.id)
+      .references(() => meals.id, { onDelete: "cascade" }) // Added onDelete
       .notNull(),
-    category: mealCategoryEnum("category").notNull(),
     createdAt: timestamp("created_at", { withTimezone: true })
       .defaultNow()
       .notNull(),
@@ -107,19 +113,25 @@ export const plannedMeals = pgTable(
       .defaultNow()
       .notNull(),
   },
-  (table) => {
-    return [primaryKey({ columns: [table.mealPlanId, table.mealId] })];
-  },
+  (table) => [
+    // Changed name for clarity
+    primaryKey({
+      columns: [table.mealPlanId, table.mealId],
+    }), // Added category to PK if one meal can be planned multiple times per day under different categories
+    // If a meal can only appear once per day plan, use:
+    // pk_planned_meals: primaryKey({ columns: [table.mealPlanId, table.mealId] }),
+  ],
 );
 
 export const ingredients = pgTable("ingredients", {
   id: uuid("id").defaultRandom().primaryKey().notNull(),
   mealId: uuid("meal_id")
     .notNull()
-    .references(() => meals.id, { onDelete: "cascade" }),
+    .references(() => meals.id, { onDelete: "set null" }),
   name: text("name").notNull(),
   quantity: text("quantity").notNull(),
-  unit: unitEnum("unit"),
+  unit: UNIT_ENUM("unit"),
+  category: INGREDIENT_CATEGORY_ENUM("category"), // Make it nullable (?) or notNull() depending on requirements
   isOptional: boolean("is_optional").default(false),
   notes: text("notes"),
   createdAt: timestamp("created_at", { withTimezone: true })
@@ -148,14 +160,15 @@ export const mealsTags = pgTable(
       .defaultNow()
       .notNull(),
   },
-  (table) => {
-    return [primaryKey({ columns: [table.mealId, table.tagId] })];
-  },
+  (table) => [primaryKey({ columns: [table.mealId, table.tagId] })],
 );
+
+// --- RELATIONS ---
 
 export const mealsRelations = relations(meals, ({ many, one }) => ({
   ingredients: many(ingredients),
   tags: many(mealsTags),
+  plannedMeals: many(plannedMeals), // Added relation to plannedMeals
   user: one(users, {
     fields: [meals.createdBy],
     references: [users.id],
@@ -203,11 +216,13 @@ export const plannedMealsRelations = relations(plannedMeals, ({ one }) => ({
   }),
 }));
 
+// --- TYPES --- (Drizzle infers these, but explicit export is good practice)
+
 export type Meal = typeof meals.$inferSelect;
 export type NewMeal = typeof meals.$inferInsert;
 
-export type Ingredient = typeof ingredients.$inferSelect;
-export type NewIngredient = typeof ingredients.$inferInsert;
+export type Ingredient = typeof ingredients.$inferSelect; // Will now include 'category'
+export type NewIngredient = typeof ingredients.$inferInsert; // Will now include 'category'
 
 export type Tag = typeof tags.$inferSelect;
 export type NewTag = typeof tags.$inferInsert;
@@ -217,3 +232,7 @@ export type NewMealPlan = typeof mealPlans.$inferInsert;
 
 export type PlannedMeal = typeof plannedMeals.$inferSelect;
 export type NewPlannedMeal = typeof plannedMeals.$inferInsert;
+
+// --- NEW: Export Enum Type ---
+export type IngredientCategory =
+  (typeof INGREDIENT_CATEGORY_ENUM.enumValues)[number];

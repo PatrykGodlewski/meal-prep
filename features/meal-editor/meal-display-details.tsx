@@ -1,0 +1,164 @@
+// components/meal-display-details.tsx
+import React from "react";
+import Image from "next/image";
+import { format } from "date-fns";
+import { Clock, Users, ChefHat, Calendar, type LucideIcon } from "lucide-react";
+import type { Ingredient, Meal } from "@/supabase/schema"; // Adjust path
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"; // Assuming DayCard is not needed here
+
+// Type for the props expected by this display component
+type MealWithDetails = Meal & {
+  ingredients: Ingredient[];
+  authorName: string;
+};
+
+interface MealDisplayDetailsProps {
+  meal: MealWithDetails;
+}
+
+// Helper component for meta labels (can be kept here or moved to a shared utils file)
+type MealLabelProps = {
+  icon: LucideIcon;
+  text: string | null | undefined;
+};
+function MealLabel({ icon: Icon, text }: MealLabelProps) {
+  if (!text) return null;
+  return (
+    <div className="flex items-center mr-4 mb-2 whitespace-nowrap text-sm">
+      <Icon className="h-4 w-4 mr-1.5 flex-shrink-0" />
+      <span>{text}</span>
+    </div>
+  );
+}
+
+export const MealDisplayDetails: React.FC<MealDisplayDetailsProps> = React.memo(
+  ({ meal }) => {
+    const totalTime = (meal.prepTimeMinutes || 0) + (meal.cookTimeMinutes || 0);
+
+    return (
+      <div className="bg-white dark:bg-neutral-900 rounded-lg shadow-md overflow-hidden">
+        {/* Image Section */}
+        <div className="relative h-64 md:h-96 w-full bg-gray-200 dark:bg-neutral-800">
+          {meal.imageUrl ? (
+            <Image
+              src={meal.imageUrl}
+              alt={meal.name}
+              fill
+              className="object-cover"
+            />
+          ) : (
+            <div className="flex items-center justify-center h-full bg-gray-100 dark:bg-neutral-700">
+              <span className="text-gray-500 dark:text-neutral-400 text-lg">
+                No image available
+              </span>
+            </div>
+          )}
+          {meal.category && (
+            <span className="absolute top-4 right-4 bg-blue-600 text-white px-3 py-1 rounded-full text-xs font-medium uppercase tracking-wide">
+              {meal.category}
+            </span>
+          )}
+        </div>
+
+        {/* Details Section */}
+        <div className="p-6">
+          {/* Title */}
+          <h1 className="text-3xl font-bold mb-2 text-gray-900 dark:text-white">
+            {meal.name}
+          </h1>
+
+          {/* Meta Info */}
+          <div className="flex flex-wrap items-center text-gray-600 dark:text-neutral-400 mb-6">
+            <MealLabel icon={ChefHat} text={`By ${meal.authorName}`} />
+            <MealLabel
+              icon={Calendar}
+              text={format(new Date(meal.createdAt), "P")}
+            />{" "}
+            {/* Use format 'P' for locale date */}
+            {totalTime > 0 && (
+              <MealLabel icon={Clock} text={`${totalTime} min total`} />
+            )}
+            {meal.servings && (
+              <MealLabel
+                icon={Users}
+                text={`${meal.servings} ${meal.servings === 1 ? "serving" : "servings"}`}
+              />
+            )}
+          </div>
+
+          {/* Description */}
+          <div className="mb-8">
+            <h2 className="text-xl font-semibold mb-2 text-gray-800 dark:text-gray-200">
+              Description
+            </h2>
+            <p className="text-gray-700 dark:text-neutral-300 prose prose-sm dark:prose-invert max-w-none">
+              {meal.description}
+            </p>
+          </div>
+
+          {/* Ingredients & Instructions Grid */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* Ingredients Column */}
+            <div className="lg:col-span-1">
+              <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-200">
+                Ingredients
+              </h2>
+              <ul className="space-y-2 text-sm text-gray-700 dark:text-neutral-300">
+                {meal.ingredients.map((ingredient) => (
+                  <li key={ingredient.id} className="flex items-start gap-2">
+                    <span className="inline-block w-1.5 h-1.5 rounded-full bg-blue-500 mt-[7px] flex-shrink-0"></span>
+                    <div>
+                      <span className="font-medium">
+                        {ingredient.quantity} {ingredient.unit}{" "}
+                        {ingredient.name}
+                      </span>
+                      {ingredient.category && (
+                        <span className="ml-2 text-xs text-gray-500 dark:text-neutral-400 capitalize">
+                          ({ingredient.category.replace(/_/g, " ")})
+                        </span>
+                      )}
+                      {ingredient.isOptional && (
+                        <span className="ml-2 text-xs text-gray-500 dark:text-neutral-500">
+                          (optional)
+                        </span>
+                      )}
+                      {ingredient.notes && (
+                        <p className="text-xs text-gray-600 dark:text-neutral-400 pl-0 mt-0.5">
+                          {ingredient.notes}
+                        </p>
+                      )}
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Instructions Column */}
+            <div className="lg:col-span-2">
+              <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-200">
+                Instructions
+              </h2>
+              <div className="prose prose-sm dark:prose-invert max-w-none text-gray-700 dark:text-neutral-300">
+                {meal.instructions ? (
+                  meal.instructions.split("\n").map(
+                    (paragraph, idx) =>
+                      paragraph.trim() && (
+                        <p key={idx} className="mb-3">
+                          {paragraph}
+                        </p>
+                      ),
+                  )
+                ) : (
+                  <p className="text-gray-500 dark:text-neutral-500 italic">
+                    No instructions provided.
+                  </p>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  },
+);
+MealDisplayDetails.displayName = "MealDisplayDetails"; // For React DevTools
