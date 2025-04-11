@@ -1,13 +1,31 @@
+// components/add-meal-form.tsx (or your chosen path)
 "use client";
 
-import { useFieldArray, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
-import { Plus, X } from "lucide-react";
+import { useQuery } from "@tanstack/react-query"; // Import useQuery
+import { Check, ChevronsUpDown, Plus, X } from "lucide-react"; // Added icons
+import { useRouter } from "next/navigation";
+import { useCallback, useMemo, useState } from "react"; // Added useState, useCallback
 import { useTransition } from "react";
-import { useRouter } from "next/navigation"; // Added missing import
+import {
+  type Control,
+  useFieldArray,
+  useForm,
+  useFormContext,
+} from "react-hook-form";
 
+import { addMealAction, getAllIngredients } from "@/app/actions"; // Import action to fetch ingredients
 import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command"; // Added Command
 import {
   Form,
   FormControl,
@@ -18,9 +36,12 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent } from "@/components/ui/card";
-import { toast } from "@/hooks/use-toast"; // Ensure path is correct
+import { Label } from "@/components/ui/label"; // Import Label
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"; // Added Popover
 import {
   Select,
   SelectContent,
@@ -28,152 +49,144 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Checkbox } from "@/components/ui/checkbox";
-import { addMealAction } from "@/app/actions"; // Ensure path is correct
-import { ingredientCategories, mealCategories, unitTypes } from "@/validators";
+import { Textarea } from "@/components/ui/textarea";
+import { useToast } from "@/hooks/use-toast";
+import { cn } from "@/lib/utils"; // Shadcn utility
 import {
   INGREDIENT_CATEGORY_ENUM,
+  type Ingredient,
   MEAL_CATEGORY_ENUM,
   UNIT_ENUM,
-} from "@/supabase/schema";
+} from "@/supabase/schema"; // Import Ingredient type
+import {
+  type IngredientFormState,
+  MealAddFormSchema,
+  type MealAddFormValues,
+} from "./validators";
 
-// Define Zod enums
+// --- Zod Schema Definitions ---
 
-// --- Updated Zod Schema ---
-const formSchema = z.object({
-  name: z.string().min(2, {
-    message: "Meal name must be at least 2 characters.",
-  }),
-  description: z.string().min(10, {
-    message: "Description must be at least 10 characters.",
-  }),
-  instructions: z.string().optional(),
-  prepTimeMinutes: z.coerce
-    .number()
-    .int()
-    .positive()
-    .optional()
-    .nullable()
-    .transform((val) => (val === null ? undefined : val)),
-  cookTimeMinutes: z.coerce
-    .number()
-    .int()
-    .positive()
-    .optional()
-    .nullable()
-    .transform((val) => (val === null ? undefined : val)),
-  servings: z.coerce
-    .number()
-    .int()
-    .positive()
-    .optional()
-    .nullable()
-    .transform((val) => (val === null ? undefined : val)),
-  category: mealCategories.optional(), // Meal category
-  imageUrl: z.string().url().optional().or(z.literal("")),
-  ublic: z.boolean().default(false),
-  ingredients: z
-    .array(
-      z.object({
-        name: z.string().min(1, { message: "Ingredient name is required" }),
-        quantity: z.string().min(1, { message: "Quantity is required" }),
-        unit: unitTypes.optional(),
-        category: ingredientCategories.optional(),
-        isOptional: z.boolean().default(false),
-        notes: z.string().optional(),
-      }),
-    )
-    .min(1, { message: "At least one ingredient is required." }), // Optional: Ensure at least one ingredient
-});
-// --- End Updated Zod Schema ---
+// Default values for a *new* ingredient row
+const NEW_INGREDIENT_DEFAULT: IngredientFormState = {
+  name: "",
+  quantity: "",
+  unit: "g",
+  category: "other",
+  isOptional: false,
+  notes: null,
+  // id is initially undefined
+};
 
-export type MealAddFormValues = z.infer<typeof formSchema>;
-
-// --- Updated Default Values ---
-const DEFAULT_VALUES: MealAddFormValues = {
-  // Use MealFormValues type
+// Default values for the entire *add* form
+const DEFAULT_ADD_VALUES: MealAddFormValues = {
   name: "",
   description: "",
   instructions: "",
   prepTimeMinutes: undefined,
   cookTimeMinutes: undefined,
   servings: undefined,
-  category: undefined, // Meal category
+  category: "lunch",
   imageUrl: "",
-  ublic: false,
-  ingredients: [
-    {
-      name: "",
-      quantity: "",
-      unit: undefined,
-      category: undefined, // <-- Add default category
-      isOptional: false,
-      notes: "",
-    },
-  ],
+  isPublic: false,
+  ingredients: [NEW_INGREDIENT_DEFAULT], // Start with one empty ingredient row
 };
-// --- End Updated Default Values ---
+// --- End Definitions ---
 
 export default function AddMealForm() {
-  const [ending, startTransition] = useTransition();
+  const [isPending, startTransition] = useTransition();
   const router = useRouter();
+  const { toast } = useToast();
+
+  // --- Fetch Available Ingredients ---
+  const { data: availableIngredients = [], isLoading: isLoadingIngredients } =
+    useQuery<Ingredient[]>({
+      queryKey: ["allIngredients"],
+      queryFn: getAllIngredients, // Server action to fetch
+      staleTime: 1000 * 60 * 15, // Cache for 15 minutes
+      refetchOnWindowFocus: false,
+    });
+  // --- End Fetch ---
 
   const form = useForm({
-    resolver: zodResolver(formSchema),
-    defaultValues: DEFAULT_VALUES,
+    resolver: zodResolver(MealAddFormSchema),
+    defaultValues: DEFAULT_ADD_VALUES,
   });
+  const { control, setValue } = form; // Get setValue and watch
 
   const { fields, append, remove } = useFieldArray({
-    control: form.control,
+    control,
     name: "ingredients",
   });
 
-  function onSubmit(values: MealAddFormValues) {
+  // --- Event Handlers ---
+  const onSubmit = (values: MealAddFormValues) => {
+    // Type is correct
     startTransition(async () => {
-      // Ensure your server action `addMealAction` is updated
-      // to handle the new `category` field within the ingredients array.
+      // Ensure addMealAction handles the structure where ingredient 'id' might be present
       const result = await addMealAction(values);
-
       if (result.success && result.mealId) {
-        // Check for mealId if action returns it
-        form.reset(DEFAULT_VALUES);
-        router.push(`/meals/${result.mealId}`); // Redirect to the new meal page
-        toast({
-          title: "Success",
-          description: "Meal added successfully!",
-        });
+        form.reset(DEFAULT_ADD_VALUES);
+        router.push(`/meals/${result.mealId}`);
+        toast({ title: "Success", description: "Meal added successfully!" });
       } else {
         toast({
           title: "Error",
-          description: result.error || "Something went wrong adding the meal.",
+          description: result.error || "Failed to add meal.",
           variant: "destructive",
         });
       }
     });
-  }
+  };
 
   const handleAddIngredient = () => {
-    append({
-      name: "",
-      quantity: "",
-      unit: undefined,
-      category: undefined, // <-- Add default category on append
-      isOptional: false,
-      notes: "",
-    });
+    append(NEW_INGREDIENT_DEFAULT);
   };
+
+  const handleRemoveIngredient = (index: number) => {
+    remove(index);
+  };
+
+  const populateIngredientData = useCallback(
+    (index: number, selectedIngredientId: string | null | undefined) => {
+      const selected = availableIngredients.find(
+        (ing) => ing.id === selectedIngredientId,
+      );
+      if (selected) {
+        setValue(`ingredients.${index}.id`, selected.id, { shouldDirty: true });
+        setValue(`ingredients.${index}.name`, selected.name, {
+          shouldDirty: true,
+          shouldValidate: true,
+        });
+        setValue(
+          `ingredients.${index}.category`,
+          selected.category ?? "other",
+          {
+            shouldDirty: true,
+          },
+        );
+        setValue(`ingredients.${index}.unit`, selected.unit ?? "g", {
+          shouldDirty: true,
+        });
+      } else {
+        setValue(`ingredients.${index}.id`, undefined);
+        // Keep typed name, potentially clear unit/category if needed
+        // setValue(`ingredients.${index}.category`, null);
+        // setValue(`ingredients.${index}.unit`, null);
+      }
+    },
+    [availableIngredients, setValue],
+  );
+  // --- End Event Handlers ---
 
   return (
     <div className="max-w-4xl mx-auto p-4 md:p-6">
-      {" "}
-      {/* Increased max-width */}
       <h1 className="text-2xl font-bold mb-6">Add New Meal</h1>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
           {/* Meal Name and Category */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <FormField
-              control={form.control}
+              control={control}
               name="name"
               render={({ field }) => (
                 <FormItem>
@@ -186,8 +199,8 @@ export default function AddMealForm() {
               )}
             />
             <FormField
-              control={form.control}
-              name="category" // Meal category
+              control={control}
+              name="category"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Meal Category</FormLabel>
@@ -220,7 +233,7 @@ export default function AddMealForm() {
 
           {/* Description */}
           <FormField
-            control={form.control}
+            control={control}
             name="description"
             render={({ field }) => (
               <FormItem>
@@ -239,7 +252,7 @@ export default function AddMealForm() {
 
           {/* Instructions */}
           <FormField
-            control={form.control}
+            control={control}
             name="instructions"
             render={({ field }) => (
               <FormItem>
@@ -249,6 +262,7 @@ export default function AddMealForm() {
                     placeholder="Step-by-step instructions..."
                     className="min-h-32"
                     {...field}
+                    value={field.value ?? ""}
                   />
                 </FormControl>
                 <FormDescription>
@@ -262,7 +276,7 @@ export default function AddMealForm() {
           {/* Prep Time, Cook Time, Servings */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <FormField
-              control={form.control}
+              control={control}
               name="prepTimeMinutes"
               render={({ field }) => (
                 <FormItem>
@@ -287,7 +301,7 @@ export default function AddMealForm() {
               )}
             />
             <FormField
-              control={form.control}
+              control={control}
               name="cookTimeMinutes"
               render={({ field }) => (
                 <FormItem>
@@ -312,7 +326,7 @@ export default function AddMealForm() {
               )}
             />
             <FormField
-              control={form.control}
+              control={control}
               name="servings"
               render={({ field }) => (
                 <FormItem>
@@ -340,7 +354,7 @@ export default function AddMealForm() {
 
           {/* Image URL */}
           <FormField
-            control={form.control}
+            control={control}
             name="imageUrl"
             render={({ field }) => (
               <FormItem>
@@ -349,6 +363,7 @@ export default function AddMealForm() {
                   <Input
                     placeholder="https://example.com/image.jpg"
                     {...field}
+                    value={field.value ?? ""}
                   />
                 </FormControl>
                 <FormDescription>
@@ -361,19 +376,19 @@ export default function AddMealForm() {
 
           {/* Is Public */}
           <FormField
-            control={form.control}
-            name="ublic"
+            control={control}
+            name="isPublic"
             render={({ field }) => (
               <FormItem className="flex flex-row items-center space-x-3 space-y-0 rounded-md border p-4 shadow-sm">
                 <FormControl>
                   <Checkbox
                     checked={field.value}
                     onCheckedChange={field.onChange}
-                    id="ublicCheckbox"
+                    id="isPublicCheckbox"
                   />
                 </FormControl>
                 <div className="space-y-1 leading-none">
-                  <FormLabel htmlFor="ublicCheckbox">
+                  <FormLabel htmlFor="isPublicCheckbox">
                     Make this meal public
                   </FormLabel>
                   <FormDescription>
@@ -398,191 +413,337 @@ export default function AddMealForm() {
                 <Plus className="h-4 w-4" /> Add Ingredient
               </Button>
             </div>
-            {/* Display validation error for the ingredients array itself */}
             <FormMessage>
               {form.formState.errors.ingredients?.root?.message}
             </FormMessage>
 
-            {fields.map((field, index) => (
-              <Card
-                key={field.id}
-                className="overflow-hidden border shadow-sm bg-gray-50/50 dark:bg-gray-800/20"
-              >
-                <CardContent className="p-4">
-                  <div className="flex justify-between items-start mb-4">
-                    <h4 className="text-base font-medium text-gray-700 dark:text-gray-300">
-                      Ingredient #{index + 1}
-                    </h4>
-                    {/* Allow removing only if more than one ingredient exists */}
-                    {fields.length > 1 && (
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => remove(index)}
-                        className="h-8 w-8 p-0 text-red-500 hover:bg-red-100 dark:hover:bg-red-900/50"
-                      >
-                        <X className="h-4 w-4" />
-                        <span className="sr-only">Remove Ingredient</span>
-                      </Button>
-                    )}
-                  </div>
-
-                  {/* Ingredient Details Grid */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {/* Name */}
-                    <FormField
-                      control={form.control}
-                      name={`ingredients.${index}.name`}
-                      render={({ field }) => (
-                        <FormItem className="lg:col-span-1">
-                          <FormLabel>Name*</FormLabel>
-                          <FormControl>
-                            <Input
-                              placeholder="e.g., All-purpose Flour"
-                              {...field}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    {/* Quantity */}
-                    <FormField
-                      control={form.control}
-                      name={`ingredients.${index}.quantity`}
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Quantity*</FormLabel>
-                          <FormControl>
-                            <Input placeholder="e.g., 2" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    {/* Unit */}
-                    <FormField
-                      control={form.control}
-                      name={`ingredients.${index}.unit`}
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Unit</FormLabel>
-                          <Select
-                            onValueChange={field.onChange}
-                            value={field.value ?? ""}
-                          >
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Select unit" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              {UNIT_ENUM.enumValues.map((unit) => (
-                                <SelectItem key={unit} value={unit}>
-                                  {unit}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    {/* --- NEW: Ingredient Category --- */}
-                    <FormField
-                      control={form.control}
-                      name={`ingredients.${index}.category`}
-                      render={({ field }) => (
-                        <FormItem className="lg:col-span-1">
-                          <FormLabel>Category</FormLabel>
-                          <Select
-                            onValueChange={field.onChange}
-                            value={field.value ?? ""}
-                          >
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Select category" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              {INGREDIENT_CATEGORY_ENUM.enumValues.map(
-                                (category) => (
-                                  <SelectItem
-                                    key={category}
-                                    value={category}
-                                    className="capitalize"
-                                  >
-                                    {/* Replace underscores with spaces for display */}
-                                    {category.replace(/_/g, " ")}
-                                  </SelectItem>
-                                ),
-                              )}
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    {/* --- END NEW --- */}
-
-                    {/* Notes */}
-                    <FormField
-                      control={form.control}
-                      name={`ingredients.${index}.notes`}
-                      render={({ field }) => (
-                        <FormItem className="lg:col-span-1">
-                          <FormLabel>Notes</FormLabel>
-                          <FormControl>
-                            <Input
-                              placeholder="e.g., finely chopped"
-                              {...field}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    {/* Is Optional */}
-                    <FormField
-                      control={form.control}
-                      name={`ingredients.${index}.isOptional`}
-                      render={({ field }) => (
-                        <FormItem className="flex flex-row items-center space-x-3 rounded-md pt-8">
-                          {" "}
-                          {/* Adjusted alignment */}
-                          <FormControl>
-                            <Checkbox
-                              checked={field.value}
-                              onCheckedChange={field.onChange}
-                              id={`isOptional-${index}`}
-                            />
-                          </FormControl>
-                          <div className="space-y-1 leading-none">
-                            <FormLabel htmlFor={`isOptional-${index}`}>
-                              Optional
-                            </FormLabel>
-                          </div>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+            <div className="space-y-4">
+              {fields.map((field, index) => (
+                // Use the IngredientInputRow component here
+                <IngredientInputRow
+                  key={field.id}
+                  index={index}
+                  control={control}
+                  availableIngredients={availableIngredients}
+                  isLoadingIngredients={isLoadingIngredients}
+                  onRemove={() => handleRemoveIngredient(index)}
+                  canRemove={fields.length > 1}
+                  onSelectIngredient={populateIngredientData}
+                />
+              ))}
+            </div>
           </div>
           {/* --- End Ingredients Section --- */}
 
-          <Button type="submit" className="w-full" disabled={ending}>
-            {ending ? "Adding Meal..." : "Add Meal"}
+          <Button type="submit" className="w-full" disabled={isPending}>
+            {isPending ? "Adding Meal..." : "Add Meal"}
           </Button>
         </form>
       </Form>
     </div>
   );
 }
+
+// --- Ingredient Input Row Sub-Component (Copied from MealEditForm, no changes needed) ---
+interface IngredientInputRowProps {
+  index: number;
+  control: Control<MealAddFormValues>;
+  availableIngredients: Ingredient[];
+  isLoadingIngredients: boolean;
+  onRemove: () => void;
+  canRemove: boolean;
+  onSelectIngredient: (
+    index: number,
+    ingredientId: string | null | undefined,
+  ) => void;
+}
+
+const IngredientInputRow: React.FC<IngredientInputRowProps> = ({
+  index,
+  control,
+  availableIngredients,
+  isLoadingIngredients,
+  onRemove,
+  canRemove,
+  onSelectIngredient,
+}) => {
+  const [popoverOpen, setPopoverOpen] = useState(false);
+  const { watch } = useFormContext<MealAddFormValues>(); // Use correct type here if needed, though AddFormValues might be okay if structure matches
+
+  const ingredientId = watch(`ingredients.${index}.id`);
+  const ingredientName = watch(`ingredients.${index}.name`);
+  const isCreatingNew = useMemo(
+    () => !!ingredientName && !ingredientId,
+    [ingredientName, ingredientId],
+  );
+  const selectedUnit = !isCreatingNew
+    ? watch(`ingredients.${index}.unit`)
+    : undefined;
+  const selectedCategory = !isCreatingNew
+    ? watch(`ingredients.${index}.category`)
+    : undefined;
+
+  return (
+    <Card className="p-4 bg-gray-50 dark:bg-neutral-800/50 border dark:border-neutral-700">
+      <div className="flex justify-between items-center mb-3">
+        <span className="font-medium text-sm text-gray-700 dark:text-gray-300">
+          Ingredient #{index + 1}
+        </span>
+        {canRemove && (
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            onClick={onRemove}
+            className="h-6 w-6 text-red-500 hover:bg-red-100 dark:hover:bg-red-900/50"
+          >
+            <X className="h-4 w-4" />
+            <span className="sr-only">Remove</span>
+          </Button>
+        )}
+      </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {/* Ingredient Combobox */}
+        <FormField
+          control={control}
+          name={`ingredients.${index}.name`}
+          render={({ field }) => (
+            <FormItem className="flex flex-col sm:col-span-2 lg:col-span-1">
+              <FormLabel className="text-xs">Ingredient*</FormLabel>
+              <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
+                <PopoverTrigger asChild>
+                  <FormControl>
+                    <Button
+                      variant="outline"
+                      // role="combobox"
+                      aria-expanded={popoverOpen}
+                      className={cn(
+                        "w-full justify-between font-normal",
+                        !field.value && "text-muted-foreground",
+                      )}
+                      disabled={isLoadingIngredients}
+                    >
+                      {field.value
+                        ? (availableIngredients.find(
+                            (ing) => ing.name === field.value,
+                          )?.name ?? field.value)
+                        : isLoadingIngredients
+                          ? "Loading..."
+                          : "Select or type..."}
+                      <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                    </Button>
+                  </FormControl>
+                </PopoverTrigger>
+                <PopoverContent className="w-[--radix-popover-trigger-width] max-h-[--radix-popover-content-available-height] p-0">
+                  <Command shouldFilter={true}>
+                    <CommandInput
+                      placeholder="Search or type new..."
+                      value={field.value}
+                      onValueChange={(search) => {
+                        field.onChange(search);
+                        const match = availableIngredients.find(
+                          (ing) =>
+                            ing.name.toLowerCase() === search.toLowerCase(),
+                        );
+                        if (!match) onSelectIngredient(index, null);
+                        else if (watch(`ingredients.${index}.id`) !== match.id)
+                          onSelectIngredient(index, match.id);
+                      }}
+                    />
+                    <CommandList>
+                      <CommandEmpty>
+                        No ingredient found. Type to add new.
+                      </CommandEmpty>
+                      <CommandGroup>
+                        {availableIngredients.map((ing) => (
+                          <CommandItem
+                            key={ing.id}
+                            value={ing.name}
+                            onSelect={(currentValue) => {
+                              const selected = availableIngredients.find(
+                                (i) =>
+                                  i.name.toLowerCase() ===
+                                  currentValue.toLowerCase(),
+                              );
+                              field.onChange(
+                                selected ? selected.name : currentValue,
+                              );
+                              onSelectIngredient(index, selected?.id);
+                              setPopoverOpen(false);
+                            }}
+                          >
+                            <Check
+                              className={cn(
+                                "mr-2 h-4 w-4",
+                                watch(`ingredients.${index}.id`) === ing.id
+                                  ? "opacity-100"
+                                  : "opacity-0",
+                              )}
+                            />
+                            {ing.name} {ing.unit ? `(${ing.unit})` : ""}
+                          </CommandItem>
+                        ))}
+                      </CommandGroup>
+                    </CommandList>
+                  </Command>
+                </PopoverContent>
+              </Popover>
+              <FormField
+                control={control}
+                name={`ingredients.${index}.id`}
+                render={({ field: idField }) => (
+                  <input
+                    type="hidden"
+                    {...idField}
+                    value={idField.value ?? ""}
+                  />
+                )}
+              />
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        {/* Quantity */}
+        <FormField
+          control={control}
+          name={`ingredients.${index}.quantity`}
+          render={({ field: inputField }) => (
+            <FormItem>
+              <FormLabel className="text-xs">Quantity*</FormLabel>
+              <FormControl>
+                <Input {...inputField} placeholder="e.g., 2" />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        {/* Unit (Conditional) */}
+        {isCreatingNew ? (
+          <FormField
+            control={control}
+            name={`ingredients.${index}.unit`}
+            render={({ field: inputField }) => (
+              <FormItem>
+                <FormLabel className="text-xs">Unit</FormLabel>
+                <Select
+                  value={inputField.value ?? ""}
+                  onValueChange={inputField.onChange}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select unit" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {UNIT_ENUM.enumValues.map((unit) => (
+                      <SelectItem key={unit} value={unit}>
+                        {unit}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        ) : (
+          <FormItem>
+            <FormLabel className="text-xs text-gray-500 dark:text-gray-400">
+              Unit
+            </FormLabel>
+            <Input
+              readOnly
+              disabled
+              value={selectedUnit ?? "-"}
+              className="bg-gray-100 dark:bg-neutral-700 border-gray-300 dark:border-neutral-600"
+            />
+          </FormItem>
+        )}
+        {/* Category (Conditional) */}
+        {isCreatingNew ? (
+          <FormField
+            control={control}
+            name={`ingredients.${index}.category`}
+            render={({ field: inputField }) => (
+              <FormItem>
+                <FormLabel className="text-xs">Category</FormLabel>
+                <Select
+                  value={inputField.value ?? ""}
+                  onValueChange={inputField.onChange}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select category" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {INGREDIENT_CATEGORY_ENUM.enumValues.map((cat) => (
+                      <SelectItem key={cat} value={cat} className="capitalize">
+                        {cat.replace(/_/g, " ")}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        ) : (
+          <FormItem>
+            <FormLabel className="text-xs text-gray-500 dark:text-gray-400">
+              Category
+            </FormLabel>
+            <Input
+              readOnly
+              disabled
+              value={selectedCategory?.replace(/_/g, " ") ?? "-"}
+              className="bg-gray-100 dark:bg-neutral-700 border-gray-300 dark:border-neutral-600 capitalize"
+            />
+          </FormItem>
+        )}
+        {/* Notes */}
+        <FormField
+          control={control}
+          name={`ingredients.${index}.notes`}
+          render={({ field: inputField }) => (
+            <FormItem>
+              <FormLabel className="text-xs">Notes</FormLabel>
+              <FormControl>
+                <Input
+                  {...inputField}
+                  value={inputField.value ?? ""}
+                  placeholder="e.g., finely chopped"
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        {/* Optional */}
+        <FormField
+          control={control}
+          name={`ingredients.${index}.isOptional`}
+          render={({ field: inputField }) => (
+            <FormItem className="flex flex-row items-center space-x-2 pt-5">
+              <FormControl>
+                <Checkbox
+                  checked={inputField.value}
+                  onCheckedChange={inputField.onChange}
+                  id={`ing-opt-${index}`}
+                />
+              </FormControl>
+              <Label
+                htmlFor={`ing-opt-${index}`}
+                className="text-xs font-normal"
+              >
+                Optional
+              </Label>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      </div>
+    </Card>
+  );
+};
+IngredientInputRow.displayName = "IngredientInputRow";

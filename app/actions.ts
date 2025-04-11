@@ -1,26 +1,27 @@
 "use server";
 
-import type { MealAddFormValues } from "@/features/meal-editor/form-meal";
 import type { MealUpdateFormValues } from "@/features/meal-editor/meal-editor-form";
-import type { MealPlanClient } from "@/features/meal-planner/types";
+import {
+  MealAddFormSchema,
+  type MealAddFormValues,
+} from "@/features/meal-editor/validators";
 import { authorize } from "@/lib/authorization";
 import { db } from "@/supabase";
 import {
   meals,
-  ingredients as ingredientsSchema,
-  mealPlans,
   plannedMeals,
   mealsTags,
-  type NewIngredient,
-  type Meal,
+  ingredients,
+  mealIngredients,
+  type Ingredient,
 } from "@/supabase/schema";
 import { createClient } from "@/utils/supabase/server";
 import { encodedRedirect } from "@/utils/utils";
-import { addDays, format, startOfWeek } from "date-fns";
 import { and, eq, inArray } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
+import { z } from "zod";
 
 export const signUpAction = async (formData: FormData) => {
   const email = formData.get("email")?.toString();
@@ -170,32 +171,97 @@ export const addDisplayNameAction = async () => {
   return redirect("/");
 };
 
-type Result = { success: boolean; mealId?: string; error?: string };
+interface Result {
+  success: boolean;
+  mealId?: string;
+  error?: string;
+}
+
 export async function addMealAction(data: MealAddFormValues): Promise<Result> {
   try {
+    // 1. Authorize User
     const user = await authorize();
-    if (!user) return { success: false };
-    const { ingredients, ...mealData } = data;
+    const userId = user?.id;
+    if (!userId) {
+      return { success: false, error: "Unauthorized: User not authenticated." };
+    }
 
-    const [newMeal] = await db
-      .insert(meals)
-      .values({
-        ...mealData,
-        createdBy: user.id,
-      })
-      .returning();
+    // 2. Server-Side Validation (Optional, if you trust client-side + Zod already)
+    // This would catch any manipulated data
+    const validatedData = MealAddFormSchema.parse(data);
 
-    await db.insert(ingredientsSchema).values(
-      data.ingredients.map((ingredient) => ({
-        ...ingredient,
-        mealId: newMeal.id,
-      })),
-    );
+    // 3. Destructure Meal and Ingredient Data
+    const { ingredients: ingredientsData, ...mealBaseData } = validatedData; // Use validatedData, not 'data'
 
-    return { success: true, mealId: newMeal.id };
+    // 4. Begin Database Transaction
+    return await db.transaction(async (tx) => {
+      // 5. Insert Meal Record
+      const [newMeal] = await tx
+        .insert(meals)
+        .values({
+          ...mealBaseData, // Spread safe data
+          createdBy: userId,
+        })
+        .returning({ id: meals.id }); // Return only the ID
+      const mealId = newMeal.id;
+
+      // 6. Process Ingredients, Handle Duplicates & Inserts into mealIngredients
+
+      for (const ingredientData of ingredientsData) {
+        // 6a. Check if ingredient exists
+        const [existingIngredient] = await tx
+          .select({ id: ingredients.id })
+          .from(ingredients)
+          .where(eq(ingredients.name, ingredientData.name))
+          .limit(1);
+
+        let ingredientId: string; // Declare to get used later
+
+        if (existingIngredient) {
+          // The ingredient already exists
+          ingredientId = existingIngredient.id;
+        } else {
+          // 6b. INSERT the new ingredient since it does not exists
+          const [newIngredient] = await tx
+            .insert(ingredients)
+            .values({
+              name: ingredientData.name,
+              category: ingredientData.category, // Added data from form
+              unit: ingredientData.unit, // Added data from form
+            })
+            .returning({ id: ingredients.id });
+
+          ingredientId = newIngredient.id;
+        }
+
+        // 7. INSERT record in junction table (mealIngredients)
+        await tx.insert(mealIngredients).values({
+          mealId: mealId, // Link to the meal
+          ingredientId: ingredientId, // Link to ingredient
+          quantity: ingredientData.quantity, // Save the specific quantity
+          isOptional: ingredientData.isOptional, // Store the optional state
+          notes: ingredientData.notes || null, // Save the note field
+        });
+      }
+
+      // 8. Revalidate Routes
+      revalidatePath(`/meals/${mealId}`); // For the individual meal page
+      revalidatePath("/meals"); // For the meal list page (or dashboard)
+
+      // 9. All good
+      return { success: true, mealId: mealId };
+    });
   } catch (error) {
-    console.error("Server error:", error);
-    return { success: false, error: "Failed to add meal" };
+    console.error("Error adding meal:", error);
+    const message =
+      error instanceof z.ZodError
+        ? error.message
+        : "Database error during meal creation.";
+
+    return {
+      success: false,
+      error: message,
+    };
   }
 }
 
@@ -204,22 +270,18 @@ interface DeleteResult {
   error?: string;
 }
 
-interface UpdateResult {
-  success: boolean;
-  error?: string;
-  mealId?: string; // Optionally return mealId
-}
-
 // Define a clear result type
 interface UpdateResult {
   success: boolean;
   error?: string;
-  mealId?: string; // Optionally return mealId
+  mealId?: string;
 }
 
 /**
- * Updates a Meal record and synchronizes its associated Ingredients.
- * Handles inserting new ingredients, updating existing ones, and deleting removed ones.
+ * Updates a Meal record and synchronizes its associated Ingredients
+ * via the mealIngredients junction table.
+ * Handles finding/creating ingredient definitions, updating/inserting/deleting
+ * the links between the meal and ingredients.
  * Operates within a database transaction.
  * @param data - Validated form data conforming to MealUpdateFormValues.
  * @returns Promise<UpdateResult> indicating success or failure.
@@ -227,7 +289,7 @@ interface UpdateResult {
 export async function updateMeal(
   data: MealUpdateFormValues,
 ): Promise<UpdateResult> {
-  // 1. Input Validation (Basic check, Zod already validated structure)
+  // 1. Input Validation (Basic check)
   if (!data?.id) {
     return { success: false, error: "Invalid meal data: Missing ID." };
   }
@@ -245,7 +307,7 @@ export async function updateMeal(
   } = data;
 
   try {
-    await db.transaction(async (tx) => {
+    return await db.transaction(async (tx) => {
       // 2. Update Meal Details
       await tx
         .update(meals)
@@ -263,88 +325,132 @@ export async function updateMeal(
         })
         .where(eq(meals.id, mealId));
 
-      // 3. Fetch IDs of Existing Ingredients for Comparison
-      const existingIngredientIds = (
-        await tx
-          .select({ id: ingredientsSchema.id })
-          .from(ingredientsSchema)
-          .where(eq(ingredientsSchema.mealId, mealId))
-      ).map((ing) => ing.id); // Get just the array of IDs
+      // 3. Fetch Existing Meal-Ingredient Links for this Meal
+      const existingLinks = await tx
+        .select({
+          ingredientId: mealIngredients.ingredientId,
+          // Include other fields from mealIngredients if needed for comparison,
+          // but usually ingredientId is enough to identify the link.
+        })
+        .from(mealIngredients)
+        .where(eq(mealIngredients.mealId, mealId));
 
-      const existingIdSet = new Set(existingIngredientIds);
-      const submittedIds = new Set<string>(); // Track IDs submitted that should be kept/updated
+      const existingIngredientIdsInMeal = new Set(
+        existingLinks.map((link) => link.ingredientId),
+      );
+      const submittedIngredientIds = new Set<string>(); // Track ingredient IDs present in the submission
 
       // --- Promises for concurrent execution ---
-      const insertPromises: Promise<any>[] = [];
-      const updatePromises: Promise<any>[] = [];
+      const upsertPromises: Promise<any>[] = []; // Combine inserts and updates for links
 
-      // 4. Process Submitted Ingredients: Prepare Inserts & Updates
+      // 4. Process Submitted Ingredients: Find/Create Ingredient, Upsert Link
       for (const submittedIng of submittedIngredients) {
-        // Prepare payload, ensuring required fields are present and optional are null if empty
-        // Explicitly type the payload for clarity and safety
-        const payload: Omit<NewIngredient, "id" | "mealId" | "createdAt"> = {
-          name: submittedIng.name, // Required by schema
-          quantity: submittedIng.quantity, // Required by schema
-          unit: submittedIng.unit || null,
-          category: submittedIng.category || null,
+        let ingredientId: string;
+
+        // 4a. Find or Create the Ingredient Definition
+        const [existingIngredient] = await tx
+          .select({ id: ingredients.id })
+          .from(ingredients)
+          .where(eq(ingredients.name, submittedIng.name)) // Match by unique name
+          .limit(1);
+
+        if (existingIngredient) {
+          ingredientId = existingIngredient.id;
+          // Optional: Update ingredient definition if needed (e.g., category changed)
+          // This might be better handled in a separate ingredient management UI
+          // await tx.update(ingredients).set({ category: submittedIng.category, unit: submittedIng.unit }).where(eq(ingredients.id, ingredientId));
+        } else {
+          // Insert new ingredient definition
+          const [newIngredient] = await tx
+            .insert(ingredients)
+            .values({
+              name: submittedIng.name,
+              category: submittedIng.category || null,
+              unit: submittedIng.unit || null,
+              // Let DB handle default 'id' and 'createdAt'
+            })
+            .returning({ id: ingredients.id });
+
+          if (!newIngredient?.id) {
+            throw new Error(
+              `Failed to insert new ingredient: ${submittedIng.name}`,
+            );
+          }
+          ingredientId = newIngredient.id;
+        }
+
+        submittedIngredientIds.add(ingredientId); // Mark this ingredient as present in submission
+
+        // 4b. Prepare data for the mealIngredients junction table link
+        const mealIngredientPayload = {
+          mealId: mealId,
+          ingredientId: ingredientId,
+          quantity: submittedIng.quantity, // Required
           isOptional: submittedIng.isOptional ?? false,
           notes: submittedIng.notes || null,
         };
 
-        if (submittedIng.id && existingIdSet.has(submittedIng.id)) {
-          // --- Prepare UPDATE ---
-          submittedIds.add(submittedIng.id); // Mark as present in submission
-          updatePromises.push(
-            tx
-              .update(ingredientsSchema)
-              .set(payload)
-              .where(eq(ingredientsSchema.id, submittedIng.id)),
-          );
-        } else {
-          // --- Prepare INSERT ---
-          // ID is missing or doesn't match an existing one for this meal
-          const insertPayload: NewIngredient = {
-            ...payload,
-            mealId: mealId, // Link to the meal
-            // Let DB handle default 'id' and 'createdAt'
-          };
-          insertPromises.push(
-            tx.insert(ingredientsSchema).values(insertPayload),
-          );
-        }
+        // 4c. Upsert the Link in mealIngredients
+        // Drizzle's .onConflictDoUpdate is ideal here if your DB supports it (like PostgreSQL)
+        // It attempts an INSERT, and if a conflict occurs on the primary key (mealId, ingredientId),
+        // it performs an UPDATE instead.
+        upsertPromises.push(
+          tx
+            .insert(mealIngredients)
+            .values(mealIngredientPayload)
+            .onConflictDoUpdate({
+              target: [mealIngredients.mealId, mealIngredients.ingredientId], // Target the composite PK
+              set: {
+                // Fields to update on conflict
+                quantity: mealIngredientPayload.quantity,
+                isOptional: mealIngredientPayload.isOptional,
+                notes: mealIngredientPayload.notes,
+              },
+            }),
+        );
       }
 
-      // 5. Determine and Prepare Deletes
-      const idsToDelete = existingIngredientIds.filter(
-        (id) => !submittedIds.has(id),
-      );
+      // 5. Determine and Prepare Deletes for mealIngredients links
+      const ingredientIdsToDelete = Array.from(
+        existingIngredientIdsInMeal,
+      ).filter((id) => !submittedIngredientIds.has(id));
+
       let deletePromise: Promise<any> | null = null;
-      if (idsToDelete.length > 0) {
+      if (ingredientIdsToDelete.length > 0) {
+        // Delete links from mealIngredients that were not submitted
         deletePromise = tx
-          .delete(ingredientsSchema)
-          .where(inArray(ingredientsSchema.id, idsToDelete));
+          .delete(mealIngredients)
+          .where(
+            and(
+              eq(mealIngredients.mealId, mealId),
+              inArray(mealIngredients.ingredientId, ingredientIdsToDelete),
+            ),
+          );
       }
 
       // 6. Execute DB Operations Concurrently
-      const allPromises = [...insertPromises, ...updatePromises];
+      const allPromises = [...upsertPromises];
       if (deletePromise) {
         allPromises.push(deletePromise);
       }
       await Promise.all(allPromises);
 
-      // 7. Revalidate Paths (after successful transaction)
+      // 7. Revalidate Paths
       revalidatePath(`/meals/${mealId}`);
       revalidatePath("/meals");
-    }); // Transaction commits here if no errors were thrown
 
-    return { success: true, mealId: mealId };
+      return { success: true, mealId: mealId }; // Return success from transaction block
+    }); // Transaction commits here if no errors were thrown
   } catch (error) {
-    console.error("Error updating meal:", { mealId, data, error }); // Log more context
-    const message =
+    console.error("Error updating meal:", { mealId, data, error });
+    let message =
       error instanceof Error
         ? error.message
         : "Database error occurred during update.";
-    // Consider logging the specific DB error if available (e.g., error.code)
+    if (error instanceof z.ZodError) {
+      // Check specifically for Zod errors if server-side validation added
+      message = `Invalid data format: ${error.flatten().fieldErrors}`;
+    }
     return { success: false, error: message };
   }
 }
@@ -405,105 +511,31 @@ export async function deleteMeal(id: string): Promise<DeleteResult> {
   }
 }
 
-// Helper to create base structure (can be moved to utils)
-// Returns objects matching MealPlanDayClient structure but with empty meals
-const createEmptyWeekStructureForClient = (
-  startDate: Date,
-): MealPlanClient[] => {
-  const mondayStart = startOfWeek(startDate, { weekStartsOn: 1 });
-  return Array.from({ length: 7 }).map((_, i) => ({
-    date: addDays(mondayStart, i),
-    meals: [],
-  }));
-};
-
-/**
- * Fetches structured meal plan data for the current week for the authorized user.
- * Returns an array of 7 days, including empty days if no plan exists.
- * @returns Promise<MealPlanDayClient[]> - Array of 7 days for the week.
- */
-export async function getMealPlansDataForCurrentWeek(
-  currentWeek: Date,
-): Promise<MealPlanClient[]> {
-  // 1. Authorization
-  const user = await authorize();
-  const startDate = startOfWeek(currentWeek, { weekStartsOn: 1 }); // Calculate start date once
-
-  if (!user?.id) {
-    console.error("Authorization failed in getMealPlansDataForCurrentWeek");
-    return createEmptyWeekStructureForClient(startDate); // Return empty structure
-  }
-  const userId = user.id;
-
-  // 2. Calculate Date Range
-  const weekDates = Array.from({ length: 7 }, (_, i) => addDays(startDate, i));
-  const weekDateStrings = weekDates.map((date) => format(date, "yyyy-MM-dd"));
-
+export const getAllIngredients = async (): Promise<Ingredient[]> => {
   try {
-    // 3. Fetch Meal Plans for the User within the Date Range
-    const mealPlansResult = await db
-      .select({
-        id: mealPlans.id,
-        date: mealPlans.date, // Keep date string for mapping
-      })
-      .from(mealPlans)
-      .where(
-        and(
-          eq(mealPlans.userId, userId),
-          inArray(mealPlans.date, weekDateStrings),
-        ),
-      );
+    console.log("Fetching all ingredients..."); // Optional: Add logging
 
-    // If no plans exist for the week, return the base structure
-    if (mealPlansResult.length === 0) {
-      return createEmptyWeekStructureForClient(startDate);
-    }
-
-    // 4. Prepare for Fetching Planned Meals
-    const mealPlanIdToDateMap = new Map(
-      mealPlansResult.map((p) => [p.id, p.date]),
-    );
-    const mealPlanIds = mealPlansResult.map((p) => p.id);
-
-    // 5. Fetch All Planned Meals for these Plans, Joining with Meals
-    const plannedMealsResult = await db
-      .select({
-        mealPlanId: plannedMeals.mealPlanId,
-        meal: meals,
-      })
-      .from(plannedMeals)
-      .innerJoin(meals, eq(plannedMeals.mealId, meals.id))
-      .where(inArray(plannedMeals.mealPlanId, mealPlanIds));
-
-    // 6. Group Planned Meals by Date String
-    const mealsGroupedByDate = new Map<string, Meal[]>();
-    for (const { mealPlanId, meal } of plannedMealsResult) {
-      const dateString = mealPlanIdToDateMap.get(mealPlanId);
-      if (!dateString) continue;
-
-      if (mealsGroupedByDate.has(dateString)) {
-        mealsGroupedByDate.get(dateString)?.push(meal);
-      } else {
-        mealsGroupedByDate.set(dateString, [meal]);
-      }
-    }
-
-    // 7. Construct the Final 7-Day Output (without dayName)
-    const finalWeekPlan = weekDates.map((date): MealPlanClient => {
-      const dateString = format(date, "yyyy-MM-dd");
-      const mealsForDay = mealsGroupedByDate.get(dateString) || [];
-
-      return {
-        date, // Use ISO string for client
-        meals: mealsForDay,
-      };
+    const ingredientList = await db.query.ingredients.findMany({
+      // Correct orderBy syntax: provide an array of columns
+      orderBy: (ingredientsTable, { asc }) => [
+        asc(ingredientsTable.category), // Order by category first (ascending, nulls might come first or last depending on DB)
+        asc(ingredientsTable.name), // Then order by name (ascending)
+      ],
+      // Optionally select specific columns if you don't need the entire object:
+      // columns: {
+      //   id: true,
+      //   name: true,
+      //   category: true,
+      //   unit: true,
+      // }
     });
 
-    // No need to sort by dayName anymore, order comes from weekDates iteration
-    return finalWeekPlan;
+    console.log(`Successfully fetched ${ingredientList.length} ingredients.`); // Optional logging
+    return ingredientList;
   } catch (error) {
-    console.error("Error fetching meal plan data:", error);
-    // Return empty structure on error
-    return createEmptyWeekStructureForClient(startDate);
+    console.error("Error fetching ingredient list:", error);
+    // Re-throw a more specific error or the original one
+    // This allows Server Components using this function to catch it and potentially show an error state or trigger notFound()
+    throw new Error("Failed to fetch ingredients from database.");
   }
-}
+};

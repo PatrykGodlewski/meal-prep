@@ -1,9 +1,10 @@
 // components/meal-edit-form.tsx
 "use client";
 
-import { useFieldArray, useFormContext } from "react-hook-form";
+import { useState, useCallback, useMemo } from "react"; // Added useState
+import { type Control, useFieldArray, useFormContext } from "react-hook-form";
 import * as z from "zod";
-import { Clock, Plus, Users, X } from "lucide-react";
+import { Clock, Plus, Users, X, ChevronsUpDown, Check } from "lucide-react"; // Added icons
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -22,29 +23,42 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form"; // Use RHF Form
-import { Card } from "@/components/ui/card"; // Use Card from shadcn
-import { ingredientCategories, mealCategories, unitTypes } from "@/validators";
+} from "@/components/ui/form";
+import { Card } from "@/components/ui/card";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"; // Added Popover
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command"; // Added Command
+import { cn } from "@/lib/utils"; // Shadcn utility
 import {
   INGREDIENT_CATEGORY_ENUM,
   MEAL_CATEGORY_ENUM,
   UNIT_ENUM,
+  type Ingredient,
 } from "@/supabase/schema";
+import { unitTypes, ingredientCategories, mealCategories } from "@/validators"; // Adjust path if needed
 
 const IngredientFormSchema = z.object({
   id: z.string().uuid().optional(),
-  mealId: z.string().uuid().optional(),
   name: z.string().min(1, "Ingredient name is required"),
+  category: ingredientCategories,
+  unit: unitTypes,
   quantity: z.string().min(1, "Quantity is required"),
-  unit: unitTypes.nullable().optional(),
-  category: ingredientCategories.nullable().optional(),
   isOptional: z.boolean().default(false),
   notes: z.string().nullable().optional(),
 });
 
 export const MealFormSchema = z.object({
-  // Export if needed elsewhere, or keep local
-  id: z.string().uuid(),
+  id: z.string().uuid("Meal ID is required for updates."),
   name: z.string().min(2, "Meal name must be at least 2 characters."),
   description: z
     .string()
@@ -53,7 +67,7 @@ export const MealFormSchema = z.object({
   prepTimeMinutes: z.coerce.number().int().positive().nullable().optional(),
   cookTimeMinutes: z.coerce.number().int().positive().nullable().optional(),
   servings: z.coerce.number().int().positive().nullable().optional(),
-  category: mealCategories.nullable().optional(),
+  category: mealCategories,
   imageUrl: z
     .string()
     .url("Invalid URL")
@@ -67,21 +81,30 @@ export const MealFormSchema = z.object({
 });
 
 export type MealUpdateFormValues = z.infer<typeof MealFormSchema>;
+type IngredientFormState = z.infer<typeof IngredientFormSchema>;
 
-// --- Default values for a *new* ingredient row ---
-const NEW_INGREDIENT_DEFAULT = {
-  // id: crypto.randomUUID(), // RHF provides a stable ID via field.id
+const NEW_INGREDIENT_DEFAULT: IngredientFormState = {
   name: "",
   quantity: "",
-  unit: null,
-  category: null,
+  unit: "g",
+  category: "other",
   isOptional: false,
-  notes: "",
+  notes: null,
 };
 
-export function MealEditForm() {
+// --- Edit Form Component Props ---
+interface MealEditFormProps {
+  availableIngredients: Ingredient[];
+  isLoadingIngredients: boolean;
+}
+
+// --- Edit Form Component ---
+export function MealEditForm({
+  availableIngredients = [],
+  isLoadingIngredients,
+}: MealEditFormProps) {
   const form = useFormContext<MealUpdateFormValues>();
-  const { control } = form;
+  const { control, setValue } = form;
 
   const { fields, append, remove } = useFieldArray({
     control,
@@ -96,8 +119,45 @@ export function MealEditForm() {
     remove(index);
   };
 
+  // --- Handle Ingredient Selection ---
+  // This function now primarily sets the associated data *after* an ID is selected
+  const populateIngredientData = useCallback(
+    (index: number, selectedIngredientId: string | null | undefined) => {
+      const selected = availableIngredients.find(
+        (ing) => ing.id === selectedIngredientId,
+      );
+      if (selected) {
+        // Set ID, Name, Category, Unit based on selection
+        setValue(`ingredients.${index}.id`, selected.id, { shouldDirty: true });
+        setValue(`ingredients.${index}.name`, selected.name, {
+          shouldDirty: true,
+          shouldValidate: true,
+        }); // Validate name after setting
+        setValue(
+          `ingredients.${index}.category`,
+          selected.category ?? "other",
+          {
+            shouldDirty: true,
+          },
+        );
+        setValue(`ingredients.${index}.unit`, selected.unit ?? "g", {
+          shouldDirty: true,
+        });
+      } else {
+        // If selection is cleared or invalid, potentially clear related fields
+        // but keep the typed name if the user is creating a new one.
+        // We only clear the ID here. The name is handled by the input itself.
+        setValue(`ingredients.${index}.id`, undefined); // Clear the definition ID
+        // Maybe clear category/unit if user clears selection? Optional.
+        // setValue(`ingredients.${index}.category`, null);
+        // setValue(`ingredients.${index}.unit`, null);
+      }
+    },
+    [availableIngredients, setValue],
+  );
+  // --- End Handle Selection ---
+
   return (
-    // The <form> tag is rendered by the parent component using form.handleSubmit
     <div className="bg-white dark:bg-neutral-900 rounded-lg shadow-md overflow-hidden">
       {/* Image Section */}
       <div className="relative h-64 md:h-96 w-full bg-gray-200 dark:bg-neutral-800">
@@ -111,8 +171,6 @@ export function MealEditForm() {
               name="imageUrl"
               render={({ field }) => (
                 <FormItem>
-                  {" "}
-                  {/* Wrap input in FormItem for message */}
                   <FormControl>
                     <Input
                       id="imageUrlEdit"
@@ -141,8 +199,7 @@ export function MealEditForm() {
             <FormItem>
               <FormLabel className="text-xs font-medium sr-only">
                 Meal Name
-              </FormLabel>{" "}
-              {/* Hide label visually if needed */}
+              </FormLabel>
               <FormControl>
                 <Input
                   type="text"
@@ -164,6 +221,7 @@ export function MealEditForm() {
             name="prepTimeMinutes"
             render={({ field }) => (
               <FormItem>
+                {" "}
                 <FormLabel className="text-sm flex items-center gap-1">
                   <Clock className="h-4 w-4" /> Prep Time (min)
                 </FormLabel>
@@ -191,6 +249,7 @@ export function MealEditForm() {
             name="cookTimeMinutes"
             render={({ field }) => (
               <FormItem>
+                {" "}
                 <FormLabel className="text-sm flex items-center gap-1">
                   <Clock className="h-4 w-4" /> Cook Time (min)
                 </FormLabel>
@@ -218,6 +277,7 @@ export function MealEditForm() {
             name="servings"
             render={({ field }) => (
               <FormItem>
+                {" "}
                 <FormLabel className="text-sm flex items-center gap-1">
                   <Users className="h-4 w-4" /> Servings
                 </FormLabel>
@@ -245,6 +305,7 @@ export function MealEditForm() {
             name="category"
             render={({ field }) => (
               <FormItem>
+                {" "}
                 <FormLabel className="text-sm">Meal Category</FormLabel>
                 <Select
                   value={field.value ?? ""}
@@ -312,7 +373,7 @@ export function MealEditForm() {
           )}
         />
 
-        {/* Ingredients Section */}
+        {/* --- Ingredients Section (MODIFIED) --- */}
         <div className="space-y-6 border-t pt-6">
           <div className="flex items-center justify-between">
             <h3 className="text-xl font-semibold">Ingredients*</h3>
@@ -331,164 +392,21 @@ export function MealEditForm() {
           </FormMessage>
 
           <div className="space-y-4">
-            {fields.map(
-              (
-                field,
-                index, // `field` here is from useFieldArray
-              ) => (
-                <Card
-                  key={field.id}
-                  className="p-4 bg-gray-50 dark:bg-neutral-800/50 border dark:border-neutral-700"
-                >
-                  <div className="flex justify-between items-center mb-3">
-                    <span className="font-medium text-sm text-gray-700 dark:text-gray-300">
-                      Ingredient #{index + 1}
-                    </span>
-                    {fields.length > 1 && (
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handleRemoveIngredient(index)}
-                        className="h-6 w-6 text-red-500 hover:bg-red-100 dark:hover:bg-red-900/50"
-                      >
-                        <X className="h-4 w-4" />
-                        <span className="sr-only">Remove</span>
-                      </Button>
-                    )}
-                  </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                    <FormField
-                      control={control}
-                      name={`ingredients.${index}.name`}
-                      render={({ field: inputField }) => (
-                        <FormItem className="sm:col-span-2 lg:col-span-1">
-                          <FormLabel className="text-xs">Name*</FormLabel>
-                          <FormControl>
-                            <Input {...inputField} placeholder="e.g., Flour" />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={control}
-                      name={`ingredients.${index}.quantity`}
-                      render={({ field: inputField }) => (
-                        <FormItem>
-                          <FormLabel className="text-xs">Quantity*</FormLabel>
-                          <FormControl>
-                            <Input {...inputField} placeholder="e.g., 2" />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={control}
-                      name={`ingredients.${index}.unit`}
-                      render={({ field: inputField }) => (
-                        <FormItem>
-                          <FormLabel className="text-xs">Unit</FormLabel>
-                          <Select
-                            value={inputField.value ?? ""}
-                            onValueChange={inputField.onChange}
-                          >
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Select" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              {UNIT_ENUM.enumValues.map((unit) => (
-                                <SelectItem key={unit} value={unit}>
-                                  {unit}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={control}
-                      name={`ingredients.${index}.category`}
-                      render={({ field: inputField }) => (
-                        <FormItem>
-                          <FormLabel className="text-xs">Category</FormLabel>
-                          <Select
-                            value={inputField.value ?? ""}
-                            onValueChange={inputField.onChange}
-                          >
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Select category" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              {INGREDIENT_CATEGORY_ENUM.enumValues.map(
-                                (category) => (
-                                  <SelectItem
-                                    key={category}
-                                    value={category}
-                                    className="capitalize"
-                                  >
-                                    {category.replace(/_/g, " ")}
-                                  </SelectItem>
-                                ),
-                              )}
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={control}
-                      name={`ingredients.${index}.notes`}
-                      render={({ field: inputField }) => (
-                        <FormItem>
-                          <FormLabel className="text-xs">Notes</FormLabel>
-                          <FormControl>
-                            <Input
-                              {...inputField}
-                              value={inputField.value ?? ""}
-                              placeholder="e.g., finely chopped"
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={control}
-                      name={`ingredients.${index}.isOptional`}
-                      render={({ field: inputField }) => (
-                        <FormItem className="flex flex-row items-center space-x-2 pt-5">
-                          <FormControl>
-                            <Checkbox
-                              checked={inputField.value}
-                              onCheckedChange={inputField.onChange}
-                              id={`ing-opt-${index}`}
-                            />
-                          </FormControl>
-                          <Label
-                            htmlFor={`ing-opt-${index}`}
-                            className="text-xs font-normal"
-                          >
-                            Optional
-                          </Label>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                </Card>
-              ),
-            )}
+            {fields.map((field, index) => (
+              <IngredientInputRow
+                key={field.id} // Use stable key from useFieldArray
+                index={index}
+                control={control}
+                availableIngredients={availableIngredients}
+                isLoadingIngredients={isLoadingIngredients}
+                onRemove={() => handleRemoveIngredient(index)}
+                canRemove={fields.length > 1}
+                onSelectIngredient={populateIngredientData} // Pass population handler
+              />
+            ))}
           </div>
         </div>
+        {/* --- End Ingredients Section --- */}
 
         {/* Instructions Section */}
         <FormField
@@ -516,3 +434,325 @@ export function MealEditForm() {
   );
 }
 MealEditForm.displayName = "MealEditForm";
+
+// --- Ingredient Input Row Sub-Component ---
+interface IngredientInputRowProps {
+  index: number;
+  control: Control<MealUpdateFormValues>; // Control object from useFormContext
+  availableIngredients: Ingredient[];
+  isLoadingIngredients: boolean;
+  onRemove: () => void;
+  canRemove: boolean;
+  onSelectIngredient: (
+    index: number,
+    ingredientId: string | null | undefined,
+  ) => void;
+}
+
+const IngredientInputRow: React.FC<IngredientInputRowProps> = ({
+  index,
+  control,
+  availableIngredients,
+  isLoadingIngredients,
+  onRemove,
+  canRemove,
+  onSelectIngredient,
+}) => {
+  const [popoverOpen, setPopoverOpen] = useState(false);
+  const { watch, setValue } = useFormContext<MealUpdateFormValues>(); // Get watch and setValue
+
+  // Watch the ID and Name for this row
+  const ingredientId = watch(`ingredients.${index}.id`);
+  const ingredientName = watch(`ingredients.${index}.name`);
+
+  // Determine if the user is likely creating a *new* ingredient
+  // This happens when there's a name typed, but no matching ID is set
+  const isCreatingNew = useMemo(() => {
+    return !!ingredientName && !ingredientId;
+  }, [ingredientName, ingredientId]);
+
+  // Watch unit and category separately ONLY if not creating new,
+  // otherwise, they should be editable via FormField
+  const selectedUnit = !isCreatingNew
+    ? watch(`ingredients.${index}.unit`)
+    : undefined;
+  const selectedCategory = !isCreatingNew
+    ? watch(`ingredients.${index}.category`)
+    : undefined;
+
+  return (
+    <Card className="p-4 bg-gray-50 dark:bg-neutral-800/50 border dark:border-neutral-700">
+      <div className="flex justify-between items-center mb-3">
+        <span className="font-medium text-sm text-gray-700 dark:text-gray-300">
+          Ingredient #{index + 1}
+        </span>
+        {canRemove && (
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            onClick={onRemove}
+            className="h-6 w-6 text-red-500 hover:bg-red-100 dark:hover:bg-red-900/50"
+          >
+            <X className="h-4 w-4" />
+            <span className="sr-only">Remove</span>
+          </Button>
+        )}
+      </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {/* Ingredient Combobox */}
+        <FormField
+          control={control}
+          name={`ingredients.${index}.name`}
+          render={({ field }) => (
+            <FormItem className="flex flex-col sm:col-span-2 lg:col-span-1">
+              <FormLabel className="text-xs">Ingredient*</FormLabel>
+              <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
+                <PopoverTrigger asChild>
+                  <FormControl>
+                    <Button
+                      variant="outline"
+                      // role="combobox"
+                      aria-expanded={popoverOpen}
+                      className={cn(
+                        "w-full justify-between font-normal",
+                        !field.value && "text-muted-foreground",
+                      )}
+                      disabled={isLoadingIngredients}
+                    >
+                      {field.value
+                        ? (availableIngredients.find(
+                            (ing) => ing.name === field.value,
+                          )?.name ?? field.value)
+                        : isLoadingIngredients
+                          ? "Loading..."
+                          : "Select or type ingredient..."}
+                      <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                    </Button>
+                  </FormControl>
+                </PopoverTrigger>
+                <PopoverContent className="w-[--radix-popover-trigger-width] max-h-[--radix-popover-content-available-height] p-0">
+                  <Command shouldFilter={true}>
+                    <CommandInput
+                      placeholder="Search or type new..."
+                      value={field.value}
+                      onValueChange={(search) => {
+                        field.onChange(search);
+                        // Check if typed value matches existing *after* updating field value
+                        const match = availableIngredients.find(
+                          (ing) =>
+                            ing.name.toLowerCase() === search.toLowerCase(),
+                        );
+                        if (!match) {
+                          // If no match, clear ID (signals new ingredient)
+                          onSelectIngredient(index, null);
+                        } else if (
+                          watch(`ingredients.${index}.id`) !== match.id
+                        ) {
+                          // If matches but ID isn't set yet, set it
+                          onSelectIngredient(index, match.id);
+                        }
+                      }}
+                    />
+                    <CommandList>
+                      <CommandEmpty>
+                        No ingredient found. Type to add new.
+                      </CommandEmpty>
+                      <CommandGroup>
+                        {availableIngredients.map((ing) => (
+                          <CommandItem
+                            key={ing.id}
+                            value={ing.name}
+                            onSelect={(currentValue) => {
+                              const selected = availableIngredients.find(
+                                (i) =>
+                                  i.name.toLowerCase() ===
+                                  currentValue.toLowerCase(),
+                              );
+                              field.onChange(
+                                selected ? selected.name : currentValue,
+                              );
+                              onSelectIngredient(index, selected?.id);
+                              setPopoverOpen(false);
+                            }}
+                          >
+                            <Check
+                              className={cn(
+                                "mr-2 h-4 w-4",
+                                watch(`ingredients.${index}.id`) === ing.id
+                                  ? "opacity-100"
+                                  : "opacity-0",
+                              )}
+                            />
+                            {ing.name} {ing.unit ? `(${ing.unit})` : ""}
+                          </CommandItem>
+                        ))}
+                      </CommandGroup>
+                    </CommandList>
+                  </Command>
+                </PopoverContent>
+              </Popover>
+              <FormField
+                control={control}
+                name={`ingredients.${index}.id`}
+                render={({ field: idField }) => (
+                  <input
+                    type="hidden"
+                    {...idField}
+                    value={idField.value ?? ""}
+                  />
+                )}
+              />
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {/* Quantity */}
+        <FormField
+          control={control}
+          name={`ingredients.${index}.quantity`}
+          render={({ field: inputField }) => (
+            <FormItem>
+              <FormLabel className="text-xs">Quantity*</FormLabel>
+              <FormControl>
+                <Input {...inputField} placeholder="e.g., 2" />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {/* Unit (Conditional: Select if creating new, ReadOnly if existing) */}
+        {isCreatingNew ? (
+          <FormField
+            control={control}
+            name={`ingredients.${index}.unit`}
+            render={({ field: inputField }) => (
+              <FormItem>
+                <FormLabel className="text-xs">Unit</FormLabel>
+                <Select
+                  value={inputField.value ?? ""}
+                  onValueChange={inputField.onChange}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select unit" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {UNIT_ENUM.enumValues.map((unit) => (
+                      <SelectItem key={unit} value={unit}>
+                        {unit}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        ) : (
+          <FormItem>
+            <FormLabel className="text-xs text-gray-500 dark:text-gray-400">
+              Unit
+            </FormLabel>
+            <Input
+              readOnly
+              disabled
+              value={selectedUnit ?? "-"}
+              className="bg-gray-100 dark:bg-neutral-700 border-gray-300 dark:border-neutral-600"
+            />
+          </FormItem>
+        )}
+
+        {/* Category (Conditional: Select if creating new, ReadOnly if existing) */}
+        {isCreatingNew ? (
+          <FormField
+            control={control}
+            name={`ingredients.${index}.category`}
+            render={({ field: inputField }) => (
+              <FormItem>
+                <FormLabel className="text-xs">Category</FormLabel>
+                <Select
+                  value={inputField.value ?? ""}
+                  onValueChange={inputField.onChange}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select category" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {INGREDIENT_CATEGORY_ENUM.enumValues.map((cat) => (
+                      <SelectItem key={cat} value={cat} className="capitalize">
+                        {cat.replace(/_/g, " ")}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        ) : (
+          <FormItem>
+            <FormLabel className="text-xs text-gray-500 dark:text-gray-400">
+              Category
+            </FormLabel>
+            <Input
+              readOnly
+              disabled
+              value={selectedCategory?.replace(/_/g, " ") ?? "-"}
+              className="bg-gray-100 dark:bg-neutral-700 border-gray-300 dark:border-neutral-600 capitalize"
+            />
+          </FormItem>
+        )}
+
+        {/* Notes */}
+        <FormField
+          control={control}
+          name={`ingredients.${index}.notes`}
+          render={({ field: inputField }) => (
+            <FormItem>
+              <FormLabel className="text-xs">Notes</FormLabel>
+              <FormControl>
+                <Input
+                  {...inputField}
+                  value={inputField.value ?? ""}
+                  placeholder="e.g., finely chopped"
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {/* Optional */}
+        <FormField
+          control={control}
+          name={`ingredients.${index}.isOptional`}
+          render={({ field: inputField }) => (
+            <FormItem className="flex flex-row items-center space-x-2 pt-5">
+              <FormControl>
+                <Checkbox
+                  checked={inputField.value}
+                  onCheckedChange={inputField.onChange}
+                  id={`ing-opt-${index}`}
+                />
+              </FormControl>
+              <Label
+                htmlFor={`ing-opt-${index}`}
+                className="text-xs font-normal"
+              >
+                Optional
+              </Label>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      </div>
+    </Card>
+  );
+};
+IngredientInputRow.displayName = "IngredientInputRow";

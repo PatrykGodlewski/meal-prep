@@ -2,6 +2,7 @@ import * as path from "node:path";
 import { config } from "dotenv";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
+import { schema } from "./schema";
 
 const envPath = path.resolve(__dirname, "../.env");
 config({ path: envPath }); // or .env.local
@@ -23,7 +24,7 @@ function singleton<Value>(name: string, value: () => Value): Value {
 
 function createDatabaseConnection() {
   const client = postgres(process.env.DATABASE_URL ?? "");
-  return drizzle({ client });
+  return drizzle({ client, schema });
 }
 
 export const db = singleton("db", createDatabaseConnection);

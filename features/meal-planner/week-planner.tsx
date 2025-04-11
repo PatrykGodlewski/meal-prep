@@ -1,6 +1,6 @@
-import { getMealPlansDataForCurrentWeek } from "@/app/actions";
 import { CalendarDays } from "lucide-react";
 import { MealPlanGrid } from "./meal-plan-grid.client";
+import { getMealPlansDataForCurrentWeek } from "./actions";
 
 export default async function WeekPlannerPage() {
   const structuredMealPlanData = await getMealPlansDataForCurrentWeek(

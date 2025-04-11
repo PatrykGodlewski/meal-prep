@@ -3,26 +3,32 @@ import React from "react";
 import Image from "next/image";
 import { format } from "date-fns";
 import { Clock, Users, ChefHat, Calendar, type LucideIcon } from "lucide-react";
-import type { Ingredient, Meal } from "@/supabase/schema"; // Adjust path
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"; // Assuming DayCard is not needed here
+// Import the necessary types, including the junction table type with nested ingredient
+import type { Meal, MealIngredient, Ingredient } from "@/supabase/schema"; // Adjust path
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-// Type for the props expected by this display component
-type MealWithDetails = Meal & {
-  ingredients: Ingredient[];
-  authorName: string;
+// Type for the junction table data + nested ingredient details
+// (Ensure this matches the type definition used in the parent server/client component)
+export type MealIngredientWithDetails = MealIngredient & {
+  ingredient: Ingredient | null; // Nested ingredient (can be null if join fails)
 };
 
+// Define the props expected by this display component
 interface MealDisplayDetailsProps {
-  meal: MealWithDetails;
+  meal: Meal;
+  mealIngredientsData: MealIngredientWithDetails[];
+  authorName: string;
 }
 
-// Helper component for meta labels (can be kept here or moved to a shared utils file)
+// Helper component for meta labels
 type MealLabelProps = {
   icon: LucideIcon;
-  text: string | null | undefined;
+  text: string | number | null | undefined; // Accept number for time/servings
 };
 function MealLabel({ icon: Icon, text }: MealLabelProps) {
-  if (!text) return null;
+  // Render nothing if text is null, undefined, or an empty string after trimming
+  if (text === null || text === undefined || String(text).trim() === "")
+    return null;
   return (
     <div className="flex items-center mr-4 mb-2 whitespace-nowrap text-sm">
       <Icon className="h-4 w-4 mr-1.5 flex-shrink-0" />
@@ -32,7 +38,7 @@ function MealLabel({ icon: Icon, text }: MealLabelProps) {
 }
 
 export const MealDisplayDetails: React.FC<MealDisplayDetailsProps> = React.memo(
-  ({ meal }) => {
+  ({ meal, mealIngredientsData, authorName }) => {
     const totalTime = (meal.prepTimeMinutes || 0) + (meal.cookTimeMinutes || 0);
 
     return (
@@ -45,7 +51,8 @@ export const MealDisplayDetails: React.FC<MealDisplayDetailsProps> = React.memo(
               alt={meal.name}
               fill
               className="object-cover"
-            />
+              priority
+            /> // Added priority for potential LCP
           ) : (
             <div className="flex items-center justify-center h-full bg-gray-100 dark:bg-neutral-700">
               <span className="text-gray-500 dark:text-neutral-400 text-lg">
@@ -69,12 +76,11 @@ export const MealDisplayDetails: React.FC<MealDisplayDetailsProps> = React.memo(
 
           {/* Meta Info */}
           <div className="flex flex-wrap items-center text-gray-600 dark:text-neutral-400 mb-6">
-            <MealLabel icon={ChefHat} text={`By ${meal.authorName}`} />
+            <MealLabel icon={ChefHat} text={`By ${authorName}`} />
             <MealLabel
               icon={Calendar}
               text={format(new Date(meal.createdAt), "P")}
-            />{" "}
-            {/* Use format 'P' for locale date */}
+            />
             {totalTime > 0 && (
               <MealLabel icon={Clock} text={`${totalTime} min total`} />
             )}
@@ -87,14 +93,17 @@ export const MealDisplayDetails: React.FC<MealDisplayDetailsProps> = React.memo(
           </div>
 
           {/* Description */}
-          <div className="mb-8">
-            <h2 className="text-xl font-semibold mb-2 text-gray-800 dark:text-gray-200">
-              Description
-            </h2>
-            <p className="text-gray-700 dark:text-neutral-300 prose prose-sm dark:prose-invert max-w-none">
-              {meal.description}
-            </p>
-          </div>
+          {meal.description && ( // Conditionally render description section
+            <div className="mb-8">
+              <h2 className="text-xl font-semibold mb-2 text-gray-800 dark:text-gray-200">
+                Description
+              </h2>
+              {/* Use dangerouslySetInnerHTML ONLY if description contains trusted HTML, otherwise render as text */}
+              <p className="text-gray-700 dark:text-neutral-300 prose prose-sm dark:prose-invert max-w-none">
+                {meal.description}
+              </p>
+            </div>
+          )}
 
           {/* Ingredients & Instructions Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -103,34 +112,60 @@ export const MealDisplayDetails: React.FC<MealDisplayDetailsProps> = React.memo(
               <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-200">
                 Ingredients
               </h2>
-              <ul className="space-y-2 text-sm text-gray-700 dark:text-neutral-300">
-                {meal.ingredients.map((ingredient) => (
-                  <li key={ingredient.id} className="flex items-start gap-2">
-                    <span className="inline-block w-1.5 h-1.5 rounded-full bg-blue-500 mt-[7px] flex-shrink-0"></span>
-                    <div>
-                      <span className="font-medium">
-                        {ingredient.quantity} {ingredient.unit}{" "}
-                        {ingredient.name}
-                      </span>
-                      {ingredient.category && (
-                        <span className="ml-2 text-xs text-gray-500 dark:text-neutral-400 capitalize">
-                          ({ingredient.category.replace(/_/g, " ")})
-                        </span>
-                      )}
-                      {ingredient.isOptional && (
-                        <span className="ml-2 text-xs text-gray-500 dark:text-neutral-500">
-                          (optional)
-                        </span>
-                      )}
-                      {ingredient.notes && (
-                        <p className="text-xs text-gray-600 dark:text-neutral-400 pl-0 mt-0.5">
-                          {ingredient.notes}
-                        </p>
-                      )}
-                    </div>
-                  </li>
-                ))}
-              </ul>
+              {mealIngredientsData && mealIngredientsData.length > 0 ? (
+                <ul className="space-y-2 text-sm text-gray-700 dark:text-neutral-300">
+                  {/* Map over mealIngredientsData */}
+                  {mealIngredientsData.map((mealIngredient) => {
+                    // Gracefully handle if the nested ingredient is somehow null
+                    if (!mealIngredient.ingredient) {
+                      console.warn(
+                        "Missing ingredient data for mealIngredient:",
+                        mealIngredient,
+                      );
+                      return null; // Skip rendering this item
+                    }
+                    const ingredient = mealIngredient.ingredient; // Alias for readability
+                    return (
+                      <li
+                        key={ingredient.id}
+                        className="flex items-start gap-2"
+                      >
+                        {" "}
+                        {/* Use ingredient.id as key */}
+                        <span className="inline-block w-1.5 h-1.5 rounded-full bg-blue-500 mt-[7px] flex-shrink-0" />
+                        <div>
+                          {/* Display quantity (from junction) and unit/name (from ingredient) */}
+                          <span className="font-medium">
+                            {mealIngredient.quantity} {ingredient.unit}{" "}
+                            {ingredient.name}
+                          </span>
+                          {/* Display category (from ingredient) */}
+                          {ingredient.category && (
+                            <span className="ml-2 text-xs text-gray-500 dark:text-neutral-400 capitalize">
+                              ({ingredient.category.replace(/_/g, " ")})
+                            </span>
+                          )}
+                          {/* Display optional/notes (from junction) */}
+                          {mealIngredient.isOptional && (
+                            <span className="ml-2 text-xs text-gray-500 dark:text-neutral-500">
+                              (optional)
+                            </span>
+                          )}
+                          {mealIngredient.notes && (
+                            <p className="text-xs text-gray-600 dark:text-neutral-400 pl-0 mt-0.5">
+                              {mealIngredient.notes}
+                            </p>
+                          )}
+                        </div>
+                      </li>
+                    );
+                  })}
+                </ul>
+              ) : (
+                <p className="text-sm text-gray-500 dark:text-neutral-500 italic">
+                  No ingredients listed.
+                </p>
+              )}
             </div>
 
             {/* Instructions Column */}
@@ -140,14 +175,12 @@ export const MealDisplayDetails: React.FC<MealDisplayDetailsProps> = React.memo(
               </h2>
               <div className="prose prose-sm dark:prose-invert max-w-none text-gray-700 dark:text-neutral-300">
                 {meal.instructions ? (
-                  meal.instructions.split("\n").map(
-                    (paragraph, idx) =>
-                      paragraph.trim() && (
-                        <p key={idx} className="mb-3">
-                          {paragraph}
-                        </p>
-                      ),
-                  )
+                  meal.instructions
+                    .split("\n")
+                    .map(
+                      (paragraph) =>
+                        paragraph.trim() && <p className="mb-3">{paragraph}</p>,
+                    )
                 ) : (
                   <p className="text-gray-500 dark:text-neutral-500 italic">
                     No instructions provided.
@@ -161,4 +194,4 @@ export const MealDisplayDetails: React.FC<MealDisplayDetailsProps> = React.memo(
     );
   },
 );
-MealDisplayDetails.displayName = "MealDisplayDetails"; // For React DevTools
+MealDisplayDetails.displayName = "MealDisplayDetails";

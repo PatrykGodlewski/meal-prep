@@ -317,10 +317,8 @@ export async function getAggregatedIngredients(
         const key = `${ingredient.name}-${ingredient.unit}`;
         if (!acc[key]) {
           acc[key] = {
-            name: ingredient.name,
-            unit: ingredient.unit,
-            category: ingredient.category,
-            totalQuantity: 0,
+            ingredient,
+            count,
           };
         }
 

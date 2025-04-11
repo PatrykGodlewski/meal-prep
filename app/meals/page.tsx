@@ -3,7 +3,9 @@ import Image from "next/image";
 import Link from "next/link";
 import { Clock, Users, ChefHat, UtensilsCrossed } from "lucide-react";
 import { db } from "@/supabase";
-import { ingredients, type Meal, meals, profiles } from "@/supabase/schema";
+import { type Meal, meals } from "@/supabase/schema";
+import { authorize } from "@/lib/authorization";
+import { getProfile } from "@/lib/getProfile";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -11,38 +13,15 @@ export const revalidate = 0;
 async function getMeals() {
   try {
     // Fetch all meals
-    const mealsData = await db.select().from(meals).orderBy(meals.createdAt);
+    const user = await authorize();
 
-    // For each meal, fetch its ingredients
-    const mealsWithIngredients = await Promise.all(
-      mealsData.map(async (meal) => {
-        const mealIngredients = await db
-          .select()
-          .from(ingredients)
-          .where(eq(ingredients.mealId, meal.id));
+    if (!user?.id) return [];
 
-        let author = "Unknown";
-        if (meal.createdBy) {
-          const authorProfile = await db
-            .select()
-            .from(profiles)
-            .where(eq(profiles.userId, meal.createdBy))
-            .limit(1);
-
-          if (authorProfile.length > 0 && authorProfile[0].nickname) {
-            author = authorProfile[0].nickname;
-          }
-        }
-
-        return {
-          meal,
-          ingredients: mealIngredients,
-          author,
-        };
-      }),
-    );
-
-    return mealsWithIngredients;
+    return await db
+      .select()
+      .from(meals)
+      .where(eq(meals.createdBy, user.id))
+      .orderBy(meals.createdAt);
   } catch (error) {
     console.error("Error fetching meals:", error);
     return [];
@@ -51,6 +30,7 @@ async function getMeals() {
 
 export default async function MealsPage() {
   const mealsData = await getMeals();
+  const profile = await getProfile();
 
   if (!mealsData.length) {
     return (
@@ -87,8 +67,8 @@ export default async function MealsPage() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {mealsData.map(({ meal, author }) => (
-          <MealCard key={meal.id} meal={meal} author={author} />
+        {mealsData.map((meal) => (
+          <MealCard key={meal.id} meal={meal} author={profile?.nickname} />
         ))}
       </div>
     </div>
