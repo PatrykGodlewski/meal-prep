@@ -7,13 +7,15 @@ import {
   type Meal,
   type NewMealPlan,
   type NewPlannedMeal,
+  type NewShoppingListItem,
   mealIngredients,
   mealPlans,
   meals,
   plannedMeals,
   shoppingListItems,
+  shoppingLists,
 } from "@/supabase/schema";
-import { addDays, format, startOfWeek } from "date-fns";
+import { addDays, endOfWeek, format, startOfWeek } from "date-fns";
 import { and, eq, inArray } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import type { MealPlanClient } from "./types";
@@ -284,116 +286,14 @@ const createEmptyWeekStructureForClient = (
   }));
 };
 
-interface AggregatedIngredient {
-  // Include ingredient definition details
-  id: string; // Keep the ingredient ID
-  name: string;
-  unit: UnitType | null;
-  category: Ingredient["category"]; // Use inferred type
-  // Aggregated quantity info
-  totalNumericQuantity: number | null; // Sum if possible
-  quantities: string[]; // List of original text quantities
-}
-
-interface GetIngredientsResult {
-  success: boolean;
-  ingredients?: AggregatedIngredient[];
-  error?: string;
-}
-
-/**
- * Given a list of Meal IDs, retrieves associated ingredients via relational queries
- * and aggregates them into a single list with combined quantities where possible.
- * @param mealIds - Array of Meal UUID strings.
- * @returns Promise<GetIngredientsResult>
- */
-export async function getAggregatedIngredients(
-  mealIds: string[],
-): Promise<GetIngredientsResult> {
-  // 1. Input Validation
-  if (!mealIds || !Array.isArray(mealIds) || mealIds.length === 0) {
-    return { success: true, ingredients: [] }; // Return empty list if no IDs
-  }
-
-  try {
-    // 2. Fetch MealIngredient Links with Nested Ingredient Data using db.query
-    // This fetches all mealIngredient rows linked to the specified mealIds
-    // and automatically includes the related ingredient object for each row.
-    const mealIngredientsWithData = await db.query.mealIngredients.findMany({
-      where: inArray(mealIngredients.mealId, mealIds), // Filter by the provided meal IDs
-      with: {
-        ingredient: true, // Include the related ingredient data based on defined relation
-      },
-    });
-    console.log(mealIngredientsWithData);
-    // 3. Aggregate Ingredients
-    const aggregatedMap = new Map<string, AggregatedIngredient>();
-
-    for (const item of mealIngredientsWithData) {
-      // Skip if the related ingredient wasn't found (data inconsistency)
-      if (!item.ingredient) {
-        console.warn(
-          `Skipping mealIngredient link because related ingredient (ID: ${item.ingredientId}) was not found.`,
-        );
-        continue;
-      }
-
-      // Use the ingredient definition ID as the key for aggregation
-      const key = item.ingredient.id;
-      const currentQuantityStr = item.quantity;
-      const currentQuantityNum = Number.parseFloat(currentQuantityStr);
-
-      if (aggregatedMap.has(key)) {
-        // biome-ignore lint/style/noNonNullAssertion: <If checks if value exists>
-        const existing = aggregatedMap.get(key)!;
-
-        if (
-          Number.isNaN(currentQuantityNum) ||
-          existing.totalNumericQuantity === null
-        ) {
-          existing.totalNumericQuantity = null;
-          existing.quantities.push(currentQuantityStr);
-        } else {
-          existing.totalNumericQuantity += currentQuantityNum;
-          existing.quantities.push(currentQuantityStr);
-        }
-      } else {
-        aggregatedMap.set(key, {
-          id: item.ingredient.id,
-          name: item.ingredient.name,
-          unit: item.ingredient.unit,
-          category: item.ingredient.category,
-          totalNumericQuantity: Number.isNaN(currentQuantityNum)
-            ? null
-            : currentQuantityNum,
-          quantities: [currentQuantityStr],
-        });
-      }
-    }
-
-    const ingredientsArray = Array.from(aggregatedMap.values());
-
-    ingredientsArray.sort((a, b) => a.name.localeCompare(b.name));
-
-    return { success: true, ingredients: ingredientsArray };
-  } catch (error) {
-    console.error("Error getting aggregated ingredients:", error);
-    const message =
-      error instanceof Error
-        ? error.message
-        : "Database error occurred during aggregation.";
-    return { success: false, error: message };
-  }
-}
-
 interface UpdateCheckResult {
   success: boolean;
   error?: string;
 }
 
 /**
- * Updates the checked status of a specific shopping list item for the authorized user.
- * @param itemId - The UUID of the shopping_list_items record.
+ * Updates the checked status of a shopping list item. Enforces ownership via relation query.
+ * @param itemId - The UUID of the shopping_list_items record to update.
  * @param isChecked - The new checked status (boolean).
  * @returns Promise<UpdateCheckResult>
  */
@@ -401,44 +301,328 @@ export async function updateShoppingListItemCheck(
   itemId: string,
   isChecked: boolean,
 ): Promise<UpdateCheckResult> {
+  // 1. Authorization and Input Validation
   const user = await authorize();
   if (!user?.id) {
     return { success: false, error: "Unauthorized" };
   }
 
   try {
-    // Note: RLS policies should implicitly handle the user check,
-    // but adding it here provides an extra layer before hitting the DB.
-    // We might need a join to shopping_lists to verify ownership if RLS isn't enough.
+    // 2. Attempt to Update using relational query
+    // We need check that item is actually owned by this user.
+
     const updateResult = await db
       .update(shoppingListItems)
-      .set({
-        isChecked: isChecked,
-        // Optional: Set checkedBy and checkedAt
-        // checkedBy: userId,
-        // checkedAt: new Date(),
-      })
-      .where(eq(shoppingListItems.id, itemId)) // Target the specific item
-      // Optional: Add user check here if RLS isn't sufficient or for clarity
-      // .where(and(
-      //     eq(shoppingListItems.id, itemId),
-      //     // You'd need to join shoppingLists here to check userId
-      // ))
-      .returning({ id: shoppingListItems.id }); // Check if update occurred
+      .set({ isChecked: isChecked })
+      .where(eq(shoppingListItems.id, itemId))
+      .returning();
 
     if (updateResult.length === 0) {
-      // This could mean the item doesn't exist OR RLS prevented the update
-      return { success: false, error: "Item not found or update denied." };
+      return {
+        success: false,
+        error: `Shopping list item with ID "${itemId}" not found or not owned by user.`,
+      };
     }
 
-    // Revalidation might be less critical if relying purely on realtime,
-    // but can be useful as a fallback or for immediate UI feedback before subscription updates.
-    // Consider revalidating the specific list page if applicable.
-    // revalidatePath('/shopping-list/[listId]');
-
+    revalidatePath("/");
     return { success: true };
   } catch (error) {
     console.error("Error updating shopping list item:", error);
-    return { success: false, error: "Database error occurred." };
+    return {
+      success: false,
+      error: `Database error occurred: ${error instanceof Error ? error.message : null}`,
+    };
   }
 }
+
+export const updateWeeklyShoppingList = async (date: Date) => {
+  const user = await authorize();
+  const userId = user?.id;
+  if (!userId) {
+    console.warn("Update shopping list: user not authorized.");
+    return null;
+  }
+
+  const getList = async () => {
+    const list = await db.query.shoppingLists.findFirst({
+      where: (shoppingLists, { and, eq }) =>
+        and(
+          eq(shoppingLists.userId, userId),
+          eq(
+            shoppingLists.mealPlanWeekStart,
+            format(startOfWeek(date), "yyyy-MM-dd"),
+          ),
+        ),
+    });
+    if (list) return list;
+    const [newList] = await db
+      .insert(shoppingLists)
+      .values({
+        userId: userId,
+        mealPlanWeekStart: format(startOfWeek(date), "yyyy-MM-dd"),
+      })
+      .returning();
+    return newList;
+  };
+
+  const list = await getList();
+
+  const mealPlansWithinRange = await db.query.mealPlans.findMany({
+    where: (mealPlans, { eq, and, gte, lte }) =>
+      and(
+        eq(mealPlans.userId, userId),
+        gte(mealPlans.date, format(startOfWeek(date), "yyyy-MM-dd")),
+        lte(mealPlans.date, format(endOfWeek(date), "yyyy-MM-dd")),
+      ),
+    with: {
+      plannedMeals: {
+        with: {
+          meal: {
+            with: {
+              mealIngredients: { with: { ingredient: true } },
+            },
+          },
+        },
+      },
+    },
+    orderBy: [mealPlans.date],
+  });
+
+  const allMealIngredients: NewShoppingListItem[] =
+    mealPlansWithinRange.flatMap((mealPlan) =>
+      mealPlan.plannedMeals.flatMap((plannedMeal) =>
+        plannedMeal.meal.mealIngredients.map(
+          (mealIngredient): NewShoppingListItem => ({
+            ingredientName: mealIngredient.ingredient.name,
+            shoppingListId: list.id,
+            ingredientId: mealIngredient.ingredientId,
+            amount: mealIngredient.quantity,
+          }),
+        ),
+      ),
+    );
+
+  const mergedMealIngredients = Array.from(
+    allMealIngredients
+      .reduce<Map<string, NewShoppingListItem>>((accMap, currentIngredient) => {
+        const ingredientId = currentIngredient.ingredientId;
+        if (!ingredientId) return accMap;
+        const incomingAmount = currentIngredient.amount ?? 0;
+
+        const existingItem = accMap.get(ingredientId);
+
+        if (existingItem) {
+          const currentAmountNum = existingItem.amount ?? 0;
+          const newTotalAmount = currentAmountNum + incomingAmount;
+
+          accMap.set(ingredientId, {
+            ...currentIngredient,
+            amount: newTotalAmount,
+          });
+        } else {
+          accMap.set(ingredientId, {
+            ...currentIngredient,
+            amount: incomingAmount,
+          });
+        }
+
+        return accMap;
+      }, new Map<string, NewShoppingListItem>())
+      .values(),
+  );
+
+  await db
+    .delete(shoppingListItems)
+    .where(eq(shoppingListItems.shoppingListId, list.id));
+
+  return await db
+    .insert(shoppingListItems)
+    .values(mergedMealIngredients)
+    .returning();
+};
+
+export const getWeeklyShoppingList = async (date: Date) => {
+  const user = await authorize();
+  if (!user?.id) {
+    console.warn("Get shopping list data: user not authorized.");
+    return null;
+  }
+  const userId = user.id;
+
+  try {
+    const list = await db.query.shoppingLists.findFirst({
+      where: (shoppingLists, { and, eq }) =>
+        and(
+          eq(shoppingLists.userId, userId),
+          eq(
+            shoppingLists.mealPlanWeekStart,
+            format(startOfWeek(date), "yyyy-MM-dd"),
+          ),
+        ),
+      with: {
+        items: true,
+      },
+    });
+    if (!list) return null;
+    return list;
+  } catch (e) {
+    console.error(e);
+    return null;
+  }
+};
+
+export type WeeklyShoppingList = NonNullable<
+  Awaited<ReturnType<typeof getWeeklyShoppingList>>
+>;
+
+export const updateShoppingList = async (date: Date) => {
+  const user = await authorize();
+  if (!user?.id) {
+    console.warn("Update shopping list: user not authorized.");
+    return null;
+  }
+  const userId = user.id;
+  const weekStartStr = format(startOfWeek(date), "yyyy-MM-dd");
+  const weekEndStr = format(endOfWeek(date), "yyyy-MM-dd");
+
+  try {
+    const mealPlansWithinRange = await db.query.mealPlans.findMany({
+      where: (mealPlans, { eq, and, gte, lte }) =>
+        and(
+          eq(mealPlans.userId, userId),
+          gte(mealPlans.date, weekStartStr),
+          lte(mealPlans.date, weekEndStr),
+        ),
+      with: {
+        plannedMeals: {
+          with: {
+            meal: {
+              with: {
+                mealIngredients: {
+                  // Ensure ingredientId and quantity are selected
+                  columns: {
+                    ingredientId: true,
+                    quantity: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+      orderBy: [mealPlans.date],
+    });
+
+    // 2. Aggregate all ingredients from the meal plans
+    const allMealIngredients = mealPlansWithinRange.flatMap(
+      (mealPlan) =>
+        mealPlan.plannedMeals?.flatMap(
+          (plannedMeal) =>
+            plannedMeal.meal.mealIngredients?.map((mealIngredient) => ({
+              // Temporary structure, shoppingListId added later
+              ingredientId: mealIngredient.ingredientId,
+              amount: mealIngredient.quantity,
+            })) ?? [], // Handle potential undefined arrays
+        ) ?? [], // Handle potential undefined arrays
+    );
+
+    // 3. Merge ingredients by ID, summing amounts
+    const baseMergedIngredients = Array.from(
+      allMealIngredients.reduce<
+        Map<string, Omit<NewShoppingListItem, "shoppingListId">>
+      >((accMap, currentIngredient) => {
+        const ingredientId = currentIngredient.ingredientId;
+        // Skip if ingredientId is missing (should ideally not happen with proper schema)
+        if (!ingredientId) return accMap;
+
+        const incomingAmount = currentIngredient.amount ?? 0;
+        const existingItem = accMap.get(ingredientId);
+
+        if (existingItem) {
+          const currentAmountNum = existingItem.amount ?? 0;
+          accMap.set(ingredientId, {
+            ingredientId: ingredientId,
+            amount: currentAmountNum + incomingAmount,
+          });
+        } else {
+          accMap.set(ingredientId, {
+            ingredientId: ingredientId,
+            amount: incomingAmount,
+          });
+        }
+        return accMap;
+      }, new Map()),
+    ).map((entry) => entry[1]); // Get only the values (ingredient objects)
+
+    // 4. Perform DB operations within a transaction
+    const updatedListId = await db.transaction(async (tx) => {
+      // Check if a list already exists for this user and week
+      const existingList = await tx.query.shoppingLists.findFirst({
+        where: (shoppingLists, { and, eq }) =>
+          and(
+            eq(shoppingLists.userId, userId),
+            eq(shoppingLists.mealPlanWeekStart, weekStartStr),
+          ),
+        columns: {
+          id: true, // Only need the ID
+        },
+      });
+
+      let shoppingListId: string;
+
+      if (existingList) {
+        // --- UPDATE PATH ---
+        shoppingListId = existingList.id;
+        // Delete existing items for this list
+        await tx
+          .delete(shoppingListItems)
+          .where(eq(shoppingListItems.shoppingListId, shoppingListId));
+      } else {
+        // --- CREATE PATH ---
+        // Create a new shopping list record
+        const [newList] = await tx
+          .insert(shoppingLists)
+          .values({
+            userId: userId,
+            mealPlanWeekStart: weekStartStr,
+          })
+          .returning({ id: shoppingLists.id });
+        if (!newList) {
+          // Throw error to rollback transaction if insertion fails
+          throw new Error("Failed to create new shopping list record.");
+        }
+        shoppingListId = newList.id;
+      }
+
+      // Prepare final list items with the correct shoppingListId
+      const finalMergedIngredients: NewShoppingListItem[] =
+        baseMergedIngredients.map((item) => ({
+          ...item,
+          shoppingListId: shoppingListId,
+        }));
+
+      // Insert the new/updated items if there are any
+      if (finalMergedIngredients.length > 0) {
+        await tx.insert(shoppingListItems).values(finalMergedIngredients);
+        // Note: Drizzle's batch insert might not easily return all inserted items
+        // across all dialects. We'll query the final list outside the transaction.
+      }
+
+      // Return the ID of the list (either existing or newly created)
+      return shoppingListId;
+    });
+
+    // 5. Fetch the final list with its items to return
+    const finalList = await db.query.shoppingLists.findFirst({
+      where: eq(shoppingLists.id, updatedListId),
+      with: {
+        items: true, // Fetch the associated items
+      },
+    });
+
+    return finalList ?? null; // Return the list or null if somehow not found
+  } catch (e) {
+    console.error("Error updating shopping list:", e);
+    return null;
+  }
+};

@@ -148,7 +148,7 @@ export const mealIngredients = pgTable(
     ingredientId: uuid("ingredient_id")
       .notNull()
       .references(() => ingredients.id, { onDelete: "cascade" }),
-    quantity: text("quantity").notNull(), // Specific quantity for this meal
+    quantity: integer("quantity").notNull(), // Specific quantity for this meal
     isOptional: boolean("is_optional").default(false),
     notes: text("notes"),
   },
@@ -188,8 +188,6 @@ export const shoppingLists = pgTable("shopping_lists", {
   userId: uuid("user_id")
     .references(() => users.id, { onDelete: "cascade" })
     .notNull(),
-  name: text("name").default("Shopping List").notNull(), // e.g., "Week of Oct 26th"
-  // Optional: Link to a specific meal plan week start date or ID
   mealPlanWeekStart: date("meal_plan_week_start"),
   createdAt: timestamp("created_at", { withTimezone: true })
     .defaultNow()
@@ -206,8 +204,9 @@ export const shoppingListItems = pgTable(
       .notNull(),
     // Store ingredient details directly or reference an ingredient ID
     // ingredientName: text("ingredient_name").notNull(),
-    amount: text("amount"), // Store the formatted amount string
+    amount: integer("amount"), // Store the formatted amount string
     ingredientId: uuid("ingredient_id").references(() => ingredients.id), // Optional: Link to definition
+    ingredientName: text("ingredient_name").references(() => ingredients.name),
     isChecked: boolean("is_checked").default(false).notNull(),
     // Optional: Track who checked it and when
     // checkedBy: uuid("checked_by").references(() => users.id),

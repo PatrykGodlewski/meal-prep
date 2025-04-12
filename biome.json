@@ -21,6 +21,7 @@
 		"rules": {
 			"recommended": true,
 			"suspicious": {
+				"noArrayIndexKey": "off",
 				"useAwait": "error"
 			}
 		}

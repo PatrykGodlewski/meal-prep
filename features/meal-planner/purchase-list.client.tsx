@@ -1,133 +1,247 @@
+// components/shopping-list-display.tsx (New file or rename existing)
 "use client";
 
-import { useMemo } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { Loader2 } from "lucide-react";
-import { getAggregatedIngredients } from "./actions";
-import IngredientList from "./ingredient-list";
+import { useState, useEffect, useCallback } from "react";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
+import convertKeysToCamelCase, { cn } from "@/lib/utils";
+import { createClient } from "@/utils/supabase/client"; // Supabase client
+import { useToast } from "@/hooks/use-toast";
+import type { ShoppingListItem } from "@/supabase/schema"; // DB type for items
+import {
+  updateShoppingListItemCheck,
+  updateWeeklyShoppingList,
+  type WeeklyShoppingList,
+} from "./actions";
+import { Button } from "@/components/ui/button";
+import {
+  REALTIME_LISTEN_TYPES,
+  REALTIME_POSTGRES_CHANGES_LISTEN_EVENT,
+} from "@supabase/supabase-js";
 
-// Type for the items expected by the IngredientList component
-interface IngredientListItem {
-  ingredient: string;
-  amount: string; // Formatted amount string
+interface ShoppingListDisplayProps {
+  list: WeeklyShoppingList;
+  currentWeek: Date;
 }
 
-// Type for the aggregated data structure returned by the server action
-// interface AggregatedIngredient {
-//   id: string;
-//   name: string;
-//   unit: string | null | undefined; // Match the type from the action
-//   category: string | null | undefined; // Match the type from the action
-//   totalNumericQuantity: number | null;
-//   quantities: string[];
-// }
-
-interface AggregatedIngredientListProps {
-  // Array of Meal IDs to fetch ingredients for
-  mealIds: string[];
-  // Optional: Title for the list
-  title?: string;
-}
-
-// Query key base
-const AGGREGATED_INGREDIENTS_QUERY_KEY = "aggregatedIngredients";
-
-/**
- * Fetches and displays an aggregated, checkable list of ingredients
- * based on a provided list of Meal IDs.
- */
-export const AggregatedIngredientList: React.FC<
-  AggregatedIngredientListProps
-> = ({
-  mealIds,
-  title = "Aggregated Shopping List", // Default title
+export const ShoppingListDisplay: React.FC<ShoppingListDisplayProps> = ({
+  list,
+  currentWeek,
 }) => {
-  // 1. Fetch Aggregated Ingredients using React Query
-  const queryKey = useMemo(
-    () => [AGGREGATED_INGREDIENTS_QUERY_KEY, mealIds.sort().join(",")],
-    [mealIds],
-  ); // Stable key based on sorted IDs
+  const initialItems = list.items;
+  const shoppingListId = list.id;
+  const supabase = createClient();
+  const { toast } = useToast();
+  const [items, setItems] = useState<ShoppingListItem[]>(initialItems);
+  const [isLoading, setIsLoading] = useState(false); // Basic loading state for updates
 
-  const {
-    data: queryResult, // Contains { success: boolean, ingredients?: AggregatedIngredient[], error?: string }
-    isLoading,
-    isError,
-    error,
-  } = useQuery({
-    queryKey: queryKey,
-    queryFn: () => getAggregatedIngredients(mealIds), // Call server action
-    enabled: mealIds.length > 0, // Only run if there are IDs
-    staleTime: 1000 * 60 * 5, // 5 minutes
-    refetchOnWindowFocus: true,
-    refetchOnMount: true,
-  });
+  useEffect(() => {
+    setItems(initialItems);
+  }, [initialItems]);
 
-  // 2. Transform Aggregated Data for the IngredientList Component
-  const shoppingListItems = useMemo((): IngredientListItem[] => {
-    // Handle error or unsuccessful fetch from action
-    if (!queryResult?.success || !queryResult.ingredients) {
-      return [];
-    }
+  useEffect(() => {
+    // Only subscribe if we have a valid list ID
+    if (!shoppingListId) return;
 
-    // Format the quantity/unit into the amount string
-    return queryResult.ingredients.map((ing) => {
-      let amountStr: string;
-      // If numeric quantity exists and is not null, format it
-      if (ing.totalNumericQuantity !== null) {
-        // Basic formatting, adjust precision as needed
-        amountStr = `${Number(ing.totalNumericQuantity.toFixed(2))}${ing.unit ? ` ${ing.unit}` : ""}`;
-      } else {
-        // Otherwise, join the original quantity strings (e.g., "1 pinch", "to taste")
-        amountStr = ing.quantities.join(", ");
+    const channel = supabase
+      .channel(`shopping_list_items_${shoppingListId}`)
+      .on<ShoppingListItem>(
+        REALTIME_LISTEN_TYPES.POSTGRES_CHANGES,
+        {
+          event: REALTIME_POSTGRES_CHANGES_LISTEN_EVENT.ALL,
+          schema: "public",
+          table: "shopping_list_items",
+          // filter: `shopping_list_id=eq.${shoppingListId}`, // Filter for this list
+        },
+        (payload) => {
+          console.log("Realtime Change received:", payload);
+          const newItem = convertKeysToCamelCase(payload.new);
+          setItems((currentItems) => {
+            let newItems = [...currentItems];
+            switch (payload.eventType) {
+              case "INSERT":
+                // Avoid duplicates if optimistic update already added it
+                if (!newItems.some((item) => item.id === payload.new.id)) {
+                  newItems.push(newItem as ShoppingListItem);
+                }
+                break;
+              case "UPDATE":
+                newItems = newItems.map((item) =>
+                  item.id === payload.new.id ? { ...item, ...newItem } : item,
+                );
+                console.log(newItems);
+                break;
+              case "DELETE":
+                newItems = newItems.filter(
+                  (item) => item.id !== payload.old.id,
+                );
+                break;
+            }
+            // Optional: Sort items after update
+            // newItems.sort((a, b) => a.ingredientName.localeCompare(b.ingredientName));
+            return newItems;
+          });
+        },
+      )
+      .subscribe((status, err) => {
+        console.log({ status, err });
+        if (status === "SUBSCRIBED") {
+          console.log(`Realtime subscribed for list: ${shoppingListId}`);
+        }
+        if (err) {
+          console.error(
+            `Realtime subscription error for list ${shoppingListId}:`,
+            err,
+          );
+          toast({
+            title: "Realtime Error",
+            description: "Problem connecting to live updates.",
+            variant: "destructive",
+          });
+        }
+      });
+
+    // Cleanup
+    return () => {
+      console.log(`Unsubscribing from list: ${shoppingListId}`);
+      supabase.removeChannel(channel);
+    };
+  }, [shoppingListId, supabase, toast]); // Re-subscribe if listId changes
+
+  const handleCheckChange = useCallback(
+    async (itemId: string, currentCheckedStatus: boolean) => {
+      const newCheckedStatus = !currentCheckedStatus;
+      setIsLoading(true); // Indicate activity
+
+      setItems((currentItems) =>
+        currentItems.map((item) =>
+          item.id === itemId ? { ...item, isChecked: newCheckedStatus } : item,
+        ),
+      );
+
+      try {
+        const result = await updateShoppingListItemCheck(
+          itemId,
+          newCheckedStatus,
+        );
+        if (!result.success) {
+          toast({
+            title: "Update Failed",
+            description: result.error || "Could not update item.",
+            variant: "destructive",
+          });
+          setItems((currentItems) =>
+            currentItems.map((item) =>
+              item.id === itemId
+                ? { ...item, isChecked: currentCheckedStatus }
+                : item,
+            ),
+          );
+        }
+      } catch (error) {
+        toast({
+          title: "Error",
+          description: "Failed to save check state.",
+          variant: "destructive",
+        });
+        setItems((currentItems) =>
+          currentItems.map((item) =>
+            item.id === itemId
+              ? { ...item, isChecked: currentCheckedStatus }
+              : item,
+          ),
+        );
+      } finally {
+        setIsLoading(false);
       }
+    },
+    [toast],
+  ); // Removed server action dependency as it's stable
 
-      return {
-        ingredient: ing.name,
-        amount: amountStr,
-      };
-    });
-  }, [queryResult]);
-
-  // 3. Render based on state
+  // --- Render Logic ---
   const renderContent = () => {
-    if (isLoading) {
-      return (
-        <div className="flex items-center justify-center py-4 text-sm text-gray-500">
-          <Loader2 className="h-4 w-4 animate-spin mr-2" />
-          Loading ingredients...
-        </div>
-      );
-    }
+    // Note: isLoading here refers to the checkbox update, not initial load
+    // Initial load state should be handled by the parent component passing initialItems
 
-    if (isError) {
-      const errorMessage =
-        error instanceof Error ? error.message : "Unknown error";
+    if (items.length === 0) {
       return (
-        <p className="text-sm text-red-600">
-          Error loading ingredients: {errorMessage}
+        <p className="text-sm text-gray-500 dark:text-gray-400 italic p-4 text-center">
+          Shopping list is empty.
         </p>
       );
     }
 
-    if (!queryResult?.success && queryResult?.error) {
-      return <p className="text-sm text-red-600">Error: {queryResult.error}</p>;
-    }
-
-    if (shoppingListItems.length === 0) {
-      return (
-        <p className="text-sm text-gray-500 dark:text-gray-400 italic">
-          No ingredients found for the selected meals.
-        </p>
-      );
-    }
-
-    // Pass the formatted items to the checkable list component
-    return <IngredientList ingredients={shoppingListItems} />;
+    return (
+      <ul className="space-y-2">
+        {items.map((item) => {
+          const uniqueId = `shopping-item-${item.id}`;
+          return (
+            <li
+              key={item.id}
+              className="flex items-center justify-between p-3 rounded-md border bg-white dark:bg-neutral-800/50 dark:border-neutral-700 shadow-sm hover:bg-gray-50 dark:hover:bg-neutral-700/50 transition-colors"
+            >
+              <div className="flex items-center space-x-3">
+                <Checkbox
+                  id={uniqueId}
+                  checked={item.isChecked}
+                  onCheckedChange={() =>
+                    handleCheckChange(item.id, item.isChecked)
+                  }
+                  aria-labelledby={`${uniqueId}-label`}
+                  disabled={isLoading}
+                />
+                <Label
+                  htmlFor={uniqueId}
+                  id={`${uniqueId}-label`}
+                  className={cn(
+                    "text-sm font-medium cursor-pointer",
+                    item.isChecked
+                      ? "line-through text-gray-500 dark:text-gray-400"
+                      : "text-gray-800 dark:text-gray-100",
+                  )}
+                >
+                  {item.ingredientName}
+                </Label>
+              </div>
+              <span
+                className={cn(
+                  "text-sm italic",
+                  item.isChecked
+                    ? "text-gray-400 dark:text-gray-500"
+                    : "text-gray-600 dark:text-gray-300",
+                )}
+              >
+                {item.amount}
+              </span>
+            </li>
+          );
+        })}
+      </ul>
+    );
   };
+
+  if (!shoppingListId) {
+    return (
+      <div className="p-4 border rounded-lg shadow-sm bg-white dark:bg-neutral-800">
+        <h3 className="text-lg font-semibold mb-3 border-b pb-2">
+          {"Shopping list"}
+        </h3>
+        <p className="text-sm text-gray-500 dark:text-gray-400 italic p-4 text-center">
+          No shopping list selected.
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="p-4 border rounded-lg shadow-sm bg-white dark:bg-neutral-800">
-      <h3 className="text-lg font-semibold mb-3 border-b pb-2">{title}</h3>
+      <div className="flex items-center justify-between mb-4 pb-2">
+        <h3 className="text-lg font-semibold ">{"Shopping list"}</h3>
+        {/* // TODO: Need a state management works but do not reflect frontend */}
+        <Button onClick={() => updateWeeklyShoppingList(currentWeek)}>
+          {"Update shopping list"}
+        </Button>
+      </div>
       {renderContent()}
     </div>
   );

@@ -19,6 +19,8 @@ export const DATE_FORMAT_DISPLAY_CARD = "MMM dd";
 /** Base query key for React Query meal plan data. */
 export const MEAL_PLAN_QUERY_KEY_BASE = "mealPlanWeek";
 
+export const SHOPPING_LIST_QUERY_KEY_BASE = "shoppingList";
+
 // --- Date Helpers ---
 
 /**

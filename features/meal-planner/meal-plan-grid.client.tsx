@@ -1,11 +1,11 @@
 "use client";
 
 import { useState, useMemo, useCallback } from "react";
-import { format, addDays, subDays, isValid, isToday } from "date-fns";
+import { format, addDays, subDays, isValid } from "date-fns";
 import {
-  useQuery,
   useQueryClient,
   keepPreviousData,
+  useQueries,
 } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Loader2, ChevronLeft, ChevronRight } from "lucide-react";
@@ -16,17 +16,27 @@ import {
   mergeDataWithBaseStructure,
   DATE_FORMAT_DISPLAY_HEADER,
   MEAL_PLAN_QUERY_KEY_BASE,
+  SHOPPING_LIST_QUERY_KEY_BASE,
 } from "@/features/meal-planner/utils";
 import { DayCard } from "./day-card";
-import { generateWeeklyMealPlan, getWeeklyMealPlan } from "./actions";
+import {
+  generateWeeklyMealPlan,
+  getWeeklyMealPlan,
+  getWeeklyShoppingList,
+  type WeeklyShoppingList,
+} from "./actions";
 import type { MealPlanClient } from "./types";
-import { AggregatedIngredientList } from "./purchase-list.client";
+import { ShoppingListDisplay } from "./purchase-list.client";
 
 interface Props {
   initialMealPlansData: MealPlanClient[] | undefined;
+  initialShoppingList: WeeklyShoppingList;
 }
 
-export function MealPlanGrid({ initialMealPlansData }: Props) {
+export function MealPlanGrid({
+  initialMealPlansData,
+  initialShoppingList,
+}: Props) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -41,39 +51,62 @@ export function MealPlanGrid({ initialMealPlansData }: Props) {
     useState<Date>(initialStartDate);
   const [isGenerating, setIsGenerating] = useState(false);
 
-  const queryKey = useMemo(
+  const mealPlanQueryKey = useMemo(
     () => [MEAL_PLAN_QUERY_KEY_BASE, displayedWeekStart.toISOString()],
     [displayedWeekStart],
   );
 
-  const {
-    data: currentWeek,
-    isFetching,
-    isError,
-    error,
-    isPlaceholderData,
-  } = useQuery({
-    queryKey: queryKey,
-    queryFn: () => getWeeklyMealPlan(displayedWeekStart),
-    staleTime: 1000 * 60 * 5,
-    placeholderData: keepPreviousData,
-    enabled: isValid(displayedWeekStart),
-    initialData: () => {
-      if (displayedWeekStart.toISOString() === initialStartDate.toISOString()) {
-        return initialMealPlansData;
-      }
-      return undefined;
+  const shoppingListQueryKey = useMemo(
+    () => [SHOPPING_LIST_QUERY_KEY_BASE, displayedWeekStart.toISOString()],
+    [displayedWeekStart],
+  );
+
+  const [
+    {
+      data: mealPlanData,
+      isFetching: isFetchingMealPlan,
+      isError: isErrorMealPlan,
+      error: mealPlanError,
+      isPlaceholderData: isPlaceholderDataMealPlan,
     },
-    // initialDataUpdatedAt is usually needed when initialData is NOT a function
-    // If initialData is a function, RQ handles staleness based on when it runs.
-    // If issues persist, uncomment and provide a timestamp:
-    // initialDataUpdatedAt: initialMealPlansData ? Date.now() : undefined,
+    {
+      data: shoppingListData,
+      isFetching: isFetchingShoppingList,
+      isError: isErrorShoppingList,
+      error: shoppingListError,
+      isPlaceholderData: isPlaceholderDataShoppingList,
+    },
+  ] = useQueries({
+    queries: [
+      {
+        queryKey: mealPlanQueryKey,
+        queryFn: () => getWeeklyMealPlan(displayedWeekStart),
+        staleTime: 1000 * 60 * 5,
+        placeholderData: keepPreviousData,
+        enabled: isValid(displayedWeekStart),
+        initialData: () => {
+          if (
+            displayedWeekStart.toISOString() === initialStartDate.toISOString()
+          ) {
+            return initialMealPlansData;
+          }
+          return undefined;
+        },
+      },
+      {
+        queryKey: shoppingListQueryKey,
+        queryFn: () => getWeeklyShoppingList(displayedWeekStart),
+        placeholderData: keepPreviousData,
+        enabled: isValid(displayedWeekStart),
+        initialData: initialShoppingList,
+      },
+    ],
   });
 
   const displayPlan = useMemo(() => {
     const baseStructure = createBaseWeekStructure(displayedWeekStart);
-    return mergeDataWithBaseStructure(baseStructure, currentWeek);
-  }, [currentWeek, displayedWeekStart]);
+    return mergeDataWithBaseStructure(baseStructure, mealPlanData); // Use mealPlanData here
+  }, [mealPlanData, displayedWeekStart]);
 
   const handleNavigateWeek = useCallback((direction: "previous" | "next") => {
     setDisplayedWeekStart((prevWeekStart) => {
@@ -113,15 +146,13 @@ export function MealPlanGrid({ initialMealPlansData }: Props) {
   }, [queryClient, toast, displayedWeekStart]);
 
   // isBusy includes generating state OR when fetching new data (not placeholder)
-  const isBusy = isGenerating || (isFetching && !isPlaceholderData);
+  const isBusy =
+    isGenerating || (isFetchingMealPlan && !isPlaceholderDataMealPlan); //Use MealPlan Fetching state
   // Show overlay only when fetching new data and showing placeholder
-  const showLoadingOverlay = isFetching && isPlaceholderData;
-
-  const todaysPlan = displayPlan.find((mealPlan) => isToday(mealPlan.date));
-  const mealIds = todaysPlan?.meals.map((meal) => meal.id) || [];
+  const showLoadingOverlay = isFetchingMealPlan && isPlaceholderDataMealPlan; //Use MealPlan Fetching state
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="p-4 flex flex-col gap-4">
       <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
         <div className="flex items-center gap-2">
           <Button
@@ -167,14 +198,17 @@ export function MealPlanGrid({ initialMealPlansData }: Props) {
           </div>
         )}
 
-        {isError && !isFetching && (
-          <div className="col-span-full text-center text-red-500 mt-8">
-            Error loading meal plan:{" "}
-            {error instanceof Error ? error.message : "Unknown error"}
-          </div>
-        )}
+        {isErrorMealPlan &&
+          !isFetchingMealPlan && ( // Use isErrorMealPlan here
+            <div className="col-span-full text-center text-red-500 mt-8">
+              Error loading meal plan:{" "}
+              {mealPlanError instanceof Error
+                ? mealPlanError.message
+                : "Unknown error"}{" "}
+            </div>
+          )}
 
-        {!isError &&
+        {!isErrorMealPlan && // Use isErrorMealPlan here
           displayPlan.map((planDay) => (
             <DayCard
               key={planDay.date.toISOString()}
@@ -183,7 +217,11 @@ export function MealPlanGrid({ initialMealPlansData }: Props) {
             />
           ))}
       </div>
-      <AggregatedIngredientList mealIds={mealIds} />
+      <ShoppingListDisplay
+        // biome-ignore lint/style/noNonNullAssertion: <explanation>
+        list={shoppingListData!}
+        currentWeek={displayedWeekStart}
+      />
     </div>
   );
 }
