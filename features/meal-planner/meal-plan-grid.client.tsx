@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo, useCallback } from "react";
-import { format, addDays, subDays, isValid } from "date-fns";
+import { format, addDays, subDays, isValid, isToday } from "date-fns";
 import {
   useQuery,
   useQueryClient,
@@ -20,6 +20,7 @@ import {
 import { DayCard } from "./day-card";
 import { generateWeeklyMealPlan, getWeeklyMealPlan } from "./actions";
 import type { MealPlanClient } from "./types";
+import { AggregatedIngredientList } from "./purchase-list.client";
 
 interface Props {
   initialMealPlansData: MealPlanClient[] | undefined;
@@ -116,9 +117,12 @@ export function MealPlanGrid({ initialMealPlansData }: Props) {
   // Show overlay only when fetching new data and showing placeholder
   const showLoadingOverlay = isFetching && isPlaceholderData;
 
+  const todaysPlan = displayPlan.find((mealPlan) => isToday(mealPlan.date));
+  const mealIds = todaysPlan?.meals.map((meal) => meal.id) || [];
+
   return (
-    <div className="p-4">
-      <div className="mb-6 flex flex-col sm:flex-row justify-between items-center gap-4">
+    <div className="flex flex-col gap-4">
+      <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
         <div className="flex items-center gap-2">
           <Button
             variant="outline"
@@ -179,6 +183,7 @@ export function MealPlanGrid({ initialMealPlansData }: Props) {
             />
           ))}
       </div>
+      <AggregatedIngredientList mealIds={mealIds} />
     </div>
   );
 }

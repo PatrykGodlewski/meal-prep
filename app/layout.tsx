@@ -1,9 +1,11 @@
 import { Geist, Playfair_Display } from "next/font/google";
-import Link from "next/link";
 import "./globals.css";
 import { authorize } from "@/lib/authorization";
-import { cn } from "@/lib/utils";
 import Providers from "./providers";
+import { getProfile } from "@/lib/getProfile";
+import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
+import { AppSidebar } from "@/components/app-sidebar";
+import { SiteHeader } from "@/components/site-header";
 
 export const metadata = {
   title: "Next.js and Supabase Starter Kit",
@@ -26,42 +28,26 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const user = await authorize();
+  const profile = await getProfile();
 
   return (
     <html lang="en" className={geistSans.className} suppressHydrationWarning>
       <body className="bg-background text-foreground">
         <Providers>
-          <main>
-            <nav
-              className={cn(
-                "flex items-start justify-center gap-2 flex-col py-8 px-6 container mx-auto",
-              )}
-            >
-              <span className={cn("text-4xl font-bold", playfair.className)}>
-                Hello {user?.user_metadata.displayName}
-              </span>
-              <span className="uppercase text-xs">let's prepare a meal!</span>
-              <div className="flex items-center gap-4">
-                <Link
-                  href="/"
-                  className="text-sm border px-2 py-1 rounded-md border-white"
-                >
-                  Home
-                </Link>
-                <Link
-                  href="/meals"
-                  className="text-sm border px-2 py-1 rounded-md border-white"
-                >
-                  Meals
-                </Link>
-              </div>
-            </nav>
-
-            <div className="">{children}</div>
-
-            <footer className="w-full flex items-center justify-center border-t mx-auto text-center text-xs gap-8 py-16">
-              Meal-prep
-            </footer>
+          <main className="flex flex-col gap-8">
+            <SidebarProvider>
+              <AppSidebar variant="inset" />
+              <SidebarInset>
+                <SiteHeader />
+                <div className="flex flex-1 flex-col">
+                  <div className="@container/main flex flex-1 flex-col gap-2">
+                    <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
+                      <div className="container">{children}</div>
+                    </div>
+                  </div>
+                </div>
+              </SidebarInset>
+            </SidebarProvider>
           </main>
         </Providers>
       </body>

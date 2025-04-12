@@ -2,18 +2,22 @@
 import { authorize } from "@/lib/authorization";
 import { db } from "@/supabase";
 import {
+  type Ingredient,
   MEAL_CATEGORY_ENUM,
   type Meal,
   type NewMealPlan,
   type NewPlannedMeal,
+  mealIngredients,
   mealPlans,
   meals,
   plannedMeals,
+  shoppingListItems,
 } from "@/supabase/schema";
 import { addDays, format, startOfWeek } from "date-fns";
 import { and, eq, inArray } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import type { MealPlanClient } from "./types";
+import type { UnitType } from "@/validators";
 
 interface GeneratePlanResult {
   success: boolean;
@@ -279,3 +283,162 @@ const createEmptyWeekStructureForClient = (
     meals: [],
   }));
 };
+
+interface AggregatedIngredient {
+  // Include ingredient definition details
+  id: string; // Keep the ingredient ID
+  name: string;
+  unit: UnitType | null;
+  category: Ingredient["category"]; // Use inferred type
+  // Aggregated quantity info
+  totalNumericQuantity: number | null; // Sum if possible
+  quantities: string[]; // List of original text quantities
+}
+
+interface GetIngredientsResult {
+  success: boolean;
+  ingredients?: AggregatedIngredient[];
+  error?: string;
+}
+
+/**
+ * Given a list of Meal IDs, retrieves associated ingredients via relational queries
+ * and aggregates them into a single list with combined quantities where possible.
+ * @param mealIds - Array of Meal UUID strings.
+ * @returns Promise<GetIngredientsResult>
+ */
+export async function getAggregatedIngredients(
+  mealIds: string[],
+): Promise<GetIngredientsResult> {
+  // 1. Input Validation
+  if (!mealIds || !Array.isArray(mealIds) || mealIds.length === 0) {
+    return { success: true, ingredients: [] }; // Return empty list if no IDs
+  }
+
+  try {
+    // 2. Fetch MealIngredient Links with Nested Ingredient Data using db.query
+    // This fetches all mealIngredient rows linked to the specified mealIds
+    // and automatically includes the related ingredient object for each row.
+    const mealIngredientsWithData = await db.query.mealIngredients.findMany({
+      where: inArray(mealIngredients.mealId, mealIds), // Filter by the provided meal IDs
+      with: {
+        ingredient: true, // Include the related ingredient data based on defined relation
+      },
+    });
+    console.log(mealIngredientsWithData);
+    // 3. Aggregate Ingredients
+    const aggregatedMap = new Map<string, AggregatedIngredient>();
+
+    for (const item of mealIngredientsWithData) {
+      // Skip if the related ingredient wasn't found (data inconsistency)
+      if (!item.ingredient) {
+        console.warn(
+          `Skipping mealIngredient link because related ingredient (ID: ${item.ingredientId}) was not found.`,
+        );
+        continue;
+      }
+
+      // Use the ingredient definition ID as the key for aggregation
+      const key = item.ingredient.id;
+      const currentQuantityStr = item.quantity;
+      const currentQuantityNum = Number.parseFloat(currentQuantityStr);
+
+      if (aggregatedMap.has(key)) {
+        // biome-ignore lint/style/noNonNullAssertion: <If checks if value exists>
+        const existing = aggregatedMap.get(key)!;
+
+        if (
+          Number.isNaN(currentQuantityNum) ||
+          existing.totalNumericQuantity === null
+        ) {
+          existing.totalNumericQuantity = null;
+          existing.quantities.push(currentQuantityStr);
+        } else {
+          existing.totalNumericQuantity += currentQuantityNum;
+          existing.quantities.push(currentQuantityStr);
+        }
+      } else {
+        aggregatedMap.set(key, {
+          id: item.ingredient.id,
+          name: item.ingredient.name,
+          unit: item.ingredient.unit,
+          category: item.ingredient.category,
+          totalNumericQuantity: Number.isNaN(currentQuantityNum)
+            ? null
+            : currentQuantityNum,
+          quantities: [currentQuantityStr],
+        });
+      }
+    }
+
+    const ingredientsArray = Array.from(aggregatedMap.values());
+
+    ingredientsArray.sort((a, b) => a.name.localeCompare(b.name));
+
+    return { success: true, ingredients: ingredientsArray };
+  } catch (error) {
+    console.error("Error getting aggregated ingredients:", error);
+    const message =
+      error instanceof Error
+        ? error.message
+        : "Database error occurred during aggregation.";
+    return { success: false, error: message };
+  }
+}
+
+interface UpdateCheckResult {
+  success: boolean;
+  error?: string;
+}
+
+/**
+ * Updates the checked status of a specific shopping list item for the authorized user.
+ * @param itemId - The UUID of the shopping_list_items record.
+ * @param isChecked - The new checked status (boolean).
+ * @returns Promise<UpdateCheckResult>
+ */
+export async function updateShoppingListItemCheck(
+  itemId: string,
+  isChecked: boolean,
+): Promise<UpdateCheckResult> {
+  const user = await authorize();
+  if (!user?.id) {
+    return { success: false, error: "Unauthorized" };
+  }
+
+  try {
+    // Note: RLS policies should implicitly handle the user check,
+    // but adding it here provides an extra layer before hitting the DB.
+    // We might need a join to shopping_lists to verify ownership if RLS isn't enough.
+    const updateResult = await db
+      .update(shoppingListItems)
+      .set({
+        isChecked: isChecked,
+        // Optional: Set checkedBy and checkedAt
+        // checkedBy: userId,
+        // checkedAt: new Date(),
+      })
+      .where(eq(shoppingListItems.id, itemId)) // Target the specific item
+      // Optional: Add user check here if RLS isn't sufficient or for clarity
+      // .where(and(
+      //     eq(shoppingListItems.id, itemId),
+      //     // You'd need to join shoppingLists here to check userId
+      // ))
+      .returning({ id: shoppingListItems.id }); // Check if update occurred
+
+    if (updateResult.length === 0) {
+      // This could mean the item doesn't exist OR RLS prevented the update
+      return { success: false, error: "Item not found or update denied." };
+    }
+
+    // Revalidation might be less critical if relying purely on realtime,
+    // but can be useful as a fallback or for immediate UI feedback before subscription updates.
+    // Consider revalidating the specific list page if applicable.
+    // revalidatePath('/shopping-list/[listId]');
+
+    return { success: true };
+  } catch (error) {
+    console.error("Error updating shopping list item:", error);
+    return { success: false, error: "Database error occurred." };
+  }
+}

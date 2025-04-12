@@ -10,6 +10,7 @@ import {
   pgSchema,
   serial,
   date,
+  uniqueIndex,
 } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 
@@ -182,7 +183,71 @@ export const mealsTags = pgTable(
   (table) => [primaryKey({ columns: [table.mealId, table.tagId] })],
 );
 
+export const shoppingLists = pgTable("shopping_lists", {
+  id: uuid("id").defaultRandom().primaryKey().notNull(),
+  userId: uuid("user_id")
+    .references(() => users.id, { onDelete: "cascade" })
+    .notNull(),
+  name: text("name").default("Shopping List").notNull(), // e.g., "Week of Oct 26th"
+  // Optional: Link to a specific meal plan week start date or ID
+  mealPlanWeekStart: date("meal_plan_week_start"),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+});
+
+// New junction table for items within a shopping list
+export const shoppingListItems = pgTable(
+  "shopping_list_items",
+  {
+    id: uuid("id").defaultRandom().primaryKey().notNull(), // Unique ID for the list item itself
+    shoppingListId: uuid("shopping_list_id")
+      .references(() => shoppingLists.id, { onDelete: "cascade" })
+      .notNull(),
+    // Store ingredient details directly or reference an ingredient ID
+    // ingredientName: text("ingredient_name").notNull(),
+    amount: text("amount"), // Store the formatted amount string
+    ingredientId: uuid("ingredient_id").references(() => ingredients.id), // Optional: Link to definition
+    isChecked: boolean("is_checked").default(false).notNull(),
+    // Optional: Track who checked it and when
+    // checkedBy: uuid("checked_by").references(() => users.id),
+    // checkedAt: timestamp("checked_at", { withTimezone: true }),
+  },
+  (table) => [
+    // Prevent duplicate ingredient names within the same list (optional but recommended)
+    uniqueIndex("uq_list_ingredient").on(
+      table.shoppingListId,
+      table.ingredientId,
+    ),
+  ],
+);
+
 // --- RELATIONS ---
+
+export const shoppingListsRelations = relations(
+  shoppingLists,
+  ({ one, many }) => ({
+    user: one(users, {
+      fields: [shoppingLists.userId],
+      references: [users.id],
+    }),
+    items: many(shoppingListItems),
+  }),
+);
+
+export const shoppingListItemsRelations = relations(
+  shoppingListItems,
+  ({ one }) => ({
+    shoppingList: one(shoppingLists, {
+      fields: [shoppingListItems.shoppingListId],
+      references: [shoppingLists.id],
+    }),
+    ingredient: one(ingredients, {
+      fields: [shoppingListItems.ingredientId],
+      references: [ingredients.id],
+    }),
+  }),
+);
 
 export const mealsRelations = relations(meals, ({ many, one }) => ({
   mealIngredients: many(mealIngredients), // Relation to the junction table
@@ -283,6 +348,12 @@ export type NewMealPlan = typeof mealPlans.$inferInsert;
 export type PlannedMeal = typeof plannedMeals.$inferSelect;
 export type NewPlannedMeal = typeof plannedMeals.$inferInsert;
 
+export type ShoppingList = typeof shoppingLists.$inferSelect;
+export type NewShoppingList = typeof shoppingLists.$inferInsert;
+
+export type ShoppingListItem = typeof shoppingListItems.$inferSelect;
+export type NewShoppingListItem = typeof shoppingListItems.$inferInsert;
+
 // --- NEW: Export Enum Type ---
 export type IngredientCategory =
   (typeof INGREDIENT_CATEGORY_ENUM.enumValues)[number];
@@ -309,4 +380,9 @@ export const schema = {
   mealIngredientsRelations,
   tagsRelations,
   mealsTagsRelations,
+
+  shoppingLists,
+  shoppingListItems,
+  shoppingListsRelations,
+  shoppingListItemsRelations,
 };
