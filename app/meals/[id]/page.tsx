@@ -1,15 +1,9 @@
 // app/meals/[id]/page.tsx (or relevant server component file)
 
 import { db } from "@/supabase"; // Adjust import
-import {
-  meals,
-  mealIngredients,
-  ingredients,
-  Ingredient,
-} from "@/supabase/schema"; // Adjust import
-import { eq, and } from "drizzle-orm";
+import { meals } from "@/supabase/schema"; // Adjust import
+import { eq } from "drizzle-orm";
 import { notFound } from "next/navigation";
-import { authorize } from "@/lib/authorization";
 import MealDetailView from "@/components/details-meal";
 import { getAllIngredients } from "@/app/actions";
 

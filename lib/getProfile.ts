@@ -9,21 +9,19 @@ export async function getProfile() {
 
     if (!user) {
       console.log("User not authenticated.");
-      return null; // Or throw an error, depending on your needs
+      return null;
     }
 
-    const profile = await db
-      .select()
-      .from(profiles)
-      .where(eq(profiles.userId, user.id))
-      .limit(1); // Limit to one result
+    const profile = await db.query.profiles.findFirst({
+      where: eq(profiles.userId, user.id),
+    });
 
-    if (!profile || profile.length === 0) {
+    if (!profile) {
       console.log("No profile found for user:", user.id);
       return null;
     }
 
-    return profile[0]; // Return the first (and only) profile
+    return profile;
   } catch (error) {
     console.error("Error fetching user profile:", error);
   }

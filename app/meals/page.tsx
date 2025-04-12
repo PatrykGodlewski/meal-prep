@@ -12,7 +12,6 @@ export const revalidate = 0;
 
 async function getMeals() {
   try {
-    // Fetch all meals
     const user = await authorize();
 
     if (!user?.id) return [];
@@ -77,7 +76,7 @@ export default async function MealsPage() {
 
 type Props = {
   meal: Meal;
-  author: string;
+  author?: string | null;
 };
 
 function MealCard({ meal, author }: Props) {

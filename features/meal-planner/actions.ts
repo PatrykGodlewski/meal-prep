@@ -2,12 +2,10 @@
 import { authorize } from "@/lib/authorization";
 import { db } from "@/supabase";
 import {
-  Ingredient,
   MEAL_CATEGORY_ENUM,
   type Meal,
   type NewMealPlan,
   type NewPlannedMeal,
-  ingredients,
   mealPlans,
   meals,
   plannedMeals,
@@ -184,7 +182,7 @@ export async function generateWeeklyMealPlan(
  * Returns an array of 7 days, including empty days if no plan exists.
  * @returns Promise<MealPlanDayClient[]> - Array of 7 days for the week.
  */
-export async function getMealPlansDataForCurrentWeek(
+export async function getWeeklyMealPlan(
   currentWeek: Date,
 ): Promise<MealPlanClient[]> {
   // 1. Authorization
@@ -281,81 +279,3 @@ const createEmptyWeekStructureForClient = (
     meals: [],
   }));
 };
-
-interface IngredientWithCount {
-  ingredient: Ingredient;
-  count: number;
-}
-
-interface GetIngredientsResult {
-  success: boolean;
-  ingredients?: IngredientWithCount[];
-  error?: string;
-}
-
-/**
- * Given a list of Meal objects, this server action retrieves the associated ingredients
- * and aggregates them into a single list with combined quantities.
- * @param mealList - Array of Meal objects.
- * @returns Promise<GetIngredientsResult> with either a success and ingredients list
- * or an error flag and message.
- */
-export async function getAggregatedIngredients(
-  mealList: Meal[],
-): Promise<GetIngredientsResult> {
-  try {
-    const mealIds = mealList.map((meal) => meal.id);
-
-    const ingredientsForMeals = await db
-      .select()
-      .from(ingredients)
-      .where(inArray(ingredients.mealId, mealIds));
-
-    const aggregatedIngredients = ingredientsForMeals.reduce(
-      (acc: Record<string, IngredientWithCount>, ingredient) => {
-        // Create a unique key for aggregation (name + unit)
-        const key = `${ingredient.name}-${ingredient.unit}`;
-        if (!acc[key]) {
-          acc[key] = {
-            ingredient,
-            count,
-          };
-        }
-
-        // Safely convert the quantity to a number, handle potential non-numeric strings
-        const quantity = parseFloat(ingredient.quantity);
-
-        if (isNaN(quantity)) {
-          console.warn(
-            `Invalid quantity found for ingredient ${ingredient.name}: ${ingredient.quantity}`,
-          );
-          return acc; // Skip this ingredient
-        }
-        //TODO: Add a unit system such as metric then perform total unit
-        acc[key].totalQuantity += quantity;
-        return acc;
-      },
-      {},
-    ); // Type inference of this line and the one used right before is very important
-
-    // 4. Convert Aggregated Object to Array for UI Consumption
-    const ingredientsArray: IngredientWithCount[] = Object.values(
-      aggregatedIngredients,
-    ).map((val) => ({
-      name: val.name,
-      totalQuantity: val.totalQuantity,
-      unit: val.unit,
-      category: val.category,
-    }));
-
-    // 5. Return Successfully Aggregated Ingredient List
-    return { success: true, ingredients: ingredientsArray };
-  } catch (error) {
-    console.error("Error getting aggregated ingredients:", error);
-    const message =
-      error instanceof Error
-        ? error.message
-        : "Database error occurred during aggregation.";
-    return { success: false, error: message };
-  }
-}

@@ -1,11 +1,9 @@
 import { CalendarDays } from "lucide-react";
 import { MealPlanGrid } from "./meal-plan-grid.client";
-import { getMealPlansDataForCurrentWeek } from "./actions";
+import { getWeeklyMealPlan } from "./actions";
 
 export default async function WeekPlannerPage() {
-  const structuredMealPlanData = await getMealPlansDataForCurrentWeek(
-    new Date(),
-  );
+  const weeklyMealPlan = await getWeeklyMealPlan(new Date());
 
   return (
     <div className="container mx-auto py-10">
@@ -13,7 +11,7 @@ export default async function WeekPlannerPage() {
         <CalendarDays className="h-7 w-7" />
         <span>This Week's Meal Plan</span>
       </h1>
-      <MealPlanGrid initialMealPlansData={structuredMealPlanData} />
+      <MealPlanGrid initialMealPlansData={weeklyMealPlan} />
     </div>
   );
 }

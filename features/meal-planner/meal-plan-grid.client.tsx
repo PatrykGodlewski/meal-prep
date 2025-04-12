@@ -5,7 +5,7 @@ import { format, addDays, subDays, isValid } from "date-fns";
 import {
   useQuery,
   useQueryClient,
-  keepPreviousData, // Import keepPreviousData placeholder
+  keepPreviousData,
 } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Loader2, ChevronLeft, ChevronRight } from "lucide-react";
@@ -16,12 +16,9 @@ import {
   mergeDataWithBaseStructure,
   DATE_FORMAT_DISPLAY_HEADER,
   MEAL_PLAN_QUERY_KEY_BASE,
-} from "@/features/meal-planner/utils"; // Adjust path
+} from "@/features/meal-planner/utils";
 import { DayCard } from "./day-card";
-import {
-  generateWeeklyMealPlan,
-  getMealPlansDataForCurrentWeek,
-} from "./actions";
+import { generateWeeklyMealPlan, getWeeklyMealPlan } from "./actions";
 import type { MealPlanClient } from "./types";
 
 interface Props {
@@ -53,19 +50,17 @@ export function MealPlanGrid({ initialMealPlansData }: Props) {
     isFetching,
     isError,
     error,
-    isPlaceholderData, // Use this instead of manually tracking navigation loading
+    isPlaceholderData,
   } = useQuery({
     queryKey: queryKey,
-    queryFn: () => getMealPlansDataForCurrentWeek(displayedWeekStart),
-    staleTime: 1000 * 60 * 5, // 5 minutes
-    placeholderData: keepPreviousData, // Correct way to use keepPreviousData in v5+
+    queryFn: () => getWeeklyMealPlan(displayedWeekStart),
+    staleTime: 1000 * 60 * 5,
+    placeholderData: keepPreviousData,
     enabled: isValid(displayedWeekStart),
     initialData: () => {
-      // Provide initial data only if it matches the initial query key
       if (displayedWeekStart.toISOString() === initialStartDate.toISOString()) {
         return initialMealPlansData;
       }
-      // Return undefined, not null, if not providing initial data
       return undefined;
     },
     // initialDataUpdatedAt is usually needed when initialData is NOT a function
@@ -74,11 +69,8 @@ export function MealPlanGrid({ initialMealPlansData }: Props) {
     // initialDataUpdatedAt: initialMealPlansData ? Date.now() : undefined,
   });
 
-  console.log(currentWeek);
-
   const displayPlan = useMemo(() => {
     const baseStructure = createBaseWeekStructure(displayedWeekStart);
-    // Use currentWeekParsedData which comes from the query (includes selected/parsed data)
     return mergeDataWithBaseStructure(baseStructure, currentWeek);
   }, [currentWeek, displayedWeekStart]);
 
@@ -132,7 +124,7 @@ export function MealPlanGrid({ initialMealPlansData }: Props) {
             variant="outline"
             size="icon"
             onClick={() => handleNavigateWeek("previous")}
-            disabled={isBusy} // Disable if generating or actively fetching new data
+            disabled={isBusy}
             aria-label="Previous Week"
           >
             <ChevronLeft className="h-4 w-4" />
@@ -171,13 +163,12 @@ export function MealPlanGrid({ initialMealPlansData }: Props) {
           </div>
         )}
 
-        {isError &&
-          !isFetching && ( // Show error only if not currently fetching
-            <div className="col-span-full text-center text-red-500 mt-8">
-              Error loading meal plan:{" "}
-              {error instanceof Error ? error.message : "Unknown error"}
-            </div>
-          )}
+        {isError && !isFetching && (
+          <div className="col-span-full text-center text-red-500 mt-8">
+            Error loading meal plan:{" "}
+            {error instanceof Error ? error.message : "Unknown error"}
+          </div>
+        )}
 
         {!isError &&
           displayPlan.map((planDay) => (

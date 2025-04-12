@@ -1,9 +1,10 @@
+import { getAllIngredients } from "@/app/actions";
 import AddMealForm from "@/features/meal-editor/form-meal";
 
-export default function Home() {
+export default async function Home() {
   return (
     <div>
-      <AddMealForm />
+      <AddMealForm ingredientList={(await getAllIngredients()) ?? []} />
     </div>
   );
 }

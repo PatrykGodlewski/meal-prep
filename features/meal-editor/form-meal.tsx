@@ -1,11 +1,10 @@
-// components/add-meal-form.tsx (or your chosen path)
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useQuery } from "@tanstack/react-query"; // Import useQuery
-import { Check, ChevronsUpDown, Plus, X } from "lucide-react"; // Added icons
+import { useQuery } from "@tanstack/react-query";
+import { Check, ChevronsUpDown, Plus, X } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useCallback, useMemo, useState } from "react"; // Added useState, useCallback
+import { useCallback, useMemo, useState } from "react";
 import { useTransition } from "react";
 import {
   type Control,
@@ -14,7 +13,7 @@ import {
   useFormContext,
 } from "react-hook-form";
 
-import { addMealAction, getAllIngredients } from "@/app/actions"; // Import action to fetch ingredients
+import { addMealAction, getAllIngredients } from "@/app/actions";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -25,7 +24,7 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
-} from "@/components/ui/command"; // Added Command
+} from "@/components/ui/command";
 import {
   Form,
   FormControl,
@@ -36,12 +35,12 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label"; // Import Label
+import { Label } from "@/components/ui/label";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/ui/popover"; // Added Popover
+} from "@/components/ui/popover";
 import {
   Select,
   SelectContent,
@@ -51,22 +50,19 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { cn } from "@/lib/utils"; // Shadcn utility
+import { cn } from "@/lib/utils";
 import {
   INGREDIENT_CATEGORY_ENUM,
   type Ingredient,
   MEAL_CATEGORY_ENUM,
   UNIT_ENUM,
-} from "@/supabase/schema"; // Import Ingredient type
+} from "@/supabase/schema";
 import {
   type IngredientFormState,
   MealAddFormSchema,
   type MealAddFormValues,
 } from "./validators";
 
-// --- Zod Schema Definitions ---
-
-// Default values for a *new* ingredient row
 const NEW_INGREDIENT_DEFAULT: IngredientFormState = {
   name: "",
   quantity: "",
@@ -74,10 +70,8 @@ const NEW_INGREDIENT_DEFAULT: IngredientFormState = {
   category: "other",
   isOptional: false,
   notes: null,
-  // id is initially undefined
 };
 
-// Default values for the entire *add* form
 const DEFAULT_ADD_VALUES: MealAddFormValues = {
   name: "",
   description: "",
@@ -88,41 +82,40 @@ const DEFAULT_ADD_VALUES: MealAddFormValues = {
   category: "lunch",
   imageUrl: "",
   isPublic: false,
-  ingredients: [NEW_INGREDIENT_DEFAULT], // Start with one empty ingredient row
+  ingredients: [NEW_INGREDIENT_DEFAULT],
 };
-// --- End Definitions ---
 
-export default function AddMealForm() {
+type Props = {
+  ingredientList: Ingredient[];
+};
+
+export default function AddMealForm({ ingredientList }: Props) {
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
   const { toast } = useToast();
 
-  // --- Fetch Available Ingredients ---
   const { data: availableIngredients = [], isLoading: isLoadingIngredients } =
     useQuery<Ingredient[]>({
       queryKey: ["allIngredients"],
-      queryFn: getAllIngredients, // Server action to fetch
-      staleTime: 1000 * 60 * 15, // Cache for 15 minutes
+      queryFn: getAllIngredients,
+      staleTime: 1000 * 60 * 15,
       refetchOnWindowFocus: false,
+      initialData: ingredientList,
     });
-  // --- End Fetch ---
 
   const form = useForm({
     resolver: zodResolver(MealAddFormSchema),
     defaultValues: DEFAULT_ADD_VALUES,
   });
-  const { control, setValue } = form; // Get setValue and watch
+  const { control, setValue } = form;
 
   const { fields, append, remove } = useFieldArray({
     control,
     name: "ingredients",
   });
 
-  // --- Event Handlers ---
   const onSubmit = (values: MealAddFormValues) => {
-    // Type is correct
     startTransition(async () => {
-      // Ensure addMealAction handles the structure where ingredient 'id' might be present
       const result = await addMealAction(values);
       if (result.success && result.mealId) {
         form.reset(DEFAULT_ADD_VALUES);
@@ -176,7 +169,6 @@ export default function AddMealForm() {
     },
     [availableIngredients, setValue],
   );
-  // --- End Event Handlers ---
 
   return (
     <div className="max-w-4xl mx-auto p-4 md:p-6">
@@ -419,7 +411,6 @@ export default function AddMealForm() {
 
             <div className="space-y-4">
               {fields.map((field, index) => (
-                // Use the IngredientInputRow component here
                 <IngredientInputRow
                   key={field.id}
                   index={index}
@@ -444,7 +435,6 @@ export default function AddMealForm() {
   );
 }
 
-// --- Ingredient Input Row Sub-Component (Copied from MealEditForm, no changes needed) ---
 interface IngredientInputRowProps {
   index: number;
   control: Control<MealAddFormValues>;
@@ -468,7 +458,7 @@ const IngredientInputRow: React.FC<IngredientInputRowProps> = ({
   onSelectIngredient,
 }) => {
   const [popoverOpen, setPopoverOpen] = useState(false);
-  const { watch } = useFormContext<MealAddFormValues>(); // Use correct type here if needed, though AddFormValues might be okay if structure matches
+  const { watch } = useFormContext<MealAddFormValues>();
 
   const ingredientId = watch(`ingredients.${index}.id`);
   const ingredientName = watch(`ingredients.${index}.name`);
