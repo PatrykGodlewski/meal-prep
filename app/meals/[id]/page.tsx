@@ -37,7 +37,7 @@ export default async function MealDetailPage({
 }: {
   params: { id: string };
 }) {
-  const mealId = params.id;
+  const mealId = (await params).id;
 
   if (!mealId) {
     notFound();
