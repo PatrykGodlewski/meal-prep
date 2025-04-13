@@ -35,7 +35,7 @@ export type MealDetails = NonNullable<Awaited<ReturnType<typeof getMealById>>>;
 export default async function MealDetailPage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
   const mealId = (await params).id;
 
