@@ -1,5 +1,3 @@
-// app/meals/[id]/page.tsx (or relevant server component file)
-
 import { db } from "@/supabase"; // Adjust import
 import { meals } from "@/supabase/schema"; // Adjust import
 import { eq } from "drizzle-orm";

@@ -52,7 +52,7 @@ const IngredientFormSchema = z.object({
   name: z.string().min(1, "Ingredient name is required"),
   category: ingredientCategories,
   unit: unitTypes,
-  quantity: z.string().min(1, "Quantity is required"),
+  quantity: z.number().min(1, "Quantity is required"),
   isOptional: z.boolean().default(false),
   notes: z.string().nullable().optional(),
 });
