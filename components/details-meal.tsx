@@ -53,6 +53,7 @@ const mapPageDataToFormValues = (
   const formIngredients = (mealIngredients || []) // Handle potentially undefined mealIngredients
     .filter((mi) => mi.ingredient !== null) // Process only valid links
     .map((mi) => {
+      // biome-ignore lint/style/noNonNullAssertion: <explanation>
       const ingredient = mi.ingredient!; // Safe due to filter
       return {
         id: ingredient.id, // Ingredient definition ID
@@ -81,7 +82,6 @@ const mapPageDataToFormValues = (
   };
 };
 
-// --- Main Controller Component ---
 export default function MealDetailView({
   pageData,
   ingredientList,

@@ -85,7 +85,7 @@ type IngredientFormState = z.infer<typeof IngredientFormSchema>;
 
 const NEW_INGREDIENT_DEFAULT: IngredientFormState = {
   name: "",
-  quantity: "",
+  quantity: 0,
   unit: "g",
   category: "other",
   isOptional: false,
@@ -459,7 +459,7 @@ const IngredientInputRow: React.FC<IngredientInputRowProps> = ({
   onSelectIngredient,
 }) => {
   const [popoverOpen, setPopoverOpen] = useState(false);
-  const { watch, setValue } = useFormContext<MealUpdateFormValues>(); // Get watch and setValue
+  const { watch } = useFormContext<MealUpdateFormValues>(); // Get watch and setValue
 
   // Watch the ID and Name for this row
   const ingredientId = watch(`ingredients.${index}.id`);

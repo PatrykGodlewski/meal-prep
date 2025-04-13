@@ -57,29 +57,26 @@ import {
   MEAL_CATEGORY_ENUM,
   UNIT_ENUM,
 } from "@/supabase/schema";
-import {
-  type IngredientFormState,
-  MealAddFormSchema,
-  type MealAddFormValues,
-} from "./validators";
+import { MealAddFormSchema, type MealAddFormValues } from "./validators";
 
-const NEW_INGREDIENT_DEFAULT: IngredientFormState = {
+const NEW_INGREDIENT_DEFAULT = {
+  id: undefined,
   name: "",
-  quantity: "",
-  unit: "g",
-  category: "other",
+  quantity: 0,
+  unit: UNIT_ENUM.enumValues[0],
+  category: INGREDIENT_CATEGORY_ENUM.enumValues[0],
   isOptional: false,
-  notes: null,
+  notes: "",
 };
 
-const DEFAULT_ADD_VALUES: MealAddFormValues = {
+const DEFAULT_ADD_VALUES = {
   name: "",
   description: "",
   instructions: "",
-  prepTimeMinutes: undefined,
-  cookTimeMinutes: undefined,
-  servings: undefined,
-  category: "lunch",
+  prepTimeMinutes: 0,
+  cookTimeMinutes: 0,
+  servings: 0,
+  category: MEAL_CATEGORY_ENUM.enumValues[1],
   imageUrl: "",
   isPublic: false,
   ingredients: [NEW_INGREDIENT_DEFAULT],
@@ -437,7 +434,8 @@ export default function AddMealForm({ ingredientList }: Props) {
 
 interface IngredientInputRowProps {
   index: number;
-  control: Control<MealAddFormValues>;
+  // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+  control: Control<any>;
   availableIngredients: Ingredient[];
   isLoadingIngredients: boolean;
   onRemove: () => void;

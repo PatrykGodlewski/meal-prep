@@ -1,4 +1,4 @@
-import { type Ingredient, unitEnum } from "@/supabase/schema";
+import { UNIT_ENUM, type Ingredient } from "@/supabase/schema";
 import { Button } from "../ui/button";
 import { X } from "lucide-react";
 import { Label } from "@radix-ui/react-label";
@@ -10,7 +10,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../ui/select";
-import { Checkbox } from "../ui/checkbox";
 import type { UnitType } from "@/validators";
 
 type Props = {
@@ -19,11 +18,11 @@ type Props = {
 };
 
 export function IngredientCard({ ingredient, index }: Props) {
-  const removeIngredient = (index: number) => {};
+  const removeIngredient = (_index: number) => {};
   const handleIngredientChange = (
-    index: number,
-    name: string,
-    value: string | boolean,
+    _index: number,
+    _name: string,
+    _value: string | boolean,
   ) => {};
   // TODO: add to meal details
   return (
@@ -55,17 +54,6 @@ export function IngredientCard({ ingredient, index }: Props) {
 
         <div className="grid grid-cols-2 gap-2">
           <div>
-            <Label className="text-sm font-medium">Quantity</Label>
-            <Input
-              value={ingredient.quantity}
-              onChange={(e) =>
-                handleIngredientChange(index, "quantity", e.target.value)
-              }
-              placeholder="e.g., 2"
-            />
-          </div>
-
-          <div>
             <Label className="text-sm font-medium">Unit</Label>
             <Select
               value={ingredient.unit || ""}
@@ -77,7 +65,7 @@ export function IngredientCard({ ingredient, index }: Props) {
                 <SelectValue placeholder="Select" />
               </SelectTrigger>
               <SelectContent>
-                {unitEnum.enumValues.map((unit) => (
+                {UNIT_ENUM.enumValues.map((unit) => (
                   <SelectItem key={unit} value={unit}>
                     {unit}
                   </SelectItem>
@@ -85,30 +73,6 @@ export function IngredientCard({ ingredient, index }: Props) {
               </SelectContent>
             </Select>
           </div>
-        </div>
-
-        <div>
-          <Label className="text-sm font-medium">Notes</Label>
-          <Input
-            value={ingredient.notes || ""}
-            onChange={(e) =>
-              handleIngredientChange(index, "notes", e.target.value)
-            }
-            placeholder="e.g., finely chopped"
-          />
-        </div>
-
-        <div className="flex items-center">
-          <Checkbox
-            id={`optional-${index}`}
-            checked={!!ingredient.isOptional}
-            onCheckedChange={(checked) =>
-              handleIngredientChange(index, "isOptional", !!checked)
-            }
-          />
-          <Label htmlFor={`optional-${index}`} className="ml-2 text-sm">
-            Optional ingredient
-          </Label>
         </div>
       </div>
     </div>
