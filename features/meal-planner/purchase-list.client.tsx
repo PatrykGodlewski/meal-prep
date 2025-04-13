@@ -181,56 +181,58 @@ export const ShoppingListDisplay: React.FC<ShoppingListDisplayProps> = ({
 
     return (
       <ul className="space-y-2">
-        {Object.entries(groupedItems).map(([category, items]) => (
-          <div key={category} className="space-y-2">
-            <h2 className="capitalize font-bold text-2xl py-2">{category}</h2>
-            {items.map((item) => {
-              const uniqueId = `shopping-item-${item.id}`;
-              return (
-                // biome-ignore lint/a11y/useKeyWithClickEvents: <explanation>
-                <li
-                  key={item.id}
-                  className="flex items-center p-3 justify-between rounded-md border bg-white dark:bg-neutral-800/50 dark:border-neutral-700 shadow-sm hover:bg-gray-50 dark:hover:bg-neutral-700/50 transition-colors"
-                  onClick={() => handleCheckChange(item.id, item.isChecked)}
-                >
-                  <div className="flex items-center space-x-3">
-                    <Checkbox
-                      id={uniqueId}
-                      checked={item.isChecked}
-                      onCheckedChange={() =>
-                        handleCheckChange(item.id, item.isChecked)
-                      }
-                      aria-labelledby={`${uniqueId}-label`}
-                      disabled={isLoading}
-                    />
-                    <Label
-                      htmlFor={uniqueId}
-                      id={`${uniqueId}-label`}
+        {Object.entries(groupedItems)
+          .sort()
+          .map(([category, items]) => (
+            <div key={category} className="space-y-2">
+              <h2 className="capitalize font-bold text-2xl py-2">{category}</h2>
+              {items.map((item) => {
+                const uniqueId = `shopping-item-${item.id}`;
+                return (
+                  // biome-ignore lint/a11y/useKeyWithClickEvents: <explanation>
+                  <li
+                    key={item.id}
+                    className="flex items-center p-3 justify-between rounded-md border bg-white dark:bg-neutral-800/50 dark:border-neutral-700 shadow-sm hover:bg-gray-50 dark:hover:bg-neutral-700/50 transition-colors"
+                    onClick={() => handleCheckChange(item.id, item.isChecked)}
+                  >
+                    <div className="flex items-center space-x-3">
+                      <Checkbox
+                        id={uniqueId}
+                        checked={item.isChecked}
+                        onCheckedChange={() =>
+                          handleCheckChange(item.id, item.isChecked)
+                        }
+                        aria-labelledby={`${uniqueId}-label`}
+                        disabled={isLoading}
+                      />
+                      <Label
+                        htmlFor={uniqueId}
+                        id={`${uniqueId}-label`}
+                        className={cn(
+                          "text-sm font-medium cursor-pointer",
+                          item.isChecked
+                            ? "line-through text-gray-500 dark:text-gray-400"
+                            : "text-gray-800 dark:text-gray-100",
+                        )}
+                      >
+                        {item.ingredientName}
+                      </Label>
+                    </div>
+                    <span
                       className={cn(
-                        "text-sm font-medium cursor-pointer",
+                        "text-sm italic",
                         item.isChecked
-                          ? "line-through text-gray-500 dark:text-gray-400"
-                          : "text-gray-800 dark:text-gray-100",
+                          ? "text-gray-400 dark:text-gray-500"
+                          : "text-gray-600 dark:text-gray-300",
                       )}
                     >
-                      {item.ingredientName}
-                    </Label>
-                  </div>
-                  <span
-                    className={cn(
-                      "text-sm italic",
-                      item.isChecked
-                        ? "text-gray-400 dark:text-gray-500"
-                        : "text-gray-600 dark:text-gray-300",
-                    )}
-                  >
-                    {item.amount} {item.ingredient?.unit}
-                  </span>
-                </li>
-              );
-            })}
-          </div>
-        ))}
+                      {item.amount} {item.ingredient?.unit}
+                    </span>
+                  </li>
+                );
+              })}
+            </div>
+          ))}
       </ul>
     );
   };
