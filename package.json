@@ -4,7 +4,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "seed": "ts-node ./supabase/seeders/meals"
+    "seed": "ts-node -r tsconfig-paths/register ./supabase/seeders/import.ts"
   },
   "dependencies": {
     "@faker-js/faker": "^9.6.0",
@@ -43,6 +43,7 @@
     "react-dom": "19.0.0",
     "react-hook-form": "^7.55.0",
     "ts-node": "^10.9.2",
+    "tsconfig-paths": "^4.2.0",
     "zod": "^3.24.2"
   },
   "devDependencies": {
@@ -59,3 +60,4 @@
     "typescript": "5.7.2"
   }
 }
+

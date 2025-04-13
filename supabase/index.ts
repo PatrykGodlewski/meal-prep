@@ -12,6 +12,7 @@ if (!process.env.DATABASE_URL) {
 }
 
 function singleton<Value>(name: string, value: () => Value): Value {
+  // biome-ignore lint/suspicious/noExplicitAny: <explanation>
   const globalAny: any = global;
   globalAny.__singletons = globalAny.__singletons || {};
 

@@ -1,0 +1,4036 @@
+{
+	"meals": [
+		{
+			"temp_id": "meal_1",
+			"name": "Kanapki z twarożkiem, mozzarellą oraz pomidorem",
+			"description": "Proste kanapki z twarożkiem, serem mozzarella i świeżym pomidorem.",
+			"instructions": "1. Posmaruj bułki grahamki twarożkiem. 2. Na wierzchu ułóż plastry mozzarelli i pomidora. 3. Dopraw solą i pieprzem do smaku.",
+			"prepTimeMinutes": 10,
+			"cookTimeMinutes": 0,
+			"servings": 1,
+			"category": "breakfast",
+			"imageUrl": null,
+			"isPublic": false
+		},
+		{
+			"temp_id": "meal_2",
+			"name": "Curry z krewetkami",
+			"description": "Aromatyczne curry z krewetkami, warzywami i mleczkiem kokosowym, podawane z ryżem.",
+			"instructions": "1. Ugotuj ryż zgodnie z instrukcją na opakowaniu. 2. Na oliwie zeszklij posiekaną cebulę i czosnek. 3. Dodaj pokrojoną paprykę i smaż przez chwilę. 4. Dodaj curry, ostrą paprykę, mleczko kokosowe i krewetki. Gotuj, aż krewetki będą gotowe. 5. Dopraw sokiem z cytryny. Podawaj z ryżem.",
+			"prepTimeMinutes": 15,
+			"cookTimeMinutes": 20,
+			"servings": 1,
+			"category": "dinner",
+			"imageUrl": null,
+			"isPublic": false
+		},
+		{
+			"temp_id": "meal_3",
+			"name": "Omlet ze skyru jak cynamonka",
+			"description": "Puszysty omlet na bazie skyru i jajek, przypominający smakiem cynamonkę, podawany z miodem i truskawkami.",
+			"instructions": "1. W misce wymieszaj jajka, jogurt skyr, mąkę owsianą, cynamon, erytrol, proszek do pieczenia i sól. 2. Rozgrzej olej rzepakowy na patelni. 3. Wylej masę jajeczną na patelnię i smaż omlet z obu stron na złoty kolor. 4. Podawaj omlet polany miodem i posypany truskawkami.",
+			"prepTimeMinutes": 10,
+			"cookTimeMinutes": 10,
+			"servings": 1,
+			"category": "breakfast",
+			"imageUrl": null,
+			"isPublic": false
+		},
+		{
+			"temp_id": "meal_4",
+			"name": "Lody na patyku",
+			"description": "Gotowe lody na patyku jako przekąska.",
+			"instructions": "Wyjąć z opakowania i zjeść.",
+			"prepTimeMinutes": 1,
+			"cookTimeMinutes": 0,
+			"servings": 1,
+			"category": "snack",
+			"imageUrl": null,
+			"isPublic": false
+		},
+		{
+			"temp_id": "meal_5",
+			"name": "Croissant z brzoskwinią",
+			"description": "Croissanty podawane z jogurtem skyr, brzoskwiniami i słodzone erytrolem.",
+			"instructions": "1. Pokrój brzoskwinie. 2. Wymieszaj jogurt skyr z ekstraktem waniliowym, erytrolem i sokiem z cytryny. 3. Podawaj croissanty z masłem, jogurtem i brzoskwiniami.",
+			"prepTimeMinutes": 10,
+			"cookTimeMinutes": 0,
+			"servings": 1,
+			"category": "breakfast",
+			"imageUrl": null,
+			"isPublic": false
+		},
+		{
+			"temp_id": "meal_6",
+			"name": "Burger wołowy",
+			"description": "Klasyczny burger wołowy w bułce grahamce z serem cheddar, warzywami i sosami.",
+			"instructions": "1. Uformuj kotlety z mięsa mielonego. 2. Usmaż lub ugrilluj kotlety. 3. Podgrzej bułki. 4. Złóż burgera: bułka, sałata, kotlet, ser cheddar, plaster pomidora, cebula, musztarda, keczup, bułka.",
+			"prepTimeMinutes": 15,
+			"cookTimeMinutes": 15,
+			"servings": 1,
+			"category": "lunch",
+			"imageUrl": null,
+			"isPublic": false
+		},
+		{
+			"temp_id": "meal_7",
+			"name": "Kanapki z jajkiem na miękko",
+			"description": "Kanapki z chleba żytniego z masłem, jajkiem na miękko, pomidorem i ogórkiem.",
+			"instructions": "1. Ugotuj jajka na miękko. 2. Posmaruj kromki chleba masłem. 3. Na kanapkach ułóż pokrojone jajka, plastry pomidora i ogórka.",
+			"prepTimeMinutes": 5,
+			"cookTimeMinutes": 5,
+			"servings": 1,
+			"category": "breakfast",
+			"imageUrl": null,
+			"isPublic": false
+		},
+		{
+			"temp_id": "meal_8",
+			"name": "Pudding proteinowy Pilos",
+			"description": "Gotowy pudding proteinowy jako przekąska.",
+			"instructions": "Otwórz opakowanie i zjedz.",
+			"prepTimeMinutes": 1,
+			"cookTimeMinutes": 0,
+			"servings": 1,
+			"category": "snack",
+			"imageUrl": null,
+			"isPublic": false
+		},
+		{
+			"temp_id": "meal_9",
+			"name": "Parówki z musztardą, warzywami i pieczywem",
+			"description": "Parówki z indyka podane z musztardą, świeżymi warzywami i chlebem żytnim.",
+			"instructions": "1. Podgrzej parówki. 2. Podawaj z musztardą, pokrojonym ogórkiem, pomidorem i kromkami chleba żytniego.",
+			"prepTimeMinutes": 5,
+			"cookTimeMinutes": 5,
+			"servings": 1,
+			"category": "lunch",
+			"imageUrl": null,
+			"isPublic": false
+		},
+		{
+			"temp_id": "meal_10",
+			"name": "Lunchbox klopsy z nachosami",
+			"description": "Klopsy z indyka z dodatkiem nachos, pomidorków koktajlowych i ogórka.",
+			"instructions": "1. Wymieszaj mięso mielone z bułką tartą, posiekaną cebulą, majerankiem i oliwą. Uformuj klopsy. 2. Usmaż lub upiecz klopsy. 3. Przygotuj lunchbox: umieść klopsy, nachosy, pomidorki koktajlowe i pokrojonego ogórka.",
+			"prepTimeMinutes": 20,
+			"cookTimeMinutes": 20,
+			"servings": 1,
+			"category": "lunch",
+			"imageUrl": null,
+			"isPublic": false
+		},
+		{
+			"temp_id": "meal_11",
+			"name": "Bułka owsiana z łososiem i warzywami",
+			"description": "Kanapka na bułce owsianej z wędzonym łososiem, pomidorem, papryką i oliwą.",
+			"instructions": "1. Przekrój bułki owsiane. 2. Na dolnej części ułóż plastry łososia, pokrojonego pomidora i papryki. 3. Skrop oliwą z oliwek. Przykryj górną częścią bułki.",
+			"prepTimeMinutes": 10,
+			"cookTimeMinutes": 0,
+			"servings": 1,
+			"category": "lunch",
+			"imageUrl": null,
+			"isPublic": false
+		},
+		{
+			"temp_id": "meal_12",
+			"name": "Koktajl białkowy Piątnica",
+			"description": "Gotowy koktajl białkowy jako przekąska.",
+			"instructions": "Wstrząśnij i wypij.",
+			"prepTimeMinutes": 1,
+			"cookTimeMinutes": 0,
+			"servings": 1,
+			"category": "snack",
+			"imageUrl": null,
+			"isPublic": false
+		},
+		{
+			"temp_id": "meal_13",
+			"name": "Tosty z zielonym pesto, mozzarellą oraz pomidorem",
+			"description": "Tosty z chleba żytniego z pesto, mozzarellą, pomidorem i szpinakiem.",
+			"instructions": "1. Posmaruj kromki chleba zielonym pesto. 2. Nałóż liście szpinaku, plastry mozzarelli i pomidora. 3. Zapiecz tosty w tosterze lub piekarniku.",
+			"prepTimeMinutes": 10,
+			"cookTimeMinutes": 5,
+			"servings": 1,
+			"category": "breakfast",
+			"imageUrl": null,
+			"isPublic": false
+		},
+		{
+			"temp_id": "meal_14",
+			"name": "Polędwica wieprzowa w sosie porowym",
+			"description": "Soczysta polędwica wieprzowa w kremowym sosie porowym z mleczkiem kokosowym, podawana z ziemniakami i ogórkiem kiszonym.",
+			"instructions": "1. Ugotuj ziemniaki. 2. Pokrój polędwicę na plastry i obsmaż na oliwie. Zdejmij z patelni. 3. Na tej samej patelni zeszklij pokrojony por i czosnek. 4. Dodaj musztardę, mleczko kokosowe, zioła prowansalskie. Gotuj chwilę. 5. Włóż polędwicę z powrotem na patelnię i duś razem przez kilka minut. 6. Podawaj z ziemniakami i ogórkiem kiszonym.",
+			"prepTimeMinutes": 15,
+			"cookTimeMinutes": 30,
+			"servings": 1,
+			"category": "dinner",
+			"imageUrl": null,
+			"isPublic": false
+		},
+		{
+			"temp_id": "meal_15",
+			"name": "Serniczki z kaszy mannej z owocami",
+			"description": "Delikatne serniczki na zimno z kaszy mannej i twarogu, podawane z kiwi, masłem orzechowym i erytrolem.",
+			"instructions": "1. Zagotuj kaszę manną (instrukcje mogą wymagać mleka, którego nie ma na liście - zakładamy gotowanie na wodzie lub dodanie mleka). 2. Wystudzoną kaszę zmiksuj z jajkami, twarogiem, solą, proszkiem do pieczenia i olejem rzepakowym. 3. Masę przełóż do foremek lub uformuj placuszki i upiecz/usmaż (instrukcje niejasne, zakładamy wersję pieczoną lub na zimno). 4. Podawaj z pokrojonym kiwi, masłem orzechowym i posypane erytrolem.",
+			"prepTimeMinutes": 15,
+			"cookTimeMinutes": 25,
+			"servings": 1,
+			"category": "dessert",
+			"imageUrl": null,
+			"isPublic": false
+		},
+		{
+			"temp_id": "meal_16",
+			"name": "Kanapki z szynką parmeńską oraz serem mozzarellą i warzywami",
+			"description": "Kanapki na chlebie żytnim z masłem, szynką parmeńską, mozzarellą light i pomidorkami koktajlowymi.",
+			"instructions": "1. Posmaruj kromki chleba masłem. 2. Nałóż plastry szynki parmeńskiej, mozzarelli light i przekrojone pomidorki koktajlowe.",
+			"prepTimeMinutes": 10,
+			"cookTimeMinutes": 0,
+			"servings": 1,
+			"category": "breakfast",
+			"imageUrl": null,
+			"isPublic": false
+		},
+		{
+			"temp_id": "meal_17",
+			"name": "Zupa pho z wołowiną",
+			"description": "Wietnamska zupa pho z rostbefem wołowym, makaronem ryżowym i aromatycznymi dodatkami.",
+			"instructions": "1. Ugotuj makaron ryżowy. 2. Pokrój rostbef w cienkie paski. 3. W garnku podgrzej bulion warzywny. 4. Na oliwie zeszklij pokrojoną cebulę i imbir. Dodaj cynamon i goździki. 5. Do gorącego bulionu dodaj sos rybny, erytrol, sok z limonki, sól i pieprz. 6. Do miski włóż makaron, paski wołowiny (zaleją się gorącym bulionem), kiełki fasoli mung, posiekaną dymkę, papryczkę chilli i kolendrę. Zalej gorącym bulionem.",
+			"prepTimeMinutes": 20,
+			"cookTimeMinutes": 15,
+			"servings": 1,
+			"category": "lunch",
+			"imageUrl": null,
+			"isPublic": false
+		},
+		{
+			"temp_id": "meal_18",
+			"name": "Pinsa z szynką i suszonymi pomidorami",
+			"description": "Włoska pinsa z sosem pomidorowym, mozzarellą, szpinakiem, szynką parmeńską, suszonymi pomidorami i serem Grana Padano.",
+			"instructions": "1. Rozgrzej piekarnik. 2. Posmaruj pinsę pomidorami z puszki. 3. Rozłóż szpinak, plastry mozzarelli kulki i żółtej. 4. Piecz pinsę zgodnie z instrukcją na opakowaniu. 5. Po upieczeniu nałóż szynkę parmeńską, odsączone suszone pomidory i posyp startym serem Grana Padano. Możesz dodać pomidorki koktajlowe.",
+			"prepTimeMinutes": 10,
+			"cookTimeMinutes": 15,
+			"servings": 1,
+			"category": "dinner",
+			"imageUrl": null,
+			"isPublic": false
+		},
+		{
+			"temp_id": "meal_19",
+			"name": "Dwa jabłka",
+			"description": "Dwa świeże jabłka jako przekąska.",
+			"instructions": "Umyj i zjedz.",
+			"prepTimeMinutes": 2,
+			"cookTimeMinutes": 0,
+			"servings": 1,
+			"category": "snack",
+			"imageUrl": null,
+			"isPublic": false
+		},
+		{
+			"temp_id": "meal_20",
+			"name": "Parówki z musztardą, warzywami i pieczywem ",
+			"description": "Parówki z indyka podane z musztardą, świeżymi warzywami i chlebem żytnim. Powtórzenie posiłku z dnia 3.",
+			"instructions": "1. Podgrzej parówki. 2. Podawaj z musztardą, pokrojonym ogórkiem, pomidorem i kromkami chleba żytniego.",
+			"prepTimeMinutes": 5,
+			"cookTimeMinutes": 5,
+			"servings": 1,
+			"category": "lunch",
+			"imageUrl": null,
+			"isPublic": false
+		},
+		{
+			"temp_id": "meal_21",
+			"name": "Makaron z sosem grzybowym",
+			"description": "Makaron pełnoziarnisty z kurczakiem w kremowym sosie grzybowym na bazie jogurtu greckiego.",
+			"instructions": "1. Ugotuj makaron pełnoziarnisty. 2. Pokrój kurczaka w kostkę i usmaż na oliwie z posiekanym czosnkiem. 3. Dodaj pokrojone grzyby i smaż, aż zmiękną. 4. Wlej bulion warzywny, dodaj jogurt grecki, sól i pieprz. Wymieszaj i podgrzej (nie gotuj). 5. Wymieszaj sos z makaronem, posyp natką pietruszki.",
+			"prepTimeMinutes": 15,
+			"cookTimeMinutes": 20,
+			"servings": 1,
+			"category": "dinner",
+			"imageUrl": null,
+			"isPublic": false
+		},
+		{
+			"temp_id": "meal_22",
+			"name": "Tosty francuskie z puddingiem proteinowym i owocami",
+			"description": "Tosty francuskie z chleba żytniego, podawane z puddingiem proteinowym, malinami, masłem orzechowym i miodem.",
+			"instructions": "1. W misce roztrzep jajka z mlekiem i przyprawą do pierników. 2. Zanurz kromki chleba w masie jajecznej. 3. Smaż tosty na maśle (nie ma masła na liście, używamy masła orzechowego?) lub oleju na złoty kolor z obu stron. 4. Podawaj tosty z puddingiem proteinowym, malinami, masłem orzechowym i miodem.",
+			"prepTimeMinutes": 10,
+			"cookTimeMinutes": 10,
+			"servings": 1,
+			"category": "breakfast",
+			"imageUrl": null,
+			"isPublic": false
+		},
+		{
+			"temp_id": "meal_23",
+			"name": "Kaszka Pilos",
+			"description": "Gotowa kaszka Pilos jako przekąska.",
+			"instructions": "Otwórz opakowanie i zjedz.",
+			"prepTimeMinutes": 1,
+			"cookTimeMinutes": 0,
+			"servings": 1,
+			"category": "snack",
+			"imageUrl": null,
+			"isPublic": false
+		},
+		{
+			"temp_id": "meal_24",
+			"name": "Bajgiel z serem i chorizo",
+			"description": "Bajgiel z serem gouda, pikantnym chorizo, sałatą, ogórkiem kiszonym i sosami.",
+			"instructions": "1. Przekrój bajgle. Można je lekko podpiec. 2. Wymieszaj jogurt naturalny z majonezem i sosem Sriracha. 3. Posmaruj wnętrze bajgla sosem. 4. Nałóż miks sałat, plastry sera gouda, chorizo i ogórka kiszonego.",
+			"prepTimeMinutes": 10,
+			"cookTimeMinutes": 0,
+			"servings": 1,
+			"category": "breakfast",
+			"imageUrl": null,
+			"isPublic": false
+		},
+		{
+			"temp_id": "meal_25",
+			"name": "Kremowy makaron z łososiem i szpinakiem",
+			"description": "Makaron pełnoziarnisty w kremowym sosie z serka śmietankowego z wędzonym łososiem, szpinakiem i pomidorkami.",
+			"instructions": "1. Ugotuj makaron pełnoziarnisty. 2. Na oliwie zeszklij posiekany czosnek. Dodaj szpinak i smaż, aż zwiędnie. 3. Dodaj serek śmietankowy, sok z cytryny, sól i pieprz. Wymieszaj i podgrzej. 4. Dodaj pokrojonego wędzonego łososia i przekrojone pomidorki koktajlowe. 5. Wymieszaj sos z makaronem.",
+			"prepTimeMinutes": 10,
+			"cookTimeMinutes": 15,
+			"servings": 1,
+			"category": "dinner",
+			"imageUrl": null,
+			"isPublic": false
+		},
+		{
+			"temp_id": "meal_26",
+			"name": "Kanapki z jajkiem na miękko ",
+			"description": "Kanapki z chleba żytniego z masłem, jajkiem na miękko, pomidorem i ogórkiem. Powtórzenie posiłku z dnia 2.",
+			"instructions": "1. Ugotuj jajka na miękko. 2. Posmaruj kromki chleba masłem. 3. Na kanapkach ułóż pokrojone jajka, plastry pomidora i ogórka.",
+			"prepTimeMinutes": 5,
+			"cookTimeMinutes": 5,
+			"servings": 1,
+			"category": "lunch",
+			"imageUrl": null,
+			"isPublic": false
+		},
+		{
+			"temp_id": "meal_27",
+			"name": "Kaszka Pilos ",
+			"description": "Gotowa kaszka Pilos jako przekąska. Powtórzenie posiłku z dnia 6.",
+			"instructions": "Otwórz opakowanie i zjedz.",
+			"prepTimeMinutes": 1,
+			"cookTimeMinutes": 0,
+			"servings": 1,
+			"category": "snack",
+			"imageUrl": null,
+			"isPublic": false
+		},
+		{
+			"temp_id": "meal_28",
+			"name": "Bajgiel z serem i chorizo ",
+			"description": "Bajgiel z serem gouda, pikantnym chorizo, sałatą, ogórkiem kiszonym i sosami. Powtórzenie posiłku z dnia 7.",
+			"instructions": "1. Przekrój bajgle. Można je lekko podpiec. 2. Wymieszaj jogurt naturalny z majonezem i sosem Sriracha. 3. Posmaruj wnętrze bajgla sosem. 4. Nałóż miks sałat, plastry sera gouda, chorizo i ogórka kiszonego.",
+			"prepTimeMinutes": 10,
+			"cookTimeMinutes": 0,
+			"servings": 1,
+			"category": "breakfast",
+			"imageUrl": null,
+			"isPublic": false
+		},
+		{
+			"temp_id": "meal_29",
+			"name": "Pieczony indyk w sosie koperkowym z kuskusem i surówką z marchwi oraz jabłka",
+			"description": "Delikatne mięso z indyka pieczone w sosie koperkowym, podawane z kaszą kuskus i świeżą surówką.",
+			"instructions": "1. Przygotuj sos: wymieszaj bulion warzywny, jogurt grecki, mąkę pszenną, posiekany koper, sól i pieprz. 2. Zalej mięso z indyka sosem i piecz w piekarniku do miękkości. 3. Przygotuj kuskus zgodnie z instrukcją na opakowaniu. 4. Przygotuj surówkę: zetrzyj marchew i jabłko na tarce, wymieszaj z oliwą z oliwek i sokiem z cytryny. 5. Podawaj pieczonego indyka z kuskusem i surówką.",
+			"prepTimeMinutes": 20,
+			"cookTimeMinutes": 35,
+			"servings": 1,
+			"category": "dinner",
+			"imageUrl": null,
+			"isPublic": false
+		},
+		{
+			"temp_id": "meal_30",
+			"name": "Croissant z brzoskwinią ",
+			"description": "Croissanty podawane z jogurtem skyr, brzoskwiniami i słodzone erytrolem. Powtórzenie posiłku z dnia 2.",
+			"instructions": "1. Pokrój brzoskwinie. 2. Wymieszaj jogurt skyr z ekstraktem waniliowym, erytrolem i sokiem z cytryny. 3. Podawaj croissanty z masłem, jogurtem i brzoskwiniami.",
+			"prepTimeMinutes": 10,
+			"cookTimeMinutes": 0,
+			"servings": 1,
+			"category": "lunch",
+			"imageUrl": null,
+			"isPublic": false
+		},
+		{
+			"temp_id": "meal_31",
+			"name": "Pudding proteinowy Pilos ",
+			"description": "Gotowy pudding proteinowy jako przekąska. Powtórzenie posiłku z dnia 2.",
+			"instructions": "Otwórz opakowanie i zjedz.",
+			"prepTimeMinutes": 1,
+			"cookTimeMinutes": 0,
+			"servings": 1,
+			"category": "snack",
+			"imageUrl": null,
+			"isPublic": false
+		},
+		{
+			"temp_id": "meal_32",
+			"name": "Tortilla na ciepło z wędliną, serem i jajkiem",
+			"description": "Pełnoziarnista tortilla zapiekana z szynką z kurczaka, mozzarellą, pomidorem i jajkiem.",
+			"instructions": "1. Na tortilli ułóż szynkę, plastry pomidora i mozzarelli. 2. Na środek wbij jajko (lub zrób jajecznicę i nałóż). Dopraw solą i pieprzem. Skrop oliwą. 3. Złóż tortillę lub przykryj drugą i zapiecz na patelni lub w piekarniku, aż ser się rozpuści a jajko zetnie.",
+			"prepTimeMinutes": 10,
+			"cookTimeMinutes": 10,
+			"servings": 1,
+			"category": "breakfast",
+			"imageUrl": null,
+			"isPublic": false
+		},
+		{
+			"temp_id": "meal_33",
+			"name": "Kurczak w sosie szpinakowym z makaronem",
+			"description": "Kawałki kurczaka w kremowym sosie szpinakowym ze śmietaną i oregano, podawane z makaronem pełnoziarnistym.",
+			"instructions": "1. Ugotuj makaron pełnoziarnisty. 2. Pokrój kurczaka w kostkę i usmaż na maśle. 3. Dodaj szpinak i smaż, aż zwiędnie. 4. Dodaj śmietanę 18%, oregano, sól i pieprz. Wymieszaj i podgrzej. 5. Połącz sos z kurczakiem i makaronem.",
+			"prepTimeMinutes": 15,
+			"cookTimeMinutes": 20,
+			"servings": 1,
+			"category": "dinner",
+			"imageUrl": null,
+			"isPublic": false
+		},
+		{
+			"temp_id": "meal_34",
+			"name": "Dutch baby z dżemem z truskawek",
+			"description": "Puszysty naleśnik pieczony w piekarniku (Dutch baby) podawany z domowym musem truskawkowym i jogurtem skyr.",
+			"instructions": "1. Zmiksuj mąkę, mleko, jajka, erytrol (20g), ekstrakt waniliowy i sól na gładkie ciasto. 2. Rozgrzej piekarnik z naczyniem żaroodpornym i olejem rzepakowym w środku. 3. Ostrożnie wlej ciasto do gorącego naczynia i piecz ok. 15-20 min, aż urośnie i się zezłoci. 4. W międzyczasie przygotuj mus: zmiksuj truskawki z sokiem pomarańczowym, cynamonem i erytrolem (40g). 5. Podawaj Dutch baby z musem truskawkowym i jogurtem skyr.",
+			"prepTimeMinutes": 15,
+			"cookTimeMinutes": 20,
+			"servings": 1,
+			"category": "breakfast",
+			"imageUrl": null,
+			"isPublic": false
+		},
+		{
+			"temp_id": "meal_35",
+			"name": "Dwa jabłka ",
+			"description": "Dwa świeże jabłka jako przekąska. Powtórzenie posiłku z dnia 5.",
+			"instructions": "Umyj i zjedz.",
+			"prepTimeMinutes": 2,
+			"cookTimeMinutes": 0,
+			"servings": 1,
+			"category": "snack",
+			"imageUrl": null,
+			"isPublic": false
+		},
+		{
+			"temp_id": "meal_36",
+			"name": "Parówki z musztardą, warzywami i pieczywem  ",
+			"description": "Parówki z indyka podane z musztardą, świeżymi warzywami i chlebem żytnim. Powtórzenie posiłku z dnia 3 i 6.",
+			"instructions": "1. Podgrzej parówki. 2. Podawaj z musztardą, pokrojonym ogórkiem, pomidorem i kromkami chleba żytniego.",
+			"prepTimeMinutes": 5,
+			"cookTimeMinutes": 5,
+			"servings": 1,
+			"category": "breakfast",
+			"imageUrl": null,
+			"isPublic": false
+		},
+		{
+			"temp_id": "meal_37",
+			"name": "Lekkostrawne spaghetti bolognese",
+			"description": "Delikatna wersja spaghetti bolognese z mięsem mielonym z indyka i warzywami.",
+			"instructions": "1. Ugotuj makaron spaghetti. 2. Na oliwie zeszklij posiekaną cebulę i czosnek. Dodaj startą marchew i seler korzeniowy, smaż chwilę. 3. Dodaj mięso mielone z indyka i smaż, aż zmieni kolor. 4. Wlej passatę pomidorową, dodaj bazylię, zioła prowansalskie, sól i erytrol. Duś pod przykryciem ok. 15-20 minut. 5. Podawaj sos z makaronem.",
+			"prepTimeMinutes": 15,
+			"cookTimeMinutes": 30,
+			"servings": 1,
+			"category": "dinner",
+			"imageUrl": null,
+			"isPublic": false
+		},
+		{
+			"temp_id": "meal_38",
+			"name": "Pudding ryżowy z musem truskawkowym",
+			"description": "Kremowy pudding ryżowy gotowany na mleku, podawany z musem truskawkowym i jogurtem skyr.",
+			"instructions": "1. Ugotuj ryż biały na mleku z dodatkiem ekstraktu waniliowego i erytrolu (20g), aż będzie miękki i kremowy. Dodaj masło. 2. Przygotuj mus: zmiksuj truskawki z erytrolem (10g). 3. Podawaj pudding ryżowy z musem truskawkowym i jogurtem skyr.",
+			"prepTimeMinutes": 5,
+			"cookTimeMinutes": 30,
+			"servings": 1,
+			"category": "dessert",
+			"imageUrl": null,
+			"isPublic": false
+		},
+		{
+			"temp_id": "meal_39",
+			"name": "Kaszka Pilos  ",
+			"description": "Gotowa kaszka Pilos jako przekąska. Powtórzenie posiłku z dnia 6 i 7.",
+			"instructions": "Otwórz opakowanie i zjedz.",
+			"prepTimeMinutes": 1,
+			"cookTimeMinutes": 0,
+			"servings": 1,
+			"category": "snack",
+			"imageUrl": null,
+			"isPublic": false
+		},
+		{
+			"temp_id": "meal_40",
+			"name": "Jajecznica na parze",
+			"description": "Delikatna jajecznica przygotowana na parze, podawana z chlebem pszennym, szynką z indyka i ogórkiem.",
+			"instructions": "1. Roztrzep jajka z solą. 2. Przygotuj naczynie do gotowania na parze (np. miseczkę umieszczoną nad garnkiem z gotującą się wodą). Wlej masę jajeczną. 3. Gotuj na parze, mieszając od czasu do czasu, aż jajecznica osiągnie pożądaną konsystencję. Można dodać olej pod koniec. 4. Podawaj z chlebem pszennym, szynką z indyka i pokrojonym ogórkiem.",
+			"prepTimeMinutes": 5,
+			"cookTimeMinutes": 10,
+			"servings": 1,
+			"category": "breakfast",
+			"imageUrl": null,
+			"isPublic": false
+		},
+		{
+			"temp_id": "meal_41",
+			"name": "Naleśniki z serem twarogowym tłustym oraz malinami",
+			"description": "Naleśniki z mąki pełnoziarnistej nadziewane tłustym twarogiem wymieszanym z jogurtem i słodzikiem, podawane z malinami.",
+			"instructions": "1. Przygotuj ciasto naleśnikowe: wymieszaj mąkę, jajko, mleko, wodę i olej. 2. Usmaż cienkie naleśniki. 3. Przygotuj nadzienie: wymieszaj ser twarogowy z jogurtem naturalnym, erytrolem i cynamonem. Dopraw solą. 4. Posmaruj naleśniki nadzieniem serowym i zwiń. 5. Podawaj z malinami.",
+			"prepTimeMinutes": 15,
+			"cookTimeMinutes": 20,
+			"servings": 1,
+			"category": "lunch",
+			"imageUrl": null,
+			"isPublic": false
+		},
+		{
+			"temp_id": "meal_42",
+			"name": "Puchate placuszki z bananem",
+			"description": "Miękkie i puszyste placuszki z dodatkiem banana, płatków owsianych i jogurtu skyr.",
+			"instructions": "1. Rozgnieć banana widelcem. 2. Dodaj jajka, mąkę pszenną, płatki owsiane, jogurt skyr, sól i erytrol. Wymieszaj na gładkie ciasto. 3. Smaż małe placuszki na maśle extra na złoty kolor z obu stron.",
+			"prepTimeMinutes": 10,
+			"cookTimeMinutes": 15,
+			"servings": 1,
+			"category": "dessert",
+			"imageUrl": null,
+			"isPublic": false
+		},
+		{
+			"temp_id": "meal_43",
+			"name": "Bajgiel z serem i chorizo  ",
+			"description": "Bajgiel z serem gouda, pikantnym chorizo, sałatą, ogórkiem kiszonym i sosami. Powtórzenie posiłku z dnia 7 i 8.",
+			"instructions": "1. Przekrój bajgle. Można je lekko podpiec. 2. Wymieszaj jogurt naturalny z majonezem i sosem Sriracha. 3. Posmaruj wnętrze bajgla sosem. 4. Nałóż miks sałat, plastry sera gouda, chorizo i ogórka kiszonego.",
+			"prepTimeMinutes": 10,
+			"cookTimeMinutes": 0,
+			"servings": 1,
+			"category": "breakfast",
+			"imageUrl": null,
+			"isPublic": false
+		},
+		{
+			"temp_id": "meal_44",
+			"name": "Danie jednogarnkowe z ryżem",
+			"description": "Szybkie danie jednogarnkowe z ryżem basmati, mielonym indykiem, warzywami i serem mozzarella.",
+			"instructions": "1. Na oleju rzepakowym zeszklij posiekaną cebulę i czosnek. Dodaj startą marchew i pokrojony seler naciowy. Smaż chwilę. 2. Dodaj mięso mielone z indyka i smaż, aż zmieni kolor. 3. Dodaj pomidory z puszki, ryż basmati, bulion warzywny, paprykę słodką, sól i sos sojowy. Wymieszaj. 4. Gotuj pod przykryciem na małym ogniu, aż ryż wchłonie płyn i będzie miękki (ok. 15-20 min). 5. Pod koniec gotowania dodaj posiekaną natkę pietruszki i plastry mozzarelli, przykryj na chwilę, aby ser się rozpuścił.",
+			"prepTimeMinutes": 15,
+			"cookTimeMinutes": 25,
+			"servings": 1,
+			"category": "dinner",
+			"imageUrl": null,
+			"isPublic": false
+		},
+		{
+			"temp_id": "meal_45",
+			"name": "Serniczki z kaszy mannej z owocami ",
+			"description": "Delikatne serniczki na zimno z kaszy mannej i twarogu, podawane z kiwi, masłem orzechowym i erytrolem. Powtórzenie posiłku z dnia 4.",
+			"instructions": "1. Zagotuj kaszę manną (instrukcje mogą wymagać mleka, którego nie ma na liście - zakładamy gotowanie na wodzie lub dodanie mleka). 2. Wystudzoną kaszę zmiksuj z jajkami, twarogiem, solą, proszkiem do pieczenia i olejem rzepakowym. 3. Masę przełóż do foremek lub uformuj placuszki i upiecz/usmaż (instrukcje niejasne, zakładamy wersję pieczoną lub na zimno). 4. Podawaj z pokrojonym kiwi, masłem orzechowym i posypane erytrolem.",
+			"prepTimeMinutes": 15,
+			"cookTimeMinutes": 25,
+			"servings": 1,
+			"category": "dessert",
+			"imageUrl": null,
+			"isPublic": false
+		},
+		{
+			"temp_id": "meal_46",
+			"name": "Pudding proteinowy Pilos  ",
+			"description": "Gotowy pudding proteinowy jako przekąska. Powtórzenie posiłku z dnia 2 i 8.",
+			"instructions": "Otwórz opakowanie i zjedz.",
+			"prepTimeMinutes": 1,
+			"cookTimeMinutes": 0,
+			"servings": 1,
+			"category": "snack",
+			"imageUrl": null,
+			"isPublic": false
+		},
+		{
+			"temp_id": "meal_47",
+			"name": "Bajgiel z serem i chorizo   ",
+			"description": "Bajgiel z serem gouda, pikantnym chorizo, sałatą, ogórkiem kiszonym i sosami. Powtórzenie posiłku z dnia 7, 8 i 12.",
+			"instructions": "1. Przekrój bajgle. Można je lekko podpiec. 2. Wymieszaj jogurt naturalny z majonezem i sosem Sriracha. 3. Posmaruj wnętrze bajgla sosem. 4. Nałóż miks sałat, plastry sera gouda, chorizo i ogórka kiszonego.",
+			"prepTimeMinutes": 10,
+			"cookTimeMinutes": 0,
+			"servings": 1,
+			"category": "breakfast",
+			"imageUrl": null,
+			"isPublic": false
+		},
+		{
+			"temp_id": "meal_48",
+			"name": "Kurczak po seczuańsku",
+			"description": "Kurczak w stylu seczuańskim z warzywami, podawany z ryżem basmati.",
+			"instructions": "1. Ugotuj ryż basmati. 2. Pokrój kurczaka w paski, a paprykę i marchew w słupki. Posiekaj cebulę i czosnek. 3. Na oliwie z oliwek smaż kurczaka, aż się zarumieni. Zdejmij z patelni. 4. Na tej samej patelni zeszklij cebulę i czosnek. Dodaj paprykę i marchew, smaż kilka minut. 5. Dodaj ostrą paprykę suszoną, imbir, sos sojowy, ketchup, kumin i słodką paprykę. Wymieszaj. 6. Dodaj usmażonego kurczaka i smaż razem jeszcze chwilę. 7. Podawaj z ryżem basmati.",
+			"prepTimeMinutes": 20,
+			"cookTimeMinutes": 15,
+			"servings": 1,
+			"category": "dinner",
+			"imageUrl": null,
+			"isPublic": false
+		},
+		{
+			"temp_id": "meal_49",
+			"name": "Bruschetta z pomidorem, bazylią świeżą oraz startym serem",
+			"description": "Klasyczna włoska bruschetta na półbagietce z pomidorami, czosnkiem, świeżą bazylią i serem Grana Padano.",
+			"instructions": "1. Pokrój półbagietkę na kromki i podpiecz je w piekarniku lub na suchej patelni. 2. Pomidory pokrój w drobną kostkę, wymieszaj z posiekaną czerwoną cebulą, przeciśniętym czosnkiem, posiekaną świeżą bazylią, oliwą z oliwek, octem balsamicznym, solą i pieprzem. 3. Nałóż mieszankę pomidorową na podpieczone kromki bagietki. 4. Posyp startym serem Grana Padano.",
+			"prepTimeMinutes": 15,
+			"cookTimeMinutes": 5,
+			"servings": 1,
+			"category": "lunch",
+			"imageUrl": null,
+			"isPublic": false
+		},
+		{
+			"temp_id": "meal_50",
+			"name": "Dwa jabłka  ",
+			"description": "Dwa świeże jabłka jako przekąska. Powtórzenie posiłku z dnia 5 i 9.",
+			"instructions": "Umyj i zjedz.",
+			"prepTimeMinutes": 2,
+			"cookTimeMinutes": 0,
+			"servings": 1,
+			"category": "snack",
+			"imageUrl": null,
+			"isPublic": false
+		},
+		{
+			"temp_id": "meal_51",
+			"name": "Kanapki z szynką parmeńską oraz serem mozzarellą i warzywami ",
+			"description": "Kanapki na chlebie żytnim z masłem, szynką parmeńską, mozzarellą light i pomidorkami koktajlowymi. Powtórzenie posiłku z dnia 5.",
+			"instructions": "1. Posmaruj kromki chleba masłem. 2. Nałóż plastry szynki parmeńskiej, mozzarelli light i przekrojone pomidorki koktajlowe.",
+			"prepTimeMinutes": 10,
+			"cookTimeMinutes": 0,
+			"servings": 1,
+			"category": "breakfast",
+			"imageUrl": null,
+			"isPublic": false
+		},
+		{
+			"temp_id": "meal_52",
+			"name": "Kurczak teriyaki",
+			"description": "Kurczak w słodko-słonym sosie teriyaki z warzywami, sezamem i ryżem basmati.",
+			"instructions": "1. Ugotuj ryż basmati. 2. Przygotuj marynatę: wymieszaj wodę, posiekaną papryczkę chilli, czosnek, starty imbir, miód, sos sojowy, ocet ryżowy i olej rzepakowy. 3. Pokrój kurczaka w kostkę i zamarynuj na co najmniej 15 minut (lub dłużej). 4. Pokrój paprykę, seler naciowy i marchew. 5. Usmaż kurczaka na patelni. Dodaj warzywa i smaż razem kilka minut. 6. Wlej resztę marynaty i gotuj, aż sos zgęstnieje. 7. Podawaj kurczaka z warzywami i ryżem, posypane posiekanym szczypiorkiem i nasionami sezamu.",
+			"prepTimeMinutes": 20,
+			"cookTimeMinutes": 15,
+			"servings": 1,
+			"category": "dinner",
+			"imageUrl": null,
+			"isPublic": false
+		},
+		{
+			"temp_id": "meal_53",
+			"name": "Serek wiejski z owocami i syropem klonowym",
+			"description": "Serek wiejski podany ze świeżymi owocami (banan, pomarańcza), migdałami i syropem klonowym.",
+			"instructions": "1. Przełóż serek wiejski do miseczki. 2. Pokrój banana i pomarańczę. 3. Na wierzchu serka ułóż owoce i migdały. 4. Polej syropem klonowym.",
+			"prepTimeMinutes": 10,
+			"cookTimeMinutes": 0,
+			"servings": 1,
+			"category": "lunch",
+			"imageUrl": null,
+			"isPublic": false
+		},
+		{
+			"temp_id": "meal_54",
+			"name": "Baton",
+			"description": "Gotowy baton jako przekąska.",
+			"instructions": "Otwórz opakowanie i zjedz.",
+			"prepTimeMinutes": 1,
+			"cookTimeMinutes": 0,
+			"servings": 1,
+			"category": "snack",
+			"imageUrl": null,
+			"isPublic": false
+		}
+	],
+	"ingredients": [
+		{
+			"temp_id": "ingredient_1",
+			"name": "Bułka grahamka",
+			"category": "grain",
+			"unit": "g"
+		},
+		{
+			"temp_id": "ingredient_2",
+			"name": "Twarożek grani",
+			"category": "dairy",
+			"unit": "g"
+		},
+		{
+			"temp_id": "ingredient_3",
+			"name": "Ser mozzarella kulka",
+			"category": "dairy",
+			"unit": "g"
+		},
+		{
+			"temp_id": "ingredient_4",
+			"name": "Pomidor",
+			"category": "vegetable",
+			"unit": "g"
+		},
+		{
+			"temp_id": "ingredient_5",
+			"name": "Sól",
+			"category": "spice_herb",
+			"unit": "g"
+		},
+		{
+			"temp_id": "ingredient_6",
+			"name": "Pieprz czarny",
+			"category": "spice_herb",
+			"unit": "g"
+		},
+		{
+			"temp_id": "ingredient_7",
+			"name": "Ryż",
+			"category": "grain",
+			"unit": "g"
+		},
+		{
+			"temp_id": "ingredient_8",
+			"name": "Cebula",
+			"category": "vegetable",
+			"unit": "g"
+		},
+		{
+			"temp_id": "ingredient_9",
+			"name": "Czosnek",
+			"category": "vegetable",
+			"unit": "piece"
+		},
+		{
+			"temp_id": "ingredient_10",
+			"name": "Papryka czerwona",
+			"category": "vegetable",
+			"unit": "g"
+		},
+		{
+			"temp_id": "ingredient_11",
+			"name": "Oliwa z oliwek",
+			"category": "fat_oil",
+			"unit": "g"
+		},
+		{
+			"temp_id": "ingredient_12",
+			"name": "Curry",
+			"category": "spice_herb",
+			"unit": "tsp"
+		},
+		{
+			"temp_id": "ingredient_13",
+			"name": "Papryka ostra suszona",
+			"category": "spice_herb",
+			"unit": "tsp"
+		},
+		{
+			"temp_id": "ingredient_14",
+			"name": "Mleczko kokosowe",
+			"category": "fat_oil",
+			"unit": "g"
+		},
+		{
+			"temp_id": "ingredient_15",
+			"name": "Krewetki tygrysie",
+			"category": "seafood",
+			"unit": "g"
+		},
+		{
+			"temp_id": "ingredient_16",
+			"name": "Sok z cytryny",
+			"category": "fruit",
+			"unit": "g"
+		},
+		{
+			"temp_id": "ingredient_17",
+			"name": "Jaja kurze całe",
+			"category": "dairy",
+			"unit": "piece"
+		},
+		{
+			"temp_id": "ingredient_18",
+			"name": "Jogurt skyr",
+			"category": "dairy",
+			"unit": "g"
+		},
+		{
+			"temp_id": "ingredient_19",
+			"name": "Mąka owsiana pełnoziarnista",
+			"category": "grain",
+			"unit": "g"
+		},
+		{
+			"temp_id": "ingredient_20",
+			"name": "Cynamon",
+			"category": "spice_herb",
+			"unit": "g"
+		},
+		{
+			"temp_id": "ingredient_21",
+			"name": "Erytrol",
+			"category": "sweetener",
+			"unit": "g"
+		},
+		{
+			"temp_id": "ingredient_22",
+			"name": "Proszek do pieczenia",
+			"category": "baking",
+			"unit": "g"
+		},
+		{
+			"temp_id": "ingredient_23",
+			"name": "Olej rzepakowy",
+			"category": "fat_oil",
+			"unit": "g"
+		},
+		{
+			"temp_id": "ingredient_24",
+			"name": "Miód",
+			"category": "sweetener",
+			"unit": "g"
+		},
+		{
+			"temp_id": "ingredient_25",
+			"name": "Truskawki",
+			"category": "fruit",
+			"unit": "g"
+		},
+		{
+			"temp_id": "ingredient_26",
+			"name": "Lody na patyku",
+			"category": "other",
+			"unit": "kcal"
+		},
+		{
+			"temp_id": "ingredient_27",
+			"name": "Rogal croissant z masłem",
+			"category": "grain",
+			"unit": "piece"
+		},
+		{
+			"temp_id": "ingredient_28",
+			"name": "Masło extra",
+			"category": "fat_oil",
+			"unit": "g"
+		},
+		{
+			"temp_id": "ingredient_29",
+			"name": "Brzoskwinia świeża lub mrożona",
+			"category": "fruit",
+			"unit": "g"
+		},
+		{
+			"temp_id": "ingredient_30",
+			"name": "Wanilia ekstrakt",
+			"category": "spice_herb",
+			"unit": "g"
+		},
+		{
+			"temp_id": "ingredient_31",
+			"name": "Mięso mielone wołowe",
+			"category": "meat",
+			"unit": "g"
+		},
+		{
+			"temp_id": "ingredient_32",
+			"name": "Ser cheddar",
+			"category": "dairy",
+			"unit": "piece"
+		},
+		{
+			"temp_id": "ingredient_33",
+			"name": "Musztarda",
+			"category": "condiment",
+			"unit": "g"
+		},
+		{
+			"temp_id": "ingredient_34",
+			"name": "Keczup",
+			"category": "condiment",
+			"unit": "g"
+		},
+		{
+			"temp_id": "ingredient_35",
+			"name": "Miks sałat",
+			"category": "vegetable",
+			"unit": "g"
+		},
+		{
+			"temp_id": "ingredient_36",
+			"name": "Chleb żytni razowy",
+			"category": "grain",
+			"unit": "g"
+		},
+		{
+			"temp_id": "ingredient_37",
+			"name": "Ogórek świeży",
+			"category": "vegetable",
+			"unit": "g"
+		},
+		{
+			"temp_id": "ingredient_38",
+			"name": "Pudding proteinowy Pilos",
+			"category": "dairy",
+			"unit": "kcal"
+		},
+		{
+			"temp_id": "ingredient_39",
+			"name": "Parówki Pikok Pure z filetem z indyka",
+			"category": "poultry",
+			"unit": "g"
+		},
+		{
+			"temp_id": "ingredient_40",
+			"name": "Mięso mielone z indyka",
+			"category": "poultry",
+			"unit": "g"
+		},
+		{
+			"temp_id": "ingredient_41",
+			"name": "Bułka tarta",
+			"category": "baking",
+			"unit": "g"
+		},
+		{
+			"temp_id": "ingredient_42",
+			"name": "Majeranek",
+			"category": "spice_herb",
+			"unit": "tsp"
+		},
+		{
+			"temp_id": "ingredient_43",
+			"name": "Nachosy",
+			"category": "grain",
+			"unit": "g"
+		},
+		{
+			"temp_id": "ingredient_44",
+			"name": "Pomidorki koktajlowe",
+			"category": "vegetable",
+			"unit": "g"
+		},
+		{
+			"temp_id": "ingredient_45",
+			"name": "Bułka owsiana",
+			"category": "grain",
+			"unit": "g"
+		},
+		{
+			"temp_id": "ingredient_46",
+			"name": "Łosoś wędzony",
+			"category": "seafood",
+			"unit": "g"
+		},
+		{
+			"temp_id": "ingredient_47",
+			"name": "Koktajl białkowy Piątnica",
+			"category": "dairy",
+			"unit": "kcal"
+		},
+		{
+			"temp_id": "ingredient_48",
+			"name": "Szpinak",
+			"category": "vegetable",
+			"unit": "g"
+		},
+		{
+			"temp_id": "ingredient_49",
+			"name": "Pesto zielone",
+			"category": "condiment",
+			"unit": "g"
+		},
+		{
+			"temp_id": "ingredient_50",
+			"name": "Ziemniaki",
+			"category": "vegetable",
+			"unit": "g"
+		},
+		{
+			"temp_id": "ingredient_51",
+			"name": "Polędwica wieprzowa",
+			"category": "meat",
+			"unit": "g"
+		},
+		{
+			"temp_id": "ingredient_52",
+			"name": "Por",
+			"category": "vegetable",
+			"unit": "g"
+		},
+		{
+			"temp_id": "ingredient_53",
+			"name": "Zioła prowansalskie",
+			"category": "spice_herb",
+			"unit": "tsp"
+		},
+		{
+			"temp_id": "ingredient_54",
+			"name": "Ogórek kiszony",
+			"category": "vegetable",
+			"unit": "g"
+		},
+		{
+			"temp_id": "ingredient_55",
+			"name": "Kasza manna",
+			"category": "grain",
+			"unit": "g"
+		},
+		{
+			"temp_id": "ingredient_56",
+			"name": "Ser twarogowy półtłusty",
+			"category": "dairy",
+			"unit": "g"
+		},
+		{
+			"temp_id": "ingredient_57",
+			"name": "Kiwi",
+			"category": "fruit",
+			"unit": "g"
+		},
+		{
+			"temp_id": "ingredient_58",
+			"name": "Masło orzechowe",
+			"category": "nut_seed",
+			"unit": "g"
+		},
+		{
+			"temp_id": "ingredient_59",
+			"name": "Szynka parmeńska",
+			"category": "meat",
+			"unit": "g"
+		},
+		{
+			"temp_id": "ingredient_60",
+			"name": "Ser mozzarella kulka light",
+			"category": "dairy",
+			"unit": "g"
+		},
+		{
+			"temp_id": "ingredient_61",
+			"name": "Makaron ryżowy",
+			"category": "grain",
+			"unit": "g"
+		},
+		{
+			"temp_id": "ingredient_62",
+			"name": "Wołowina rostbef",
+			"category": "meat",
+			"unit": "g"
+		},
+		{
+			"temp_id": "ingredient_63",
+			"name": "Bulion warzywny",
+			"category": "condiment",
+			"unit": "g"
+		},
+		{
+			"temp_id": "ingredient_64",
+			"name": "Imbir",
+			"category": "spice_herb",
+			"unit": "g"
+		},
+		{
+			"temp_id": "ingredient_65",
+			"name": "Goździki mielone",
+			"category": "spice_herb",
+			"unit": "g"
+		},
+		{
+			"temp_id": "ingredient_66",
+			"name": "Sos rybny",
+			"category": "condiment",
+			"unit": "g"
+		},
+		{
+			"temp_id": "ingredient_67",
+			"name": "Cebula dymka",
+			"category": "vegetable",
+			"unit": "g"
+		},
+		{
+			"temp_id": "ingredient_68",
+			"name": "Papryczka chilli",
+			"category": "spice_herb",
+			"unit": "g"
+		},
+		{
+			"temp_id": "ingredient_69",
+			"name": "Sok z limonki",
+			"category": "fruit",
+			"unit": "g"
+		},
+		{
+			"temp_id": "ingredient_70",
+			"name": "Fasola mung, kiełki",
+			"category": "legume",
+			"unit": "g"
+		},
+		{
+			"temp_id": "ingredient_71",
+			"name": "Kolendra świeża",
+			"category": "spice_herb",
+			"unit": "g"
+		},
+		{
+			"temp_id": "ingredient_72",
+			"name": "Pinsa",
+			"category": "grain",
+			"unit": "g"
+		},
+		{
+			"temp_id": "ingredient_73",
+			"name": "Pomidory z puszki",
+			"category": "vegetable",
+			"unit": "g"
+		},
+		{
+			"temp_id": "ingredient_74",
+			"name": "Ser mozzarella żółta",
+			"category": "dairy",
+			"unit": "g"
+		},
+		{
+			"temp_id": "ingredient_75",
+			"name": "Pomidory suszone w oleju (odsączone)",
+			"category": "vegetable",
+			"unit": "g"
+		},
+		{
+			"temp_id": "ingredient_76",
+			"name": "Ser Grana Padano starty",
+			"category": "dairy",
+			"unit": "g"
+		},
+		{
+			"temp_id": "ingredient_77",
+			"name": "Dwa jabłka",
+			"category": "fruit",
+			"unit": "kcal"
+		},
+		{
+			"temp_id": "ingredient_78",
+			"name": "Makaron pełnoziarnisty",
+			"category": "grain",
+			"unit": "g"
+		},
+		{
+			"temp_id": "ingredient_79",
+			"name": "Mięso z piersi kurczaka",
+			"category": "poultry",
+			"unit": "g"
+		},
+		{
+			"temp_id": "ingredient_80",
+			"name": "Jogurt grecki",
+			"category": "dairy",
+			"unit": "g"
+		},
+		{
+			"temp_id": "ingredient_81",
+			"name": "Grzyby surowe",
+			"category": "vegetable",
+			"unit": "g"
+		},
+		{
+			"temp_id": "ingredient_82",
+			"name": "Natka pietruszki posiekana",
+			"category": "spice_herb",
+			"unit": "g"
+		},
+		{
+			"temp_id": "ingredient_83",
+			"name": "Mleko 1,5%",
+			"category": "dairy",
+			"unit": "g"
+		},
+		{
+			"temp_id": "ingredient_84",
+			"name": "Przyprawa do pierników",
+			"category": "spice_herb",
+			"unit": "g"
+		},
+		{
+			"temp_id": "ingredient_85",
+			"name": "Pudding proteinowy smak waniliowy Go active",
+			"category": "dairy",
+			"unit": "g"
+		},
+		{
+			"temp_id": "ingredient_86",
+			"name": "Maliny świeże lub mrożone",
+			"category": "fruit",
+			"unit": "g"
+		},
+		{
+			"temp_id": "ingredient_87",
+			"name": "Kaszka Pilos",
+			"category": "grain",
+			"unit": "kcal"
+		},
+		{
+			"temp_id": "ingredient_88",
+			"name": "Bajgiel z sezamem",
+			"category": "grain",
+			"unit": "g"
+		},
+		{
+			"temp_id": "ingredient_89",
+			"name": "Ser gouda",
+			"category": "dairy",
+			"unit": "g"
+		},
+		{
+			"temp_id": "ingredient_90",
+			"name": "Chorizo",
+			"category": "meat",
+			"unit": "g"
+		},
+		{
+			"temp_id": "ingredient_91",
+			"name": "Jogurt naturalny 2%",
+			"category": "dairy",
+			"unit": "g"
+		},
+		{
+			"temp_id": "ingredient_92",
+			"name": "Majonez",
+			"category": "condiment",
+			"unit": "g"
+		},
+		{
+			"temp_id": "ingredient_93",
+			"name": "Sos Sriracha",
+			"category": "condiment",
+			"unit": "g"
+		},
+		{
+			"temp_id": "ingredient_94",
+			"name": "Serek śmietankowy",
+			"category": "dairy",
+			"unit": "g"
+		},
+		{
+			"temp_id": "ingredient_95",
+			"name": "Mąka pszenna typ 500",
+			"category": "baking",
+			"unit": "g"
+		},
+		{
+			"temp_id": "ingredient_96",
+			"name": "Koper posiekany",
+			"category": "spice_herb",
+			"unit": "g"
+		},
+		{
+			"temp_id": "ingredient_97",
+			"name": "Kasza kuskus",
+			"category": "grain",
+			"unit": "g"
+		},
+		{
+			"temp_id": "ingredient_98",
+			"name": "Marchew",
+			"category": "vegetable",
+			"unit": "g"
+		},
+		{
+			"temp_id": "ingredient_99",
+			"name": "Jabłko",
+			"category": "fruit",
+			"unit": "g"
+		},
+		{
+			"temp_id": "ingredient_100",
+			"name": "Tortilla pełnoziarnista",
+			"category": "grain",
+			"unit": "g"
+		},
+		{
+			"temp_id": "ingredient_101",
+			"name": "Szynka z kurczaka",
+			"category": "poultry",
+			"unit": "g"
+		},
+		{
+			"temp_id": "ingredient_102",
+			"name": "Śmietana 18%",
+			"category": "dairy",
+			"unit": "g"
+		},
+		{
+			"temp_id": "ingredient_103",
+			"name": "Oregano suszone",
+			"category": "spice_herb",
+			"unit": "g"
+		},
+		{
+			"temp_id": "ingredient_104",
+			"name": "Mąka pszenna pełnoziarnista",
+			"category": "grain",
+			"unit": "g"
+		},
+		{
+			"temp_id": "ingredient_105",
+			"name": "Sok pomarańczowy świeży",
+			"category": "fruit",
+			"unit": "g"
+		},
+		{
+			"temp_id": "ingredient_106",
+			"name": "Makaron spaghetti",
+			"category": "grain",
+			"unit": "g"
+		},
+		{
+			"temp_id": "ingredient_107",
+			"name": "Passata pomidorowa",
+			"category": "vegetable",
+			"unit": "g"
+		},
+		{
+			"temp_id": "ingredient_108",
+			"name": "Seler korzeniowy",
+			"category": "vegetable",
+			"unit": "g"
+		},
+		{
+			"temp_id": "ingredient_109",
+			"name": "Bazylia suszona",
+			"category": "spice_herb",
+			"unit": "g"
+		},
+		{
+			"temp_id": "ingredient_110",
+			"name": "Ryż biały",
+			"category": "grain",
+			"unit": "g"
+		},
+		{
+			"temp_id": "ingredient_111",
+			"name": "Chleb pszenny",
+			"category": "grain",
+			"unit": "g"
+		},
+		{
+			"temp_id": "ingredient_112",
+			"name": "Szynka z indyka",
+			"category": "poultry",
+			"unit": "g"
+		},
+		{
+			"temp_id": "ingredient_113",
+			"name": "Ser twarogowy tłusty",
+			"category": "dairy",
+			"unit": "g"
+		},
+		{
+			"temp_id": "ingredient_114",
+			"name": "Woda",
+			"category": "beverage",
+			"unit": "g"
+		},
+		{
+			"temp_id": "ingredient_115",
+			"name": "Banan",
+			"category": "fruit",
+			"unit": "g"
+		},
+		{
+			"temp_id": "ingredient_116",
+			"name": "Mąka pszenna, typ 550",
+			"category": "baking",
+			"unit": "g"
+		},
+		{
+			"temp_id": "ingredient_117",
+			"name": "Płatki owsiane błyskawiczne",
+			"category": "grain",
+			"unit": "g"
+		},
+		{
+			"temp_id": "ingredient_118",
+			"name": "Ryż basmati",
+			"category": "grain",
+			"unit": "g"
+		},
+		{
+			"temp_id": "ingredient_119",
+			"name": "Seler naciowy",
+			"category": "vegetable",
+			"unit": "g"
+		},
+		{
+			"temp_id": "ingredient_120",
+			"name": "Papryka słodka",
+			"category": "spice_herb",
+			"unit": "g"
+		},
+		{
+			"temp_id": "ingredient_121",
+			"name": "Sos sojowy",
+			"category": "condiment",
+			"unit": "g"
+		},
+		{
+			"temp_id": "ingredient_122",
+			"name": "Półbagietka",
+			"category": "grain",
+			"unit": "g"
+		},
+		{
+			"temp_id": "ingredient_123",
+			"name": "Cebula czerwona",
+			"category": "vegetable",
+			"unit": "g"
+		},
+		{
+			"temp_id": "ingredient_124",
+			"name": "Bazylia świeża",
+			"category": "spice_herb",
+			"unit": "g"
+		},
+		{
+			"temp_id": "ingredient_125",
+			"name": "Ocet balsamiczny",
+			"category": "condiment",
+			"unit": "g"
+		},
+		{
+			"temp_id": "ingredient_126",
+			"name": "Kumin",
+			"category": "spice_herb",
+			"unit": "g"
+		},
+		{
+			"temp_id": "ingredient_127",
+			"name": "Szczypiorek siekany",
+			"category": "spice_herb",
+			"unit": "g"
+		},
+		{
+			"temp_id": "ingredient_128",
+			"name": "Sezam nasiona",
+			"category": "nut_seed",
+			"unit": "g"
+		},
+		{
+			"temp_id": "ingredient_129",
+			"name": "Ocet ryżowy",
+			"category": "condiment",
+			"unit": "g"
+		},
+		{
+			"temp_id": "ingredient_130",
+			"name": "Serek wiejski naturalny",
+			"category": "dairy",
+			"unit": "g"
+		},
+		{
+			"temp_id": "ingredient_131",
+			"name": "Pomarańcza",
+			"category": "fruit",
+			"unit": "g"
+		},
+		{
+			"temp_id": "ingredient_132",
+			"name": "Syrop klonowy",
+			"category": "sweetener",
+			"unit": "g"
+		},
+		{
+			"temp_id": "ingredient_133",
+			"name": "Migdały",
+			"category": "nut_seed",
+			"unit": "g"
+		},
+		{
+			"temp_id": "ingredient_134",
+			"name": "Baton",
+			"category": "other",
+			"unit": "kcal"
+		}
+	],
+	"mealIngredients": [
+		{
+			"mealId": "meal_1",
+			"ingredientId": "ingredient_1",
+			"quantity": 280,
+			"isOptional": false,
+			"notes": "4 sztuki"
+		},
+		{
+			"mealId": "meal_1",
+			"ingredientId": "ingredient_2",
+			"quantity": 200,
+			"isOptional": false,
+			"notes": "1 opakowanie"
+		},
+		{
+			"mealId": "meal_1",
+			"ingredientId": "ingredient_3",
+			"quantity": 180,
+			"isOptional": false,
+			"notes": "12 plastrów"
+		},
+		{
+			"mealId": "meal_1",
+			"ingredientId": "ingredient_4",
+			"quantity": 160,
+			"isOptional": false,
+			"notes": "1 sztuka"
+		},
+		{
+			"mealId": "meal_1",
+			"ingredientId": "ingredient_5",
+			"quantity": 2,
+			"isOptional": false,
+			"notes": "2 szczypty"
+		},
+		{
+			"mealId": "meal_1",
+			"ingredientId": "ingredient_6",
+			"quantity": 2,
+			"isOptional": false,
+			"notes": "2 szczypty"
+		},
+		{
+			"mealId": "meal_2",
+			"ingredientId": "ingredient_7",
+			"quantity": 120,
+			"isOptional": false,
+			"notes": null
+		},
+		{
+			"mealId": "meal_2",
+			"ingredientId": "ingredient_8",
+			"quantity": 80,
+			"isOptional": false,
+			"notes": "1 szt."
+		},
+		{
+			"mealId": "meal_2",
+			"ingredientId": "ingredient_9",
+			"quantity": 2,
+			"isOptional": false,
+			"notes": "2 ząbki"
+		},
+		{
+			"mealId": "meal_2",
+			"ingredientId": "ingredient_10",
+			"quantity": 170,
+			"isOptional": false,
+			"notes": "1 szt."
+		},
+		{
+			"mealId": "meal_2",
+			"ingredientId": "ingredient_11",
+			"quantity": 10,
+			"isOptional": false,
+			"notes": "2 łyżeczki"
+		},
+		{
+			"mealId": "meal_2",
+			"ingredientId": "ingredient_12",
+			"quantity": 2,
+			"isOptional": false,
+			"notes": null
+		},
+		{
+			"mealId": "meal_2",
+			"ingredientId": "ingredient_13",
+			"quantity": 1,
+			"isOptional": false,
+			"notes": "1 łyżeczka"
+		},
+		{
+			"mealId": "meal_2",
+			"ingredientId": "ingredient_14",
+			"quantity": 300,
+			"isOptional": false,
+			"notes": null
+		},
+		{
+			"mealId": "meal_2",
+			"ingredientId": "ingredient_15",
+			"quantity": 250,
+			"isOptional": false,
+			"notes": null
+		},
+		{
+			"mealId": "meal_2",
+			"ingredientId": "ingredient_16",
+			"quantity": 0,
+			"isOptional": true,
+			"notes": "do smaku"
+		},
+		{
+			"mealId": "meal_3",
+			"ingredientId": "ingredient_17",
+			"quantity": 4,
+			"isOptional": false,
+			"notes": "4 sztuki"
+		},
+		{
+			"mealId": "meal_3",
+			"ingredientId": "ingredient_18",
+			"quantity": 300,
+			"isOptional": false,
+			"notes": "2 opakowania"
+		},
+		{
+			"mealId": "meal_3",
+			"ingredientId": "ingredient_19",
+			"quantity": 48,
+			"isOptional": false,
+			"notes": "4 łyżki"
+		},
+		{
+			"mealId": "meal_3",
+			"ingredientId": "ingredient_20",
+			"quantity": 8,
+			"isOptional": false,
+			"notes": "2 łyżeczki"
+		},
+		{
+			"mealId": "meal_3",
+			"ingredientId": "ingredient_21",
+			"quantity": 20,
+			"isOptional": false,
+			"notes": "4 łyżeczki"
+		},
+		{
+			"mealId": "meal_3",
+			"ingredientId": "ingredient_22",
+			"quantity": 4,
+			"isOptional": false,
+			"notes": "1 łyżeczka"
+		},
+		{
+			"mealId": "meal_3",
+			"ingredientId": "ingredient_5",
+			"quantity": 2,
+			"isOptional": false,
+			"notes": "2 szczypty"
+		},
+		{
+			"mealId": "meal_3",
+			"ingredientId": "ingredient_23",
+			"quantity": 10,
+			"isOptional": false,
+			"notes": "2 łyżeczki"
+		},
+		{
+			"mealId": "meal_3",
+			"ingredientId": "ingredient_24",
+			"quantity": 24,
+			"isOptional": false,
+			"notes": "Do podania: 2 łyżeczki"
+		},
+		{
+			"mealId": "meal_3",
+			"ingredientId": "ingredient_25",
+			"quantity": 200,
+			"isOptional": false,
+			"notes": "Do podania"
+		},
+		{
+			"mealId": "meal_4",
+			"ingredientId": "ingredient_26",
+			"quantity": 250,
+			"isOptional": false,
+			"notes": "do 250 kcal"
+		},
+		{
+			"mealId": "meal_5",
+			"ingredientId": "ingredient_27",
+			"quantity": 4,
+			"isOptional": false,
+			"notes": "4 sztuki"
+		},
+		{
+			"mealId": "meal_5",
+			"ingredientId": "ingredient_28",
+			"quantity": 40,
+			"isOptional": false,
+			"notes": "4 łyżeczki"
+		},
+		{
+			"mealId": "meal_5",
+			"ingredientId": "ingredient_29",
+			"quantity": 180,
+			"isOptional": false,
+			"notes": "2 sztuki"
+		},
+		{
+			"mealId": "meal_5",
+			"ingredientId": "ingredient_18",
+			"quantity": 300,
+			"isOptional": false,
+			"notes": "2 opakowania"
+		},
+		{
+			"mealId": "meal_5",
+			"ingredientId": "ingredient_30",
+			"quantity": 3,
+			"isOptional": false,
+			"notes": "1 łyżeczka"
+		},
+		{
+			"mealId": "meal_5",
+			"ingredientId": "ingredient_21",
+			"quantity": 20,
+			"isOptional": false,
+			"notes": "4 łyżeczki"
+		},
+		{
+			"mealId": "meal_5",
+			"ingredientId": "ingredient_16",
+			"quantity": 16,
+			"isOptional": false,
+			"notes": "3 łyżki"
+		},
+		{
+			"mealId": "meal_6",
+			"ingredientId": "ingredient_31",
+			"quantity": 200,
+			"isOptional": false,
+			"notes": null
+		},
+		{
+			"mealId": "meal_6",
+			"ingredientId": "ingredient_1",
+			"quantity": 140,
+			"isOptional": false,
+			"notes": null
+		},
+		{
+			"mealId": "meal_6",
+			"ingredientId": "ingredient_32",
+			"quantity": 2,
+			"isOptional": false,
+			"notes": "2 plastry"
+		},
+		{
+			"mealId": "meal_6",
+			"ingredientId": "ingredient_4",
+			"quantity": 160,
+			"isOptional": false,
+			"notes": null
+		},
+		{
+			"mealId": "meal_6",
+			"ingredientId": "ingredient_8",
+			"quantity": 20,
+			"isOptional": false,
+			"notes": null
+		},
+		{
+			"mealId": "meal_6",
+			"ingredientId": "ingredient_33",
+			"quantity": 20,
+			"isOptional": false,
+			"notes": "2 łyżeczki"
+		},
+		{
+			"mealId": "meal_6",
+			"ingredientId": "ingredient_34",
+			"quantity": 20,
+			"isOptional": false,
+			"notes": "2 łyżeczki"
+		},
+		{
+			"mealId": "meal_6",
+			"ingredientId": "ingredient_35",
+			"quantity": 20,
+			"isOptional": false,
+			"notes": null
+		},
+		{
+			"mealId": "meal_7",
+			"ingredientId": "ingredient_17",
+			"quantity": 8,
+			"isOptional": false,
+			"notes": "8 sztuk - 448 g"
+		},
+		{
+			"mealId": "meal_7",
+			"ingredientId": "ingredient_36",
+			"quantity": 180,
+			"isOptional": false,
+			"notes": "6 kromek"
+		},
+		{
+			"mealId": "meal_7",
+			"ingredientId": "ingredient_28",
+			"quantity": 30,
+			"isOptional": false,
+			"notes": "6 łyżeczek"
+		},
+		{
+			"mealId": "meal_7",
+			"ingredientId": "ingredient_4",
+			"quantity": 480,
+			"isOptional": false,
+			"notes": "3 sztuki"
+		},
+		{
+			"mealId": "meal_7",
+			"ingredientId": "ingredient_37",
+			"quantity": 150,
+			"isOptional": false,
+			"notes": "1 sztuka"
+		},
+		{
+			"mealId": "meal_8",
+			"ingredientId": "ingredient_38",
+			"quantity": 152,
+			"isOptional": false,
+			"notes": null
+		},
+		{
+			"mealId": "meal_9",
+			"ingredientId": "ingredient_39",
+			"quantity": 400,
+			"isOptional": false,
+			"notes": "8 sztuk"
+		},
+		{
+			"mealId": "meal_9",
+			"ingredientId": "ingredient_33",
+			"quantity": 40,
+			"isOptional": false,
+			"notes": "4 łyżeczki"
+		},
+		{
+			"mealId": "meal_9",
+			"ingredientId": "ingredient_37",
+			"quantity": 300,
+			"isOptional": false,
+			"notes": "2 sztuki"
+		},
+		{
+			"mealId": "meal_9",
+			"ingredientId": "ingredient_4",
+			"quantity": 320,
+			"isOptional": false,
+			"notes": "2 sztuki"
+		},
+		{
+			"mealId": "meal_9",
+			"ingredientId": "ingredient_36",
+			"quantity": 180,
+			"isOptional": false,
+			"notes": "6 kromek"
+		},
+		{
+			"mealId": "meal_10",
+			"ingredientId": "ingredient_40",
+			"quantity": 250,
+			"isOptional": false,
+			"notes": null
+		},
+		{
+			"mealId": "meal_10",
+			"ingredientId": "ingredient_41",
+			"quantity": 20,
+			"isOptional": false,
+			"notes": null
+		},
+		{
+			"mealId": "meal_10",
+			"ingredientId": "ingredient_8",
+			"quantity": 80,
+			"isOptional": false,
+			"notes": "1 szt."
+		},
+		{
+			"mealId": "meal_10",
+			"ingredientId": "ingredient_42",
+			"quantity": 1,
+			"isOptional": false,
+			"notes": "1 łyżeczka"
+		},
+		{
+			"mealId": "meal_10",
+			"ingredientId": "ingredient_11",
+			"quantity": 10,
+			"isOptional": false,
+			"notes": "1 łyżeczka"
+		},
+		{
+			"mealId": "meal_10",
+			"ingredientId": "ingredient_43",
+			"quantity": 120,
+			"isOptional": false,
+			"notes": null
+		},
+		{
+			"mealId": "meal_10",
+			"ingredientId": "ingredient_44",
+			"quantity": 300,
+			"isOptional": false,
+			"notes": "16 szt."
+		},
+		{
+			"mealId": "meal_10",
+			"ingredientId": "ingredient_37",
+			"quantity": 300,
+			"isOptional": false,
+			"notes": "2 szt."
+		},
+		{
+			"mealId": "meal_11",
+			"ingredientId": "ingredient_45",
+			"quantity": 200,
+			"isOptional": false,
+			"notes": "2 sztuki"
+		},
+		{
+			"mealId": "meal_11",
+			"ingredientId": "ingredient_4",
+			"quantity": 320,
+			"isOptional": false,
+			"notes": "2 sztuki"
+		},
+		{
+			"mealId": "meal_11",
+			"ingredientId": "ingredient_10",
+			"quantity": 170,
+			"isOptional": false,
+			"notes": "1 sztuka"
+		},
+		{
+			"mealId": "meal_11",
+			"ingredientId": "ingredient_46",
+			"quantity": 200,
+			"isOptional": false,
+			"notes": null
+		},
+		{
+			"mealId": "meal_11",
+			"ingredientId": "ingredient_11",
+			"quantity": 20,
+			"isOptional": false,
+			"notes": "2 łyżki"
+		},
+		{
+			"mealId": "meal_12",
+			"ingredientId": "ingredient_47",
+			"quantity": 224,
+			"isOptional": false,
+			"notes": null
+		},
+		{
+			"mealId": "meal_13",
+			"ingredientId": "ingredient_36",
+			"quantity": 240,
+			"isOptional": false,
+			"notes": "8 kromek"
+		},
+		{
+			"mealId": "meal_13",
+			"ingredientId": "ingredient_3",
+			"quantity": 240,
+			"isOptional": false,
+			"notes": "2 sztuki"
+		},
+		{
+			"mealId": "meal_13",
+			"ingredientId": "ingredient_4",
+			"quantity": 320,
+			"isOptional": false,
+			"notes": "2 sztuki"
+		},
+		{
+			"mealId": "meal_13",
+			"ingredientId": "ingredient_48",
+			"quantity": 50,
+			"isOptional": false,
+			"notes": null
+		},
+		{
+			"mealId": "meal_13",
+			"ingredientId": "ingredient_49",
+			"quantity": 30,
+			"isOptional": false,
+			"notes": "6 łyżeczek"
+		},
+		{
+			"mealId": "meal_14",
+			"ingredientId": "ingredient_50",
+			"quantity": 560,
+			"isOptional": false,
+			"notes": "8 szt."
+		},
+		{
+			"mealId": "meal_14",
+			"ingredientId": "ingredient_51",
+			"quantity": 200,
+			"isOptional": false,
+			"notes": null
+		},
+		{
+			"mealId": "meal_14",
+			"ingredientId": "ingredient_11",
+			"quantity": 20,
+			"isOptional": false,
+			"notes": "2 łyżki"
+		},
+		{
+			"mealId": "meal_14",
+			"ingredientId": "ingredient_33",
+			"quantity": 10,
+			"isOptional": false,
+			"notes": "1 łyżeczka"
+		},
+		{
+			"mealId": "meal_14",
+			"ingredientId": "ingredient_14",
+			"quantity": 160,
+			"isOptional": false,
+			"notes": null
+		},
+		{
+			"mealId": "meal_14",
+			"ingredientId": "ingredient_52",
+			"quantity": 280,
+			"isOptional": false,
+			"notes": null
+		},
+		{
+			"mealId": "meal_14",
+			"ingredientId": "ingredient_53",
+			"quantity": 1,
+			"isOptional": false,
+			"notes": "1 łyżeczka"
+		},
+		{
+			"mealId": "meal_14",
+			"ingredientId": "ingredient_9",
+			"quantity": 2,
+			"isOptional": false,
+			"notes": "2 ząbki"
+		},
+		{
+			"mealId": "meal_14",
+			"ingredientId": "ingredient_54",
+			"quantity": 200,
+			"isOptional": false,
+			"notes": "4 szt."
+		},
+		{
+			"mealId": "meal_15",
+			"ingredientId": "ingredient_55",
+			"quantity": 120,
+			"isOptional": false,
+			"notes": null
+		},
+		{
+			"mealId": "meal_15",
+			"ingredientId": "ingredient_17",
+			"quantity": 4,
+			"isOptional": false,
+			"notes": "4 sztuki - 224 g"
+		},
+		{
+			"mealId": "meal_15",
+			"ingredientId": "ingredient_56",
+			"quantity": 240,
+			"isOptional": false,
+			"notes": "8 plastrów"
+		},
+		{
+			"mealId": "meal_15",
+			"ingredientId": "ingredient_5",
+			"quantity": 2,
+			"isOptional": false,
+			"notes": "2 szczypty"
+		},
+		{
+			"mealId": "meal_15",
+			"ingredientId": "ingredient_22",
+			"quantity": 4,
+			"isOptional": false,
+			"notes": "1 łyżeczka"
+		},
+		{
+			"mealId": "meal_15",
+			"ingredientId": "ingredient_23",
+			"quantity": 10,
+			"isOptional": false,
+			"notes": "2 łyżeczki"
+		},
+		{
+			"mealId": "meal_15",
+			"ingredientId": "ingredient_57",
+			"quantity": 300,
+			"isOptional": false,
+			"notes": "Do podania: 4 sztuki"
+		},
+		{
+			"mealId": "meal_15",
+			"ingredientId": "ingredient_58",
+			"quantity": 20,
+			"isOptional": false,
+			"notes": "Do podania: 2 łyżeczki"
+		},
+		{
+			"mealId": "meal_15",
+			"ingredientId": "ingredient_21",
+			"quantity": 20,
+			"isOptional": false,
+			"notes": "Do podania: 4 łyżeczki"
+		},
+		{
+			"mealId": "meal_16",
+			"ingredientId": "ingredient_36",
+			"quantity": 240,
+			"isOptional": false,
+			"notes": "8 kromek"
+		},
+		{
+			"mealId": "meal_16",
+			"ingredientId": "ingredient_59",
+			"quantity": 60,
+			"isOptional": false,
+			"notes": "4 plastry"
+		},
+		{
+			"mealId": "meal_16",
+			"ingredientId": "ingredient_60",
+			"quantity": 240,
+			"isOptional": false,
+			"notes": "2 opakowania"
+		},
+		{
+			"mealId": "meal_16",
+			"ingredientId": "ingredient_44",
+			"quantity": 200,
+			"isOptional": false,
+			"notes": "10 sztuk"
+		},
+		{
+			"mealId": "meal_16",
+			"ingredientId": "ingredient_28",
+			"quantity": 40,
+			"isOptional": false,
+			"notes": "8 łyżeczek"
+		},
+		{
+			"mealId": "meal_17",
+			"ingredientId": "ingredient_61",
+			"quantity": 140,
+			"isOptional": false,
+			"notes": null
+		},
+		{
+			"mealId": "meal_17",
+			"ingredientId": "ingredient_62",
+			"quantity": 250,
+			"isOptional": false,
+			"notes": null
+		},
+		{
+			"mealId": "meal_17",
+			"ingredientId": "ingredient_63",
+			"quantity": 750,
+			"isOptional": false,
+			"notes": "3 szklanki"
+		},
+		{
+			"mealId": "meal_17",
+			"ingredientId": "ingredient_11",
+			"quantity": 20,
+			"isOptional": false,
+			"notes": "2 łyżki"
+		},
+		{
+			"mealId": "meal_17",
+			"ingredientId": "ingredient_8",
+			"quantity": 80,
+			"isOptional": false,
+			"notes": "1 sztuka"
+		},
+		{
+			"mealId": "meal_17",
+			"ingredientId": "ingredient_64",
+			"quantity": 5,
+			"isOptional": false,
+			"notes": "1 plaster"
+		},
+		{
+			"mealId": "meal_17",
+			"ingredientId": "ingredient_20",
+			"quantity": 4,
+			"isOptional": false,
+			"notes": "1 łyżeczka"
+		},
+		{
+			"mealId": "meal_17",
+			"ingredientId": "ingredient_65",
+			"quantity": 2,
+			"isOptional": false,
+			"notes": "1 łyżeczka"
+		},
+		{
+			"mealId": "meal_17",
+			"ingredientId": "ingredient_66",
+			"quantity": 60,
+			"isOptional": false,
+			"notes": "6 łyżek"
+		},
+		{
+			"mealId": "meal_17",
+			"ingredientId": "ingredient_21",
+			"quantity": 20,
+			"isOptional": false,
+			"notes": "4 łyżeczki"
+		},
+		{
+			"mealId": "meal_17",
+			"ingredientId": "ingredient_67",
+			"quantity": 40,
+			"isOptional": false,
+			"notes": "2 sztuki"
+		},
+		{
+			"mealId": "meal_17",
+			"ingredientId": "ingredient_68",
+			"quantity": 20,
+			"isOptional": false,
+			"notes": "1 sztuka"
+		},
+		{
+			"mealId": "meal_17",
+			"ingredientId": "ingredient_69",
+			"quantity": 24,
+			"isOptional": false,
+			"notes": "4 łyżki"
+		},
+		{
+			"mealId": "meal_17",
+			"ingredientId": "ingredient_70",
+			"quantity": 40,
+			"isOptional": false,
+			"notes": null
+		},
+		{
+			"mealId": "meal_17",
+			"ingredientId": "ingredient_71",
+			"quantity": 4,
+			"isOptional": false,
+			"notes": "1 garść"
+		},
+		{
+			"mealId": "meal_17",
+			"ingredientId": "ingredient_5",
+			"quantity": 2,
+			"isOptional": false,
+			"notes": "2 szczypty"
+		},
+		{
+			"mealId": "meal_17",
+			"ingredientId": "ingredient_6",
+			"quantity": 2,
+			"isOptional": false,
+			"notes": "2 szczypty"
+		},
+		{
+			"mealId": "meal_18",
+			"ingredientId": "ingredient_72",
+			"quantity": 220,
+			"isOptional": false,
+			"notes": "1 sztuka"
+		},
+		{
+			"mealId": "meal_18",
+			"ingredientId": "ingredient_73",
+			"quantity": 80,
+			"isOptional": false,
+			"notes": null
+		},
+		{
+			"mealId": "meal_18",
+			"ingredientId": "ingredient_74",
+			"quantity": 40,
+			"isOptional": false,
+			"notes": null
+		},
+		{
+			"mealId": "meal_18",
+			"ingredientId": "ingredient_48",
+			"quantity": 50,
+			"isOptional": false,
+			"notes": null
+		},
+		{
+			"mealId": "meal_18",
+			"ingredientId": "ingredient_3",
+			"quantity": 120,
+			"isOptional": false,
+			"notes": "8 plastrów"
+		},
+		{
+			"mealId": "meal_18",
+			"ingredientId": "ingredient_44",
+			"quantity": 200,
+			"isOptional": false,
+			"notes": "10 sztuk"
+		},
+		{
+			"mealId": "meal_18",
+			"ingredientId": "ingredient_59",
+			"quantity": 60,
+			"isOptional": false,
+			"notes": "6 plastrów"
+		},
+		{
+			"mealId": "meal_18",
+			"ingredientId": "ingredient_75",
+			"quantity": 80,
+			"isOptional": false,
+			"notes": "4 sztuki"
+		},
+		{
+			"mealId": "meal_18",
+			"ingredientId": "ingredient_76",
+			"quantity": 20,
+			"isOptional": false,
+			"notes": "2 łyżki"
+		},
+		{
+			"mealId": "meal_19",
+			"ingredientId": "ingredient_77",
+			"quantity": 180,
+			"isOptional": false,
+			"notes": null
+		},
+		{
+			"mealId": "meal_20",
+			"ingredientId": "ingredient_39",
+			"quantity": 400,
+			"isOptional": false,
+			"notes": "8 sztuk"
+		},
+		{
+			"mealId": "meal_20",
+			"ingredientId": "ingredient_33",
+			"quantity": 40,
+			"isOptional": false,
+			"notes": "4 łyżeczki"
+		},
+		{
+			"mealId": "meal_20",
+			"ingredientId": "ingredient_37",
+			"quantity": 300,
+			"isOptional": false,
+			"notes": "2 sztuki"
+		},
+		{
+			"mealId": "meal_20",
+			"ingredientId": "ingredient_4",
+			"quantity": 320,
+			"isOptional": false,
+			"notes": "2 sztuki"
+		},
+		{
+			"mealId": "meal_20",
+			"ingredientId": "ingredient_36",
+			"quantity": 180,
+			"isOptional": false,
+			"notes": "6 kromek"
+		},
+		{
+			"mealId": "meal_21",
+			"ingredientId": "ingredient_78",
+			"quantity": 80,
+			"isOptional": false,
+			"notes": null
+		},
+		{
+			"mealId": "meal_21",
+			"ingredientId": "ingredient_11",
+			"quantity": 10,
+			"isOptional": false,
+			"notes": "1 łyżka"
+		},
+		{
+			"mealId": "meal_21",
+			"ingredientId": "ingredient_79",
+			"quantity": 100,
+			"isOptional": false,
+			"notes": null
+		},
+		{
+			"mealId": "meal_21",
+			"ingredientId": "ingredient_9",
+			"quantity": 1,
+			"isOptional": false,
+			"notes": "1 ząbek - 6 g"
+		},
+		{
+			"mealId": "meal_21",
+			"ingredientId": "ingredient_63",
+			"quantity": 125,
+			"isOptional": false,
+			"notes": "0.5 szklanki"
+		},
+		{
+			"mealId": "meal_21",
+			"ingredientId": "ingredient_80",
+			"quantity": 80,
+			"isOptional": false,
+			"notes": "4 łyżki"
+		},
+		{
+			"mealId": "meal_21",
+			"ingredientId": "ingredient_81",
+			"quantity": 80,
+			"isOptional": false,
+			"notes": "8 sztuk"
+		},
+		{
+			"mealId": "meal_21",
+			"ingredientId": "ingredient_5",
+			"quantity": 1,
+			"isOptional": false,
+			"notes": "1 szczypta"
+		},
+		{
+			"mealId": "meal_21",
+			"ingredientId": "ingredient_6",
+			"quantity": 1,
+			"isOptional": false,
+			"notes": "1 szczypta"
+		},
+		{
+			"mealId": "meal_21",
+			"ingredientId": "ingredient_82",
+			"quantity": 5,
+			"isOptional": false,
+			"notes": "1 łyżeczka"
+		},
+		{
+			"mealId": "meal_22",
+			"ingredientId": "ingredient_36",
+			"quantity": 180,
+			"isOptional": false,
+			"notes": "6 kromek"
+		},
+		{
+			"mealId": "meal_22",
+			"ingredientId": "ingredient_17",
+			"quantity": 2,
+			"isOptional": false,
+			"notes": "2 sztuki - 112 g"
+		},
+		{
+			"mealId": "meal_22",
+			"ingredientId": "ingredient_83",
+			"quantity": 120,
+			"isOptional": false,
+			"notes": "8 łyżek"
+		},
+		{
+			"mealId": "meal_22",
+			"ingredientId": "ingredient_84",
+			"quantity": 5,
+			"isOptional": false,
+			"notes": "1 łyżeczka"
+		},
+		{
+			"mealId": "meal_22",
+			"ingredientId": "ingredient_85",
+			"quantity": 400,
+			"isOptional": false,
+			"notes": "2 opakowania"
+		},
+		{
+			"mealId": "meal_22",
+			"ingredientId": "ingredient_86",
+			"quantity": 200,
+			"isOptional": false,
+			"notes": null
+		},
+		{
+			"mealId": "meal_22",
+			"ingredientId": "ingredient_58",
+			"quantity": 50,
+			"isOptional": false,
+			"notes": "3 łyżki"
+		},
+		{
+			"mealId": "meal_22",
+			"ingredientId": "ingredient_24",
+			"quantity": 20,
+			"isOptional": false,
+			"notes": "2 łyżeczki"
+		},
+		{
+			"mealId": "meal_23",
+			"ingredientId": "ingredient_87",
+			"quantity": 158,
+			"isOptional": false,
+			"notes": null
+		},
+		{
+			"mealId": "meal_24",
+			"ingredientId": "ingredient_88",
+			"quantity": 150,
+			"isOptional": false,
+			"notes": "2 sztuki"
+		},
+		{
+			"mealId": "meal_24",
+			"ingredientId": "ingredient_35",
+			"quantity": 40,
+			"isOptional": false,
+			"notes": null
+		},
+		{
+			"mealId": "meal_24",
+			"ingredientId": "ingredient_89",
+			"quantity": 90,
+			"isOptional": false,
+			"notes": "6 plastrów"
+		},
+		{
+			"mealId": "meal_24",
+			"ingredientId": "ingredient_90",
+			"quantity": 84,
+			"isOptional": false,
+			"notes": "12 plastrów"
+		},
+		{
+			"mealId": "meal_24",
+			"ingredientId": "ingredient_54",
+			"quantity": 300,
+			"isOptional": false,
+			"notes": "2 sztuki"
+		},
+		{
+			"mealId": "meal_24",
+			"ingredientId": "ingredient_91",
+			"quantity": 80,
+			"isOptional": false,
+			"notes": "4 łyżki"
+		},
+		{
+			"mealId": "meal_24",
+			"ingredientId": "ingredient_92",
+			"quantity": 30,
+			"isOptional": false,
+			"notes": "3 łyżeczki"
+		},
+		{
+			"mealId": "meal_24",
+			"ingredientId": "ingredient_93",
+			"quantity": 10,
+			"isOptional": false,
+			"notes": "1 łyżka"
+		},
+		{
+			"mealId": "meal_25",
+			"ingredientId": "ingredient_78",
+			"quantity": 140,
+			"isOptional": false,
+			"notes": null
+		},
+		{
+			"mealId": "meal_25",
+			"ingredientId": "ingredient_94",
+			"quantity": 100,
+			"isOptional": false,
+			"notes": "4 łyżki"
+		},
+		{
+			"mealId": "meal_25",
+			"ingredientId": "ingredient_46",
+			"quantity": 150,
+			"isOptional": false,
+			"notes": null
+		},
+		{
+			"mealId": "meal_25",
+			"ingredientId": "ingredient_16",
+			"quantity": 36,
+			"isOptional": false,
+			"notes": "6 łyżek"
+		},
+		{
+			"mealId": "meal_25",
+			"ingredientId": "ingredient_48",
+			"quantity": 100,
+			"isOptional": false,
+			"notes": null
+		},
+		{
+			"mealId": "meal_25",
+			"ingredientId": "ingredient_11",
+			"quantity": 10,
+			"isOptional": false,
+			"notes": "2 łyżeczki"
+		},
+		{
+			"mealId": "meal_25",
+			"ingredientId": "ingredient_5",
+			"quantity": 1,
+			"isOptional": false,
+			"notes": "4 szczypty"
+		},
+		{
+			"mealId": "meal_25",
+			"ingredientId": "ingredient_6",
+			"quantity": 1,
+			"isOptional": false,
+			"notes": "4 szczypty"
+		},
+		{
+			"mealId": "meal_25",
+			"ingredientId": "ingredient_9",
+			"quantity": 4,
+			"isOptional": false,
+			"notes": "4 ząbki - 24 g"
+		},
+		{
+			"mealId": "meal_25",
+			"ingredientId": "ingredient_44",
+			"quantity": 240,
+			"isOptional": false,
+			"notes": "12 sztuk"
+		},
+		{
+			"mealId": "meal_26",
+			"ingredientId": "ingredient_17",
+			"quantity": 8,
+			"isOptional": false,
+			"notes": "8 sztuk - 448 g"
+		},
+		{
+			"mealId": "meal_26",
+			"ingredientId": "ingredient_36",
+			"quantity": 180,
+			"isOptional": false,
+			"notes": "6 kromek"
+		},
+		{
+			"mealId": "meal_26",
+			"ingredientId": "ingredient_28",
+			"quantity": 30,
+			"isOptional": false,
+			"notes": "6 łyżeczek"
+		},
+		{
+			"mealId": "meal_26",
+			"ingredientId": "ingredient_4",
+			"quantity": 480,
+			"isOptional": false,
+			"notes": "3 sztuki"
+		},
+		{
+			"mealId": "meal_26",
+			"ingredientId": "ingredient_37",
+			"quantity": 150,
+			"isOptional": false,
+			"notes": "1 sztuka"
+		},
+		{
+			"mealId": "meal_27",
+			"ingredientId": "ingredient_87",
+			"quantity": 158,
+			"isOptional": false,
+			"notes": null
+		},
+		{
+			"mealId": "meal_28",
+			"ingredientId": "ingredient_88",
+			"quantity": 150,
+			"isOptional": false,
+			"notes": "2 sztuki"
+		},
+		{
+			"mealId": "meal_28",
+			"ingredientId": "ingredient_35",
+			"quantity": 40,
+			"isOptional": false,
+			"notes": null
+		},
+		{
+			"mealId": "meal_28",
+			"ingredientId": "ingredient_89",
+			"quantity": 90,
+			"isOptional": false,
+			"notes": "6 plastrów"
+		},
+		{
+			"mealId": "meal_28",
+			"ingredientId": "ingredient_90",
+			"quantity": 84,
+			"isOptional": false,
+			"notes": "12 plastrów"
+		},
+		{
+			"mealId": "meal_28",
+			"ingredientId": "ingredient_54",
+			"quantity": 300,
+			"isOptional": false,
+			"notes": "2 sztuki"
+		},
+		{
+			"mealId": "meal_28",
+			"ingredientId": "ingredient_91",
+			"quantity": 80,
+			"isOptional": false,
+			"notes": "4 łyżki"
+		},
+		{
+			"mealId": "meal_28",
+			"ingredientId": "ingredient_92",
+			"quantity": 30,
+			"isOptional": false,
+			"notes": "3 łyżeczki"
+		},
+		{
+			"mealId": "meal_28",
+			"ingredientId": "ingredient_93",
+			"quantity": 10,
+			"isOptional": false,
+			"notes": "1 łyżka"
+		},
+		{
+			"mealId": "meal_29",
+			"ingredientId": "ingredient_79",
+			"quantity": 200,
+			"isOptional": false,
+			"notes": "Mięso z piersi indyka"
+		},
+		{
+			"mealId": "meal_29",
+			"ingredientId": "ingredient_63",
+			"quantity": 150,
+			"isOptional": false,
+			"notes": "10 łyżek"
+		},
+		{
+			"mealId": "meal_29",
+			"ingredientId": "ingredient_80",
+			"quantity": 80,
+			"isOptional": false,
+			"notes": "4 łyżki"
+		},
+		{
+			"mealId": "meal_29",
+			"ingredientId": "ingredient_95",
+			"quantity": 24,
+			"isOptional": false,
+			"notes": "2 łyżki"
+		},
+		{
+			"mealId": "meal_29",
+			"ingredientId": "ingredient_5",
+			"quantity": 2,
+			"isOptional": false,
+			"notes": "2 szczypty"
+		},
+		{
+			"mealId": "meal_29",
+			"ingredientId": "ingredient_6",
+			"quantity": 2,
+			"isOptional": false,
+			"notes": "2 szczypty"
+		},
+		{
+			"mealId": "meal_29",
+			"ingredientId": "ingredient_96",
+			"quantity": 32,
+			"isOptional": false,
+			"notes": "8 łyżeczek"
+		},
+		{
+			"mealId": "meal_29",
+			"ingredientId": "ingredient_97",
+			"quantity": 100,
+			"isOptional": false,
+			"notes": null
+		},
+		{
+			"mealId": "meal_29",
+			"ingredientId": "ingredient_98",
+			"quantity": 320,
+			"isOptional": false,
+			"notes": "Surówka: 4 sztuki"
+		},
+		{
+			"mealId": "meal_29",
+			"ingredientId": "ingredient_99",
+			"quantity": 150,
+			"isOptional": false,
+			"notes": "Surówka: 1 sztuka"
+		},
+		{
+			"mealId": "meal_29",
+			"ingredientId": "ingredient_11",
+			"quantity": 30,
+			"isOptional": false,
+			"notes": "Surówka: 3 łyżki"
+		},
+		{
+			"mealId": "meal_29",
+			"ingredientId": "ingredient_16",
+			"quantity": 12,
+			"isOptional": false,
+			"notes": "Surówka: 2 łyżki"
+		},
+		{
+			"mealId": "meal_30",
+			"ingredientId": "ingredient_27",
+			"quantity": 4,
+			"isOptional": false,
+			"notes": "4 sztuki"
+		},
+		{
+			"mealId": "meal_30",
+			"ingredientId": "ingredient_28",
+			"quantity": 40,
+			"isOptional": false,
+			"notes": "4 łyżeczki"
+		},
+		{
+			"mealId": "meal_30",
+			"ingredientId": "ingredient_29",
+			"quantity": 180,
+			"isOptional": false,
+			"notes": "2 sztuki"
+		},
+		{
+			"mealId": "meal_30",
+			"ingredientId": "ingredient_18",
+			"quantity": 300,
+			"isOptional": false,
+			"notes": "2 opakowania"
+		},
+		{
+			"mealId": "meal_30",
+			"ingredientId": "ingredient_30",
+			"quantity": 3,
+			"isOptional": false,
+			"notes": "1 łyżeczka"
+		},
+		{
+			"mealId": "meal_30",
+			"ingredientId": "ingredient_21",
+			"quantity": 20,
+			"isOptional": false,
+			"notes": "4 łyżeczki"
+		},
+		{
+			"mealId": "meal_30",
+			"ingredientId": "ingredient_16",
+			"quantity": 16,
+			"isOptional": false,
+			"notes": "3 łyżki"
+		},
+		{
+			"mealId": "meal_31",
+			"ingredientId": "ingredient_38",
+			"quantity": 152,
+			"isOptional": false,
+			"notes": null
+		},
+		{
+			"mealId": "meal_32",
+			"ingredientId": "ingredient_100",
+			"quantity": 120,
+			"isOptional": false,
+			"notes": "2 sztuki"
+		},
+		{
+			"mealId": "meal_32",
+			"ingredientId": "ingredient_101",
+			"quantity": 80,
+			"isOptional": false,
+			"notes": "8 plastrów"
+		},
+		{
+			"mealId": "meal_32",
+			"ingredientId": "ingredient_4",
+			"quantity": 240,
+			"isOptional": false,
+			"notes": "12 plastrów"
+		},
+		{
+			"mealId": "meal_32",
+			"ingredientId": "ingredient_3",
+			"quantity": 120,
+			"isOptional": false,
+			"notes": "8 plastrów"
+		},
+		{
+			"mealId": "meal_32",
+			"ingredientId": "ingredient_17",
+			"quantity": 6,
+			"isOptional": false,
+			"notes": "6 sztuk - 336 g"
+		},
+		{
+			"mealId": "meal_32",
+			"ingredientId": "ingredient_5",
+			"quantity": 2,
+			"isOptional": false,
+			"notes": "2 szczypty"
+		},
+		{
+			"mealId": "meal_32",
+			"ingredientId": "ingredient_6",
+			"quantity": 2,
+			"isOptional": false,
+			"notes": "2 szczypty"
+		},
+		{
+			"mealId": "meal_32",
+			"ingredientId": "ingredient_11",
+			"quantity": 10,
+			"isOptional": false,
+			"notes": "2 łyżeczki"
+		},
+		{
+			"mealId": "meal_33",
+			"ingredientId": "ingredient_79",
+			"quantity": 200,
+			"isOptional": false,
+			"notes": null
+		},
+		{
+			"mealId": "meal_33",
+			"ingredientId": "ingredient_48",
+			"quantity": 100,
+			"isOptional": false,
+			"notes": null
+		},
+		{
+			"mealId": "meal_33",
+			"ingredientId": "ingredient_102",
+			"quantity": 100,
+			"isOptional": false,
+			"notes": "4 łyżki"
+		},
+		{
+			"mealId": "meal_33",
+			"ingredientId": "ingredient_5",
+			"quantity": 1,
+			"isOptional": false,
+			"notes": "4 szczypty"
+		},
+		{
+			"mealId": "meal_33",
+			"ingredientId": "ingredient_6",
+			"quantity": 1,
+			"isOptional": false,
+			"notes": "4 szczypty"
+		},
+		{
+			"mealId": "meal_33",
+			"ingredientId": "ingredient_103",
+			"quantity": 6,
+			"isOptional": false,
+			"notes": "2 łyżeczki"
+		},
+		{
+			"mealId": "meal_33",
+			"ingredientId": "ingredient_28",
+			"quantity": 20,
+			"isOptional": false,
+			"notes": "4 łyżeczki"
+		},
+		{
+			"mealId": "meal_33",
+			"ingredientId": "ingredient_78",
+			"quantity": 160,
+			"isOptional": false,
+			"notes": null
+		},
+		{
+			"mealId": "meal_34",
+			"ingredientId": "ingredient_104",
+			"quantity": 120,
+			"isOptional": false,
+			"notes": "8 łyżek"
+		},
+		{
+			"mealId": "meal_34",
+			"ingredientId": "ingredient_83",
+			"quantity": 250,
+			"isOptional": false,
+			"notes": "1 szklanka"
+		},
+		{
+			"mealId": "meal_34",
+			"ingredientId": "ingredient_17",
+			"quantity": 4,
+			"isOptional": false,
+			"notes": "4 sztuki - 224 g"
+		},
+		{
+			"mealId": "meal_34",
+			"ingredientId": "ingredient_21",
+			"quantity": 20,
+			"isOptional": false,
+			"notes": "4 łyżeczki (do ciasta)"
+		},
+		{
+			"mealId": "meal_34",
+			"ingredientId": "ingredient_23",
+			"quantity": 20,
+			"isOptional": false,
+			"notes": "4 łyżeczki"
+		},
+		{
+			"mealId": "meal_34",
+			"ingredientId": "ingredient_30",
+			"quantity": 3,
+			"isOptional": false,
+			"notes": "1 łyżeczka"
+		},
+		{
+			"mealId": "meal_34",
+			"ingredientId": "ingredient_5",
+			"quantity": 2,
+			"isOptional": false,
+			"notes": "2 szczypty"
+		},
+		{
+			"mealId": "meal_34",
+			"ingredientId": "ingredient_25",
+			"quantity": 200,
+			"isOptional": false,
+			"notes": "Nadzienie: świeże lub mrożone"
+		},
+		{
+			"mealId": "meal_34",
+			"ingredientId": "ingredient_105",
+			"quantity": 300,
+			"isOptional": false,
+			"notes": "Nadzienie: 1.2 szklanki"
+		},
+		{
+			"mealId": "meal_34",
+			"ingredientId": "ingredient_20",
+			"quantity": 4,
+			"isOptional": false,
+			"notes": "Nadzienie: 1 łyżeczka"
+		},
+		{
+			"mealId": "meal_34",
+			"ingredientId": "ingredient_21",
+			"quantity": 40,
+			"isOptional": false,
+			"notes": "Nadzienie: 8 łyżeczek"
+		},
+		{
+			"mealId": "meal_34",
+			"ingredientId": "ingredient_18",
+			"quantity": 300,
+			"isOptional": false,
+			"notes": "Do podania: 2 opakowania"
+		},
+		{
+			"mealId": "meal_35",
+			"ingredientId": "ingredient_77",
+			"quantity": 180,
+			"isOptional": false,
+			"notes": null
+		},
+		{
+			"mealId": "meal_36",
+			"ingredientId": "ingredient_39",
+			"quantity": 400,
+			"isOptional": false,
+			"notes": "8 sztuk"
+		},
+		{
+			"mealId": "meal_36",
+			"ingredientId": "ingredient_33",
+			"quantity": 40,
+			"isOptional": false,
+			"notes": "4 łyżeczki"
+		},
+		{
+			"mealId": "meal_36",
+			"ingredientId": "ingredient_37",
+			"quantity": 300,
+			"isOptional": false,
+			"notes": "2 sztuki"
+		},
+		{
+			"mealId": "meal_36",
+			"ingredientId": "ingredient_4",
+			"quantity": 320,
+			"isOptional": false,
+			"notes": "2 sztuki"
+		},
+		{
+			"mealId": "meal_36",
+			"ingredientId": "ingredient_36",
+			"quantity": 180,
+			"isOptional": false,
+			"notes": "6 kromek"
+		},
+		{
+			"mealId": "meal_37",
+			"ingredientId": "ingredient_106",
+			"quantity": 120,
+			"isOptional": false,
+			"notes": null
+		},
+		{
+			"mealId": "meal_37",
+			"ingredientId": "ingredient_40",
+			"quantity": 200,
+			"isOptional": false,
+			"notes": null
+		},
+		{
+			"mealId": "meal_37",
+			"ingredientId": "ingredient_107",
+			"quantity": 500,
+			"isOptional": false,
+			"notes": "2 szklanki"
+		},
+		{
+			"mealId": "meal_37",
+			"ingredientId": "ingredient_108",
+			"quantity": 100,
+			"isOptional": false,
+			"notes": "1 sztuka"
+		},
+		{
+			"mealId": "meal_37",
+			"ingredientId": "ingredient_98",
+			"quantity": 80,
+			"isOptional": false,
+			"notes": "1 sztuka"
+		},
+		{
+			"mealId": "meal_37",
+			"ingredientId": "ingredient_109",
+			"quantity": 4,
+			"isOptional": false,
+			"notes": "1 łyżeczka"
+		},
+		{
+			"mealId": "meal_37",
+			"ingredientId": "ingredient_5",
+			"quantity": 2,
+			"isOptional": false,
+			"notes": "2 szczypty"
+		},
+		{
+			"mealId": "meal_37",
+			"ingredientId": "ingredient_21",
+			"quantity": 20,
+			"isOptional": false,
+			"notes": "4 łyżeczki"
+		},
+		{
+			"mealId": "meal_37",
+			"ingredientId": "ingredient_53",
+			"quantity": 3,
+			"isOptional": false,
+			"notes": "1 łyżeczka"
+		},
+		{
+			"mealId": "meal_37",
+			"ingredientId": "ingredient_11",
+			"quantity": 30,
+			"isOptional": false,
+			"notes": "3 łyżki"
+		},
+		{
+			"mealId": "meal_37",
+			"ingredientId": "ingredient_9",
+			"quantity": 1,
+			"isOptional": false,
+			"notes": "1 ząbek"
+		},
+		{
+			"mealId": "meal_37",
+			"ingredientId": "ingredient_8",
+			"quantity": 0,
+			"isOptional": false,
+			"notes": "1 sztuka"
+		},
+		{
+			"mealId": "meal_38",
+			"ingredientId": "ingredient_110",
+			"quantity": 120,
+			"isOptional": false,
+			"notes": null
+		},
+		{
+			"mealId": "meal_38",
+			"ingredientId": "ingredient_83",
+			"quantity": 750,
+			"isOptional": false,
+			"notes": "3 szklanki"
+		},
+		{
+			"mealId": "meal_38",
+			"ingredientId": "ingredient_21",
+			"quantity": 20,
+			"isOptional": false,
+			"notes": "4 łyżeczki (do puddingu)"
+		},
+		{
+			"mealId": "meal_38",
+			"ingredientId": "ingredient_30",
+			"quantity": 3,
+			"isOptional": false,
+			"notes": "1 łyżeczka"
+		},
+		{
+			"mealId": "meal_38",
+			"ingredientId": "ingredient_28",
+			"quantity": 40,
+			"isOptional": false,
+			"notes": "3 łyżki"
+		},
+		{
+			"mealId": "meal_38",
+			"ingredientId": "ingredient_18",
+			"quantity": 450,
+			"isOptional": false,
+			"notes": "3 opakowania"
+		},
+		{
+			"mealId": "meal_38",
+			"ingredientId": "ingredient_25",
+			"quantity": 200,
+			"isOptional": false,
+			"notes": "Mus: świeże lub mrożone"
+		},
+		{
+			"mealId": "meal_38",
+			"ingredientId": "ingredient_21",
+			"quantity": 10,
+			"isOptional": false,
+			"notes": "Mus: 2 łyżeczki"
+		},
+		{
+			"mealId": "meal_39",
+			"ingredientId": "ingredient_87",
+			"quantity": 158,
+			"isOptional": false,
+			"notes": null
+		},
+		{
+			"mealId": "meal_40",
+			"ingredientId": "ingredient_17",
+			"quantity": 6,
+			"isOptional": false,
+			"notes": "6 sztuk - 336 g"
+		},
+		{
+			"mealId": "meal_40",
+			"ingredientId": "ingredient_111",
+			"quantity": 240,
+			"isOptional": false,
+			"notes": "8 kromek"
+		},
+		{
+			"mealId": "meal_40",
+			"ingredientId": "ingredient_23",
+			"quantity": 20,
+			"isOptional": false,
+			"notes": "2 łyżki"
+		},
+		{
+			"mealId": "meal_40",
+			"ingredientId": "ingredient_112",
+			"quantity": 120,
+			"isOptional": false,
+			"notes": "8 plastrów"
+		},
+		{
+			"mealId": "meal_40",
+			"ingredientId": "ingredient_37",
+			"quantity": 300,
+			"isOptional": false,
+			"notes": "2 sztuki"
+		},
+		{
+			"mealId": "meal_40",
+			"ingredientId": "ingredient_5",
+			"quantity": 2,
+			"isOptional": false,
+			"notes": "2 szczypty"
+		},
+		{
+			"mealId": "meal_41",
+			"ingredientId": "ingredient_104",
+			"quantity": 100,
+			"isOptional": false,
+			"notes": "6,7 łyżki"
+		},
+		{
+			"mealId": "meal_41",
+			"ingredientId": "ingredient_17",
+			"quantity": 1,
+			"isOptional": false,
+			"notes": "0,7 sztuki - 37,3 g"
+		},
+		{
+			"mealId": "meal_41",
+			"ingredientId": "ingredient_83",
+			"quantity": 134,
+			"isOptional": false,
+			"notes": "0,5 szklanki"
+		},
+		{
+			"mealId": "meal_41",
+			"ingredientId": "ingredient_114",
+			"quantity": 84,
+			"isOptional": false,
+			"notes": "0,3 szklanki"
+		},
+		{
+			"mealId": "meal_41",
+			"ingredientId": "ingredient_23",
+			"quantity": 7,
+			"isOptional": false,
+			"notes": "1,3 łyżeczki"
+		},
+		{
+			"mealId": "meal_41",
+			"ingredientId": "ingredient_113",
+			"quantity": 250,
+			"isOptional": false,
+			"notes": "1 opakowanie"
+		},
+		{
+			"mealId": "meal_41",
+			"ingredientId": "ingredient_91",
+			"quantity": 280,
+			"isOptional": false,
+			"notes": "14 łyżek"
+		},
+		{
+			"mealId": "meal_41",
+			"ingredientId": "ingredient_5",
+			"quantity": 2,
+			"isOptional": false,
+			"notes": "2 szczypty"
+		},
+		{
+			"mealId": "meal_41",
+			"ingredientId": "ingredient_20",
+			"quantity": 4,
+			"isOptional": false,
+			"notes": "1 łyżeczka"
+		},
+		{
+			"mealId": "meal_41",
+			"ingredientId": "ingredient_21",
+			"quantity": 30,
+			"isOptional": false,
+			"notes": "6 łyżeczek"
+		},
+		{
+			"mealId": "meal_41",
+			"ingredientId": "ingredient_86",
+			"quantity": 200,
+			"isOptional": false,
+			"notes": "świeże lub mrożone"
+		},
+		{
+			"mealId": "meal_42",
+			"ingredientId": "ingredient_115",
+			"quantity": 180,
+			"isOptional": false,
+			"notes": "1.5 sztuki"
+		},
+		{
+			"mealId": "meal_42",
+			"ingredientId": "ingredient_17",
+			"quantity": 3,
+			"isOptional": false,
+			"notes": "3 sztuki - 168 g"
+		},
+		{
+			"mealId": "meal_42",
+			"ingredientId": "ingredient_116",
+			"quantity": 50,
+			"isOptional": false,
+			"notes": null
+		},
+		{
+			"mealId": "meal_42",
+			"ingredientId": "ingredient_117",
+			"quantity": 70,
+			"isOptional": false,
+			"notes": "7 łyżek"
+		},
+		{
+			"mealId": "meal_42",
+			"ingredientId": "ingredient_28",
+			"quantity": 35,
+			"isOptional": false,
+			"notes": "7 łyżeczek"
+		},
+		{
+			"mealId": "meal_42",
+			"ingredientId": "ingredient_18",
+			"quantity": 450,
+			"isOptional": false,
+			"notes": "3 opakowania"
+		},
+		{
+			"mealId": "meal_42",
+			"ingredientId": "ingredient_5",
+			"quantity": 1,
+			"isOptional": false,
+			"notes": "1 szczypta"
+		},
+		{
+			"mealId": "meal_42",
+			"ingredientId": "ingredient_21",
+			"quantity": 10,
+			"isOptional": false,
+			"notes": "2 łyżeczki"
+		},
+		{
+			"mealId": "meal_43",
+			"ingredientId": "ingredient_88",
+			"quantity": 150,
+			"isOptional": false,
+			"notes": "2 sztuki"
+		},
+		{
+			"mealId": "meal_43",
+			"ingredientId": "ingredient_35",
+			"quantity": 40,
+			"isOptional": false,
+			"notes": null
+		},
+		{
+			"mealId": "meal_43",
+			"ingredientId": "ingredient_89",
+			"quantity": 90,
+			"isOptional": false,
+			"notes": "6 plastrów"
+		},
+		{
+			"mealId": "meal_43",
+			"ingredientId": "ingredient_90",
+			"quantity": 84,
+			"isOptional": false,
+			"notes": "12 plastrów"
+		},
+		{
+			"mealId": "meal_43",
+			"ingredientId": "ingredient_54",
+			"quantity": 300,
+			"isOptional": false,
+			"notes": "2 sztuki"
+		},
+		{
+			"mealId": "meal_43",
+			"ingredientId": "ingredient_91",
+			"quantity": 80,
+			"isOptional": false,
+			"notes": "4 łyżki"
+		},
+		{
+			"mealId": "meal_43",
+			"ingredientId": "ingredient_92",
+			"quantity": 30,
+			"isOptional": false,
+			"notes": "3 łyżeczki"
+		},
+		{
+			"mealId": "meal_43",
+			"ingredientId": "ingredient_93",
+			"quantity": 10,
+			"isOptional": false,
+			"notes": "1 łyżka"
+		},
+		{
+			"mealId": "meal_44",
+			"ingredientId": "ingredient_118",
+			"quantity": 90,
+			"isOptional": false,
+			"notes": null
+		},
+		{
+			"mealId": "meal_44",
+			"ingredientId": "ingredient_40",
+			"quantity": 150,
+			"isOptional": false,
+			"notes": null
+		},
+		{
+			"mealId": "meal_44",
+			"ingredientId": "ingredient_73",
+			"quantity": 400,
+			"isOptional": false,
+			"notes": "1 opakowanie"
+		},
+		{
+			"mealId": "meal_44",
+			"ingredientId": "ingredient_8",
+			"quantity": 160,
+			"isOptional": false,
+			"notes": "2 sztuki"
+		},
+		{
+			"mealId": "meal_44",
+			"ingredientId": "ingredient_9",
+			"quantity": 2,
+			"isOptional": false,
+			"notes": "2 ząbki - 12 g"
+		},
+		{
+			"mealId": "meal_44",
+			"ingredientId": "ingredient_98",
+			"quantity": 160,
+			"isOptional": false,
+			"notes": "2 sztuki"
+		},
+		{
+			"mealId": "meal_44",
+			"ingredientId": "ingredient_119",
+			"quantity": 90,
+			"isOptional": false,
+			"notes": "2 łodygi"
+		},
+		{
+			"mealId": "meal_44",
+			"ingredientId": "ingredient_63",
+			"quantity": 160,
+			"isOptional": false,
+			"notes": "0.6 szklanki"
+		},
+		{
+			"mealId": "meal_44",
+			"ingredientId": "ingredient_3",
+			"quantity": 90,
+			"isOptional": false,
+			"notes": "6 plastrów"
+		},
+		{
+			"mealId": "meal_44",
+			"ingredientId": "ingredient_82",
+			"quantity": 20,
+			"isOptional": false,
+			"notes": "4 łyżeczki"
+		},
+		{
+			"mealId": "meal_44",
+			"ingredientId": "ingredient_23",
+			"quantity": 20,
+			"isOptional": false,
+			"notes": "2 łyżki"
+		},
+		{
+			"mealId": "meal_44",
+			"ingredientId": "ingredient_120",
+			"quantity": 3,
+			"isOptional": false,
+			"notes": "1 łyżeczka"
+		},
+		{
+			"mealId": "meal_44",
+			"ingredientId": "ingredient_5",
+			"quantity": 2,
+			"isOptional": false,
+			"notes": "2 szczypty"
+		},
+		{
+			"mealId": "meal_44",
+			"ingredientId": "ingredient_121",
+			"quantity": 20,
+			"isOptional": false,
+			"notes": "2 łyżki"
+		},
+		{
+			"mealId": "meal_45",
+			"ingredientId": "ingredient_55",
+			"quantity": 120,
+			"isOptional": false,
+			"notes": null
+		},
+		{
+			"mealId": "meal_45",
+			"ingredientId": "ingredient_17",
+			"quantity": 4,
+			"isOptional": false,
+			"notes": "4 sztuki - 224 g"
+		},
+		{
+			"mealId": "meal_45",
+			"ingredientId": "ingredient_56",
+			"quantity": 240,
+			"isOptional": false,
+			"notes": "8 plastrów"
+		},
+		{
+			"mealId": "meal_45",
+			"ingredientId": "ingredient_5",
+			"quantity": 2,
+			"isOptional": false,
+			"notes": "2 szczypty"
+		},
+		{
+			"mealId": "meal_45",
+			"ingredientId": "ingredient_22",
+			"quantity": 4,
+			"isOptional": false,
+			"notes": "1 łyżeczka"
+		},
+		{
+			"mealId": "meal_45",
+			"ingredientId": "ingredient_23",
+			"quantity": 10,
+			"isOptional": false,
+			"notes": "2 łyżeczki"
+		},
+		{
+			"mealId": "meal_45",
+			"ingredientId": "ingredient_57",
+			"quantity": 300,
+			"isOptional": false,
+			"notes": "Do podania: 4 sztuki"
+		},
+		{
+			"mealId": "meal_45",
+			"ingredientId": "ingredient_58",
+			"quantity": 20,
+			"isOptional": false,
+			"notes": "Do podania: 2 łyżeczki"
+		},
+		{
+			"mealId": "meal_45",
+			"ingredientId": "ingredient_21",
+			"quantity": 20,
+			"isOptional": false,
+			"notes": "Do podania: 4 łyżeczki"
+		},
+		{
+			"mealId": "meal_46",
+			"ingredientId": "ingredient_38",
+			"quantity": 152,
+			"isOptional": false,
+			"notes": null
+		},
+		{
+			"mealId": "meal_47",
+			"ingredientId": "ingredient_88",
+			"quantity": 150,
+			"isOptional": false,
+			"notes": "2 sztuki"
+		},
+		{
+			"mealId": "meal_47",
+			"ingredientId": "ingredient_35",
+			"quantity": 40,
+			"isOptional": false,
+			"notes": null
+		},
+		{
+			"mealId": "meal_47",
+			"ingredientId": "ingredient_89",
+			"quantity": 90,
+			"isOptional": false,
+			"notes": "6 plastrów"
+		},
+		{
+			"mealId": "meal_47",
+			"ingredientId": "ingredient_90",
+			"quantity": 84,
+			"isOptional": false,
+			"notes": "12 plastrów"
+		},
+		{
+			"mealId": "meal_47",
+			"ingredientId": "ingredient_54",
+			"quantity": 300,
+			"isOptional": false,
+			"notes": "2 sztuki"
+		},
+		{
+			"mealId": "meal_47",
+			"ingredientId": "ingredient_91",
+			"quantity": 80,
+			"isOptional": false,
+			"notes": "4 łyżki"
+		},
+		{
+			"mealId": "meal_47",
+			"ingredientId": "ingredient_92",
+			"quantity": 30,
+			"isOptional": false,
+			"notes": "3 łyżeczki"
+		},
+		{
+			"mealId": "meal_47",
+			"ingredientId": "ingredient_93",
+			"quantity": 10,
+			"isOptional": false,
+			"notes": "1 łyżka"
+		},
+		{
+			"mealId": "meal_48",
+			"ingredientId": "ingredient_8",
+			"quantity": 80,
+			"isOptional": false,
+			"notes": "1 sztuka"
+		},
+		{
+			"mealId": "meal_48",
+			"ingredientId": "ingredient_9",
+			"quantity": 2,
+			"isOptional": false,
+			"notes": "2 ząbki - 12 g"
+		},
+		{
+			"mealId": "meal_48",
+			"ingredientId": "ingredient_10",
+			"quantity": 340,
+			"isOptional": false,
+			"notes": "2 sztuki"
+		},
+		{
+			"mealId": "meal_48",
+			"ingredientId": "ingredient_98",
+			"quantity": 160,
+			"isOptional": false,
+			"notes": "2 sztuki"
+		},
+		{
+			"mealId": "meal_48",
+			"ingredientId": "ingredient_79",
+			"quantity": 250,
+			"isOptional": false,
+			"notes": null
+		},
+		{
+			"mealId": "meal_48",
+			"ingredientId": "ingredient_118",
+			"quantity": 120,
+			"isOptional": false,
+			"notes": null
+		},
+		{
+			"mealId": "meal_48",
+			"ingredientId": "ingredient_13",
+			"quantity": 3,
+			"isOptional": false,
+			"notes": "1 łyżeczka"
+		},
+		{
+			"mealId": "meal_48",
+			"ingredientId": "ingredient_64",
+			"quantity": 5,
+			"isOptional": false,
+			"notes": "1 plaster"
+		},
+		{
+			"mealId": "meal_48",
+			"ingredientId": "ingredient_121",
+			"quantity": 20,
+			"isOptional": false,
+			"notes": "2 łyżki"
+		},
+		{
+			"mealId": "meal_48",
+			"ingredientId": "ingredient_34",
+			"quantity": 20,
+			"isOptional": false,
+			"notes": "1 łyżka"
+		},
+		{
+			"mealId": "meal_48",
+			"ingredientId": "ingredient_11",
+			"quantity": 30,
+			"isOptional": false,
+			"notes": "3 łyżki"
+		},
+		{
+			"mealId": "meal_48",
+			"ingredientId": "ingredient_126",
+			"quantity": 4,
+			"isOptional": false,
+			"notes": "1 łyżeczka"
+		},
+		{
+			"mealId": "meal_48",
+			"ingredientId": "ingredient_120",
+			"quantity": 3,
+			"isOptional": false,
+			"notes": "1 łyżeczka"
+		},
+		{
+			"mealId": "meal_49",
+			"ingredientId": "ingredient_122",
+			"quantity": 220,
+			"isOptional": false,
+			"notes": "2 sztuki"
+		},
+		{
+			"mealId": "meal_49",
+			"ingredientId": "ingredient_4",
+			"quantity": 640,
+			"isOptional": false,
+			"notes": "4 sztuki"
+		},
+		{
+			"mealId": "meal_49",
+			"ingredientId": "ingredient_123",
+			"quantity": 80,
+			"isOptional": false,
+			"notes": "1 sztuka"
+		},
+		{
+			"mealId": "meal_49",
+			"ingredientId": "ingredient_9",
+			"quantity": 2,
+			"isOptional": false,
+			"notes": "2 ząbki - 12 g"
+		},
+		{
+			"mealId": "meal_49",
+			"ingredientId": "ingredient_124",
+			"quantity": 6,
+			"isOptional": false,
+			"notes": "2 garści"
+		},
+		{
+			"mealId": "meal_49",
+			"ingredientId": "ingredient_76",
+			"quantity": 80,
+			"isOptional": false,
+			"notes": "8 łyżek"
+		},
+		{
+			"mealId": "meal_49",
+			"ingredientId": "ingredient_125",
+			"quantity": 12,
+			"isOptional": false,
+			"notes": "2 łyżki"
+		},
+		{
+			"mealId": "meal_49",
+			"ingredientId": "ingredient_11",
+			"quantity": 30,
+			"isOptional": false,
+			"notes": "6 łyżeczek"
+		},
+		{
+			"mealId": "meal_49",
+			"ingredientId": "ingredient_5",
+			"quantity": 2,
+			"isOptional": false,
+			"notes": "2 szczypty"
+		},
+		{
+			"mealId": "meal_49",
+			"ingredientId": "ingredient_6",
+			"quantity": 2,
+			"isOptional": false,
+			"notes": "2 szczypty"
+		},
+		{
+			"mealId": "meal_50",
+			"ingredientId": "ingredient_77",
+			"quantity": 180,
+			"isOptional": false,
+			"notes": null
+		},
+		{
+			"mealId": "meal_51",
+			"ingredientId": "ingredient_36",
+			"quantity": 240,
+			"isOptional": false,
+			"notes": "8 kromek"
+		},
+		{
+			"mealId": "meal_51",
+			"ingredientId": "ingredient_59",
+			"quantity": 60,
+			"isOptional": false,
+			"notes": "4 plastry"
+		},
+		{
+			"mealId": "meal_51",
+			"ingredientId": "ingredient_60",
+			"quantity": 240,
+			"isOptional": false,
+			"notes": "2 opakowania"
+		},
+		{
+			"mealId": "meal_51",
+			"ingredientId": "ingredient_44",
+			"quantity": 200,
+			"isOptional": false,
+			"notes": "10 sztuk"
+		},
+		{
+			"mealId": "meal_51",
+			"ingredientId": "ingredient_28",
+			"quantity": 40,
+			"isOptional": false,
+			"notes": "8 łyżeczek"
+		},
+		{
+			"mealId": "meal_52",
+			"ingredientId": "ingredient_79",
+			"quantity": 200,
+			"isOptional": false,
+			"notes": null
+		},
+		{
+			"mealId": "meal_52",
+			"ingredientId": "ingredient_118",
+			"quantity": 120,
+			"isOptional": false,
+			"notes": null
+		},
+		{
+			"mealId": "meal_52",
+			"ingredientId": "ingredient_10",
+			"quantity": 170,
+			"isOptional": false,
+			"notes": "1 sztuka"
+		},
+		{
+			"mealId": "meal_52",
+			"ingredientId": "ingredient_119",
+			"quantity": 90,
+			"isOptional": false,
+			"notes": "2 łodygi"
+		},
+		{
+			"mealId": "meal_52",
+			"ingredientId": "ingredient_98",
+			"quantity": 80,
+			"isOptional": false,
+			"notes": "1 sztuka"
+		},
+		{
+			"mealId": "meal_52",
+			"ingredientId": "ingredient_127",
+			"quantity": 10,
+			"isOptional": false,
+			"notes": "2 łyżeczki"
+		},
+		{
+			"mealId": "meal_52",
+			"ingredientId": "ingredient_128",
+			"quantity": 10,
+			"isOptional": false,
+			"notes": "2 łyżeczki"
+		},
+		{
+			"mealId": "meal_52",
+			"ingredientId": "ingredient_114",
+			"quantity": 250,
+			"isOptional": false,
+			"notes": "Marynata: 1 szklanka"
+		},
+		{
+			"mealId": "meal_52",
+			"ingredientId": "ingredient_68",
+			"quantity": 10,
+			"isOptional": false,
+			"notes": "Marynata: 1 sztuka"
+		},
+		{
+			"mealId": "meal_52",
+			"ingredientId": "ingredient_9",
+			"quantity": 2,
+			"isOptional": false,
+			"notes": "Marynata: 2 ząbki - 12 g"
+		},
+		{
+			"mealId": "meal_52",
+			"ingredientId": "ingredient_64",
+			"quantity": 10,
+			"isOptional": false,
+			"notes": "Marynata: 2 plastry"
+		},
+		{
+			"mealId": "meal_52",
+			"ingredientId": "ingredient_24",
+			"quantity": 24,
+			"isOptional": false,
+			"notes": "Marynata: 2 łyżeczki"
+		},
+		{
+			"mealId": "meal_52",
+			"ingredientId": "ingredient_121",
+			"quantity": 20,
+			"isOptional": false,
+			"notes": "Marynata: 2 łyżki"
+		},
+		{
+			"mealId": "meal_52",
+			"ingredientId": "ingredient_129",
+			"quantity": 10,
+			"isOptional": false,
+			"notes": "Marynata: 1 łyżka"
+		},
+		{
+			"mealId": "meal_52",
+			"ingredientId": "ingredient_23",
+			"quantity": 30,
+			"isOptional": false,
+			"notes": "Marynata: 3 łyżki"
+		},
+		{
+			"mealId": "meal_53",
+			"ingredientId": "ingredient_130",
+			"quantity": 600,
+			"isOptional": false,
+			"notes": "3 opakowania"
+		},
+		{
+			"mealId": "meal_53",
+			"ingredientId": "ingredient_115",
+			"quantity": 240,
+			"isOptional": false,
+			"notes": "2 sztuki"
+		},
+		{
+			"mealId": "meal_53",
+			"ingredientId": "ingredient_131",
+			"quantity": 480,
+			"isOptional": false,
+			"notes": "2 sztuki"
+		},
+		{
+			"mealId": "meal_53",
+			"ingredientId": "ingredient_132",
+			"quantity": 40,
+			"isOptional": false,
+			"notes": "4 łyżeczki"
+		},
+		{
+			"mealId": "meal_53",
+			"ingredientId": "ingredient_133",
+			"quantity": 40,
+			"isOptional": false,
+			"notes": null
+		},
+		{
+			"mealId": "meal_54",
+			"ingredientId": "ingredient_134",
+			"quantity": 200,
+			"isOptional": false,
+			"notes": "do 200 kcal"
+		}
+	]
+}
