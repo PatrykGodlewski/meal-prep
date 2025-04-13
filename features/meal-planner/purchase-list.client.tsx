@@ -1,7 +1,7 @@
 // components/shopping-list-display.tsx (New file or rename existing)
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import convertKeysToCamelCase, { cn } from "@/lib/utils";
@@ -28,11 +28,11 @@ export const ShoppingListDisplay: React.FC<ShoppingListDisplayProps> = ({
   list,
   currentWeek,
 }) => {
-  const initialItems = list.items;
-  const shoppingListId = list.id;
+  const initialItems = list?.items;
+  const shoppingListId = list?.id;
   const supabase = createClient();
   const { toast } = useToast();
-  const [items, setItems] = useState<ShoppingListItem[]>(initialItems);
+  const [items, setItems] = useState<WeeklyShoppingList["items"]>(initialItems);
   const [isLoading, setIsLoading] = useState(false); // Basic loading state for updates
 
   useEffect(() => {
@@ -62,7 +62,7 @@ export const ShoppingListDisplay: React.FC<ShoppingListDisplayProps> = ({
               case "INSERT":
                 // Avoid duplicates if optimistic update already added it
                 if (!newItems.some((item) => item.id === payload.new.id)) {
-                  newItems.push(newItem as ShoppingListItem);
+                  newItems.push(newItem as WeeklyShoppingList["items"][number]);
                 }
                 break;
               case "UPDATE":
@@ -171,78 +171,79 @@ export const ShoppingListDisplay: React.FC<ShoppingListDisplayProps> = ({
       );
     }
 
+    // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
+    const groupedItems = useMemo(() => {
+      return Object.groupBy(
+        items,
+        (item) => item?.ingredient?.category ?? "other",
+      );
+    }, [items]);
+
     return (
       <ul className="space-y-2">
-        {items.map((item) => {
-          const uniqueId = `shopping-item-${item.id}`;
-          return (
-            <li
-              key={item.id}
-              className="flex items-center justify-between p-3 rounded-md border bg-white dark:bg-neutral-800/50 dark:border-neutral-700 shadow-sm hover:bg-gray-50 dark:hover:bg-neutral-700/50 transition-colors"
-            >
-              <div className="flex items-center space-x-3">
-                <Checkbox
-                  id={uniqueId}
-                  checked={item.isChecked}
-                  onCheckedChange={() =>
-                    handleCheckChange(item.id, item.isChecked)
-                  }
-                  aria-labelledby={`${uniqueId}-label`}
-                  disabled={isLoading}
-                />
-                <Label
-                  htmlFor={uniqueId}
-                  id={`${uniqueId}-label`}
-                  className={cn(
-                    "text-sm font-medium cursor-pointer",
-                    item.isChecked
-                      ? "line-through text-gray-500 dark:text-gray-400"
-                      : "text-gray-800 dark:text-gray-100",
-                  )}
+        {Object.entries(groupedItems).map(([category, items]) => (
+          <div key={category} className="space-y-2">
+            <h2 className="capitalize font-bold text-2xl py-2">{category}</h2>
+            {items.map((item) => {
+              const uniqueId = `shopping-item-${item.id}`;
+              return (
+                // biome-ignore lint/a11y/useKeyWithClickEvents: <explanation>
+                <li
+                  key={item.id}
+                  className="flex items-center p-3 justify-between rounded-md border bg-white dark:bg-neutral-800/50 dark:border-neutral-700 shadow-sm hover:bg-gray-50 dark:hover:bg-neutral-700/50 transition-colors"
+                  onClick={() => handleCheckChange(item.id, item.isChecked)}
                 >
-                  {item.ingredientName}
-                </Label>
-              </div>
-              <span
-                className={cn(
-                  "text-sm italic",
-                  item.isChecked
-                    ? "text-gray-400 dark:text-gray-500"
-                    : "text-gray-600 dark:text-gray-300",
-                )}
-              >
-                {item.amount}
-              </span>
-            </li>
-          );
-        })}
+                  <div className="flex items-center space-x-3">
+                    <Checkbox
+                      id={uniqueId}
+                      checked={item.isChecked}
+                      onCheckedChange={() =>
+                        handleCheckChange(item.id, item.isChecked)
+                      }
+                      aria-labelledby={`${uniqueId}-label`}
+                      disabled={isLoading}
+                    />
+                    <Label
+                      htmlFor={uniqueId}
+                      id={`${uniqueId}-label`}
+                      className={cn(
+                        "text-sm font-medium cursor-pointer",
+                        item.isChecked
+                          ? "line-through text-gray-500 dark:text-gray-400"
+                          : "text-gray-800 dark:text-gray-100",
+                      )}
+                    >
+                      {item.ingredientName}
+                    </Label>
+                  </div>
+                  <span
+                    className={cn(
+                      "text-sm italic",
+                      item.isChecked
+                        ? "text-gray-400 dark:text-gray-500"
+                        : "text-gray-600 dark:text-gray-300",
+                    )}
+                  >
+                    {item.amount} {item.ingredient?.unit}
+                  </span>
+                </li>
+              );
+            })}
+          </div>
+        ))}
       </ul>
     );
   };
-
-  if (!shoppingListId) {
-    return (
-      <div className="p-4 border rounded-lg shadow-sm bg-white dark:bg-neutral-800">
-        <h3 className="text-lg font-semibold mb-3 border-b pb-2">
-          {"Shopping list"}
-        </h3>
-        <p className="text-sm text-gray-500 dark:text-gray-400 italic p-4 text-center">
-          No shopping list selected.
-        </p>
-      </div>
-    );
-  }
 
   return (
     <div className="p-4 border rounded-lg shadow-sm bg-white dark:bg-neutral-800">
       <div className="flex items-center justify-between mb-4 pb-2">
         <h3 className="text-lg font-semibold ">{"Shopping list"}</h3>
-        {/* // TODO: Need a state management works but do not reflect frontend */}
         <Button onClick={() => updateWeeklyShoppingList(currentWeek)}>
           {"Update shopping list"}
         </Button>
       </div>
-      {renderContent()}
+      {shoppingListId ? renderContent() : "No shopping list created"}
     </div>
   );
 };

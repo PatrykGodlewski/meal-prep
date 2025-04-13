@@ -20,6 +20,7 @@ import { and, eq, inArray } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import type { MealPlanClient } from "./types";
 import type { UnitType } from "@/validators";
+import { formatedEndOfWeek, formatedStartOfWeek } from "@/lib/utils";
 
 interface GeneratePlanResult {
   success: boolean;
@@ -348,10 +349,7 @@ export const updateWeeklyShoppingList = async (date: Date) => {
       where: (shoppingLists, { and, eq }) =>
         and(
           eq(shoppingLists.userId, userId),
-          eq(
-            shoppingLists.mealPlanWeekStart,
-            format(startOfWeek(date), "yyyy-MM-dd"),
-          ),
+          eq(shoppingLists.mealPlanWeekStart, formatedStartOfWeek(date)),
         ),
     });
     if (list) return list;
@@ -359,7 +357,7 @@ export const updateWeeklyShoppingList = async (date: Date) => {
       .insert(shoppingLists)
       .values({
         userId: userId,
-        mealPlanWeekStart: format(startOfWeek(date), "yyyy-MM-dd"),
+        mealPlanWeekStart: formatedStartOfWeek(date),
       })
       .returning();
     return newList;
@@ -371,8 +369,8 @@ export const updateWeeklyShoppingList = async (date: Date) => {
     where: (mealPlans, { eq, and, gte, lte }) =>
       and(
         eq(mealPlans.userId, userId),
-        gte(mealPlans.date, format(startOfWeek(date), "yyyy-MM-dd")),
-        lte(mealPlans.date, format(endOfWeek(date), "yyyy-MM-dd")),
+        gte(mealPlans.date, formatedStartOfWeek(date)),
+        lte(mealPlans.date, formatedEndOfWeek(date)),
       ),
     with: {
       plannedMeals: {
@@ -454,13 +452,12 @@ export const getWeeklyShoppingList = async (date: Date) => {
       where: (shoppingLists, { and, eq }) =>
         and(
           eq(shoppingLists.userId, userId),
-          eq(
-            shoppingLists.mealPlanWeekStart,
-            format(startOfWeek(date), "yyyy-MM-dd"),
-          ),
+          eq(shoppingLists.mealPlanWeekStart, formatedStartOfWeek(date)),
         ),
       with: {
-        items: true,
+        items: {
+          with: { ingredient: true },
+        },
       },
     });
     if (!list) return null;
@@ -482,8 +479,8 @@ export const updateShoppingList = async (date: Date) => {
     return null;
   }
   const userId = user.id;
-  const weekStartStr = format(startOfWeek(date), "yyyy-MM-dd");
-  const weekEndStr = format(endOfWeek(date), "yyyy-MM-dd");
+  const weekStartStr = formatedStartOfWeek(date);
+  const weekEndStr = formatedEndOfWeek(date);
 
   try {
     const mealPlansWithinRange = await db.query.mealPlans.findMany({

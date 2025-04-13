@@ -30,7 +30,7 @@ import { ShoppingListDisplay } from "./purchase-list.client";
 
 interface Props {
   initialMealPlansData: MealPlanClient[] | undefined;
-  initialShoppingList: WeeklyShoppingList;
+  initialShoppingList: WeeklyShoppingList | null;
 }
 
 export function MealPlanGrid({

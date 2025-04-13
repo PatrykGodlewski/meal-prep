@@ -176,7 +176,7 @@
 			"prepTimeMinutes": 15,
 			"cookTimeMinutes": 25,
 			"servings": 1,
-			"category": "dessert",
+			"category": "snack",
 			"imageUrl": null,
 			"isPublic": false
 		},
@@ -452,7 +452,7 @@
 			"prepTimeMinutes": 5,
 			"cookTimeMinutes": 30,
 			"servings": 1,
-			"category": "dessert",
+			"category": "snack",
 			"imageUrl": null,
 			"isPublic": false
 		},
@@ -500,7 +500,7 @@
 			"prepTimeMinutes": 10,
 			"cookTimeMinutes": 15,
 			"servings": 1,
-			"category": "dessert",
+			"category": "snack",
 			"imageUrl": null,
 			"isPublic": false
 		},
@@ -536,7 +536,7 @@
 			"prepTimeMinutes": 15,
 			"cookTimeMinutes": 25,
 			"servings": 1,
-			"category": "dessert",
+			"category": "snack",
 			"imageUrl": null,
 			"isPublic": false
 		},
@@ -804,7 +804,7 @@
 			"temp_id": "ingredient_26",
 			"name": "Lody na patyku",
 			"category": "other",
-			"unit": "kcal"
+			"unit": "piece"
 		},
 		{
 			"temp_id": "ingredient_27",
@@ -876,7 +876,7 @@
 			"temp_id": "ingredient_38",
 			"name": "Pudding proteinowy Pilos",
 			"category": "dairy",
-			"unit": "kcal"
+			"unit": "piece"
 		},
 		{
 			"temp_id": "ingredient_39",
@@ -930,7 +930,7 @@
 			"temp_id": "ingredient_47",
 			"name": "Koktajl białkowy Piątnica",
 			"category": "dairy",
-			"unit": "kcal"
+			"unit": "piece"
 		},
 		{
 			"temp_id": "ingredient_48",
@@ -1110,7 +1110,7 @@
 			"temp_id": "ingredient_77",
 			"name": "Dwa jabłka",
 			"category": "fruit",
-			"unit": "kcal"
+			"unit": "piece"
 		},
 		{
 			"temp_id": "ingredient_78",
@@ -1170,7 +1170,7 @@
 			"temp_id": "ingredient_87",
 			"name": "Kaszka Pilos",
 			"category": "grain",
-			"unit": "kcal"
+			"unit": "piece"
 		},
 		{
 			"temp_id": "ingredient_88",
@@ -1452,7 +1452,7 @@
 			"temp_id": "ingredient_134",
 			"name": "Baton",
 			"category": "other",
-			"unit": "kcal"
+			"unit": "piece"
 		}
 	],
 	"mealIngredients": [
@@ -2977,13 +2977,6 @@
 		},
 		{
 			"mealId": "meal_34",
-			"ingredientId": "ingredient_21",
-			"quantity": 20,
-			"isOptional": false,
-			"notes": "4 łyżeczki (do ciasta)"
-		},
-		{
-			"mealId": "meal_34",
 			"ingredientId": "ingredient_23",
 			"quantity": 20,
 			"isOptional": false,
@@ -3026,17 +3019,17 @@
 		},
 		{
 			"mealId": "meal_34",
-			"ingredientId": "ingredient_21",
-			"quantity": 40,
-			"isOptional": false,
-			"notes": "Nadzienie: 8 łyżeczek"
-		},
-		{
-			"mealId": "meal_34",
 			"ingredientId": "ingredient_18",
 			"quantity": 300,
 			"isOptional": false,
 			"notes": "Do podania: 2 opakowania"
+		},
+		{
+			"mealId": "meal_34",
+			"ingredientId": "ingredient_21",
+			"quantity": 60,
+			"isOptional": false,
+			"notes": "Do ciasta: 4 łyżeczki; Nadzienie: 8 łyżeczek"
 		},
 		{
 			"mealId": "meal_35",
@@ -3180,13 +3173,6 @@
 		},
 		{
 			"mealId": "meal_38",
-			"ingredientId": "ingredient_21",
-			"quantity": 20,
-			"isOptional": false,
-			"notes": "4 łyżeczki (do puddingu)"
-		},
-		{
-			"mealId": "meal_38",
 			"ingredientId": "ingredient_30",
 			"quantity": 3,
 			"isOptional": false,
@@ -3216,9 +3202,9 @@
 		{
 			"mealId": "meal_38",
 			"ingredientId": "ingredient_21",
-			"quantity": 10,
+			"quantity": 30,
 			"isOptional": false,
-			"notes": "Mus: 2 łyżeczki"
+			"notes": "Do puddingu: 4 łyżeczki; Mus: 2 łyżeczki"
 		},
 		{
 			"mealId": "meal_39",

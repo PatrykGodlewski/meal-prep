@@ -1,9 +1,5 @@
-export default async function Layout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
-  return (
-    <div className="max-w-7xl flex flex-col gap-12 items-start">{children}</div>
-  );
+import type { PropsWithChildren } from "react";
+
+export default function AuthLayout({ children }: PropsWithChildren) {
+  return <div className="flex justify-center">{children}</div>;
 }

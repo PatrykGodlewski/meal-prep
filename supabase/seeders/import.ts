@@ -113,7 +113,7 @@ export async function importMealsAndIngredients(
             category: mealData.category,
             imageUrl: mealData.imageUrl,
             isPublic: mealData.isPublic,
-            createdBy: mealData.createdBy, // Ensure this is a valid UUID string or null
+            createdBy: "47ad5682-4626-425f-a6d6-28202f0fb58b", // Ensure this is a valid UUID string or null
             // createdAt and updatedAt will be set by the database default
           })
           .returning({ id: meals.id });

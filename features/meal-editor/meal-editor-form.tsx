@@ -64,8 +64,8 @@ export const MealFormSchema = z.object({
     .string()
     .min(10, "Description must be at least 10 characters."),
   instructions: z.string().nullable().optional(),
-  prepTimeMinutes: z.coerce.number().int().positive().nullable().optional(),
-  cookTimeMinutes: z.coerce.number().int().positive().nullable().optional(),
+  prepTimeMinutes: z.coerce.number().nonnegative().int().nullable().optional(),
+  cookTimeMinutes: z.coerce.number().nonnegative().int().nullable().optional(),
   servings: z.coerce.number().int().positive().nullable().optional(),
   category: mealCategories,
   imageUrl: z

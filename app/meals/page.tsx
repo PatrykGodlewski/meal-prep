@@ -6,6 +6,7 @@ import { db } from "@/supabase";
 import { type Meal, meals } from "@/supabase/schema";
 import { authorize } from "@/lib/authorization";
 import { getProfile } from "@/lib/getProfile";
+import { redirect } from "next/navigation";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
