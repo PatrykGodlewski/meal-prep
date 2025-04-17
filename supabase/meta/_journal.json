@@ -50,6 +50,13 @@
       "when": 1744492954505,
       "tag": "0006_next_thunderbolt_ross",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1744666755033,
+      "tag": "0007_friendly_maximus",
+      "breakpoints": true
     }
   ]
 }

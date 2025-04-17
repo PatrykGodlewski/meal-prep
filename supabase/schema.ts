@@ -16,9 +16,7 @@ import { relations } from "drizzle-orm";
 
 const authSchema = pgSchema("auth");
 
-// --- ENUMS ---
-
-export const MEAL_CATEGORY_ENUM = pgEnum("meal_category", [
+export const MEAL_CATEGORY_ENUM = pgEnum("mealCategory", [
   "breakfast",
   "lunch",
   "dinner",
@@ -39,26 +37,24 @@ export const UNIT_ENUM = pgEnum("unit", [
   "pinch",
 ]);
 
-export const INGREDIENT_CATEGORY_ENUM = pgEnum("ingredient_category", [
+export const INGREDIENT_CATEGORY_ENUM = pgEnum("ingredientCategory", [
   "dairy",
   "meat",
   "poultry",
   "seafood",
   "vegetable",
   "fruit",
-  "grain", // Includes flour, pasta, rice etc.
-  "legume", // Beans, lentils, peas
+  "grain",
+  "legume",
   "nut_seed",
   "spice_herb",
   "fat_oil",
   "sweetener",
-  "condiment", // Sauces, vinegar etc.
+  "condiment",
   "beverage",
-  "baking", // Baking powder, yeast etc.
+  "baking",
   "other",
 ]);
-
-// --- TABLES ---
 
 export const users = authSchema.table("users", {
   id: uuid("id").primaryKey(),
@@ -66,7 +62,7 @@ export const users = authSchema.table("users", {
 
 export const profiles = pgTable("profiles", {
   id: serial("id").primaryKey(),
-  userId: uuid("user_id")
+  userId: uuid("userId")
     .references(() => users.id)
     .notNull(),
   nickname: text("nickname"),
@@ -77,79 +73,75 @@ export const meals = pgTable("meals", {
   name: text("name").notNull(),
   description: text("description").notNull(),
   instructions: text("instructions"),
-  prepTimeMinutes: integer("prep_time_minutes"),
-  cookTimeMinutes: integer("cook_time_minutes"),
+  prepTimeMinutes: integer("prepTimeMinutes"),
+  cookTimeMinutes: integer("cookTimeMinutes"),
   servings: integer("servings"),
   category: MEAL_CATEGORY_ENUM("category"),
-  imageUrl: text("image_url"),
-  isPublic: boolean("is_public").default(false),
-  createdBy: uuid("created_by").references(() => users.id, {
+  imageUrl: text("imageUrl"),
+  isPublic: boolean("isPublic").default(false),
+  createdBy: uuid("createdBy").references(() => users.id, {
     onDelete: "cascade",
   }),
-  createdAt: timestamp("created_at", { withTimezone: true })
+  createdAt: timestamp("createdAt", { withTimezone: true })
     .defaultNow()
     .notNull(),
-  updatedAt: timestamp("updated_at", { withTimezone: true })
+  updatedAt: timestamp("updatedAt", { withTimezone: true })
     .defaultNow()
     .notNull(),
 });
 
-export const mealPlans = pgTable("meal_plans", {
+export const mealPlans = pgTable("mealPlans", {
   id: serial("id").primaryKey(),
-  userId: uuid("user_id")
+  userId: uuid("userId")
     .references(() => users.id)
     .notNull(),
   date: date("date").notNull(),
 });
 
 export const plannedMeals = pgTable(
-  "planned_meals",
+  "plannedMeals",
   {
-    mealPlanId: integer("meal_plan_id")
-      .references(() => mealPlans.id, { onDelete: "cascade" }) // Added onDelete
+    mealPlanId: integer("mealPlanId")
+      .references(() => mealPlans.id, { onDelete: "cascade" })
       .notNull(),
-    mealId: uuid("meal_id")
-      .references(() => meals.id, { onDelete: "cascade" }) // Added onDelete
+    mealId: uuid("mealId")
+      .references(() => meals.id, { onDelete: "cascade" })
       .notNull(),
-    createdAt: timestamp("created_at", { withTimezone: true })
+    createdAt: timestamp("createdAt", { withTimezone: true })
       .defaultNow()
       .notNull(),
-    updatedAt: timestamp("updated_at", { withTimezone: true })
+    updatedAt: timestamp("updatedAt", { withTimezone: true })
       .defaultNow()
       .notNull(),
   },
   (table) => [
     primaryKey({
       columns: [table.mealPlanId, table.mealId],
-    }), // Added category to PK if one meal can be planned multiple times per day under different categories
-    // If a meal can only appear once per day plan, use:
-    // pk_planned_meals: primaryKey({ columns: [table.mealPlanId, table.mealId] }),
+    }),
   ],
 );
 
-// --- Independent Ingredients Table ---
 export const ingredients = pgTable("ingredients", {
   id: uuid("id").defaultRandom().primaryKey().notNull(),
-  name: text("name").notNull().unique(), // Each ingredient name should be unique
-  category: INGREDIENT_CATEGORY_ENUM("category"), // Required or notNull, based on your requirements
+  name: text("name").notNull().unique(),
+  category: INGREDIENT_CATEGORY_ENUM("category"),
   unit: UNIT_ENUM("unit"),
-  createdAt: timestamp("created_at", { withTimezone: true })
+  createdAt: timestamp("createdAt", { withTimezone: true })
     .defaultNow()
     .notNull(),
 });
 
-// --- Junction Table: Many-to-Many Relation Between Meals and Ingredients ---
 export const mealIngredients = pgTable(
-  "meal_ingredients",
+  "mealIngredients",
   {
-    mealId: uuid("meal_id")
+    mealId: uuid("mealId")
       .notNull()
       .references(() => meals.id, { onDelete: "cascade" }),
-    ingredientId: uuid("ingredient_id")
+    ingredientId: uuid("ingredientId")
       .notNull()
       .references(() => ingredients.id, { onDelete: "cascade" }),
-    quantity: integer("quantity").notNull(), // Specific quantity for this meal
-    isOptional: boolean("is_optional").default(false),
+    quantity: integer("quantity").notNull(),
+    isOptional: boolean("isOptional").default(false),
     notes: text("notes"),
   },
   (table) => [
@@ -159,69 +151,41 @@ export const mealIngredients = pgTable(
   ],
 );
 
-export const tags = pgTable("tags", {
+export const shoppingLists = pgTable("shoppingLists", {
   id: uuid("id").defaultRandom().primaryKey().notNull(),
-  name: text("name").notNull().unique(),
-  createdAt: timestamp("created_at", { withTimezone: true })
+  userId: uuid("userId")
+    .references(() => users.id, { onDelete: "cascade" })
+    .notNull(),
+  mealPlanWeekStart: date("mealPlanWeekStart"),
+  createdAt: timestamp("createdAt", { withTimezone: true })
     .defaultNow()
     .notNull(),
 });
 
-export const mealsTags = pgTable(
-  "meals_tags",
+export const shoppingListItems = pgTable(
+  "shoppingListItems",
   {
-    mealId: uuid("meal_id")
-      .notNull()
-      .references(() => meals.id, { onDelete: "cascade" }),
-    tagId: uuid("tag_id")
-      .notNull()
-      .references(() => tags.id, { onDelete: "cascade" }),
-    createdAt: timestamp("created_at", { withTimezone: true })
+    id: uuid("id").defaultRandom().primaryKey().notNull(),
+    shoppingListId: uuid("shoppingListId")
+      .references(() => shoppingLists.id, { onDelete: "cascade" })
+      .notNull(),
+    ingredientId: uuid("ingredientId").references(() => ingredients.id),
+    amount: integer("amount"),
+    isChecked: boolean("isChecked").default(false).notNull(),
+    createdAt: timestamp("createdAt", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updatedAt", { withTimezone: true })
       .defaultNow()
       .notNull(),
   },
-  (table) => [primaryKey({ columns: [table.mealId, table.tagId] })],
-);
-
-export const shoppingLists = pgTable("shopping_lists", {
-  id: uuid("id").defaultRandom().primaryKey().notNull(),
-  userId: uuid("user_id")
-    .references(() => users.id, { onDelete: "cascade" })
-    .notNull(),
-  mealPlanWeekStart: date("meal_plan_week_start"),
-  createdAt: timestamp("created_at", { withTimezone: true })
-    .defaultNow()
-    .notNull(),
-});
-
-// New junction table for items within a shopping list
-export const shoppingListItems = pgTable(
-  "shopping_list_items",
-  {
-    id: uuid("id").defaultRandom().primaryKey().notNull(), // Unique ID for the list item itself
-    shoppingListId: uuid("shopping_list_id")
-      .references(() => shoppingLists.id, { onDelete: "cascade" })
-      .notNull(),
-    // Store ingredient details directly or reference an ingredient ID
-    // ingredientName: text("ingredient_name").notNull(),
-    amount: integer("amount"), // Store the formatted amount string
-    ingredientId: uuid("ingredient_id").references(() => ingredients.id), // Optional: Link to definition
-    ingredientName: text("ingredient_name").references(() => ingredients.name),
-    isChecked: boolean("is_checked").default(false).notNull(),
-    // Optional: Track who checked it and when
-    // checkedBy: uuid("checked_by").references(() => users.id),
-    // checkedAt: timestamp("checked_at", { withTimezone: true }),
-  },
   (table) => [
-    // Prevent duplicate ingredient names within the same list (optional but recommended)
-    uniqueIndex("uq_list_ingredient").on(
+    uniqueIndex("uqListIngredient").on(
       table.shoppingListId,
       table.ingredientId,
     ),
   ],
 );
-
-// --- RELATIONS ---
 
 export const shoppingListsRelations = relations(
   shoppingLists,
@@ -249,8 +213,7 @@ export const shoppingListItemsRelations = relations(
 );
 
 export const mealsRelations = relations(meals, ({ many, one }) => ({
-  mealIngredients: many(mealIngredients), // Relation to the junction table
-  tags: many(mealsTags),
+  mealIngredients: many(mealIngredients),
   plannedMeals: many(plannedMeals),
   user: one(users, {
     fields: [meals.createdBy],
@@ -259,7 +222,7 @@ export const mealsRelations = relations(meals, ({ many, one }) => ({
 }));
 
 export const ingredientsRelations = relations(ingredients, ({ many }) => ({
-  mealIngredients: many(mealIngredients), // Relation to the junction table
+  mealIngredients: many(mealIngredients),
 }));
 
 export const mealIngredientsRelations = relations(
@@ -275,21 +238,6 @@ export const mealIngredientsRelations = relations(
     }),
   }),
 );
-
-export const tagsRelations = relations(tags, ({ many }) => ({
-  meals: many(mealsTags),
-}));
-
-export const mealsTagsRelations = relations(mealsTags, ({ one }) => ({
-  meal: one(meals, {
-    fields: [mealsTags.mealId],
-    references: [meals.id],
-  }),
-  tag: one(tags, {
-    fields: [mealsTags.tagId],
-    references: [tags.id],
-  }),
-}));
 
 export const mealPlansRelations = relations(mealPlans, ({ one, many }) => ({
   user: one(users, {
@@ -319,15 +267,12 @@ export const profilesRelations = relations(profiles, ({ one }) => ({
 
 export const usersRelations = relations(users, ({ one, many }) => ({
   profile: one(profiles, {
-    // Assumes profiles table is accessible
     fields: [users.id],
     references: [profiles.userId],
   }),
-  meals: many(meals), // Relation back to meals created by the user
-  mealPlans: many(mealPlans), // Relation back to user's meal plans
+  meals: many(meals),
+  mealPlans: many(mealPlans),
 }));
-
-// --- TYPES --- (Drizzle infers these, but explicit export is good practice)
 
 export type Meal = typeof meals.$inferSelect;
 export type NewMeal = typeof meals.$inferInsert;
@@ -337,9 +282,6 @@ export type NewIngredient = typeof ingredients.$inferInsert;
 
 export type MealIngredient = typeof mealIngredients.$inferSelect;
 export type NewMealIngredient = typeof mealIngredients.$inferInsert;
-
-export type Tag = typeof tags.$inferSelect;
-export type NewTag = typeof tags.$inferInsert;
 
 export type MealPlan = typeof mealPlans.$inferSelect;
 export type NewMealPlan = typeof mealPlans.$inferInsert;
@@ -353,12 +295,10 @@ export type NewShoppingList = typeof shoppingLists.$inferInsert;
 export type ShoppingListItem = typeof shoppingListItems.$inferSelect;
 export type NewShoppingListItem = typeof shoppingListItems.$inferInsert;
 
-// --- NEW: Export Enum Type ---
 export type IngredientCategory =
   (typeof INGREDIENT_CATEGORY_ENUM.enumValues)[number];
 
 export const schema = {
-  // Tables
   users,
   profiles,
   meals,
@@ -366,10 +306,7 @@ export const schema = {
   plannedMeals,
   ingredients,
   mealIngredients,
-  tags,
-  mealsTags,
 
-  // Relations
   usersRelations,
   profilesRelations,
   mealsRelations,
@@ -377,8 +314,6 @@ export const schema = {
   plannedMealsRelations,
   ingredientsRelations,
   mealIngredientsRelations,
-  tagsRelations,
-  mealsTagsRelations,
 
   shoppingLists,
   shoppingListItems,

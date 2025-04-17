@@ -13,7 +13,7 @@ import {
 const items = [
   {
     title: "Settings",
-    url: "#",
+    url: "/settings",
     icon: SettingsIcon,
   },
   {
@@ -32,11 +32,7 @@ export function NavSecondary({
         <SidebarMenu>
           {items.map((item) => (
             <SidebarMenuItem key={item.title}>
-              <SidebarMenuButton
-                className="pointer-events-none text-neutral-600 bg-neutral-800"
-                disabled
-                asChild
-              >
+              <SidebarMenuButton variant={"outline"} asChild>
                 <a href={item.url}>
                   <item.icon />
                   <span>{item.title}</span>

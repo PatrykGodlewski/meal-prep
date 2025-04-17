@@ -34,7 +34,7 @@ export function BreadcrumbClient() {
   const segments = pathname.split("/").filter(Boolean);
 
   return (
-    <Breadcrumb className="flex items-center justify-center">
+    <Breadcrumb className="flex flex-1 items-center">
       {" "}
       {/* Example: hide on mobile */}
       <BreadcrumbList>

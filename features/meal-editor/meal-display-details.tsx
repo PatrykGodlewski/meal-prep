@@ -175,12 +175,14 @@ export const MealDisplayDetails: React.FC<MealDisplayDetailsProps> = React.memo(
               </h2>
               <div className="prose prose-sm dark:prose-invert max-w-none text-gray-700 dark:text-neutral-300">
                 {meal.instructions ? (
-                  meal.instructions
-                    .split("\n")
-                    .map(
-                      (paragraph) =>
-                        paragraph.trim() && <p className="mb-3">{paragraph}</p>,
-                    )
+                  meal.instructions.split("\n").map(
+                    (paragraph, idx) =>
+                      paragraph.trim() && (
+                        <p key={idx} className="mb-3">
+                          {paragraph}
+                        </p>
+                      ),
+                  )
                 ) : (
                   <p className="text-gray-500 dark:text-neutral-500 italic">
                     No instructions provided.

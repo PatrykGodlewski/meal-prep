@@ -2,44 +2,69 @@
 import { authorize } from "@/lib/authorization";
 import { db } from "@/supabase";
 import {
-  type Ingredient,
   MEAL_CATEGORY_ENUM,
   type Meal,
   type NewMealPlan,
   type NewPlannedMeal,
   type NewShoppingListItem,
-  mealIngredients,
   mealPlans,
   meals,
   plannedMeals,
   shoppingListItems,
   shoppingLists,
 } from "@/supabase/schema";
-import { addDays, endOfWeek, format, startOfWeek } from "date-fns";
+import { addDays, format, isValid, startOfWeek } from "date-fns";
 import { and, eq, inArray } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import type { MealPlanClient } from "./types";
-import type { UnitType } from "@/validators";
+// import type { UnitType } from "@/validators"; // UnitType might not be needed directly here anymore
 import { formatedEndOfWeek, formatedStartOfWeek } from "@/lib/utils";
+import type { ShoppingList, ShoppingListItem } from "@/supabase/schema"; // Import ShoppingList types
 
-interface GeneratePlanResult {
+interface ActionVoidResult {
   success: boolean;
   message: string;
   error?: string;
 }
 
+// Define a specific result type for this action
+interface GeneratePlanResult {
+  success: boolean;
+  message: string;
+  data?: {
+    weeklyMealPlan: MealPlanClient[];
+    weeklyShoppingList: ShoppingList & { items: ShoppingListItem[] };
+  };
+  error?: string;
+}
+
+interface UpdateCheckResult {
+  success: boolean;
+  error?: string;
+}
+
+export type WeeklyShoppingList = NonNullable<
+  Awaited<ReturnType<typeof getWeeklyShoppingList>>
+>;
+
+export type WeeklyMealPlan = NonNullable<
+  Awaited<ReturnType<typeof getWeeklyMealPlan>>
+>;
+
+const DATE_FORMAT_KEY = "yyyy-MM-dd";
+
 /**
- * Generates a weekly meal plan for the week containing the given startDate.
- * Creates meal plan entries for each day and assigns random meals for each category.
- * Skips days where a plan already exists for the authorized user.
- * @param startDate - A date within the target week.
- * @returns Promise<GeneratePlanResult> indicating success or failure.
+ * Generates a new meal plan for the entire specified week, overwriting any existing plan for that week.
+ * Creates or updates the corresponding shopping list with aggregated ingredients.
+ * @param targetWeekDate - A date within the target week.
+ * @returns Promise<GeneratePlanResult> - The result object containing success status, message, and potentially the generated plan and list.
  */
-export async function generateWeeklyMealPlan(
-  startDate: Date,
+export async function generatePlanAndUpdateShoppingList(
+  targetWeekDate: Date,
 ): Promise<GeneratePlanResult> {
   const user = await authorize();
-  if (!user) {
+
+  if (!user?.id) {
     return {
       success: false,
       error: "User not authorized.",
@@ -47,131 +72,266 @@ export async function generateWeeklyMealPlan(
     };
   }
 
-  const weekStart = startOfWeek(startDate, { weekStartsOn: 1 }); // Monday
+  const userId = user.id;
+
+  if (!targetWeekDate || !isValid(targetWeekDate)) {
+    return {
+      success: false,
+      error: "Invalid date provided.",
+      message: "Invalid target date.",
+    };
+  }
+
+  const weekStart = startOfWeek(targetWeekDate, { weekStartsOn: 1 });
+  const weekStartDateStr = format(weekStart, DATE_FORMAT_KEY);
   const weekDates = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
-  const weekDateStrings = weekDates.map((date) => format(date, "yyyy-MM-dd"));
+  const weekDateStrings = weekDates.map((date) =>
+    format(date, DATE_FORMAT_KEY),
+  );
 
   try {
-    const [allMeals, existingPlansForWeek] = await Promise.all([
-      db.select().from(meals),
-      db
-        .select({ date: mealPlans.date })
+    // Use a transaction to ensure atomicity
+    const transactionResult = await db.transaction(async (tx) => {
+      // 1. Fetch all available meals for the user (or public meals)
+      // TODO: Add filtering for user-specific vs public meals if needed
+      const allMeals = await tx.select().from(meals);
+      if (allMeals.length === 0) {
+        throw new Error("No meals available in the database to create a plan.");
+      }
+      const mealsByCategory = Object.groupBy(
+        allMeals,
+        (meal) => meal.category ?? "other",
+      );
+
+      // 2. Clean up existing plan for the target week
+      const existingPlans = await tx
+        .select({ id: mealPlans.id })
         .from(mealPlans)
         .where(
           and(
-            eq(mealPlans.userId, user.id),
+            eq(mealPlans.userId, userId),
             inArray(mealPlans.date, weekDateStrings),
           ),
-        ),
-    ]);
-
-    if (allMeals.length === 0) {
-      return {
-        success: false,
-        error: "No meals available.",
-        message: "Cannot generate plan without any meals in the database.",
-      };
-    }
-
-    const existingPlanDates = new Set(existingPlansForWeek.map((p) => p.date));
-    const mealsByCategory = Object.groupBy(
-      allMeals,
-      (meal) => meal.category ?? "other",
-    );
-
-    const mealsPerDateMap = weekDates.reduce<
-      Map<string, (string | undefined)[]>
-    >((map, date) => {
-      const formattedDate = format(date, "yyyy-MM-dd");
-
-      if (existingPlanDates.has(formattedDate)) {
-        console.log(
-          `Skipping generation for ${formattedDate} (plan already exists).`,
         );
-        return map;
+
+      if (existingPlans.length > 0) {
+        const existingPlanIds = existingPlans.map((p) => p.id);
+        // Delete associated planned meals first due to foreign key constraints
+        await tx
+          .delete(plannedMeals)
+          .where(inArray(plannedMeals.mealPlanId, existingPlanIds));
+        // Then delete the meal plans
+        await tx
+          .delete(mealPlans)
+          .where(inArray(mealPlans.id, existingPlanIds));
+        console.log(
+          `Deleted ${existingPlans.length} existing meal plans for week starting ${weekStartDateStr}.`,
+        );
       }
 
-      const newPlannedMeals = MEAL_CATEGORY_ENUM.enumValues.map((category) => {
-        const availableMeals = mealsByCategory[category];
-
-        if (!availableMeals || availableMeals.length === 0) {
-          console.warn(
-            `No ${category} meals available for ${formattedDate}. Skipping category.`,
-          );
-          return;
-        }
-
-        // TODO: Replace random selection with a proper algorithm based on preferences/settings
-        const randomMeal =
-          availableMeals[Math.floor(Math.random() * availableMeals.length)];
-
-        return randomMeal.id;
-      });
-      map.set(formattedDate, newPlannedMeals);
-      return map;
-    }, new Map());
-
-    if (mealsPerDateMap.size === 0) {
-      console.log("No new meal plans needed for this week.");
-      return {
-        success: true,
-        message: "All days this week already have meal plans.",
-      };
-    }
-
-    const mealPlansToInsert = Array.from(mealsPerDateMap.entries()).map(
-      ([date]) => ({ date, userId: user.id }) satisfies NewMealPlan,
-    );
-
-    await db.transaction(async (tx) => {
+      // 3. Generate new Meal Plans for the entire week
+      const mealPlansToInsert: NewMealPlan[] = weekDateStrings.map((date) => ({
+        userId,
+        date,
+      }));
       const insertedMealPlans = await tx
         .insert(mealPlans)
         .values(mealPlansToInsert)
         .returning({ id: mealPlans.id, date: mealPlans.date });
 
-      const dateToActualIdMap = new Map(
-        insertedMealPlans.map((plan) => [plan.date, plan.id]),
+      const dateToPlanIdMap = new Map(
+        insertedMealPlans.map((p) => [p.date, p.id]),
       );
 
-      const finalPlannedMealsValues: NewPlannedMeal[] = Array.from(
-        mealsPerDateMap.entries(),
-      ).reduce<NewPlannedMeal[]>((acc, [date, mealIds]) => {
-        const mealPlanId = dateToActualIdMap.get(date);
-        if (!mealPlanId) return acc;
+      // 4. Generate Planned Meals for each day
+      const allPlannedMealsForWeek: NewPlannedMeal[] = [];
+      const allMealIdsForWeekSet = new Set<string>(); // Use Set for unique meal IDs
 
-        for (const mealId of mealIds) {
-          if (!mealId) continue;
-          acc.push({
-            mealPlanId,
-            mealId,
-          });
+      for (const dateStr of weekDateStrings) {
+        const mealPlanId = dateToPlanIdMap.get(dateStr);
+        if (!mealPlanId) {
+          console.error(`Missing mealPlanId for date ${dateStr}, skipping.`);
+          continue;
         }
 
-        return acc;
-      }, []);
-
-      if (finalPlannedMealsValues.length > 0) {
-        await tx.insert(plannedMeals).values(finalPlannedMealsValues);
-      } else {
-        console.warn(
-          "No planned meals were generated, possibly due to missing meal categories.",
-        );
+        for (const category of MEAL_CATEGORY_ENUM.enumValues) {
+          const availableMeals = mealsByCategory[category];
+          if (!availableMeals || availableMeals.length === 0) {
+            console.warn(
+              `No ${category} meals available for ${dateStr}. Skipping category.`,
+            );
+            continue;
+          }
+          // Select a random meal for the category
+          const randomMeal =
+            availableMeals[Math.floor(Math.random() * availableMeals.length)];
+          allPlannedMealsForWeek.push({ mealPlanId, mealId: randomMeal.id });
+          allMealIdsForWeekSet.add(randomMeal.id); // Add meal ID to the set
+        }
       }
+
+      // Batch insert all planned meals for the week
+      if (allPlannedMealsForWeek.length > 0) {
+        await tx.insert(plannedMeals).values(allPlannedMealsForWeek);
+      }
+
+      // --- Aggregate Ingredients for the Shopping List ---
+
+      const allMealIdsForWeek = Array.from(allMealIdsForWeekSet);
+      let aggregatedIngredients: NewShoppingListItem[] = [];
+
+      if (allMealIdsForWeek.length > 0) {
+        // Fetch ingredients needed for all selected meals
+        const ingredientsForWeek = await tx.query.mealIngredients.findMany({
+          where: (mealIngredients, { inArray }) =>
+            inArray(mealIngredients.mealId, allMealIdsForWeek),
+          with: {
+            ingredient: {
+              columns: {
+                id: true,
+                name: true,
+                unit: true,
+                // category: true, // Uncomment if needed
+              },
+            },
+          },
+          columns: {
+            quantity: true,
+          },
+        });
+
+        // Aggregate using a Map (similar to updateWeeklyShoppingList logic)
+        const aggregationMap = ingredientsForWeek.reduce(
+          (
+            acc: Map<string, NewShoppingListItem & { unit?: string | null }>,
+            item,
+          ) => {
+            const key = item.ingredient.id; // Aggregate by ingredient ID
+            const existing = acc.get(key);
+            const currentQuantity = item.quantity ?? 0; // Default to 0 if null
+
+            if (existing) {
+              // Basic summation - assumes compatible units or simple addition
+              // TODO: Implement unit conversion if necessary
+              const existingAmount = existing.amount ?? 0;
+              existing.amount = existingAmount + currentQuantity;
+              // If units differ, maybe store as string or handle later
+              if (existing.unit !== item.ingredient.unit) {
+                console.warn(
+                  `Unit mismatch for ingredient ${item.ingredient.name}: ${existing.unit} vs ${item.ingredient.unit}. Simple addition applied.`,
+                );
+                // Optionally reset unit or handle complex aggregation
+              }
+            } else {
+              acc.set(key, {
+                ingredientId: item.ingredient.id,
+                amount: currentQuantity,
+                unit: item.ingredient.unit, // Store unit for potential formatting later
+                shoppingListId: "", // Placeholder, will be set later
+                isChecked: false,
+              });
+            }
+            return acc;
+          },
+          new Map<string, NewShoppingListItem & { unit?: string | null }>(),
+        );
+
+        aggregatedIngredients = Array.from(aggregationMap.values());
+      }
+
+      // 5. Find or Create Shopping List for the Week
+      let shoppingListId: string;
+      const existingList = await tx.query.shoppingLists.findFirst({
+        where: (sl, { and, eq }) =>
+          and(
+            eq(sl.userId, userId),
+            eq(sl.mealPlanWeekStart, weekStartDateStr),
+          ),
+        columns: { id: true },
+      });
+
+      if (existingList) {
+        shoppingListId = existingList.id;
+        // Delete old items before inserting new ones
+        await tx
+          .delete(shoppingListItems)
+          .where(eq(shoppingListItems.shoppingListId, shoppingListId));
+        console.log(
+          `Cleared existing items for shopping list ${shoppingListId}.`,
+        );
+      } else {
+        // Create new list
+        const [newList] = await tx
+          .insert(shoppingLists)
+          .values({
+            userId: userId,
+            // name: `Week of ${format(weekStart, "MMM do")}`, // Optional: Add name if desired
+            mealPlanWeekStart: weekStartDateStr,
+          })
+          .returning({ id: shoppingLists.id });
+        if (!newList?.id) throw new Error("Failed to create shopping list.");
+        shoppingListId = newList.id;
+        console.log(`Created new shopping list ${shoppingListId}.`);
+      }
+
+      // 6. Insert Aggregated Ingredients into Shopping List Items
+      if (aggregatedIngredients.length > 0) {
+        const finalShoppingListItems: NewShoppingListItem[] =
+          aggregatedIngredients.map((item) => ({
+            shoppingListId: shoppingListId,
+            ingredientId: item.ingredientId,
+            // Format amount with unit if available
+            amount: item.amount, // Keep raw amount for now, formatting can happen on client or here
+            // amount: `${item.amount}${item.unit ? ` ${item.unit}` : ""}`, // Example formatting
+            isChecked: false,
+          }));
+        await tx.insert(shoppingListItems).values(finalShoppingListItems);
+      }
+
+      // 7. Return the ID of the shopping list for fetching outside transaction
+      return shoppingListId;
+    }); // Transaction commits here
+
+    // --- Fetch final data outside the transaction ---
+
+    // 8. Fetch the generated Weekly Meal Plan
+    const weeklyMealPlan = await getWeeklyMealPlan(targetWeekDate); // Reuse existing fetch logic
+
+    // 9. Fetch the updated Shopping List with items
+    const weeklyShoppingList = await db.query.shoppingLists.findFirst({
+      where: eq(shoppingLists.id, transactionResult), // Use the ID returned by transaction
+      with: {
+        items: {
+          with: {
+            ingredient: { columns: { name: true } },
+          },
+        },
+      },
     });
 
-    revalidatePath("/"); // Adjust path as needed
-    // Consider revalidating specific user paths if applicable
-    // revalidateTag(`user-${userId}-mealplans`);
+    if (!weeklyShoppingList) {
+      // This shouldn't happen if the transaction succeeded
+      throw new Error("Failed to retrieve the updated shopping list.");
+    }
 
-    console.log(
-      `Generated meal plans for ${mealPlansToInsert.length} new day(s).`,
-    );
+    // 10. Revalidate Paths
+    revalidatePath("/planner");
+    revalidatePath(`/shopping-list/${weeklyShoppingList.id}`);
+
     return {
       success: true,
-      message: `Generated meal plans for ${mealPlansToInsert.length} new day(s).`,
+      message: `Successfully generated meal plan and shopping list for the week of ${weekStartDateStr}.`,
+      data: {
+        weeklyMealPlan,
+        // Ensure items is always an array, even if empty
+        weeklyShoppingList: {
+          ...weeklyShoppingList,
+          items: weeklyShoppingList.items || [],
+        },
+      },
     };
   } catch (error) {
-    console.error("Error generating weekly meal plan:", error);
+    console.error("Error generating plan and shopping list:", error);
     const message =
       error instanceof Error
         ? error.message
@@ -179,19 +339,15 @@ export async function generateWeeklyMealPlan(
     return {
       success: false,
       error: message,
-      message: "Failed to generate weekly meal plan.",
+      message: "Failed to generate plan and update shopping list.",
     };
   }
 }
 
-/**
- * Fetches structured meal plan data for the current week for the authorized user.
- * Returns an array of 7 days, including empty days if no plan exists.
- * @returns Promise<MealPlanDayClient[]> - Array of 7 days for the week.
- */
-export async function getWeeklyMealPlan(
-  currentWeek: Date,
-): Promise<MealPlanClient[]> {
+// Note: getWeeklyMealPlan is now primarily used by generatePlanAndUpdateShoppingList
+// to fetch the final plan structure after generation.
+// It can still be called directly if needed.
+export async function getWeeklyMealPlan(currentWeek: Date) {
   // 1. Authorization
   const user = await authorize();
   const startDate = startOfWeek(currentWeek, { weekStartsOn: 1 }); // Calculate start date once
@@ -286,11 +442,6 @@ const createEmptyWeekStructureForClient = (
     meals: [],
   }));
 };
-
-interface UpdateCheckResult {
-  success: boolean;
-  error?: string;
-}
 
 /**
  * Updates the checked status of a shopping list item. Enforces ownership via relation query.
@@ -391,7 +542,6 @@ export const updateWeeklyShoppingList = async (date: Date) => {
       mealPlan.plannedMeals.flatMap((plannedMeal) =>
         plannedMeal.meal.mealIngredients.map(
           (mealIngredient): NewShoppingListItem => ({
-            ingredientName: mealIngredient.ingredient.name,
             shoppingListId: list.id,
             ingredientId: mealIngredient.ingredientId,
             amount: mealIngredient.quantity,
@@ -439,7 +589,7 @@ export const updateWeeklyShoppingList = async (date: Date) => {
     .returning();
 };
 
-export const getWeeklyShoppingList = async (date: Date) => {
+export async function getWeeklyShoppingList(date: Date) {
   const user = await authorize();
   if (!user?.id) {
     console.warn("Get shopping list data: user not authorized.");
@@ -466,160 +616,4 @@ export const getWeeklyShoppingList = async (date: Date) => {
     console.error(e);
     return null;
   }
-};
-
-export type WeeklyShoppingList = NonNullable<
-  Awaited<ReturnType<typeof getWeeklyShoppingList>>
->;
-
-export const updateShoppingList = async (date: Date) => {
-  const user = await authorize();
-  if (!user?.id) {
-    console.warn("Update shopping list: user not authorized.");
-    return null;
-  }
-  const userId = user.id;
-  const weekStartStr = formatedStartOfWeek(date);
-  const weekEndStr = formatedEndOfWeek(date);
-
-  try {
-    const mealPlansWithinRange = await db.query.mealPlans.findMany({
-      where: (mealPlans, { eq, and, gte, lte }) =>
-        and(
-          eq(mealPlans.userId, userId),
-          gte(mealPlans.date, weekStartStr),
-          lte(mealPlans.date, weekEndStr),
-        ),
-      with: {
-        plannedMeals: {
-          with: {
-            meal: {
-              with: {
-                mealIngredients: {
-                  // Ensure ingredientId and quantity are selected
-                  columns: {
-                    ingredientId: true,
-                    quantity: true,
-                  },
-                },
-              },
-            },
-          },
-        },
-      },
-      orderBy: [mealPlans.date],
-    });
-
-    // 2. Aggregate all ingredients from the meal plans
-    const allMealIngredients = mealPlansWithinRange.flatMap(
-      (mealPlan) =>
-        mealPlan.plannedMeals?.flatMap(
-          (plannedMeal) =>
-            plannedMeal.meal.mealIngredients?.map((mealIngredient) => ({
-              // Temporary structure, shoppingListId added later
-              ingredientId: mealIngredient.ingredientId,
-              amount: mealIngredient.quantity,
-            })) ?? [], // Handle potential undefined arrays
-        ) ?? [], // Handle potential undefined arrays
-    );
-
-    // 3. Merge ingredients by ID, summing amounts
-    const baseMergedIngredients = Array.from(
-      allMealIngredients.reduce<
-        Map<string, Omit<NewShoppingListItem, "shoppingListId">>
-      >((accMap, currentIngredient) => {
-        const ingredientId = currentIngredient.ingredientId;
-        // Skip if ingredientId is missing (should ideally not happen with proper schema)
-        if (!ingredientId) return accMap;
-
-        const incomingAmount = currentIngredient.amount ?? 0;
-        const existingItem = accMap.get(ingredientId);
-
-        if (existingItem) {
-          const currentAmountNum = existingItem.amount ?? 0;
-          accMap.set(ingredientId, {
-            ingredientId: ingredientId,
-            amount: currentAmountNum + incomingAmount,
-          });
-        } else {
-          accMap.set(ingredientId, {
-            ingredientId: ingredientId,
-            amount: incomingAmount,
-          });
-        }
-        return accMap;
-      }, new Map()),
-    ).map((entry) => entry[1]); // Get only the values (ingredient objects)
-
-    // 4. Perform DB operations within a transaction
-    const updatedListId = await db.transaction(async (tx) => {
-      // Check if a list already exists for this user and week
-      const existingList = await tx.query.shoppingLists.findFirst({
-        where: (shoppingLists, { and, eq }) =>
-          and(
-            eq(shoppingLists.userId, userId),
-            eq(shoppingLists.mealPlanWeekStart, weekStartStr),
-          ),
-        columns: {
-          id: true, // Only need the ID
-        },
-      });
-
-      let shoppingListId: string;
-
-      if (existingList) {
-        // --- UPDATE PATH ---
-        shoppingListId = existingList.id;
-        // Delete existing items for this list
-        await tx
-          .delete(shoppingListItems)
-          .where(eq(shoppingListItems.shoppingListId, shoppingListId));
-      } else {
-        // --- CREATE PATH ---
-        // Create a new shopping list record
-        const [newList] = await tx
-          .insert(shoppingLists)
-          .values({
-            userId: userId,
-            mealPlanWeekStart: weekStartStr,
-          })
-          .returning({ id: shoppingLists.id });
-        if (!newList) {
-          // Throw error to rollback transaction if insertion fails
-          throw new Error("Failed to create new shopping list record.");
-        }
-        shoppingListId = newList.id;
-      }
-
-      // Prepare final list items with the correct shoppingListId
-      const finalMergedIngredients: NewShoppingListItem[] =
-        baseMergedIngredients.map((item) => ({
-          ...item,
-          shoppingListId: shoppingListId,
-        }));
-
-      // Insert the new/updated items if there are any
-      if (finalMergedIngredients.length > 0) {
-        await tx.insert(shoppingListItems).values(finalMergedIngredients);
-        // Note: Drizzle's batch insert might not easily return all inserted items
-        // across all dialects. We'll query the final list outside the transaction.
-      }
-
-      // Return the ID of the list (either existing or newly created)
-      return shoppingListId;
-    });
-
-    // 5. Fetch the final list with its items to return
-    const finalList = await db.query.shoppingLists.findFirst({
-      where: eq(shoppingLists.id, updatedListId),
-      with: {
-        items: true, // Fetch the associated items
-      },
-    });
-
-    return finalList ?? null; // Return the list or null if somehow not found
-  } catch (e) {
-    console.error("Error updating shopping list:", e);
-    return null;
-  }
-};
+}

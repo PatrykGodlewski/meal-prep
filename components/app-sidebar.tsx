@@ -1,23 +1,4 @@
-import {
-  ArrowUpCircleIcon,
-  BarChartIcon,
-  CameraIcon,
-  ClipboardListIcon,
-  DatabaseIcon,
-  FileCodeIcon,
-  FileIcon,
-  FileTextIcon,
-  FolderIcon,
-  HelpCircleIcon,
-  LayoutDashboardIcon,
-  ListIcon,
-  SearchIcon,
-  SettingsIcon,
-  Triangle,
-  UsersIcon,
-} from "lucide-react";
-
-import { NavDocuments } from "@/components/nav-documents";
+import { Triangle } from "lucide-react";
 import { NavMain } from "@/components/nav-main";
 import { NavSecondary } from "@/components/nav-secondary";
 import { NavUser } from "@/components/nav-user";
@@ -67,7 +48,6 @@ export async function AppSidebar({
             user={{
               name: profile?.nickname ?? "User",
               email: user?.email ?? "Email missing",
-              avatar: "/avatars/shadcn.jpg",
             }}
           />
         )}

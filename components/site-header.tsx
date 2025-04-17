@@ -1,6 +1,7 @@
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { BreadcrumbClient } from "./breadcrumbs";
+import { ThemeSwitcher } from "./theme-switcher";
 
 export function SiteHeader() {
   return (
@@ -12,6 +13,11 @@ export function SiteHeader() {
           className="mx-2 data-[orientation=vertical]:h-4"
         />
         <BreadcrumbClient />
+        <Separator
+          orientation="vertical"
+          className="mx-2 data-[orientation=vertical]:h-4"
+        />
+        <ThemeSwitcher />
       </div>
     </header>
   );
