@@ -296,7 +296,9 @@ export async function generatePlanAndUpdateShoppingList(
     // --- Fetch final data outside the transaction ---
 
     // 8. Fetch the generated Weekly Meal Plan
-    const weeklyMealPlan = await getWeeklyMealPlan(targetWeekDate); // Reuse existing fetch logic
+    const weeklyMealPlan = await getWeeklyMealPlan(
+      format(targetWeekDate, DATE_FORMAT_KEY),
+    ); // Reuse existing fetch logic
 
     // 9. Fetch the updated Shopping List with items
     const weeklyShoppingList = await db.query.shoppingLists.findFirst({
@@ -349,7 +351,7 @@ export async function generatePlanAndUpdateShoppingList(
 // to fetch the final plan structure after generation.
 // It can still be called directly if needed.
 export async function getWeeklyMealPlan(currentWeekString: string) {
-  const currentWeek = parse(currentWeekString, "yyyy-MM-dd", new Date());
+  const currentWeek = parse(currentWeekString, DATE_FORMAT_KEY, new Date());
   // 1. Authorization
   const user = await authorize();
   const startDate = getMonday(currentWeek); // Calculate start date once
@@ -362,7 +364,9 @@ export async function getWeeklyMealPlan(currentWeekString: string) {
 
   // 2. Calculate Date Range
   const weekDates = Array.from({ length: 7 }, (_, i) => addDays(startDate, i));
-  const weekDateStrings = weekDates.map((date) => format(date, "yyyy-MM-dd"));
+  const weekDateStrings = weekDates.map((date) =>
+    format(date, DATE_FORMAT_KEY),
+  );
 
   try {
     // 3. Fetch Meal Plans for the User within the Date Range
@@ -415,7 +419,7 @@ export async function getWeeklyMealPlan(currentWeekString: string) {
 
     // 7. Construct the Final 7-Day Output (without dayName)
     const finalWeekPlan = weekDates.map((date): MealPlanClient => {
-      const dateString = format(date, "yyyy-MM-dd");
+      const dateString = format(date, DATE_FORMAT_KEY);
       const mealsForDay = mealsGroupedByDate.get(dateString) || [];
 
       return {
@@ -592,7 +596,7 @@ export const updateWeeklyShoppingList = async (date: Date) => {
 };
 
 export async function getWeeklyShoppingList(dateString: string) {
-  const date = parse(dateString, "yyyy-MM-dd", new Date());
+  const date = parse(dateString, DATE_FORMAT_KEY, new Date());
   const user = await authorize();
   if (!user?.id) {
     console.warn("Get shopping list data: user not authorized.");
