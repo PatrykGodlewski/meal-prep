@@ -22,6 +22,13 @@
       "when": 1744922589131,
       "tag": "0002_sour_albert_cleary",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1745011404455,
+      "tag": "0003_simple_killraven",
+      "breakpoints": true
     }
   ]
 }

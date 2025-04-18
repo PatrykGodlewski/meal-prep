@@ -63,7 +63,7 @@ export const users = authSchema.table("users", {
 export const profiles = pgTable("profiles", {
   id: serial("id").primaryKey(),
   userId: uuid("userId")
-    .references(() => users.id)
+    .references(() => users.id, { onDelete: "cascade" })
     .notNull(),
   nickname: text("nickname"),
 });
@@ -78,9 +78,9 @@ export const meals = pgTable("meals", {
   servings: integer("servings"),
   category: MEAL_CATEGORY_ENUM("category"),
   imageUrl: text("imageUrl"),
-  isPublic: boolean("isPublic").default(false),
+  isPublic: boolean("isPublic").default(true),
   createdBy: uuid("createdBy").references(() => users.id, {
-    onDelete: "cascade",
+    onDelete: "set null",
   }),
   createdAt: timestamp("createdAt", { withTimezone: true })
     .defaultNow()
@@ -93,7 +93,7 @@ export const meals = pgTable("meals", {
 export const mealPlans = pgTable("mealPlans", {
   id: serial("id").primaryKey(),
   userId: uuid("userId")
-    .references(() => users.id)
+    .references(() => users.id, { onDelete: "cascade" })
     .notNull(),
   date: date("date").notNull(),
 });

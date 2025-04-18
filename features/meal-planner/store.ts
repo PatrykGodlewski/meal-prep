@@ -2,7 +2,7 @@
 import { observable } from "@legendapp/state";
 import { use$, useObservable } from "@legendapp/state/react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { addDays, subDays } from "date-fns";
+import { addDays, format, subDays } from "date-fns";
 import { getMonday } from "./utils";
 import {
   generatePlanAndUpdateShoppingList,
@@ -67,8 +67,7 @@ export const useMealPlanner = () => {
   } = useQuery({
     queryKey: mealPlanQueryKey,
     queryFn: () => {
-      console.log(`current week [client]: ${currentWeek}`);
-      return getWeeklyMealPlan(currentWeek);
+      return getWeeklyMealPlan(format(currentWeek, "yyyy-MM-dd"));
     }, // Pass the Date object
     // Keep previous data while loading new week's data for smoother transitions
     placeholderData: (previousData) => previousData,
@@ -83,7 +82,7 @@ export const useMealPlanner = () => {
     error: shoppingListError,
   } = useQuery({
     queryKey: shoppingListQueryKey,
-    queryFn: () => getWeeklyShoppingList(currentWeek), // Pass the Date object
+    queryFn: () => getWeeklyShoppingList(format(currentWeek, "yyyy-MM-dd")), // Pass the Date object
     // Keep previous data while loading new week's data
     placeholderData: (previousData) => previousData,
     // staleTime: 1000 * 60 * 5, // e.g., 5 minutes

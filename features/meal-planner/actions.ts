@@ -13,7 +13,7 @@ import {
   shoppingListItems,
   shoppingLists,
 } from "@/supabase/schema";
-import { addDays, format, isValid, startOfWeek } from "date-fns";
+import { addDays, format, isValid, parse, startOfWeek } from "date-fns";
 import { and, eq, inArray } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import type { MealPlanClient } from "./types";
@@ -348,9 +348,9 @@ export async function generatePlanAndUpdateShoppingList(
 // Note: getWeeklyMealPlan is now primarily used by generatePlanAndUpdateShoppingList
 // to fetch the final plan structure after generation.
 // It can still be called directly if needed.
-export async function getWeeklyMealPlan(currentWeek: Date) {
+export async function getWeeklyMealPlan(currentWeekString: string) {
+  const currentWeek = parse(currentWeekString, "yyyy-MM-dd", new Date());
   // 1. Authorization
-  console.log(`current week [server]: ${currentWeek}`);
   const user = await authorize();
   const startDate = getMonday(currentWeek); // Calculate start date once
   console.log(startDate, currentWeek);
@@ -591,7 +591,8 @@ export const updateWeeklyShoppingList = async (date: Date) => {
     .returning();
 };
 
-export async function getWeeklyShoppingList(date: Date) {
+export async function getWeeklyShoppingList(dateString: string) {
+  const date = parse(dateString, "yyyy-MM-dd", new Date());
   const user = await authorize();
   if (!user?.id) {
     console.warn("Get shopping list data: user not authorized.");
