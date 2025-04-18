@@ -10,7 +10,6 @@ import { db } from "@/supabase";
 import {
   meals,
   plannedMeals,
-  mealsTags,
   ingredients,
   mealIngredients,
   type Ingredient,
@@ -341,6 +340,7 @@ export async function updateMeal(
       const submittedIngredientIds = new Set<string>(); // Track ingredient IDs present in the submission
 
       // --- Promises for concurrent execution ---
+      // biome-ignore lint/suspicious/noExplicitAny: <explanation>
       const upsertPromises: Promise<any>[] = []; // Combine inserts and updates for links
 
       // 4. Process Submitted Ingredients: Find/Create Ingredient, Upsert Link
@@ -415,6 +415,7 @@ export async function updateMeal(
         existingIngredientIdsInMeal,
       ).filter((id) => !submittedIngredientIds.has(id));
 
+      // biome-ignore lint/suspicious/noExplicitAny: <explanation>
       let deletePromise: Promise<any> | null = null;
       if (ingredientIdsToDelete.length > 0) {
         // Delete links from mealIngredients that were not submitted
@@ -480,7 +481,6 @@ export async function deleteMeal(id: string): Promise<DeleteResult> {
       await tx.delete(plannedMeals).where(eq(plannedMeals.mealId, id));
 
       // 2. Delete associations in mealsTags table
-      await tx.delete(mealsTags).where(eq(mealsTags.mealId, id));
 
       // 3. Delete the meal itself
       //    The 'on delete set null' constraint on ingredients.mealId

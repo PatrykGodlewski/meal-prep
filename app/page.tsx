@@ -13,9 +13,10 @@ export default async function Home() {
   if (!user) {
     return redirect("/sign-in");
   }
-  const date = new Date();
-  const weeklyMealPlan = await getWeeklyMealPlan(date);
-  const weeklyShoppingList = await getWeeklyShoppingList(date);
+  // const date = new Date();
+  // TODO: add as initial data
+  // const weeklyMealPlan = await getWeeklyMealPlan(date);
+  // const weeklyShoppingList = await getWeeklyShoppingList(date);
 
   return (
     <div>
@@ -23,10 +24,7 @@ export default async function Home() {
         <CalendarDays className="h-7 w-7" />
         <span>This Week's Meal Plan</span>
       </h1>
-      <MealPlanGrid
-        initialMealPlansData={weeklyMealPlan}
-        initialShoppingList={weeklyShoppingList}
-      />
+      <MealPlanGrid />
     </div>
   );
 }
