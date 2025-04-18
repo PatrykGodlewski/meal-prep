@@ -66,7 +66,10 @@ export const useMealPlanner = () => {
     error: mealPlanError,
   } = useQuery({
     queryKey: mealPlanQueryKey,
-    queryFn: () => getWeeklyMealPlan(currentWeek), // Pass the Date object
+    queryFn: () => {
+      console.log(`current week [client]: ${currentWeek}`);
+      return getWeeklyMealPlan(currentWeek);
+    }, // Pass the Date object
     // Keep previous data while loading new week's data for smoother transitions
     placeholderData: (previousData) => previousData,
     // Consider staleness settings based on how often data might change outside generation

@@ -350,6 +350,7 @@ export async function generatePlanAndUpdateShoppingList(
 // It can still be called directly if needed.
 export async function getWeeklyMealPlan(currentWeek: Date) {
   // 1. Authorization
+  console.log(`current week [server]: ${currentWeek}`);
   const user = await authorize();
   const startDate = getMonday(currentWeek); // Calculate start date once
   console.log(startDate, currentWeek);
