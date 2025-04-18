@@ -28,26 +28,12 @@ export function MealPlanGrid() {
 
 function MealPlanDisplay() {
   const {
-    currentWeek,
     isBusy,
     isGenerating,
     mealPlanData,
     isMealPlanLoading,
     mealPlanError,
   } = useMealPlanner();
-
-  const currentWeekDate = currentWeek;
-
-  const displayPlan = useMemo(() => {
-    if (!isValid(currentWeekDate)) {
-      console.warn(
-        "MealPlanDisplay: currentWeekDate is invalid, returning default structure.",
-      );
-      return createBaseWeekStructure(getMonday(new Date())); // Or return []
-    }
-    const baseStructure = createBaseWeekStructure(currentWeekDate);
-    return mergeDataWithBaseStructure(baseStructure, mealPlanData);
-  }, [mealPlanData, currentWeekDate]); // Depend on mealPlanData and the actual date value
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-7 gap-4 relative min-h-[200px]">
@@ -71,7 +57,8 @@ function MealPlanDisplay() {
       {/* Render day cards only if there are no errors */}
       {/* We can still render the grid structure even if data is loading */}
       {!mealPlanError &&
-        displayPlan.map((planDay) => (
+        !!mealPlanData &&
+        mealPlanData.map((planDay) => (
           <PlanCard key={planDay.date.toISOString()} plan={planDay} />
         ))}
     </div>
