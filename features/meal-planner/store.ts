@@ -50,8 +50,7 @@ export const useMealPlanner = () => {
 
   // --- Queries ---
   // Calculate the start of the current week and its ISO string representation for query keys
-  const currentMonday = getMonday(currentWeek);
-  const weekIsoString = currentMonday.toISOString();
+  const weekIsoString = currentWeek.toISOString();
 
   // Query Key for the current week's meal plan
   const mealPlanQueryKey = [MEAL_PLAN_QUERY_KEY_BASE, weekIsoString];
@@ -66,7 +65,7 @@ export const useMealPlanner = () => {
     error: mealPlanError,
   } = useQuery({
     queryKey: mealPlanQueryKey,
-    queryFn: () => getWeeklyMealPlan(currentMonday), // Pass the Date object
+    queryFn: () => getWeeklyMealPlan(currentWeek), // Pass the Date object
     // Keep previous data while loading new week's data for smoother transitions
     placeholderData: (previousData) => previousData,
     // Consider staleness settings based on how often data might change outside generation
@@ -80,7 +79,7 @@ export const useMealPlanner = () => {
     error: shoppingListError,
   } = useQuery({
     queryKey: shoppingListQueryKey,
-    queryFn: () => getWeeklyShoppingList(currentMonday), // Pass the Date object
+    queryFn: () => getWeeklyShoppingList(currentWeek), // Pass the Date object
     // Keep previous data while loading new week's data
     placeholderData: (previousData) => previousData,
     // staleTime: 1000 * 60 * 5, // e.g., 5 minutes
@@ -97,7 +96,7 @@ export const useMealPlanner = () => {
       }
       return result; // Return the success result
     },
-    onSuccess: (data, weekStartDate) => {
+    onSuccess: (_, weekStartDate) => {
       // Invalidate queries for the specific week upon successful generation
       // Note: The query keys are now calculated above based on currentWeek,
       // but we still need the specific week's keys for invalidation here.
