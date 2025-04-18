@@ -20,7 +20,8 @@ async function getMeals() {
     return await db
       .select()
       .from(meals)
-      .where(eq(meals.createdBy, user.id))
+      // TODO: data need to be transformed
+      // .where(eq(meals.isPublic, true))
       .orderBy(meals.createdAt);
   } catch (error) {
     console.error("Error fetching meals:", error);
