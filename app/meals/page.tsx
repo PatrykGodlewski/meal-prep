@@ -1,33 +1,14 @@
-import { eq } from "drizzle-orm";
 import Image from "next/image";
 import Link from "next/link";
 import { Clock, Users, ChefHat, UtensilsCrossed } from "lucide-react";
-import { db } from "@/supabase";
-import { type Meal, meals } from "@/supabase/schema";
+import type { Meal } from "@/supabase/schema";
 import { authorize } from "@/lib/authorization";
 import { getProfile } from "@/lib/getProfile";
 import { redirect } from "next/navigation";
+import { getMeals } from "../actions";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
-
-async function getMeals() {
-  try {
-    const user = await authorize();
-
-    if (!user?.id) return [];
-
-    return await db
-      .select()
-      .from(meals)
-      // TODO: data need to be transformed
-      // .where(eq(meals.isPublic, true))
-      .orderBy(meals.createdAt);
-  } catch (error) {
-    console.error("Error fetching meals:", error);
-    return [];
-  }
-}
 
 export default async function MealsPage() {
   const user = await authorize();

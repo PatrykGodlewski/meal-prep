@@ -1,0 +1,1 @@
+ALTER TABLE "plannedMeals" ADD COLUMN "id" serial PRIMARY KEY NOT NULL;

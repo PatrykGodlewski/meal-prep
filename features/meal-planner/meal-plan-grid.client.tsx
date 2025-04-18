@@ -1,15 +1,8 @@
 "use client";
 
-import { useMemo } from "react";
-import { format, isValid, startOfWeek } from "date-fns";
+import { format, isValid } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { Loader2, ChevronLeft, ChevronRight } from "lucide-react";
-import {
-  getMonday,
-  createBaseWeekStructure,
-  mergeDataWithBaseStructure,
-  DATE_FORMAT_DISPLAY_HEADER,
-} from "@/features/meal-planner/utils";
 import { PlanCard } from "./day-card";
 import { ShoppingListDisplay } from "./purchase-list.client";
 import { useMealPlanner } from "./store";
@@ -59,7 +52,7 @@ function MealPlanDisplay() {
       {!mealPlanError &&
         !!mealPlanData &&
         mealPlanData.map((planDay) => (
-          <PlanCard key={planDay.date.toISOString()} plan={planDay} />
+          <PlanCard key={planDay.id} plan={planDay} />
         ))}
     </div>
   );
@@ -76,7 +69,7 @@ function MealPlannerHeader() {
   } = useMealPlanner();
 
   const title = isValid(currentWeek)
-    ? format(currentWeek, DATE_FORMAT_DISPLAY_HEADER)
+    ? format(currentWeek, "MMMM d, yyyy")
     : "Loading...";
 
   return (

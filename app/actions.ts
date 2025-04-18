@@ -539,3 +539,21 @@ export const getAllIngredients = async (): Promise<Ingredient[]> => {
     throw new Error("Failed to fetch ingredients from database.");
   }
 };
+
+export async function getMeals() {
+  try {
+    const user = await authorize();
+
+    if (!user?.id) return [];
+
+    return await db
+      .select()
+      .from(meals)
+      // TODO: data need to be transformed
+      // .where(eq(meals.isPublic, true))
+      .orderBy(meals.createdAt);
+  } catch (error) {
+    console.error("Error fetching meals:", error);
+    return [];
+  }
+}

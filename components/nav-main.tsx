@@ -1,6 +1,11 @@
 "use client";
 
-import { LayoutDashboardIcon, ListIcon, PlusCircleIcon } from "lucide-react";
+import {
+  CalendarCog,
+  LayoutDashboardIcon,
+  ListIcon,
+  PlusCircleIcon,
+} from "lucide-react";
 
 import {
   SidebarGroup,
@@ -21,6 +26,11 @@ const items = [
     title: "Meal List",
     url: "/meals",
     icon: ListIcon,
+  },
+  {
+    title: "Plans",
+    url: "/plans",
+    icon: CalendarCog,
   },
 ];
 

@@ -98,28 +98,21 @@ export const mealPlans = pgTable("mealPlans", {
   date: date("date").notNull(),
 });
 
-export const plannedMeals = pgTable(
-  "plannedMeals",
-  {
-    mealPlanId: integer("mealPlanId")
-      .references(() => mealPlans.id, { onDelete: "cascade" })
-      .notNull(),
-    mealId: uuid("mealId")
-      .references(() => meals.id, { onDelete: "cascade" })
-      .notNull(),
-    createdAt: timestamp("createdAt", { withTimezone: true })
-      .defaultNow()
-      .notNull(),
-    updatedAt: timestamp("updatedAt", { withTimezone: true })
-      .defaultNow()
-      .notNull(),
-  },
-  (table) => [
-    primaryKey({
-      columns: [table.mealPlanId, table.mealId],
-    }),
-  ],
-);
+export const plannedMeals = pgTable("plannedMeals", {
+  id: serial("id").primaryKey(),
+  mealPlanId: integer("mealPlanId")
+    .references(() => mealPlans.id, { onDelete: "cascade" })
+    .notNull(),
+  mealId: uuid("mealId")
+    .references(() => meals.id, { onDelete: "cascade" })
+    .notNull(),
+  createdAt: timestamp("createdAt", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+  updatedAt: timestamp("updatedAt", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+});
 
 export const ingredients = pgTable("ingredients", {
   id: uuid("id").defaultRandom().primaryKey().notNull(),

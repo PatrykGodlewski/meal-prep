@@ -3,7 +3,6 @@ import { authorize } from "@/lib/authorization";
 import { db } from "@/supabase";
 import {
   MEAL_CATEGORY_ENUM,
-  type Meal,
   type NewMealPlan,
   type NewPlannedMeal,
   type NewShoppingListItem,
@@ -13,14 +12,19 @@ import {
   shoppingListItems,
   shoppingLists,
 } from "@/supabase/schema";
-import { addDays, format, isValid, parse, startOfWeek } from "date-fns";
-import { and, eq, inArray } from "drizzle-orm";
+import {
+  addDays,
+  endOfWeek,
+  format,
+  isValid,
+  parse,
+  startOfWeek,
+} from "date-fns";
+import { and, eq, gte, inArray, lte } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
-import type { MealPlanClient } from "./types";
 // import type { UnitType } from "@/validators"; // UnitType might not be needed directly here anymore
 import { formatedEndOfWeek, formatedStartOfWeek } from "@/lib/utils";
 import type { ShoppingList, ShoppingListItem } from "@/supabase/schema"; // Import ShoppingList types
-import { getMonday } from "./utils";
 
 interface ActionVoidResult {
   success: boolean;
@@ -29,13 +33,10 @@ interface ActionVoidResult {
 }
 
 // Define a specific result type for this action
-interface GeneratePlanResult {
+interface GeneratePlanResult<T> {
   success: boolean;
   message: string;
-  data?: {
-    weeklyMealPlan: MealPlanClient[];
-    weeklyShoppingList: ShoppingList & { items: ShoppingListItem[] };
-  };
+  data?: T;
   error?: string;
 }
 
@@ -44,13 +45,13 @@ interface UpdateCheckResult {
   error?: string;
 }
 
-export type WeeklyShoppingList = NonNullable<
-  Awaited<ReturnType<typeof getWeeklyShoppingList>>
+// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+export type InferAction<T extends (...args: any) => any> = NonNullable<
+  Awaited<ReturnType<T>>
 >;
 
-export type WeeklyMealPlan = NonNullable<
-  Awaited<ReturnType<typeof getWeeklyMealPlan>>
->;
+export type WeeklyShoppingList = InferAction<typeof getWeeklyShoppingList>;
+export type WeeklyMealPlan = InferAction<typeof getWeeklyMealPlan>;
 
 const DATE_FORMAT_KEY = "yyyy-MM-dd";
 
@@ -62,7 +63,7 @@ const DATE_FORMAT_KEY = "yyyy-MM-dd";
  */
 export async function generatePlanAndUpdateShoppingList(
   targetWeekDateString: string,
-): Promise<GeneratePlanResult> {
+) {
   const user = await authorize();
 
   if (!user?.id) {
@@ -357,103 +358,56 @@ export async function generatePlanAndUpdateShoppingList(
 // to fetch the final plan structure after generation.
 // It can still be called directly if needed.
 export async function getWeeklyMealPlan(currentWeekString: string) {
-  const currentWeek = parse(currentWeekString, DATE_FORMAT_KEY, new Date());
-  // 1. Authorization
   const user = await authorize();
-  const startDate = getMonday(currentWeek); // Calculate start date once
-  console.log(startDate, currentWeek);
   if (!user?.id) {
-    console.error("Authorization failed in getMealPlansDataForCurrentWeek");
-    return createEmptyWeekStructureForClient(startDate); // Return empty structure
+    console.error("getDbQueryWeeklyMealPlan: User not authorized.");
+    return null; // Or throw an error, depending on desired handling
   }
   const userId = user.id;
 
-  // 2. Calculate Date Range
-  const weekDates = Array.from({ length: 7 }, (_, i) => addDays(startDate, i));
-  const weekDateStrings = weekDates.map((date) =>
-    format(date, DATE_FORMAT_KEY),
-  );
+  const referenceDate = parse(currentWeekString, DATE_FORMAT_KEY, new Date());
+  if (!isValid(referenceDate)) {
+    console.error("getDbQueryWeeklyMealPlan: Invalid date provided.");
+    return null; // Or throw an error
+  }
+
+  // Calculate the start and end dates of the week (assuming Monday start)
+  const weekStart = startOfWeek(referenceDate, { weekStartsOn: 1 });
+  const weekEnd = endOfWeek(referenceDate, { weekStartsOn: 1 });
+
+  // Format dates for comparison with the 'date' column in the database
+  const weekStartDateStr = format(weekStart, DATE_FORMAT_KEY);
+  const weekEndDateStr = format(weekEnd, DATE_FORMAT_KEY);
 
   try {
-    // 3. Fetch Meal Plans for the User within the Date Range
-    const mealPlansResult = await db
-      .select({
-        id: mealPlans.id,
-        date: mealPlans.date, // Keep date string for mapping
-      })
-      .from(mealPlans)
-      .where(
-        and(
-          eq(mealPlans.userId, userId),
-          inArray(mealPlans.date, weekDateStrings),
-        ),
-      );
-
-    // If no plans exist for the week, return the base structure
-    if (mealPlansResult.length === 0) {
-      return createEmptyWeekStructureForClient(startDate);
-    }
-
-    // 4. Prepare for Fetching Planned Meals
-    const mealPlanIdToDateMap = new Map(
-      mealPlansResult.map((p) => [p.id, p.date]),
-    );
-    const mealPlanIds = mealPlansResult.map((p) => p.id);
-
-    // 5. Fetch All Planned Meals for these Plans, Joining with Meals
-    const plannedMealsResult = await db
-      .select({
-        mealPlanId: plannedMeals.mealPlanId,
-        meal: meals,
-      })
-      .from(plannedMeals)
-      .innerJoin(meals, eq(plannedMeals.mealId, meals.id))
-      .where(inArray(plannedMeals.mealPlanId, mealPlanIds));
-
-    // 6. Group Planned Meals by Date String
-    const mealsGroupedByDate = new Map<string, Meal[]>();
-    for (const { mealPlanId, meal } of plannedMealsResult) {
-      const dateString = mealPlanIdToDateMap.get(mealPlanId);
-      if (!dateString) continue;
-
-      if (mealsGroupedByDate.has(dateString)) {
-        mealsGroupedByDate.get(dateString)?.push(meal);
-      } else {
-        mealsGroupedByDate.set(dateString, [meal]);
-      }
-    }
-
-    // 7. Construct the Final 7-Day Output (without dayName)
-    const finalWeekPlan = weekDates.map((date): MealPlanClient => {
-      const dateString = format(date, DATE_FORMAT_KEY);
-      const mealsForDay = mealsGroupedByDate.get(dateString) || [];
-
-      return {
-        date, // Use ISO string for client
-        meals: mealsForDay,
-      };
+    // Fetch meal plans within the date range for the user
+    const weeklyPlan = await db.query.mealPlans.findMany({
+      // Filter conditions: matching userId and date within the week range
+      where: and(
+        eq(mealPlans.userId, userId),
+        gte(mealPlans.date, weekStartDateStr),
+        lte(mealPlans.date, weekEndDateStr),
+      ),
+      // Eagerly load related data:
+      with: {
+        // Include the list of planned meals for each meal plan day
+        plannedMeals: {
+          with: {
+            // For each planned meal, include the details of the associated meal
+            meal: true,
+          },
+        },
+      },
+      // Order the results by date
+      orderBy: (mealPlans, { asc }) => [asc(mealPlans.date)],
     });
 
-    // No need to sort by dayName anymore, order comes from weekDates iteration
-    return finalWeekPlan;
+    return weeklyPlan;
   } catch (error) {
-    console.error("Error fetching meal plan data:", error);
-    // Return empty structure on error
-    return createEmptyWeekStructureForClient(startDate);
+    console.error("Error fetching weekly meal plan with db.query:", error);
+    return null; // Return null or re-throw error as needed
   }
 }
-
-// Helper to create base structure (can be moved to utils)
-// Returns objects matching MealPlanDayClient structure but with empty meals
-const createEmptyWeekStructureForClient = (
-  startDate: Date,
-): MealPlanClient[] => {
-  const mondayStart = startOfWeek(startDate, { weekStartsOn: 1 });
-  return Array.from({ length: 7 }).map((_, i) => ({
-    date: addDays(mondayStart, i),
-    meals: [],
-  }));
-};
 
 /**
  * Updates the checked status of a shopping list item. Enforces ownership via relation query.

@@ -1,0 +1,1 @@
+ALTER TABLE "plannedMeals" DROP CONSTRAINT "plannedMeals_mealPlanId_mealId_pk";

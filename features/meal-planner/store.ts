@@ -3,17 +3,16 @@ import { observable } from "@legendapp/state";
 import { use$ } from "@legendapp/state/react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { addDays, format, subDays } from "date-fns";
-import { getMonday } from "./utils";
 import {
   generatePlanAndUpdateShoppingList,
   getWeeklyMealPlan,
   getWeeklyShoppingList,
 } from "./actions";
 import { useToast } from "@/hooks/use-toast";
-import {
-  MEAL_PLAN_QUERY_KEY_BASE,
-  SHOPPING_LIST_QUERY_KEY_BASE,
-} from "./utils"; // Assuming utils exports these keys
+import { getMonday } from "./utils";
+
+export const MEAL_PLAN_QUERY_KEY_BASE = "meal-planner-QK";
+export const SHOPPING_LIST_QUERY_KEY_BASE = "shopping-list-QK";
 
 // --- Observable State ---
 // Using a global observable for the current week's start date
