@@ -34,7 +34,7 @@ export default async function MealsPage() {
 
   if (!mealsData.length) {
     return (
-      <div className="container mx-auto py-12 px-4">
+      <div>
         <h1 className="text-3xl font-bold mb-8">Meals</h1>
         <div className="bg-neutral-50 rounded-lg p-8 text-center">
           <h2 className="text-xl font-medium text-neutral-700 mb-2">
@@ -55,7 +55,7 @@ export default async function MealsPage() {
   }
 
   return (
-    <div className="container mx-auto py-12 px-4">
+    <div>
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-3xl font-bold">Meals</h1>
         <Link

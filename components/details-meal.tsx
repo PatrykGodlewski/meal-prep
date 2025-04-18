@@ -189,7 +189,7 @@ export default function MealDetailView({
   }
 
   return (
-    <div className="container mx-auto py-8 px-4">
+    <div>
       {/* Header Buttons */}
       <div className="flex justify-between items-center mb-6">
         <Button

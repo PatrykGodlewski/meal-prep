@@ -10,12 +10,12 @@ import {
   mergeDataWithBaseStructure,
   DATE_FORMAT_DISPLAY_HEADER,
 } from "@/features/meal-planner/utils";
-import { DayCard } from "./day-card";
+import { PlanCard } from "./day-card";
 import { ShoppingListDisplay } from "./purchase-list.client";
 import { useMealPlanner } from "./store";
 
 export function MealPlanGrid() {
-  const { shoppingListData } = useMealPlanner();
+  // const { shoppingListData } = useMealPlanner();
 
   return (
     <div className="flex flex-col gap-4">
@@ -34,8 +34,6 @@ function MealPlanDisplay() {
     mealPlanData,
     isMealPlanLoading,
     mealPlanError,
-    isShoppingListLoading,
-    shoppingListError,
   } = useMealPlanner();
 
   const currentWeekDate = currentWeek;
@@ -70,23 +68,11 @@ function MealPlanDisplay() {
         </div>
       )}
 
-      {/* Display shopping list error if it exists and we are not currently loading */}
-      {shoppingListError && !isShoppingListLoading && (
-        <div className="col-span-full text-center text-red-500 mt-8">
-          Error loading shopping list:{" "}
-          {shoppingListError instanceof Error
-            ? shoppingListError.message
-            : "Unknown error"}{" "}
-          {/* Consider adding a retry button */}
-        </div>
-      )}
-
       {/* Render day cards only if there are no errors */}
       {/* We can still render the grid structure even if data is loading */}
       {!mealPlanError &&
-        !shoppingListError &&
         displayPlan.map((planDay) => (
-          <DayCard key={planDay.date.toISOString()} planDay={planDay} />
+          <PlanCard key={planDay.date.toISOString()} plan={planDay} />
         ))}
     </div>
   );

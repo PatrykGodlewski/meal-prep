@@ -1,3 +1,4 @@
+"use client";
 import { format, isToday, isValid } from "date-fns";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import React from "react";
@@ -8,12 +9,12 @@ import { For } from "@/components/for-each";
 
 const DATE_FORMAT_DISPLAY_CARD = "MMM dd";
 
-interface DayCardProps {
-  planDay: MealPlanClient;
+interface PlanCardProps {
+  plan: MealPlanClient;
 }
 
-export const DayCard: React.FC<DayCardProps> = React.memo(({ planDay }) => {
-  if (!isValid(planDay.date)) {
+export function PlanCard({ plan }: PlanCardProps) {
+  if (!isValid(plan.date)) {
     return (
       <Card className="shadow-sm flex flex-col min-h-[150px] border-red-500">
         <CardHeader className="p-3">
@@ -29,21 +30,21 @@ export const DayCard: React.FC<DayCardProps> = React.memo(({ planDay }) => {
   return (
     <Card
       className={cn("shadow-sm flex flex-col min-h-[150px]", {
-        "bg-neutral-200 dark:bg-neutral-800": isToday(planDay.date),
+        "bg-neutral-200 dark:bg-neutral-800": isToday(plan.date),
       })}
     >
       <CardHeader className="p-3">
         <CardTitle className="flex items-center justify-between text-sm font-medium ">
-          <span>{format(planDay.date, "EEEE")}</span>
+          <span>{format(plan.date, "EEEE")}</span>
           <span className="text-xs text-gray-500">
-            {format(planDay.date, DATE_FORMAT_DISPLAY_CARD)}
+            {format(plan.date, DATE_FORMAT_DISPLAY_CARD)}
           </span>
         </CardTitle>
       </CardHeader>
       <CardContent className="p-3 space-y-2 flex-grow">
         <ul className="space-y-1 text-xs">
           <For
-            each={planDay.meals}
+            each={plan.meals}
             empty={
               <li className="text-center text-gray-400 italic pt-4">
                 No meals planned
@@ -52,7 +53,7 @@ export const DayCard: React.FC<DayCardProps> = React.memo(({ planDay }) => {
           >
             {(meal) => (
               <li
-                key={`${planDay.date.toISOString()}-${meal.category}-${meal.id}`}
+                key={`${plan.date.toISOString()}-${meal.category}-${meal.id}`}
               >
                 <Link className="hover:underline" href={`/meals/${meal.id}`}>
                   <span className="font-semibold capitalize">
@@ -67,5 +68,4 @@ export const DayCard: React.FC<DayCardProps> = React.memo(({ planDay }) => {
       </CardContent>
     </Card>
   );
-});
-DayCard.displayName = "DayCard"; // For better debugging
+}

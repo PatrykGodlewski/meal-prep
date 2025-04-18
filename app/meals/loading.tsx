@@ -4,7 +4,7 @@ export default function MealsLoading() {
   const skeletonCardCount = 6;
 
   return (
-    <div className="container mx-auto py-10">
+    <div>
       {/* Skeleton for Header */}
       <div className="flex justify-between items-center mb-6">
         <div className="flex items-center space-x-2">
