@@ -29,6 +29,10 @@ async function getMeals() {
 }
 
 export default async function MealsPage() {
+  const user = await authorize();
+  if (!user) {
+    redirect("/sign-in");
+  }
   const mealsData = await getMeals();
   const profile = await getProfile();
 
