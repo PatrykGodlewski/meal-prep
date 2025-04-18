@@ -61,7 +61,7 @@ const DATE_FORMAT_KEY = "yyyy-MM-dd";
  * @returns Promise<GeneratePlanResult> - The result object containing success status, message, and potentially the generated plan and list.
  */
 export async function generatePlanAndUpdateShoppingList(
-  targetWeekDate: Date,
+  targetWeekDateString: string,
 ): Promise<GeneratePlanResult> {
   const user = await authorize();
 
@@ -72,6 +72,12 @@ export async function generatePlanAndUpdateShoppingList(
       message: "Authorization failed.",
     };
   }
+
+  const targetWeekDate = parse(
+    targetWeekDateString,
+    DATE_FORMAT_KEY,
+    new Date(),
+  );
 
   const userId = user.id;
 
@@ -493,14 +499,14 @@ export async function updateShoppingListItemCheck(
   }
 }
 
-export const updateWeeklyShoppingList = async (date: Date) => {
+export const updateWeeklyShoppingList = async (dateString: string) => {
   const user = await authorize();
   const userId = user?.id;
   if (!userId) {
     console.warn("Update shopping list: user not authorized.");
     return null;
   }
-
+  const date = parse(dateString, DATE_FORMAT_KEY, new Date());
   const getList = async () => {
     const list = await db.query.shoppingLists.findFirst({
       where: (shoppingLists, { and, eq }) =>

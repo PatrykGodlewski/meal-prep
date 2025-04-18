@@ -1,6 +1,6 @@
 "use client";
 import { observable } from "@legendapp/state";
-import { use$, useObservable } from "@legendapp/state/react";
+import { use$ } from "@legendapp/state/react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { addDays, format, subDays } from "date-fns";
 import { getMonday } from "./utils";
@@ -92,7 +92,9 @@ export const useMealPlanner = () => {
   const { mutate, isPending: isGenerating } = useMutation({
     mutationFn: async (weekStartDate: Date) => {
       // The actual server action call
-      const result = await generatePlanAndUpdateShoppingList(weekStartDate);
+      const result = await generatePlanAndUpdateShoppingList(
+        format(weekStartDate, "yyyy-MM-dd"),
+      );
       if (!result?.success) {
         // Throw an error if the server action indicates failure
         throw new Error(result?.error || "Failed to generate meal plan.");
