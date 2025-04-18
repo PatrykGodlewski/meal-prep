@@ -1,9 +1,10 @@
 import { db } from "@/supabase"; // Adjust import
 import { meals } from "@/supabase/schema"; // Adjust import
 import { eq } from "drizzle-orm";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import MealDetailView from "@/components/details-meal";
 import { getAllIngredients } from "@/app/actions";
+import { authorize } from "@/lib/authorization";
 
 const getMealById = async (mealId: string) => {
   try {
@@ -37,6 +38,12 @@ export default async function MealDetailPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
+  const user = await authorize();
+
+  if (!user) {
+    redirect("/sign-in");
+  }
+
   const mealId = (await params).id;
 
   if (!mealId) {
