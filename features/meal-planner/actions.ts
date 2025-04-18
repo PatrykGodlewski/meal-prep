@@ -20,6 +20,7 @@ import type { MealPlanClient } from "./types";
 // import type { UnitType } from "@/validators"; // UnitType might not be needed directly here anymore
 import { formatedEndOfWeek, formatedStartOfWeek } from "@/lib/utils";
 import type { ShoppingList, ShoppingListItem } from "@/supabase/schema"; // Import ShoppingList types
+import { getMonday } from "./utils";
 
 interface ActionVoidResult {
   success: boolean;
@@ -350,7 +351,7 @@ export async function generatePlanAndUpdateShoppingList(
 export async function getWeeklyMealPlan(currentWeek: Date) {
   // 1. Authorization
   const user = await authorize();
-  const startDate = startOfWeek(currentWeek, { weekStartsOn: 1 }); // Calculate start date once
+  const startDate = getMonday(currentWeek); // Calculate start date once
   console.log(startDate, currentWeek);
   if (!user?.id) {
     console.error("Authorization failed in getMealPlansDataForCurrentWeek");

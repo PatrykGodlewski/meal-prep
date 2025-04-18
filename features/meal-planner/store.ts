@@ -1,3 +1,4 @@
+"use client";
 import { observable } from "@legendapp/state";
 import { use$, useObservable } from "@legendapp/state/react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
