@@ -351,7 +351,7 @@ export async function getWeeklyMealPlan(currentWeek: Date) {
   // 1. Authorization
   const user = await authorize();
   const startDate = startOfWeek(currentWeek, { weekStartsOn: 1 }); // Calculate start date once
-
+  console.log(startDate);
   if (!user?.id) {
     console.error("Authorization failed in getMealPlansDataForCurrentWeek");
     return createEmptyWeekStructureForClient(startDate); // Return empty structure
