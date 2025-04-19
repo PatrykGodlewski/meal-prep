@@ -4,22 +4,9 @@ import { format, isValid } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { Loader2, ChevronLeft, ChevronRight } from "lucide-react";
 import { PlanCard } from "./day-card";
-import { ShoppingListDisplay } from "./purchase-list.client";
 import { useMealPlanner } from "./store";
 
-export function MealPlanGrid() {
-  // const { shoppingListData } = useMealPlanner();
-
-  return (
-    <div className="flex flex-col gap-4">
-      <MealPlannerHeader />
-      <MealPlanDisplay />
-      <ShoppingListDisplay />
-    </div>
-  );
-}
-
-function MealPlanDisplay() {
+export function MealPlanDisplay() {
   const {
     isBusy,
     isGenerating,
@@ -58,7 +45,7 @@ function MealPlanDisplay() {
   );
 }
 
-function MealPlannerHeader() {
+export function MealPlannerHeader() {
   const {
     currentWeek,
     isGenerating,

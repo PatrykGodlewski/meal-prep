@@ -1,17 +1,22 @@
 import { CalendarDays } from "lucide-react";
 import { authorize } from "@/lib/authorization";
 import { redirect } from "next/navigation";
-import { MealPlanGrid } from "@/features/meal-planner/meal-plan-grid.client";
+import {
+  MealPlanDisplay,
+  MealPlannerHeader,
+} from "@/features/meal-planner/meal-plan-grid.client";
 import {
   getWeeklyMealPlan,
   getWeeklyShoppingList,
 } from "@/features/meal-planner/actions";
+import { ShoppingListDisplay } from "@/features/meal-planner/purchase-list.client";
+import { Suspense } from "react";
 
 export default async function Home() {
   await authorize();
 
-  // const date = new Date();
   // TODO: add as initial data
+  // const date = new Date();
   // const weeklyMealPlan = await getWeeklyMealPlan(date);
   // const weeklyShoppingList = await getWeeklyShoppingList(date);
 
@@ -21,7 +26,18 @@ export default async function Home() {
         <CalendarDays className="h-7 w-7" />
         <span>This Week's Meal Plan</span>
       </h1>
-      <MealPlanGrid />
+
+      <div className="flex flex-col gap-4">
+        <Suspense>
+          <MealPlannerHeader />
+        </Suspense>
+        <Suspense>
+          <MealPlanDisplay />
+        </Suspense>
+        <Suspense>
+          <ShoppingListDisplay />
+        </Suspense>
+      </div>
     </div>
   );
 }
