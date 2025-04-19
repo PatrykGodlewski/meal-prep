@@ -16,7 +16,7 @@ import {
 } from "@/supabase/schema";
 import { createClient } from "@/utils/supabase/server";
 import { encodedRedirect } from "@/utils/utils";
-import { and, eq, inArray } from "drizzle-orm";
+import { and, count, eq, ilike, inArray } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
@@ -548,20 +548,55 @@ export const getAllIngredients = async (): Promise<Ingredient[]> => {
   }
 };
 
-export async function getMeals() {
+const MEALS_PER_PAGE = 10; // Define how many meals per page
+
+export async function getMeals(searchQuery?: string, page = 1) {
   try {
     const user = await authorize();
+    if (!user) {
+      return { meals: [], totalCount: 0 };
+    }
 
-    if (!user?.id) return [];
+    const offset = (page - 1) * MEALS_PER_PAGE;
 
-    return await db
+    // --- Build Conditions Dynamically ---
+    // const conditions: any[] = [eq(meals.createdBy, user.id)]; // Start with mandatory user filter
+    // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+    const conditions: any[] = []; // Start with mandatory user filter
+
+    if (searchQuery) {
+      conditions.push(ilike(meals.name, `%${searchQuery}%`)); // Add search filter if provided
+    }
+    // --- End Build Conditions ---
+
+    // Query for the paginated meals
+    const paginatedMealsQuery = db
       .select()
       .from(meals)
-      // TODO: data need to be transformed
-      // .where(eq(meals.isPublic, true))
-      .orderBy(meals.createdAt);
+      .where(and(...conditions)) // Apply all conditions using and()
+      .orderBy(meals.createdAt) // Or any other desired order
+      .limit(MEALS_PER_PAGE)
+      .offset(offset);
+
+    // Query to get the total count of matching meals (without pagination)
+    // Apply the same dynamic conditions
+    const countQuery = db
+      .select({ count: count() }) // Select the count
+      .from(meals)
+      .where(and(...conditions)); // Apply the same conditions here
+
+    // Execute both queries
+    const [paginatedMeals, totalResult] = await Promise.all([
+      paginatedMealsQuery,
+      countQuery,
+    ]);
+
+    const totalCount = totalResult[0]?.count ?? 0;
+
+    return { meals: paginatedMeals, totalCount };
   } catch (error) {
     console.error("Error fetching meals:", error);
-    return [];
+    // Return an empty structure in case of error
+    return { meals: [], totalCount: 0 };
   }
 }

@@ -1,0 +1,78 @@
+import Image from "next/image";
+import Link from "next/link";
+import { Clock, Users, ChefHat, UtensilsCrossed } from "lucide-react";
+import type { Meal } from "@/supabase/schema";
+
+type Props = {
+  meal: Meal;
+};
+
+export function MealCard({ meal }: Props) {
+  const totalTime = (meal.prepTimeMinutes || 0) + (meal.cookTimeMinutes || 0);
+
+  const displayAuthor = meal.createdBy || "Skibidi Obiadex";
+
+  return (
+    <Link href={`/meals/${meal.id}`}>
+      <div className="bg-neutral-200 dark:bg-neutral-700 rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow h-full flex flex-col">
+        <div className="relative h-48 w-full bg-neutral-300 dark:bg-neutral-600 flex-shrink-0">
+          {meal.imageUrl ? (
+            <Image
+              src={meal.imageUrl}
+              alt={meal.name}
+              fill
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" // Add sizes prop for optimization
+              className="object-cover"
+            />
+          ) : (
+            <div className="flex items-center justify-center h-full">
+              <UtensilsCrossed className="h-12 w-12 text-neutral-500 dark:text-neutral-400" />
+            </div>
+          )}
+          {meal.category && (
+            <span className="absolute uppercase top-2 right-2 bg-blue-600 text-white text-xs px-2 py-1 rounded-full shadow">
+              {meal.category}
+            </span>
+          )}
+        </div>
+
+        <div className="p-4 text-neutral-700 dark:text-neutral-300 flex flex-col flex-grow">
+          <h2 className="text-xl font-semibold mb-2 line-clamp-1">
+            {meal.name}
+          </h2>
+          <p className="text-sm mb-4 line-clamp-2 flex-grow">
+            {meal.description || "No description available."}
+          </p>
+
+          <div className="flex items-center text-sm mb-3 text-neutral-600 dark:text-neutral-400">
+            <span className="flex items-center mr-4" title="Total time">
+              <Clock className="h-4 w-4 mr-1 flex-shrink-0" />
+              {totalTime > 0 ? `${totalTime} min` : "N/A"}
+            </span>
+
+            {meal.servings && (
+              <span className="flex items-center" title="Servings">
+                <Users className="h-4 w-4 mr-1 flex-shrink-0" />
+                {meal.servings} {meal.servings === 1 ? "serving" : "servings"}
+              </span>
+            )}
+          </div>
+
+          <div className="flex justify-between items-center mt-auto pt-2 border-t border-neutral-300 dark:border-neutral-600">
+            <div
+              className="flex items-center text-sm text-neutral-600 dark:text-neutral-400"
+              title="Author"
+            >
+              <ChefHat className="h-4 w-4 mr-1 flex-shrink-0" />
+              <span className="truncate">By {displayAuthor}</span>
+            </div>
+
+            <span className="text-xs text-neutral-500 dark:text-neutral-400 flex-shrink-0">
+              {new Date(meal.createdAt).toLocaleDateString()}
+            </span>
+          </div>
+        </div>
+      </div>
+    </Link>
+  );
+}
