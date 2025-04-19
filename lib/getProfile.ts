@@ -1,11 +1,11 @@
 import { db } from "@/supabase";
-import { authorize } from "./authorization";
+import { authorize, getUser } from "./authorization";
 import { profiles } from "@/supabase/schema";
 import { eq } from "drizzle-orm";
 
 export async function getProfile() {
   try {
-    const user = await authorize();
+    const user = await getUser();
 
     if (!user) {
       console.log("User not authenticated.");

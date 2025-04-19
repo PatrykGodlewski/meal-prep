@@ -3,7 +3,7 @@
 import type React from "react";
 import { useEffect, useRef, useState, type RefObject } from "react";
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { getMeals } from "../actions";
+import { getMealsWithQuery } from "../actions";
 import { For } from "@/components/for-each";
 import { Skeleton } from "@/components/ui/skeleton"; // Import Skeleton
 import { MealCard } from "./MealCard";
@@ -11,7 +11,7 @@ import { useSearchParams } from "next/navigation";
 
 // --- Basic Intersection Observer Hook ---
 function useIntersection(
-  ref: RefObject<Element>,
+  ref: RefObject<HTMLDivElement | null>,
   options: IntersectionObserverInit = { rootMargin: "0px 0px 400px 0px" }, // Trigger 400px before element enters viewport
 ): boolean {
   const [isIntersecting, setIntersecting] = useState(false);
@@ -85,7 +85,7 @@ const PaginatedMealList: React.FC<PaginatedMealListProps> = () => {
   const fetchMeals = async ({ pageParam = 1 }: { pageParam?: number }) => {
     const currentSearchQuery = searchParams.get(SEARCH_PARAM_KEY) || undefined;
 
-    const result = await getMeals(currentSearchQuery, pageParam);
+    const result = await getMealsWithQuery(currentSearchQuery, pageParam);
 
     return result;
   };

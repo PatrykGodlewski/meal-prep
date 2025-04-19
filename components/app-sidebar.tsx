@@ -12,14 +12,14 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import { getProfile } from "@/lib/getProfile";
-import { authorize } from "@/lib/authorization";
+import { getUser } from "@/lib/authorization";
 import { NavGuest } from "./nav-guest";
 
 export async function AppSidebar({
   ...props
 }: React.ComponentProps<typeof Sidebar>) {
   const profile = await getProfile();
-  const user = await authorize();
+  const user = await getUser();
 
   return (
     <Sidebar collapsible="offcanvas" {...props}>

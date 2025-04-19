@@ -5,7 +5,7 @@ import {
   MealAddFormSchema,
   type MealAddFormValues,
 } from "@/features/meal-editor/validators";
-import { authorize } from "@/lib/authorization";
+import { authorize, getUser } from "@/lib/authorization";
 import { db } from "@/supabase";
 import {
   meals,
@@ -179,7 +179,7 @@ interface Result {
 export async function addMealAction(data: MealAddFormValues): Promise<Result> {
   try {
     // 1. Authorize User
-    const user = await authorize();
+    const user = await getUser();
     const userId = user?.id;
     if (!userId) {
       return { success: false, error: "Unauthorized: User not authenticated." };
@@ -548,11 +548,30 @@ export const getAllIngredients = async (): Promise<Ingredient[]> => {
   }
 };
 
+export async function getMeals() {
+  try {
+    const user = await getUser();
+
+    if (!user?.id) return [];
+
+    return await db
+
+      .select()
+      .from(meals)
+      // TODO: data need to be transformed
+      // .where(eq(meals.isPublic, true))
+      .orderBy(meals.createdAt);
+  } catch (error) {
+    console.error("Error fetching meals:", error);
+    return [];
+  }
+}
+
 const MEALS_PER_PAGE = 10; // Define how many meals per page
 
-export async function getMeals(searchQuery?: string, page = 1) {
+export async function getMealsWithQuery(searchQuery?: string, page = 1) {
   try {
-    const user = await authorize();
+    const user = await getUser();
     if (!user) {
       return { meals: [], totalCount: 0 };
     }

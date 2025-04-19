@@ -8,11 +8,8 @@ import {
 } from "@/features/meal-planner/actions";
 
 export default async function Home() {
-  const user = await authorize();
+  await authorize();
 
-  if (!user) {
-    return redirect("/sign-in");
-  }
   // const date = new Date();
   // TODO: add as initial data
   // const weeklyMealPlan = await getWeeklyMealPlan(date);

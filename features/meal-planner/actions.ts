@@ -1,5 +1,5 @@
 "use server";
-import { authorize } from "@/lib/authorization";
+import { authorize, getUser } from "@/lib/authorization";
 import { db } from "@/supabase";
 import {
   MEAL_CATEGORY_ENUM,
@@ -64,7 +64,7 @@ const DATE_FORMAT_KEY = "yyyy-MM-dd";
 export async function generatePlanAndUpdateShoppingList(
   targetWeekDateString: string,
 ) {
-  const user = await authorize();
+  const user = await getUser();
 
   if (!user?.id) {
     return {
@@ -358,7 +358,7 @@ export async function generatePlanAndUpdateShoppingList(
 // to fetch the final plan structure after generation.
 // It can still be called directly if needed.
 export async function getWeeklyMealPlan(currentWeekString: string) {
-  const user = await authorize();
+  const user = await getUser();
   if (!user?.id) {
     console.error("getDbQueryWeeklyMealPlan: User not authorized.");
     return null; // Or throw an error, depending on desired handling
@@ -420,7 +420,7 @@ export async function updateShoppingListItemCheck(
   isChecked: boolean,
 ): Promise<UpdateCheckResult> {
   // 1. Authorization and Input Validation
-  const user = await authorize();
+  const user = await getUser();
   if (!user?.id) {
     return { success: false, error: "Unauthorized" };
   }
@@ -454,7 +454,7 @@ export async function updateShoppingListItemCheck(
 }
 
 export const updateWeeklyShoppingList = async (dateString: string) => {
-  const user = await authorize();
+  const user = await getUser();
   const userId = user?.id;
   if (!userId) {
     console.warn("Update shopping list: user not authorized.");
@@ -557,7 +557,7 @@ export const updateWeeklyShoppingList = async (dateString: string) => {
 
 export async function getWeeklyShoppingList(dateString: string) {
   const date = parse(dateString, DATE_FORMAT_KEY, new Date());
-  const user = await authorize();
+  const user = await getUser();
   if (!user?.id) {
     console.warn("Get shopping list data: user not authorized.");
     return null;

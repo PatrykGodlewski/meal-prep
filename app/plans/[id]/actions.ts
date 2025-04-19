@@ -1,6 +1,6 @@
 "use server";
 import { updateWeeklyShoppingList } from "@/features/meal-planner/actions";
-import { authorize } from "@/lib/authorization";
+import { authorize, getUser } from "@/lib/authorization";
 import { db } from "@/supabase";
 import { mealPlans, plannedMeals } from "@/supabase/schema"; // Import table schema
 import { eq } from "drizzle-orm"; // Import eq operator
@@ -13,7 +13,7 @@ import { redirect } from "next/navigation";
  * @param newMealId - The ID of the new meal to assign.
  */
 export async function changeMeal(plannedMealId: number, newMealId: string) {
-  const user = await authorize(); // Ensure user is authorized
+  const user = await getUser(); // Ensure user is authorized
   if (!user) redirect("/sign-in");
 
   if (!plannedMealId || !newMealId) {
