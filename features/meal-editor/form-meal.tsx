@@ -58,6 +58,7 @@ import {
   UNIT_ENUM,
 } from "@/supabase/schema";
 import { MealAddFormSchema, type MealAddFormValues } from "./validators";
+import { BackButton } from "@/components/back-button";
 
 const NEW_INGREDIENT_DEFAULT = {
   id: undefined,
@@ -168,7 +169,8 @@ export default function AddMealForm({ ingredientList }: Props) {
   );
 
   return (
-    <div className="max-w-4xl mx-auto p-4 md:p-6">
+    <div className="max-w-4xl space-y-4 mx-auto p-4 md:p-6">
+      <BackButton />
       <h1 className="text-2xl font-bold mb-6">Add New Meal</h1>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">

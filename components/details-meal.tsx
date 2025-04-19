@@ -31,6 +31,7 @@ import {
 import { MealDisplayDetails } from "@/features/meal-editor/meal-display-details"; // Adjust path
 import type { MealDetails } from "@/app/meals/[id]/page"; // Import the specific type from the server component
 import type { Ingredient } from "@/supabase/schema";
+import { BackButton } from "./back-button";
 
 // --- Prop Types ---
 interface MealDetailViewProps {
@@ -192,13 +193,7 @@ export default function MealDetailView({
     <div>
       {/* Header Buttons */}
       <div className="flex justify-between items-center mb-6">
-        <Button
-          variant="link"
-          onClick={() => router.back()}
-          className="p-0 h-auto text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
-        >
-          <ArrowLeft className="h-4 w-4 mr-1" /> Back
-        </Button>
+        <BackButton />
         <div className="flex gap-2">
           {isEditing ? (
             <>

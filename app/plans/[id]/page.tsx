@@ -6,6 +6,7 @@ import { and, eq } from "drizzle-orm";
 import { getMeals } from "@/app/actions";
 import { MealPlanDetailClient } from "./MealPlanDetailClient";
 import type { InferAction } from "@/features/meal-planner/actions";
+import { BackButton } from "@/components/back-button";
 // import { db } from "@/supabase"; // Potentially needed for fetching all meals later
 // import { meals } from "@/supabase/schema";
 // import { eq } from "drizzle-orm";
@@ -70,8 +71,9 @@ export default async function PlanDetailPage({ params }: PlanDetailPageProps) {
   // });
 
   return (
-    <div className="container mx-auto py-8 px-4">
-      <h1 className="text-3xl font-bold mb-6">Meal Plan Details</h1>
+    <div className="container mx-auto space-y-4 py-8 px-4">
+      <BackButton />
+      <h1 className="text-3xl font-bold">Meal Plan Details</h1>
       {/* Pass fetched data to the client component */}
       <MealPlanDetailClient initialPlanData={planData} allMeals={allMeals} />
     </div>

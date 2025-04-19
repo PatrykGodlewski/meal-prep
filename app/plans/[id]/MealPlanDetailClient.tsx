@@ -18,6 +18,10 @@ import {
 } from "@/features/meal-planner/store";
 import { useQueryClient } from "@tanstack/react-query";
 import { toDate } from "date-fns";
+import { Button } from "@/components/ui/button";
+import { ArrowLeft } from "lucide-react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 interface Props {
   initialPlanData: MealPlanDetails;
@@ -88,8 +92,14 @@ function MealCard({ plannedMeal, allMeals }: MealCardProps) {
   return (
     <div className="border p-4 rounded-md shadow flex justify-between items-center">
       <div>
-        <h3 className="font-semibold text-lg">{plannedMeal.meal.name}</h3>
-        <p className="text-sm text-gray-600">{plannedMeal.meal.category}</p>
+        <Link href={`/meals/${plannedMeal.meal.id}`}>
+          <h3 className="font-semibold text-lg hover:underline">
+            {plannedMeal.meal.name}
+          </h3>
+        </Link>
+        <p className="text-sm text-neutral-400 uppercase">
+          {plannedMeal.meal.category}
+        </p>
         {/* Add more meal details if needed */}
       </div>
       <Select
