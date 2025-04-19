@@ -11,6 +11,7 @@ import {
 } from "@/features/meal-planner/actions";
 import { ShoppingListDisplay } from "@/features/meal-planner/purchase-list.client";
 import { Suspense } from "react";
+import { ErrorBoundary } from "@/components/error-boundary";
 
 export default async function Home() {
   await authorize();
@@ -29,13 +30,19 @@ export default async function Home() {
 
       <div className="flex flex-col gap-4">
         <Suspense>
-          <MealPlannerHeader />
+          <ErrorBoundary>
+            <MealPlannerHeader />
+          </ErrorBoundary>
         </Suspense>
         <Suspense>
-          <MealPlanDisplay />
+          <ErrorBoundary>
+            <MealPlanDisplay />
+          </ErrorBoundary>
         </Suspense>
         <Suspense>
-          <ShoppingListDisplay />
+          <ErrorBoundary>
+            <ShoppingListDisplay />
+          </ErrorBoundary>
         </Suspense>
       </div>
     </div>

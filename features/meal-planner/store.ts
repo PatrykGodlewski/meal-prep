@@ -50,7 +50,7 @@ export const useMealPlanner = () => {
 
   // --- Queries ---
   // Calculate the start of the current week and its ISO string representation for query keys
-  const weekIsoString = currentWeek.toISOString();
+  const weekIsoString = currentWeek?.toISOString();
 
   // Query Key for the current week's meal plan
   const mealPlanQueryKey = [MEAL_PLAN_QUERY_KEY_BASE, weekIsoString];

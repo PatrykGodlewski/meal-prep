@@ -55,9 +55,7 @@ export function MealPlannerHeader() {
     isBusy,
   } = useMealPlanner();
 
-  const title = isValid(currentWeek)
-    ? format(currentWeek, "MMMM d, yyyy")
-    : "Loading...";
+  const title = format(currentWeek, "MMMM d, yyyy");
 
   return (
     <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
