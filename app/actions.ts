@@ -356,9 +356,17 @@ export async function updateMeal(
 
         if (existingIngredient) {
           ingredientId = existingIngredient.id;
-          // Optional: Update ingredient definition if needed (e.g., category changed)
-          // This might be better handled in a separate ingredient management UI
-          // await tx.update(ingredients).set({ category: submittedIng.category, unit: submittedIng.unit }).where(eq(ingredients.id, ingredientId));
+          // Update the existing ingredient's category and unit if provided
+          // Add this update operation to the list of promises to run within the transaction
+          upsertPromises.push(
+            tx
+              .update(ingredients)
+              .set({
+                category: submittedIng.category || null, // Use submitted category or null
+                unit: submittedIng.unit || null, // Use submitted unit or null
+              })
+              .where(eq(ingredients.id, ingredientId)),
+          );
         } else {
           // Insert new ingredient definition
           const [newIngredient] = await tx

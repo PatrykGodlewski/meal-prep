@@ -3,42 +3,15 @@ import Link from "next/link";
 import { Clock, Users, ChefHat, UtensilsCrossed } from "lucide-react";
 import type { Meal } from "@/supabase/schema";
 import { authorize } from "@/lib/authorization";
-import { getProfile } from "@/lib/getProfile";
-import { redirect } from "next/navigation";
 import { getMeals } from "../actions";
+import { For } from "@/components/for-each";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 export default async function MealsPage() {
-  const user = await authorize();
-  if (!user) {
-    redirect("/sign-in");
-  }
+  await authorize("/meals");
   const mealsData = await getMeals();
-  const profile = await getProfile();
-
-  if (!mealsData.length) {
-    return (
-      <div>
-        <h1 className="text-3xl font-bold mb-8">Meals</h1>
-        <div className="bg-neutral-50 rounded-lg p-8 text-center">
-          <h2 className="text-xl font-medium text-neutral-700 mb-2">
-            No meals found
-          </h2>
-          <p className="text-neutral-500 mb-6">
-            Start by adding your first meal recipe.
-          </p>
-          <Link
-            href="/meals/add"
-            className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
-          >
-            Add New Meal
-          </Link>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div>
@@ -53,9 +26,11 @@ export default async function MealsPage() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {mealsData.map((meal) => (
-          <MealCard key={meal.id} meal={meal} author={profile?.nickname} />
-        ))}
+        <For each={mealsData} empty={<p> Add your first meal </p>}>
+          {(meal) => (
+            <MealCard key={meal.id} meal={meal} author={meal.createdBy} />
+          )}
+        </For>
       </div>
     </div>
   );

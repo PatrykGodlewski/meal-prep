@@ -467,18 +467,11 @@ const IngredientInputRow: React.FC<IngredientInputRowProps> = ({
 
   // Determine if the user is likely creating a *new* ingredient
   // This happens when there's a name typed, but no matching ID is set
-  const isCreatingNew = useMemo(() => {
-    return !!ingredientName && !ingredientId;
-  }, [ingredientName, ingredientId]);
 
   // Watch unit and category separately ONLY if not creating new,
   // otherwise, they should be editable via FormField
-  const selectedUnit = !isCreatingNew
-    ? watch(`ingredients.${index}.unit`)
-    : undefined;
-  const selectedCategory = !isCreatingNew
-    ? watch(`ingredients.${index}.category`)
-    : undefined;
+  const selectedUnit = watch(`ingredients.${index}.unit`);
+  const selectedCategory = watch(`ingredients.${index}.category`);
 
   return (
     <Card className="p-4 bg-gray-50 dark:bg-neutral-800/50 border dark:border-neutral-700">
@@ -624,90 +617,62 @@ const IngredientInputRow: React.FC<IngredientInputRowProps> = ({
         />
 
         {/* Unit (Conditional: Select if creating new, ReadOnly if existing) */}
-        {isCreatingNew ? (
-          <FormField
-            control={control}
-            name={`ingredients.${index}.unit`}
-            render={({ field: inputField }) => (
-              <FormItem>
-                <FormLabel className="text-xs">Unit</FormLabel>
-                <Select
-                  value={inputField.value ?? ""}
-                  onValueChange={inputField.onChange}
-                >
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select unit" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {UNIT_ENUM.enumValues.map((unit) => (
-                      <SelectItem key={unit} value={unit}>
-                        {unit}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        ) : (
-          <FormItem>
-            <FormLabel className="text-xs text-gray-500 dark:text-gray-400">
-              Unit
-            </FormLabel>
-            <Input
-              readOnly
-              disabled
-              value={selectedUnit ?? "-"}
-              className="bg-gray-100 dark:bg-neutral-700 border-gray-300 dark:border-neutral-600"
-            />
-          </FormItem>
-        )}
+        <FormField
+          control={control}
+          name={`ingredients.${index}.unit`}
+          render={({ field: inputField }) => (
+            <FormItem>
+              <FormLabel className="text-xs">Unit</FormLabel>
+              <Select
+                value={inputField.value ?? ""}
+                onValueChange={inputField.onChange}
+              >
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select unit" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {UNIT_ENUM.enumValues.map((unit) => (
+                    <SelectItem key={unit} value={unit}>
+                      {unit}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
         {/* Category (Conditional: Select if creating new, ReadOnly if existing) */}
-        {isCreatingNew ? (
-          <FormField
-            control={control}
-            name={`ingredients.${index}.category`}
-            render={({ field: inputField }) => (
-              <FormItem>
-                <FormLabel className="text-xs">Category</FormLabel>
-                <Select
-                  value={inputField.value ?? ""}
-                  onValueChange={inputField.onChange}
-                >
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select category" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {INGREDIENT_CATEGORY_ENUM.enumValues.map((cat) => (
-                      <SelectItem key={cat} value={cat} className="capitalize">
-                        {cat.replace(/_/g, " ")}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        ) : (
-          <FormItem>
-            <FormLabel className="text-xs text-gray-500 dark:text-gray-400">
-              Category
-            </FormLabel>
-            <Input
-              readOnly
-              disabled
-              value={selectedCategory?.replace(/_/g, " ") ?? "-"}
-              className="bg-gray-100 dark:bg-neutral-700 border-gray-300 dark:border-neutral-600 capitalize"
-            />
-          </FormItem>
-        )}
+        <FormField
+          control={control}
+          name={`ingredients.${index}.category`}
+          render={({ field: inputField }) => (
+            <FormItem>
+              <FormLabel className="text-xs">Category</FormLabel>
+              <Select
+                value={inputField.value ?? ""}
+                onValueChange={inputField.onChange}
+              >
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select category" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {INGREDIENT_CATEGORY_ENUM.enumValues.map((cat) => (
+                    <SelectItem key={cat} value={cat} className="capitalize">
+                      {cat.replace(/_/g, " ")}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
         {/* Notes */}
         <FormField

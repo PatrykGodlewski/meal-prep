@@ -38,13 +38,8 @@ export default async function MealDetailPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
-  const user = await authorize();
-
-  if (!user) {
-    redirect("/sign-in");
-  }
-
   const mealId = (await params).id;
+  await authorize(`/meals/${mealId}`);
 
   if (!mealId) {
     notFound();
