@@ -11,7 +11,7 @@ export const revalidate = 0;
 
 export default async function MealsPage() {
   await authorize("/meals");
-  const mealsData = await getMeals();
+  const meals = await getMeals();
 
   return (
     <div>
@@ -26,7 +26,7 @@ export default async function MealsPage() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <For each={mealsData} empty={<p> Add your first meal </p>}>
+        <For each={meals} empty={<p> Add your first meal </p>}>
           {(meal) => (
             <MealCard key={meal.id} meal={meal} author={meal.createdBy} />
           )}
@@ -46,7 +46,7 @@ function MealCard({ meal, author }: Props) {
 
   return (
     <Link href={`/meals/${meal.id}`}>
-      <div className="bg-neutral-700 rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow">
+      <div className="bg-neutral-200 dark:bg-neutral-700 rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow">
         <div className="relative h-48 w-full bg-neutral-200">
           {meal.imageUrl ? (
             <Image
@@ -67,15 +67,13 @@ function MealCard({ meal, author }: Props) {
           )}
         </div>
 
-        <div className="p-4">
+        <div className="p-4 text-neutral-600 dark:text-neutral-300">
           <h2 className="text-2xl font-semibold mb-2 line-clamp-1">
             {meal.name}
           </h2>
-          <p className="text-neutral-300 text-sm mb-4 line-clamp-2">
-            {meal.description}
-          </p>
+          <p className=" text-sm mb-4 line-clamp-2">{meal.description}</p>
 
-          <div className="flex items-center text-sm text-neutral-400 mb-3">
+          <div className="flex items-center text-sm mb-3">
             <span className="flex items-center mr-4">
               <Clock className="h-4 w-4 mr-1" />
               {totalTime > 0 ? `${totalTime} min` : "N/A"}
@@ -90,12 +88,12 @@ function MealCard({ meal, author }: Props) {
           </div>
 
           <div className="flex justify-between items-center">
-            <div className="flex items-center text-sm text-neutral-400">
+            <div className="flex items-center text-sm ">
               <ChefHat className="h-4 w-4 mr-1" />
               <span>By {author}</span>
             </div>
 
-            <span className="text-xs text-neutral-400">
+            <span className="text-xs ">
               {new Date(meal.createdAt).toLocaleDateString()}
             </span>
           </div>
