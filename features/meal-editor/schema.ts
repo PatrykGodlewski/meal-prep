@@ -9,7 +9,7 @@ const unitEnum = z.enum(UNITS);
 // Schema for a single ingredient within the form
 export const IngredientFormSchema = z.object({
   // ID of the ingredient definition (if existing)
-  id: z.string().optional(),
+  id: z.any().optional(),
   // Name is required, used for lookup or creation
   name: z.string().min(1, "Ingredient name is required"),
   // Category and Unit are required for new ingredients, populated for existing

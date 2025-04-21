@@ -1,8 +1,6 @@
 import { Geist, Playfair_Display } from "next/font/google";
 import "./globals.css";
-import { authorize } from "@/lib/authorization";
 import Providers from "./providers";
-import { getProfile } from "@/lib/getProfile";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
 import { ConvexAuthNextjsServerProvider } from "@convex-dev/auth/nextjs/server";
@@ -14,11 +12,6 @@ export const metadata = {
 };
 
 const geistSans = Geist({
-  display: "swap",
-  subsets: ["latin"],
-});
-
-const playfair = Playfair_Display({
   display: "swap",
   subsets: ["latin"],
 });

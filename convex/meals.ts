@@ -19,7 +19,7 @@ export const addMeal = mutation({
     isPublic: v.boolean(),
     ingredients: v.array(
       v.object({
-        id: v.optional(v.id("ingredients")),
+        id: v.optional(v.string()),
         name: v.optional(v.string()),
         category: v.optional(
           v.union(...INGREDIENT_CATEGORIES.map((c) => v.literal(c))),
@@ -59,7 +59,7 @@ export const addMeal = mutation({
 
         if (ing.id) {
           // If an ID is provided, patch the existing ingredient
-          finalIngredientId = ing.id; // Use the provided ID
+          finalIngredientId = ing.id as Id<"ingredients">; // Use the provided ID
           await ctx.db.patch(finalIngredientId, {
             // Only update if name/category/unit are actually provided in the input
             // This prevents accidentally overwriting with defaults if not specified
@@ -111,8 +111,7 @@ export const editMeal = mutation({
     isPublic: v.boolean(),
     ingredients: v.array(
       v.object({
-        // Either ingredientId (for existing) or name/category/unit (for new)
-        id: v.optional(v.id("ingredients")),
+        id: v.optional(v.string()),
         name: v.optional(v.string()),
         category: v.optional(
           v.union(...INGREDIENT_CATEGORIES.map((c) => v.literal(c))),
@@ -168,7 +167,7 @@ export const editMeal = mutation({
             updatedAt: now,
           });
         } else {
-          await ctx.db.patch(ingredientId, {
+          await ctx.db.patch(ingredientId as Id<"ingredients">, {
             name: ing.name ?? "", // Update name if provided
             category: ing.category ?? "other", // Update category if provided
             unit: ing.unit ?? "g", // Update unit if provided
@@ -179,7 +178,7 @@ export const editMeal = mutation({
         // Create mealIngredient
         await ctx.db.insert("mealIngredients", {
           mealId: args.mealId,
-          ingredientId,
+          ingredientId: ingredientId as Id<"ingredients">,
           quantity: ing.quantity,
           isOptional: ing.isOptional ?? false,
           notes: ing.notes,

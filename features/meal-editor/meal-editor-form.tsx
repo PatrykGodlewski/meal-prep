@@ -106,11 +106,10 @@ interface MealEditFormProps {
 export function MealEditForm({
   availableIngredients = [],
   meal,
-  isAddForm,
   onSuccess,
 }: MealEditFormProps) {
   const { isPending, editMeal, deleteMeal } = useMealEditor({
-    onEditSuccess: onSuccess,
+    onSuccess,
   });
 
   const form = useForm({
@@ -127,7 +126,8 @@ export function MealEditForm({
 
   const onSubmitEdit = (values: MealUpdateFormValues) => {
     if (!meal?._id) return;
-    editMeal({ mealId: meal?._id, ...values });
+    // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+    editMeal(values as any);
   };
 
   const handleAddIngredient = () => {

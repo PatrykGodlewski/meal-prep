@@ -1,9 +1,8 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Check, ChevronsUpDown, Plus } from "lucide-react";
+import { Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useCallback } from "react";
 import { useTransition } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 
@@ -27,7 +26,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { useToast } from "@/hooks/use-toast";
 import { BackButton } from "@/components/back-button";
 import { type Preloaded, usePreloadedQuery } from "convex/react";
 import type { api } from "@/convex/_generated/api";
@@ -86,11 +84,8 @@ export default function AddMealForm({ preloadedIngredients }: Props) {
   });
 
   const onSubmit = (values: MealAddFormValues) => {
-    startTransition(async () => {
-      console.log(values);
-      const result = await addMeal(values);
-      console.log({ result });
-      // router.push(`/meals/${result.mealId}`);
+    startTransition(() => {
+      addMeal(values);
     });
   };
 

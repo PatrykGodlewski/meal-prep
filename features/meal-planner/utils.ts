@@ -1,5 +1,4 @@
-import { format, startOfWeek, addDays, isValid } from "date-fns";
-import type { Meal } from "@/supabase/schema";
+import { startOfWeek, isValid } from "date-fns";
 
 export const DATE_FORMAT_KEY = "yyyy-MM-dd";
 export const DATE_FORMAT_DISPLAY_HEADER = "MMMM do";
