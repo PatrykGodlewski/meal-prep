@@ -1,25 +1,19 @@
 import { CalendarDays } from "lucide-react";
-import { authorize } from "@/lib/authorization";
 import { redirect } from "next/navigation";
 import {
   MealPlanDisplay,
   MealPlannerHeader,
 } from "@/features/meal-planner/meal-plan-grid.client";
-import {
-  getWeeklyMealPlan,
-  getWeeklyShoppingList,
-} from "@/features/meal-planner/actions";
 import { ShoppingListDisplay } from "@/features/meal-planner/purchase-list.client";
 import { Suspense } from "react";
 import { ErrorBoundary } from "@/components/error-boundary";
 
-export default async function Home() {
-  await authorize();
-
-  // TODO: add as initial data
-  // const date = new Date();
-  // const weeklyMealPlan = await getWeeklyMealPlan(date);
-  // const weeklyShoppingList = await getWeeklyShoppingList(date);
+export default function Home() {
+  // const preloaded = await preloadQuery(api.myFunctions.listNumbers, {
+  //   count: 3,
+  // });
+  //
+  // const data = preloadedQueryResult(preloaded);
 
   return (
     <div>

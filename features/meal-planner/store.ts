@@ -1,15 +1,12 @@
 "use client";
 import { observable } from "@legendapp/state";
 import { use$ } from "@legendapp/state/react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { addDays, format, subDays } from "date-fns";
-import {
-  generatePlanAndUpdateShoppingList,
-  getWeeklyMealPlan,
-  getWeeklyShoppingList,
-} from "./actions";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { addDays, subDays } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import { getMonday } from "./utils";
+import { convexQuery, useConvexMutation } from "@convex-dev/react-query";
+import { api } from "@/convex/_generated/api";
 
 export const MEAL_PLAN_QUERY_KEY_BASE = "meal-planner-QK";
 export const SHOPPING_LIST_QUERY_KEY_BASE = "shopping-list-QK";
@@ -45,88 +42,37 @@ export const useMealPlanner = () => {
   const currentWeek = use$(mealPlannerState$.currentWeek);
 
   // TanStack Query setup
-  const queryClient = useQueryClient();
   const { toast } = useToast();
 
-  // --- Queries ---
-  // Calculate the start of the current week and its ISO string representation for query keys
-  const weekIsoString = currentWeek?.toISOString();
-
-  // Query Key for the current week's meal plan
-  const mealPlanQueryKey = [MEAL_PLAN_QUERY_KEY_BASE, weekIsoString];
-
-  // Query Key for the current week's shopping list
-  const shoppingListQueryKey = [SHOPPING_LIST_QUERY_KEY_BASE, weekIsoString];
-
-  // Fetch the meal plan for the current week
   const {
     data: mealPlanData,
     isLoading: isMealPlanLoading,
     error: mealPlanError,
-  } = useQuery({
-    queryKey: mealPlanQueryKey,
-    queryFn: () => {
-      return getWeeklyMealPlan(format(currentWeek, "yyyy-MM-dd"));
-    }, // Pass the Date object
-    // Keep previous data while loading new week's data for smoother transitions
-    placeholderData: (previousData) => previousData,
-    // Consider staleness settings based on how often data might change outside generation
-    // staleTime: 1000 * 60 * 5, // e.g., 5 minutes
-  });
+  } = useQuery(
+    convexQuery(api.mealPlans.getWeeklyMealPlan, {
+      weekStart: currentWeek.getTime(),
+    }),
+  );
 
-  // Fetch the shopping list for the current week
   const {
     data: shoppingListData,
     isLoading: isShoppingListLoading,
     error: shoppingListError,
-  } = useQuery({
-    queryKey: shoppingListQueryKey,
-    queryFn: () => getWeeklyShoppingList(format(currentWeek, "yyyy-MM-dd")), // Pass the Date object
-    // Keep previous data while loading new week's data
-    placeholderData: (previousData) => previousData,
-    // staleTime: 1000 * 60 * 5, // e.g., 5 minutes
-  });
+  } = useQuery(
+    convexQuery(api.shoppingList.getWeeklyShoppingList, {
+      weekStart: currentWeek.getTime(),
+    }),
+  );
 
-  // --- Mutation ---
   const { mutate, isPending: isGenerating } = useMutation({
-    mutationFn: async (weekStartDate: Date) => {
-      // The actual server action call
-      const result = await generatePlanAndUpdateShoppingList(
-        format(weekStartDate, "yyyy-MM-dd"),
-      );
-      if (!result?.success) {
-        // Throw an error if the server action indicates failure
-        throw new Error(result?.error || "Failed to generate meal plan.");
-      }
-      return result; // Return the success result
-    },
-    onSuccess: (_, weekStartDate) => {
-      // Invalidate queries for the specific week upon successful generation
-      // Note: The query keys are now calculated above based on currentWeek,
-      // but we still need the specific week's keys for invalidation here.
-      const invalidatedWeekIsoString = getMonday(weekStartDate).toISOString();
-      const invalidatedMealPlanQueryKey = [
-        MEAL_PLAN_QUERY_KEY_BASE,
-        invalidatedWeekIsoString,
-      ];
-      const invalidatedShoppingListQueryKey = [
-        SHOPPING_LIST_QUERY_KEY_BASE,
-        invalidatedWeekIsoString,
-      ];
-
-      // Invalidate both meal plan and shopping list queries for the affected week
-      queryClient.invalidateQueries({ queryKey: invalidatedMealPlanQueryKey });
-      queryClient.invalidateQueries({
-        queryKey: invalidatedShoppingListQueryKey,
-      });
-
+    mutationFn: useConvexMutation(api.planAndList.generatePlanAndShoppingList),
+    onSuccess: () => {
       toast({
         title: "Success",
         description: "Meal plan generated and shopping list updated!",
       });
     },
     onError: (error) => {
-      // Handle errors, e.g., show a toast notification
       console.error("Error generating meal plan:", error);
       toast({
         title: "Error",
@@ -139,8 +85,8 @@ export const useMealPlanner = () => {
 
   // Action to trigger the mutation using the current state
   const handleGenerateMealPlan = () => {
-    const weekToGenerate = mealPlannerState$.currentWeek.get(); // Get current value directly
-    mutate(weekToGenerate);
+    const weekStart = mealPlannerState$.currentWeek.get().getTime(); // Get current value directly
+    mutate({ weekStart });
   };
 
   const isBusy = isMealPlanLoading || isShoppingListLoading;

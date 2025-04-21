@@ -1,13 +1,18 @@
 {
 	"private": true,
 	"scripts": {
-		"dev": "next dev",
+		"dev:frontend": "next dev",
+		"dev:backend": "convex dev",
+		"predev": "convex dev --until-success && convex dev --once --run-sh \"node setup.mjs --once\" && convex dashboard",
 		"build": "next build",
 		"start": "next start",
 		"seed": "ts-node -r tsconfig-paths/register ./supabase/seeders/import.ts",
 		"update-types": "npx supabase gen types typescript --project-id \"jfeukaxhtqvfnoqcrpql\" --schema public > supabase/database.types.ts"
 	},
 	"dependencies": {
+		"@auth/core": "0.37.0",
+		"@convex-dev/auth": "^0.0.81",
+		"@convex-dev/react-query": "^0.0.0-alpha.8",
 		"@faker-js/faker": "^9.6.0",
 		"@hookform/resolvers": "^5.0.1",
 		"@legendapp/state": "^3.0.0-beta.30",
@@ -31,6 +36,7 @@
 		"class-variance-authority": "^0.7.1",
 		"clsx": "^2.1.1",
 		"cmdk": "^1.1.1",
+		"convex": "^1.23.0",
 		"date-fns": "^4.1.0",
 		"dotenv": "^16.4.7",
 		"drizzle-orm": "^0.41.0",

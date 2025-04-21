@@ -5,16 +5,35 @@ import React from "react";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { For } from "@/components/for-each";
-import type { WeeklyMealPlan } from "./actions";
 import { Button } from "@/components/ui/button";
+import type { api } from "@/convex/_generated/api";
+import type { FunctionReturnType } from "convex/server";
 
 const DATE_FORMAT_DISPLAY_CARD = "MMM dd";
 
 interface PlanCardProps {
-  plan: WeeklyMealPlan[number];
+  plan?: FunctionReturnType<typeof api.mealPlans.getWeeklyMealPlan>[number];
 }
 
 export function PlanCard({ plan }: PlanCardProps) {
+  if (!plan) {
+    return (
+      <Card className="shadow-sm flex flex-col min-h-[150px] border-neutral-800 bg-neutral-50 dark:bg-neutral-800/50 border-2 border-dashed">
+        <CardHeader className="p-3">
+          <CardTitle className="text-sm font-medium text-neutral-400 dark:text-neutral-600">
+            Plan not yet created
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="p-3 flex-grow flex items-center justify-center">
+          <span className="text-xs text-neutral-400 dark:text-neutral-600 italic">
+            Empty
+          </span>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  // Handle the case where plan data exists but the date is invalid
   if (!isValid(toDate(plan.date))) {
     return (
       <Card className="shadow-sm flex flex-col min-h-[150px] border-red-500">
@@ -47,7 +66,7 @@ export function PlanCard({ plan }: PlanCardProps) {
         <ul className="space-y-1 text-xs group">
           <For
             each={plan.plannedMeals.sort((a, b) =>
-              (a.meal.category ?? "").localeCompare(b.meal?.category ?? ""),
+              (a.meal?.category ?? "").localeCompare(b.meal?.category ?? ""),
             )}
             empty={
               <li className="text-center text-gray-400 italic pt-4">
@@ -57,16 +76,16 @@ export function PlanCard({ plan }: PlanCardProps) {
           >
             {(plannedMeal) => (
               <li
-                key={`${plan.id}-${plannedMeal.meal.category}-${plannedMeal.id}`}
+                key={`${plan._id}-${plannedMeal.meal?.category}-${plannedMeal._id}`}
               >
                 <Link
                   className="hover:underline"
-                  href={`/meals/${plannedMeal.meal.id}`}
+                  href={`/meals/${plannedMeal.meal?._id}`}
                 >
                   <span className="font-semibold capitalize">
-                    {plannedMeal.meal.category}:
+                    {plannedMeal.meal?.category}:
                   </span>{" "}
-                  {plannedMeal.meal.name}
+                  {plannedMeal.meal?.name}
                 </Link>
               </li>
             )}
@@ -74,7 +93,7 @@ export function PlanCard({ plan }: PlanCardProps) {
         </ul>
 
         <Button size={"sm"} asChild>
-          <Link href={`/plans/${plan.id}`}>Go to plan</Link>
+          <Link href={`/plans/${plan._id}`}>Go to plan</Link>
         </Button>
       </CardContent>
     </Card>

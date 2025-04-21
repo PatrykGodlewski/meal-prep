@@ -1,66 +1,39 @@
 "use client";
-import type { Meal } from "@/supabase/schema";
-import type { MealPlanDetails } from "./page";
 import { For } from "@/components/for-each";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { changeMeal } from "./actions"; // Import the server action
-import { useEffect } from "react";
-import { getMonday } from "@/features/meal-planner/utils";
-import {
-  MEAL_PLAN_QUERY_KEY_BASE,
-  SHOPPING_LIST_QUERY_KEY_BASE,
-} from "@/features/meal-planner/store";
-import { useQueryClient } from "@tanstack/react-query";
-import { toDate } from "date-fns";
-import { Button } from "@/components/ui/button";
-import { ArrowLeft } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { usePreloadedQuery, type Preloaded } from "convex/react";
 import Link from "next/link";
+import {} from "@convex-dev/react-query";
+import type { api } from "@/convex/_generated/api";
+import { Button } from "@/components/ui/button";
+import type { FunctionReturnType } from "convex/server";
 
 interface Props {
-  initialPlanData: MealPlanDetails;
-  allMeals: Meal[];
+  preloadedMealPlan: Preloaded<typeof api.mealPlans.getMealPlan>;
 }
-export function MealPlanDetailClient({ allMeals, initialPlanData }: Props) {
-  const queryClient = useQueryClient();
-  useEffect(() => {
-    const invalidatedWeekIsoString = getMonday(
-      toDate(initialPlanData.date),
-    ).toISOString();
-    const invalidatedMealPlanQueryKey = [
-      MEAL_PLAN_QUERY_KEY_BASE,
-      invalidatedWeekIsoString,
-    ];
-    const invalidatedShoppingListQueryKey = [
-      SHOPPING_LIST_QUERY_KEY_BASE,
-      invalidatedWeekIsoString,
-    ];
 
-    // Invalidate both meal plan and shopping list queries for the affected week
-    queryClient.invalidateQueries({ queryKey: invalidatedMealPlanQueryKey });
-    queryClient.invalidateQueries({
-      queryKey: invalidatedShoppingListQueryKey,
-    });
-  });
+export function MealPlanDetail({ preloadedMealPlan }: Props) {
+  const mealPlan = usePreloadedQuery(preloadedMealPlan);
+
+  if (!mealPlan) {
+    return (
+      <p className="text-center text-gray-500 dark:text-gray-400">
+        No meal plan found. Start by creating one!
+        <Button variant="outline" size="sm" asChild className="mt-2">
+          <Link href="/">Create a Meal Plan</Link>
+        </Button>
+      </p>
+    );
+  }
+
   return (
     <div className="flex flex-col gap-4">
       <For
-        each={initialPlanData.plannedMeals.sort((a, b) =>
-          (a.meal.category ?? "").localeCompare(b.meal?.category ?? ""),
+        each={mealPlan.plannedMeals.sort((a, b) =>
+          (a.meal?.category ?? "").localeCompare(b.meal?.category ?? ""),
         )}
       >
         {(plannedMeal) => (
-          <MealCard
-            key={plannedMeal.id} // Add key for list rendering
-            plannedMeal={plannedMeal}
-            allMeals={allMeals} // Pass allMeals down
-          />
+          <MealCard key={plannedMeal._id} plannedMeal={plannedMeal} />
         )}
       </For>
     </div>
@@ -68,61 +41,24 @@ export function MealPlanDetailClient({ allMeals, initialPlanData }: Props) {
 }
 
 interface MealCardProps {
-  plannedMeal: MealPlanDetails["plannedMeals"][number];
-  allMeals: Meal[]; // Add allMeals prop
+  plannedMeal: NonNullable<
+    FunctionReturnType<typeof api.mealPlans.getMealPlan>
+  >["plannedMeals"][number];
 }
 
-function MealCard({ plannedMeal, allMeals }: MealCardProps) {
-  // Handler for when a new meal is selected
-  const handleMealChange = (newMealId: string) => {
-    // Call the server action
-    // Consider adding optimistic updates or loading states here
-    changeMeal(plannedMeal.id, newMealId)
-      .then(() => {
-        // Optional: Show success feedback
-        console.log("Meal changed successfully");
-      })
-      .catch((error) => {
-        // Optional: Show error feedback
-        console.error("Failed to change meal:", error);
-        // Potentially revert optimistic update here
-      });
-  };
-
+function MealCard({ plannedMeal }: MealCardProps) {
   return (
     <div className="border p-4 rounded-md shadow flex justify-between items-center">
       <div>
-        <Link href={`/meals/${plannedMeal.meal.id}`}>
+        <Link href={`/meals/${plannedMeal.meal?._id}`}>
           <h3 className="font-semibold text-lg hover:underline">
-            {plannedMeal.meal.name}
+            {plannedMeal.meal?.name}
           </h3>
         </Link>
         <p className="text-sm text-neutral-400 uppercase">
-          {plannedMeal.meal.category}
+          {plannedMeal.meal?.category}
         </p>
-        {/* Add more meal details if needed */}
       </div>
-      <Select
-        defaultValue={plannedMeal.mealId} // Set initial value to current meal ID
-        onValueChange={handleMealChange} // Call action on change
-      >
-        <SelectTrigger className="w-[280px]">
-          <SelectValue placeholder="Change meal..." />
-        </SelectTrigger>
-        <SelectContent>
-          <For
-            each={allMeals.filter(
-              (meal) => meal.category === plannedMeal.meal.category,
-            )}
-          >
-            {(mealOption) => (
-              <SelectItem key={mealOption.id} value={mealOption.id}>
-                {mealOption.name.trim()}
-              </SelectItem>
-            )}
-          </For>
-        </SelectContent>
-      </Select>
     </div>
   );
 }

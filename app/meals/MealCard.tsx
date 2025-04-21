@@ -1,10 +1,10 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Clock, Users, ChefHat, UtensilsCrossed } from "lucide-react";
-import type { Meal } from "@/supabase/schema";
+import type { Doc } from "@/convex/_generated/dataModel";
 
 type Props = {
-  meal: Meal;
+  meal: Doc<"meals">;
 };
 
 export function MealCard({ meal }: Props) {
@@ -13,7 +13,7 @@ export function MealCard({ meal }: Props) {
   const displayAuthor = meal.createdBy || "Skibidi Obiadex";
 
   return (
-    <Link href={`/meals/${meal.id}`}>
+    <Link href={`/meals/${meal._id}`}>
       <div className="bg-neutral-200 dark:bg-neutral-700 rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow h-full flex flex-col">
         <div className="relative h-48 w-full bg-neutral-300 dark:bg-neutral-600 flex-shrink-0">
           {meal.imageUrl ? (

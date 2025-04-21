@@ -36,11 +36,13 @@ export function MealPlanDisplay() {
 
       {/* Render day cards only if there are no errors */}
       {/* We can still render the grid structure even if data is loading */}
-      {!mealPlanError &&
-        !!mealPlanData &&
-        mealPlanData.map((planDay) => (
-          <PlanCard key={planDay.id} plan={planDay} />
-        ))}
+      {!mealPlanError && !!mealPlanData && !!mealPlanData.length
+        ? mealPlanData.map((planDay) => (
+            <PlanCard key={planDay._id} plan={planDay} />
+          ))
+        : Array.from({ length: 7 }, (_, idx) => (
+            <PlanCard key={`placeholder-${idx}`} /> // Added placeholder prefix to key for clarity
+          ))}
     </div>
   );
 }

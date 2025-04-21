@@ -1,23 +1,9 @@
 import Link from "next/link";
-import { authorize } from "@/lib/authorization";
 import PaginatedMealList from "./PaginatedMealList"; // Import the new component
 import { Suspense } from "react";
 import { Skeleton } from "@/components/ui/skeleton"; // Import Skeleton for page level suspense
 import { SearchInput } from "./SearchInput";
 
-// Keep dynamic for authorization check, but data fetching moves client-side
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
-
-// Skeleton for the header part while authorization is checked
-const HeaderSkeleton = () => (
-  <div className="flex justify-between items-center mb-8">
-    <Skeleton className="h-9 w-32" />
-    <Skeleton className="h-10 w-36" />
-  </div>
-);
-
-// Skeleton for the initial list loading state
 const ListSkeleton = () => (
   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
     {Array.from({ length: 6 }).map((_, index) => (
@@ -49,16 +35,7 @@ const ListSkeleton = () => (
   </div>
 );
 
-interface PageProps {
-  searchParams: Promise<{ q: string }>;
-}
-
-export default async function MealsPage({ searchParams }: PageProps) {
-  // Authorization still happens server-side on page load
-  await authorize("/meals");
-  // TODO: for initial data to be passed
-  // const search = (await searchParams).q;
-
+export default function MealsPage() {
   return (
     <div>
       <div className="flex justify-between items-center mb-8">

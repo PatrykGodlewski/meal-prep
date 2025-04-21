@@ -1,52 +1,12 @@
 "use client";
 
 import type React from "react";
-import { useEffect, useRef, useState, type RefObject } from "react";
-import { useInfiniteQuery } from "@tanstack/react-query";
-import { getMealsWithQuery } from "../actions";
 import { For } from "@/components/for-each";
-import { Skeleton } from "@/components/ui/skeleton"; // Import Skeleton
+import { Skeleton } from "@/components/ui/skeleton";
 import { MealCard } from "./MealCard";
-import { useSearchParams } from "next/navigation";
+import { usePaginatedMeals } from "@/hooks/use-paginated-meals";
 
-// --- Basic Intersection Observer Hook ---
-function useIntersection(
-  ref: RefObject<HTMLDivElement | null>,
-  options: IntersectionObserverInit = { rootMargin: "0px 0px 400px 0px" }, // Trigger 400px before element enters viewport
-): boolean {
-  const [isIntersecting, setIntersecting] = useState(false);
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => setIntersecting(entry.isIntersecting),
-      options,
-    );
-
-    const currentElement = ref.current;
-
-    if (currentElement) {
-      observer.observe(currentElement);
-    }
-
-    return () => {
-      if (currentElement) {
-        observer.unobserve(currentElement);
-      }
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    ref.current,
-    options,
-    options.root,
-    options.rootMargin,
-    options.threshold,
-  ]);
-
-  return isIntersecting;
-}
-// --- End Intersection Observer Hook ---
-
-// --- Skeleton Loader for Meal Card ---
+// --- Skeleton Loader for Meal Card (Keep this presentation logic here) ---
 const MealCardSkeleton = () => (
   <div className="bg-neutral-200 dark:bg-neutral-700 rounded-lg overflow-hidden shadow-md h-full flex flex-col">
     <Skeleton className="h-48 w-full" />
@@ -72,89 +32,32 @@ const MealCardSkeleton = () => (
 );
 // --- End Skeleton Loader ---
 
-interface PaginatedMealListProps {
-  searchQuery?: string;
-}
+// Remove searchQuery prop if it's always derived from URL params via the hook
+// interface PaginatedMealListProps {
+//   searchQuery?: string; // This might no longer be needed
+// }
+// export const SEARCH_PARAM_KEY = "q"; // This is now defined in the hook
 
-export const SEARCH_PARAM_KEY = "q";
-
-const PaginatedMealList: React.FC<PaginatedMealListProps> = () => {
-  const loadMoreRef = useRef<HTMLDivElement>(null);
-  const searchParams = useSearchParams();
-
-  const fetchMeals = async ({ pageParam = 1 }: { pageParam?: number }) => {
-    const currentSearchQuery = searchParams.get(SEARCH_PARAM_KEY) || undefined;
-
-    const result = await getMealsWithQuery(currentSearchQuery, pageParam);
-
-    return result;
-  };
-
-  // Use the search param from the URL as part of the query key
-  const currentSearchQuery = searchParams.get(SEARCH_PARAM_KEY) || "";
-
+const PaginatedMealList: React.FC = () => {
+  // Use the hook to get data and state
   const {
-    data,
-    error,
-    fetchNextPage,
-    hasNextPage,
-    isFetching,
-    isFetchingNextPage,
+    allMeals,
     status,
-  } = useInfiniteQuery({
-    // Update queryKey to depend on the actual search term from URL
-    queryKey: ["meals", currentSearchQuery],
-    queryFn: fetchMeals,
-    initialPageParam: 1,
-    getNextPageParam: (lastPage, allPages) => {
-      const totalFetchedMeals = allPages.reduce(
-        (acc, page) => acc + page.meals.length,
-        0,
-      );
-      const totalAvailableMeals = lastPage.totalCount;
+    isFetching, // Use this for the empty state check
+    isFetchingNextPage,
+    hasNextPage,
+    loadMoreRef,
+  } = usePaginatedMeals();
 
-      // If we've fetched less than the total available, there's potentially a next page
-      if (totalFetchedMeals < totalAvailableMeals) {
-        return allPages.length + 1; // Next page number
-      }
-      return undefined; // No more pages
-    },
-    // staleTime: 1000 * 60 * 1, // Optional: 1 minute stale time
-  });
-
-  const isIntersecting = useIntersection(loadMoreRef);
-
-  useEffect(() => {
-    if (isIntersecting && hasNextPage && !isFetchingNextPage) {
-      fetchNextPage();
-    }
-  }, [isIntersecting, hasNextPage, isFetchingNextPage, fetchNextPage]);
-
-  // Handle initial loading state with skeletons
-  if (status === "pending") {
+  if (status === "LoadingFirstPage") {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {Array.from({ length: 6 }).map(
-          (
-            _,
-            index, // Show 6 skeletons initially
-          ) => (
-            <MealCardSkeleton key={index} />
-          ),
-        )}
+        {Array.from({ length: 6 }).map((_, index) => (
+          <MealCardSkeleton key={index} />
+        ))}
       </div>
     );
   }
-
-  if (status === "error") {
-    return (
-      <div className="text-center text-red-500 dark:text-red-400 py-10">
-        Error loading meals: {error?.message || "Unknown error"}
-      </div>
-    );
-  }
-
-  const allMeals = data?.pages.flatMap((page) => page.meals) ?? [];
 
   return (
     <div>
@@ -162,48 +65,41 @@ const PaginatedMealList: React.FC<PaginatedMealListProps> = () => {
         <For
           each={allMeals}
           empty={
-            !isFetching ? (
+            // Show empty message only when not initially fetching and no meals exist
+            !isFetching && allMeals.length === 0 ? (
               <p className="col-span-full text-center py-10 text-neutral-500 dark:text-neutral-400">
                 No meals found matching your criteria.
               </p>
             ) : null
           }
         >
-          {(meal) => <MealCard key={meal.id} meal={meal} />}
+          {(meal) => <MealCard key={meal._id} meal={meal} />}
         </For>
-        {/* Show skeletons while fetching next page */}
+        {/* Show skeletons while fetching the next page */}
         {isFetchingNextPage &&
-          Array.from({ length: 3 }).map(
-            (
-              _,
-              index, // Show 3 skeletons when loading more
-            ) => <MealCardSkeleton key={`loading-${index}`} />,
-          )}
+          Array.from({ length: 3 }).map((_, index) => (
+            <MealCardSkeleton key={`loading-${index}`} />
+          ))}
       </div>
 
       {/* Load More Trigger Element (Invisible) */}
+      {/* Assign the ref obtained from the hook */}
       <div ref={loadMoreRef} className="h-10" />
 
-      {/* Optional: Explicit Load More Button or Status */}
+      {/* Optional: Status indicator */}
       <div className="flex justify-center items-center mt-6 mb-4 h-10">
         {!isFetchingNextPage && hasNextPage && (
           <span className="text-neutral-500 dark:text-neutral-400">
             Scroll down to load more...
           </span>
-          // Or a button:
-          // <button
-          //   onClick={() => fetchNextPage()}
-          //   disabled={isFetchingNextPage}
-          //   className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
-          // >
-          //   {isFetchingNextPage ? 'Loading...' : 'Load More'}
-          // </button>
         )}
-        {!hasNextPage && allMeals.length > 0 && (
+        {!hasNextPage && allMeals.length > 0 && !isFetching && (
           <span className="text-neutral-500 dark:text-neutral-400">
             You've reached the end.
           </span>
         )}
+        {/* Optional: Show loading indicator even when not fetching next page but initial fetch is happening */}
+        {/* {isFetching && !isFetchingNextPage && <p>Loading...</p>} */}
       </div>
     </div>
   );

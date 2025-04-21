@@ -1,3 +1,4 @@
+"use client";
 import { Triangle } from "lucide-react";
 import { NavMain } from "@/components/nav-main";
 import { NavSecondary } from "@/components/nav-secondary";
@@ -11,15 +12,11 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { getProfile } from "@/lib/getProfile";
-import { getUser } from "@/lib/authorization";
 import { NavGuest } from "./nav-guest";
+import { useConvexAuth } from "convex/react";
 
-export async function AppSidebar({
-  ...props
-}: React.ComponentProps<typeof Sidebar>) {
-  const profile = await getProfile();
-  const user = await getUser();
+export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const { isAuthenticated } = useConvexAuth();
 
   return (
     <Sidebar collapsible="offcanvas" {...props}>
@@ -39,15 +36,15 @@ export async function AppSidebar({
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        {user ? <NavMain /> : <NavGuest />}
-        {!!user && <NavSecondary className="mt-auto" />}
+        {isAuthenticated ? <NavMain /> : <NavGuest />}
+        {!!isAuthenticated && <NavSecondary className="mt-auto" />}
       </SidebarContent>
       <SidebarFooter>
-        {!!user && (
+        {!!isAuthenticated && (
           <NavUser
             user={{
-              name: profile?.nickname ?? "User",
-              email: user?.email ?? "Email missing",
+              name: "User missing",
+              email: "Email missing",
             }}
           />
         )}

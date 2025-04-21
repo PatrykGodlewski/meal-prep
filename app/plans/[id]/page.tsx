@@ -1,59 +1,22 @@
-import { notFound, redirect } from "next/navigation";
-import { authorize } from "@/lib/authorization";
-import { db } from "@/supabase";
-import { mealPlans } from "@/supabase/schema";
-import { and, eq } from "drizzle-orm";
-import { getMeals } from "@/app/actions";
-import { MealPlanDetailClient } from "./MealPlanDetailClient";
-import type { InferAction } from "@/features/meal-planner/actions";
 import { BackButton } from "@/components/back-button";
-// import { db } from "@/supabase"; // Potentially needed for fetching all meals later
-// import { meals } from "@/supabase/schema";
-// import { eq } from "drizzle-orm";
-
-async function getMealPlanDetails(planId: number) {
-  const user = await authorize(`/plans/${planId}`);
-
-  try {
-    const plan = await db.query.mealPlans.findFirst({
-      where: and(eq(mealPlans.id, planId), eq(mealPlans.userId, user.id)),
-      with: {
-        plannedMeals: {
-          with: {
-            meal: {
-              columns: {
-                id: true,
-                name: true,
-                category: true,
-              },
-            },
-          },
-        },
-      },
-    });
-
-    return plan ?? null;
-  } catch (error) {
-    console.error("Error fetching meal plan details:", error);
-    // Decide how to handle DB errors, maybe rethrow or return null
-    return null;
-  }
-}
-
-export type MealPlanDetails = InferAction<typeof getMealPlanDetails>;
+import type { Id } from "@/convex/_generated/dataModel";
+import { preloadQuery } from "convex/nextjs";
+import { api } from "@/convex/_generated/api";
+import { notFound } from "next/navigation";
+import { MealPlanDetail } from "./MealPlanDetailClient";
 
 interface PlanDetailPageProps {
-  params: Promise<{ id: number }>;
+  params: Promise<{ id: Id<"mealPlans"> }>;
 }
 
 export default async function PlanDetailPage({ params }: PlanDetailPageProps) {
   const planId = (await params).id;
-  await authorize(`/plans/${planId}`);
 
-  const planData = await getMealPlanDetails(planId);
-  const allMeals = await getMeals();
+  const preloadedMealPlan = await preloadQuery(api.mealPlans.getMealPlan, {
+    mealPlanId: planId,
+  });
 
-  if (!planData) {
+  if (!preloadedMealPlan) {
     notFound();
   }
 
@@ -61,7 +24,7 @@ export default async function PlanDetailPage({ params }: PlanDetailPageProps) {
     <div className="container mx-auto space-y-4 py-8 px-4">
       <BackButton />
       <h1 className="text-3xl font-bold">Meal Plan Details</h1>
-      <MealPlanDetailClient initialPlanData={planData} allMeals={allMeals} />
+      <MealPlanDetail preloadedMealPlan={preloadedMealPlan} />
     </div>
   );
 }

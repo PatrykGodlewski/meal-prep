@@ -1,60 +1,41 @@
-import { db } from "@/supabase"; // Adjust import
-import { meals } from "@/supabase/schema"; // Adjust import
-import { eq } from "drizzle-orm";
-import { notFound, redirect } from "next/navigation";
-import MealDetailView from "@/components/details-meal";
-import { getAllIngredients } from "@/app/actions";
-import { authorize } from "@/lib/authorization";
-
-const getMealById = async (mealId: string) => {
-  try {
-    const mealWithIngredients = await db.query.meals.findFirst({
-      where: eq(meals.id, mealId),
-      with: {
-        mealIngredients: {
-          with: {
-            ingredient: true,
-          },
-        },
-      },
-    });
-
-    if (!mealWithIngredients) {
-      console.log(`No meal found with id: ${mealId}`);
-      return null;
-    }
-
-    return mealWithIngredients;
-  } catch (error) {
-    console.error("Error fetching meal with ingredients:", error);
-    throw error;
-  }
-};
-
-export type MealDetails = NonNullable<Awaited<ReturnType<typeof getMealById>>>;
+import { notFound } from "next/navigation";
+import { preloadQuery } from "convex/nextjs";
+import { convexAuthNextjsToken } from "@convex-dev/auth/nextjs/server";
+import { api } from "@/convex/_generated/api";
+import type { Id } from "@/convex/_generated/dataModel";
+import MealDetailView from "@/features/meal-editor/meal-editor-view";
 
 export default async function MealDetailPage({
   params,
 }: {
-  params: Promise<{ id: string }>;
+  params: Promise<{ id: Id<"meals"> }>;
 }) {
   const mealId = (await params).id;
-  await authorize(`/meals/${mealId}`);
 
   if (!mealId) {
     notFound();
   }
 
-  const pageData = await getMealById(mealId);
+  const preloadedMeal = await preloadQuery(
+    api.meals.getMeal,
+    { mealId },
+    { token: await convexAuthNextjsToken() },
+  );
 
-  if (!pageData) {
+  const preloadedIngredients = await preloadQuery(
+    api.ingredients.getIngredients,
+    {},
+    { token: await convexAuthNextjsToken() },
+  );
+
+  if (!preloadedMeal || !mealId) {
     notFound();
   }
 
   return (
     <MealDetailView
-      pageData={pageData}
-      ingredientList={(await getAllIngredients()) ?? []}
+      preloadedMeal={preloadedMeal}
+      preloadedIngredients={preloadedIngredients}
     />
   );
 }

@@ -1,8 +1,8 @@
 "use client";
 import { Input } from "@/components/ui/input";
+import { SEARCH_PARAM_KEY } from "@/hooks/use-paginated-meals";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useDebounceCallback } from "usehooks-ts";
-import { SEARCH_PARAM_KEY } from "./PaginatedMealList";
 
 export function SearchInput() {
   const searchParams = useSearchParams();

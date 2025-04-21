@@ -1,12 +1,18 @@
-import { getAllIngredients } from "@/app/actions";
+import { api } from "@/convex/_generated/api";
 import AddMealForm from "@/features/meal-editor/form-meal";
-import { authorize } from "@/lib/authorization";
+import { convexAuthNextjsToken } from "@convex-dev/auth/nextjs/server";
+import { preloadQuery } from "convex/nextjs";
 
 export default async function Home() {
-  await authorize("/meals/add");
+  const preloadedIngredients = await preloadQuery(
+    api.ingredients.getIngredients,
+    {},
+    { token: await convexAuthNextjsToken() },
+  );
+
   return (
     <div>
-      <AddMealForm ingredientList={(await getAllIngredients()) ?? []} />
+      <AddMealForm preloadedIngredients={preloadedIngredients} />
     </div>
   );
 }

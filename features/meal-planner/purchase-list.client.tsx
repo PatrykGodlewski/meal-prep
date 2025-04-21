@@ -7,21 +7,16 @@ import { cn } from "@/lib/utils";
 import { useMealPlanner } from "./store";
 import { useMutation } from "@tanstack/react-query";
 import { use$, useObservable } from "@legendapp/state/react";
-import {
-  updateShoppingListItemCheck,
-  type WeeklyShoppingList,
-} from "./actions";
 import { For } from "@/components/for-each";
 import { startCase } from "lodash";
+import { useConvexMutation } from "@convex-dev/react-query";
+import { api } from "@/convex/_generated/api";
+import { toast } from "@/hooks/use-toast";
+import type { Id } from "@/convex/_generated/dataModel";
 
 export function ShoppingListDisplay() {
   const { shoppingListData: list } = useMealPlanner();
   const items = list?.items ?? [];
-
-  // https://github.com/LegendApp/legend-state/issues/476
-  // implement this to tanstack query as initial data or something
-  // const { updateItemChecked, listItems } = useShoppingList(listId);
-  // const items = Object.values(listItems);
 
   const groupedItems = Object.groupBy(
     items,
@@ -49,7 +44,14 @@ export function ShoppingListDisplay() {
                 empty={"no ingredients found"}
               >
                 {(item) => (
-                  <ShoppingListItem key={item.ingredientId} item={item} />
+                  <ShoppingListItem
+                    key={item.ingredientId}
+                    amount={item.amount}
+                    unit={item.ingredient?.unit}
+                    name={item.ingredient?.name}
+                    isChecked={item.isChecked}
+                    id={item._id}
+                  />
                 )}
               </For>
             </div>
@@ -61,27 +63,63 @@ export function ShoppingListDisplay() {
 }
 
 type Props = {
-  item: WeeklyShoppingList["items"][number];
+  amount: number;
+  unit?: string;
+  name?: string;
+  isChecked: boolean;
+  id: Id<"shoppingListItems">;
 };
 
-function ShoppingListItem({ item }: Props) {
-  // export to useMealPlanner and add reset or something like that
-  const checked$ = useObservable(item.isChecked);
-  const checked = use$(checked$);
+function ShoppingListItem({ amount, unit, name, isChecked, id }: Props) {
+  const { currentWeek } = useMealPlanner();
+
   const uniqueId = useId();
   const labelId = `${uniqueId}-label`;
 
-  const { mutate, isPending } = useMutation({
-    mutationKey: ["shopping-list-item", item.id],
-    mutationFn: (isChecked: boolean) =>
-      updateShoppingListItemCheck(item.id, isChecked),
-    onSuccess: (data) => {
-      checked$.set(data.success ? !checked : checked);
+  const { mutate } = useMutation({
+    mutationFn: useConvexMutation(
+      api.shoppingList.updateShoppingListItem,
+    ).withOptimisticUpdate((localStore, args) => {
+      const { checked } = args;
+
+      const weekStart = currentWeek.getTime();
+
+      const currentValue = localStore.getQuery(
+        api.shoppingList.getWeeklyShoppingList,
+        { weekStart },
+      );
+
+      if (currentValue) {
+        const updatedItems = currentValue.items.map((item) =>
+          item._id === id ? { ...item, isChecked: checked } : item,
+        );
+
+        const updatedValue = {
+          ...currentValue,
+          items: updatedItems,
+        };
+
+        localStore.setQuery(
+          api.shoppingList.getWeeklyShoppingList,
+          { weekStart },
+          updatedValue,
+        );
+      }
+    }),
+
+    onError: (error) => {
+      console.error(error);
+      toast({
+        title: "Error",
+        description:
+          error instanceof Error ? error.message : "An unknown error occurred.",
+        variant: "destructive",
+      });
     },
   });
 
   const handleCheckChange = () => {
-    mutate(!checked);
+    mutate({ checked: !isChecked, shoppingListItemId: id });
   };
 
   return (
@@ -91,33 +129,30 @@ function ShoppingListItem({ item }: Props) {
         id={labelId}
         className={cn(
           "flex items-center p-3 justify-between rounded-md border bg-neutral-0 dark:bg-neutral-800 border-neutral-700 shadow-sm transition-colors",
-          isPending
-            ? "opacity-50 cursor-not-allowed"
-            : "hover:bg-neutral-100 dark:hover:bg-neutral-700/50 cursor-pointer",
+          "hover:bg-neutral-100 dark:hover:bg-neutral-700/50 cursor-pointer",
         )}
       >
         <div className="flex items-center gap-2">
           <Checkbox
             id={uniqueId}
-            checked={checked}
+            checked={isChecked}
             onCheckedChange={handleCheckChange}
             aria-labelledby={labelId}
           />
           <span
             className={cn("text-sm font-medium", {
-              "cursor-pointer": !isPending,
-              "line-through text-neutral-500": checked,
+              "line-through text-neutral-500": isChecked,
             })}
           >
-            {item.ingredient?.name}
+            {name}
           </span>
         </div>
         <span
           className={cn("text-sm italic", {
-            "text-gray-400": checked,
+            "text-gray-400": isChecked,
           })}
         >
-          {item.amount} {item.ingredient?.unit}
+          {amount} {unit}
         </span>
       </Label>
     </li>

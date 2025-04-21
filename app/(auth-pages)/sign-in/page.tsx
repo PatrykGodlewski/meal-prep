@@ -1,44 +1,65 @@
-import { signInAction } from "@/app/actions";
-import { FormMessage, type Message } from "@/components/form-message";
-import { SubmitButton } from "@/components/submit-button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import Link from "next/link";
+"use client";
 
-export default async function Login(props: { searchParams: Promise<Message> }) {
-  const searchParams = await props.searchParams;
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { useAuthActions } from "@convex-dev/auth/react";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+
+export default function SignIn() {
+  const { signIn } = useAuthActions();
+  const [flow, setFlow] = useState<"signIn" | "signUp">("signIn");
+  const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
   return (
-    <form className="flex-1 flex flex-col max-w-2xl">
-      <h1 className="text-2xl font-medium">Sign in</h1>
-      <p className="text-sm text-foreground">
-        Don't have an account?{" "}
-        <Link className="text-foreground font-medium underline" href="/sign-up">
-          Sign up
-        </Link>
-      </p>
-      <div className="flex flex-col gap-2 [&>input]:mb-3 mt-8">
-        <Label htmlFor="email">Email</Label>
-        <Input name="email" placeholder="you@example.com" required />
-        <div className="flex justify-between items-center">
-          <Label htmlFor="password">Password</Label>
-          <Link
-            className="text-xs text-foreground underline"
-            href="/forgot-password"
-          >
-            Forgot Password?
-          </Link>
-        </div>
+    <div className="flex flex-col gap-8 w-96 mx-auto h-screen justify-center items-center">
+      <p>Log in to see the numbers</p>
+      <form
+        className="flex flex-col gap-2"
+        onSubmit={(e) => {
+          e.preventDefault();
+          const formData = new FormData(e.target as HTMLFormElement);
+          formData.set("flow", flow);
+          void signIn("password", formData)
+            .catch((error) => {
+              setError(error.message);
+            })
+            .then(() => {
+              router.push("/");
+            });
+        }}
+      >
+        <Input type="email" name="email" placeholder="Email" required />
         <Input
           type="password"
           name="password"
-          placeholder="Your password"
+          placeholder="Password"
           required
         />
-        <SubmitButton pendingText="Signing In..." formAction={signInAction}>
-          Sign in
-        </SubmitButton>
-        <FormMessage message={searchParams} />
-      </div>
-    </form>
+        <Button type="submit">
+          {flow === "signIn" ? "Sign in" : "Sign up"}
+        </Button>
+        <div className="flex flex-row gap-2">
+          <span>
+            {flow === "signIn"
+              ? "Don't have an account?"
+              : "Already have an account?"}
+          </span>
+          <span
+            className="text-foreground underline hover:no-underline cursor-pointer"
+            onClick={() => setFlow(flow === "signIn" ? "signIn" : "signIn")}
+          >
+            {flow === "signIn" ? "Sign up instead" : "Sign in instead"}
+          </span>
+        </div>
+        {error && (
+          <div className="bg-red-500/20 border-2 border-red-500/50 rounded-md p-2">
+            <p className="text-foreground font-mono text-xs">
+              Error signing in: {error}
+            </p>
+          </div>
+        )}
+      </form>
+    </div>
   );
 }

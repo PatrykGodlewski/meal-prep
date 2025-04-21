@@ -1,12 +1,6 @@
 "use client";
 
-import {
-  BellIcon,
-  CreditCardIcon,
-  LogOutIcon,
-  MoreVerticalIcon,
-  UserCircleIcon,
-} from "lucide-react";
+import { LogOutIcon, MoreVerticalIcon, UserCircleIcon } from "lucide-react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -24,7 +18,8 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { signOutAction } from "@/app/actions";
+import { useAuthActions } from "@convex-dev/auth/react";
+import { useRouter } from "next/navigation";
 
 export function NavUser({
   user,
@@ -35,6 +30,8 @@ export function NavUser({
     avatar?: string;
   };
 }) {
+  const { signOut } = useAuthActions();
+  const router = useRouter();
   const { isMobile } = useSidebar();
 
   return (
@@ -97,7 +94,14 @@ export function NavUser({
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem className="flex gap-2" onClick={signOutAction}>
+            <DropdownMenuItem
+              className="flex gap-2"
+              onClick={() =>
+                void signOut().then(() => {
+                  router.push("/sign-in");
+                })
+              }
+            >
               <LogOutIcon size={18} />
               Log out
             </DropdownMenuItem>

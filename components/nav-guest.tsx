@@ -1,6 +1,6 @@
 "use client";
 
-import { Lock, LogIn, UserPlus2 } from "lucide-react";
+import { LogIn } from "lucide-react";
 
 import {
   SidebarGroup,
@@ -11,18 +11,7 @@ import {
 } from "@/components/ui/sidebar";
 import Link from "next/link";
 
-const items = [
-  {
-    title: "Sign Up",
-    url: "/sign-up",
-    icon: UserPlus2,
-  },
-  {
-    title: "Forgot Password",
-    url: "/forgot-password",
-    icon: Lock,
-  },
-];
+// const items = [];
 
 export function NavGuest() {
   return (
@@ -43,16 +32,16 @@ export function NavGuest() {
           </SidebarMenuItem>
         </SidebarMenu>
         <SidebarMenu>
-          {items.map((item) => (
-            <SidebarMenuItem key={item.title}>
-              <SidebarMenuButton asChild tooltip={item.title}>
-                <Link href={item.url} passHref>
-                  {item.icon && <item.icon />}
-                  <span>{item.title}</span>
-                </Link>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          ))}
+          {/* {items.map((item) => ( */}
+          {/*   <SidebarMenuItem key={item.title}> */}
+          {/*     <SidebarMenuButton asChild tooltip={item.title}> */}
+          {/*       <Link href={item.url} passHref> */}
+          {/*         {item.icon && <item.icon />} */}
+          {/*         <span>{item.title}</span> */}
+          {/*       </Link> */}
+          {/*     </SidebarMenuButton> */}
+          {/*   </SidebarMenuItem> */}
+          {/* ))} */}
         </SidebarMenu>
       </SidebarGroupContent>
     </SidebarGroup>

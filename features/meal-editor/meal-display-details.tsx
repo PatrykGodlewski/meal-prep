@@ -3,32 +3,21 @@ import React from "react";
 import Image from "next/image";
 import { format } from "date-fns";
 import { Clock, Users, ChefHat, Calendar, type LucideIcon } from "lucide-react";
-// Import the necessary types, including the junction table type with nested ingredient
-import type { Meal, MealIngredient, Ingredient } from "@/supabase/schema"; // Adjust path
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import type { Meal, MealIngredients } from "./types";
 
-// Type for the junction table data + nested ingredient details
-// (Ensure this matches the type definition used in the parent server/client component)
-export type MealIngredientWithDetails = MealIngredient & {
-  ingredient: Ingredient | null; // Nested ingredient (can be null if join fails)
-};
-
-// Define the props expected by this display component
 interface MealDisplayDetailsProps {
   meal: Meal;
-  mealIngredientsData: MealIngredientWithDetails[];
-  authorName: string;
+  mealIngredients: MealIngredients;
 }
 
-// Helper component for meta labels
 type MealLabelProps = {
   icon: LucideIcon;
-  text: string | number | null | undefined; // Accept number for time/servings
+  text: string | number | null | undefined;
 };
 function MealLabel({ icon: Icon, text }: MealLabelProps) {
-  // Render nothing if text is null, undefined, or an empty string after trimming
   if (text === null || text === undefined || String(text).trim() === "")
     return null;
+
   return (
     <div className="flex items-center mr-4 mb-2 whitespace-nowrap text-sm">
       <Icon className="h-4 w-4 mr-1.5 flex-shrink-0" />
@@ -38,8 +27,9 @@ function MealLabel({ icon: Icon, text }: MealLabelProps) {
 }
 
 export const MealDisplayDetails: React.FC<MealDisplayDetailsProps> = React.memo(
-  ({ meal, mealIngredientsData, authorName }) => {
+  ({ meal, mealIngredients }) => {
     const totalTime = (meal.prepTimeMinutes || 0) + (meal.cookTimeMinutes || 0);
+    const authorName = meal.createdBy;
 
     return (
       <div className="bg-white dark:bg-neutral-900 rounded-lg shadow-md overflow-hidden">
@@ -112,10 +102,10 @@ export const MealDisplayDetails: React.FC<MealDisplayDetailsProps> = React.memo(
               <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-200">
                 Ingredients
               </h2>
-              {mealIngredientsData && mealIngredientsData.length > 0 ? (
+              {mealIngredients && mealIngredients.length > 0 ? (
                 <ul className="space-y-2 text-sm text-gray-700 dark:text-neutral-300">
                   {/* Map over mealIngredientsData */}
-                  {mealIngredientsData.map((mealIngredient) => {
+                  {mealIngredients.map((mealIngredient) => {
                     // Gracefully handle if the nested ingredient is somehow null
                     if (!mealIngredient.ingredient) {
                       console.warn(
@@ -127,7 +117,7 @@ export const MealDisplayDetails: React.FC<MealDisplayDetailsProps> = React.memo(
                     const ingredient = mealIngredient.ingredient; // Alias for readability
                     return (
                       <li
-                        key={ingredient.id}
+                        key={ingredient._id}
                         className="flex items-start gap-2"
                       >
                         {" "}
