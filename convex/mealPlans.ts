@@ -235,3 +235,89 @@ export const generateMealPlan = mutation({
     return { success: true, mealPlanIds };
   },
 });
+
+export const updatePlannedMealByCategory = mutation({
+  args: {
+    mealPlanId: v.id("mealPlans"),
+    category: v.union(...MEAL_CATEGORIES.map((c) => v.literal(c))),
+    newMealId: v.id("meals"),
+  },
+  handler: async (ctx, { mealPlanId, category, newMealId }) => {
+    // 1. --- Authentication ---
+    const userId = await getAuthUserId(ctx);
+    if (!userId) {
+      throw new Error("User must be authenticated to update a meal plan.");
+    }
+
+    // 2. --- Authorization & Validation ---
+    // Fetch the meal plan to ensure it exists and belongs to the user
+    const mealPlan = await ctx.db.get(mealPlanId);
+    if (!mealPlan) {
+      throw new Error("Meal plan not found.");
+    }
+    if (mealPlan.userId !== userId) {
+      throw new Error("User is not authorized to modify this meal plan.");
+    }
+    // Optional: Validate that the newMealId exists and is accessible by the user
+    const newMeal = await ctx.db.get(newMealId);
+    if (!newMeal) {
+      throw new Error("The selected meal does not exist.");
+    }
+    // Add check if meal is not public and not created by user if needed
+    // if (!newMeal.isPublic && newMeal.createdBy !== userId) {
+    //   throw new Error("User is not authorized to use this meal.");
+    // }
+
+    // 3. --- Find Existing Planned Meal for the Category ---
+    // Fetch all planned meals for this specific meal plan
+    const plannedMeals = await ctx.db
+      .query("plannedMeals")
+      .withIndex("by_meal_plan", (q) => q.eq("mealPlanId", mealPlanId))
+      .collect();
+
+    let targetPlannedMealId: Id<"plannedMeals"> | null = null;
+
+    // Fetch the associated meal data to check categories
+    const mealIds = plannedMeals.map((pm) => pm.mealId);
+    const meals = (
+      await Promise.all(mealIds.map((id) => ctx.db.get(id)))
+    ).filter((meal): meal is NonNullable<typeof meal> => meal !== null);
+    const mealMap = new Map(meals.map((meal) => [meal._id, meal]));
+
+    // Find the plannedMeal matching the category
+    for (const pm of plannedMeals) {
+      const associatedMeal = mealMap.get(pm.mealId);
+      if (associatedMeal && associatedMeal.category === category) {
+        targetPlannedMealId = pm._id;
+        break; // Found the planned meal for this category
+      }
+    }
+
+    // 4. --- Update or Insert Planned Meal ---
+    if (targetPlannedMealId) {
+      // Update the existing planned meal
+      await ctx.db.patch(targetPlannedMealId, {
+        mealId: newMealId,
+        updatedAt: Date.now(),
+      });
+      console.log(
+        `Updated planned meal ${targetPlannedMealId} for category ${category} in meal plan ${mealPlanId}`,
+      );
+    } else {
+      // Insert a new planned meal if none existed for this category
+      const newPlannedMealId = await ctx.db.insert("plannedMeals", {
+        mealPlanId: mealPlanId,
+        mealId: newMealId,
+        createdAt: Date.now(),
+        updatedAt: Date.now(),
+      });
+      console.log(
+        `Inserted new planned meal ${newPlannedMealId} for category ${category} in meal plan ${mealPlanId}`,
+      );
+      targetPlannedMealId = newPlannedMealId; // Return the ID of the newly created one
+    }
+
+    // 5. --- Return Result ---
+    return { success: true, plannedMealId: targetPlannedMealId };
+  },
+});

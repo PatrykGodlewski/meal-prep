@@ -8,7 +8,7 @@ const PAGE_SIZE = 10;
 
 function useIntersection(
   ref: RefObject<HTMLDivElement | null>,
-  options: IntersectionObserverInit = { rootMargin: "0px 0px 400px 0px" },
+  options: IntersectionObserverInit = { rootMargin: "0px 0px 600px 0px" },
 ): boolean {
   const [isIntersecting, setIntersecting] = useState(false);
 
@@ -21,11 +21,13 @@ function useIntersection(
     const currentElement = ref.current;
 
     if (currentElement) {
+      console.log("OBSERV");
       observer.observe(currentElement);
     }
 
     return () => {
       if (currentElement) {
+        console.log("UNOBSERV");
         observer.unobserve(currentElement);
       }
     };
@@ -34,18 +36,22 @@ function useIntersection(
   return isIntersecting;
 }
 
-export function usePaginatedMeals() {
+type Props = {
+  clientSearch?: string;
+};
+
+export function usePaginatedMeals({ clientSearch }: Props = {}) {
   const loadMoreRef = useRef<HTMLDivElement>(null);
   const searchParams = useSearchParams();
-  const search = searchParams.get(SEARCH_PARAM_KEY) ?? "";
+  const search = clientSearch
+    ? clientSearch
+    : (searchParams.get(SEARCH_PARAM_KEY) ?? "");
 
   const { results, status, loadMore, isLoading } = usePaginatedQuery(
     api.meals.getMeals,
     { search },
     { initialNumItems: PAGE_SIZE },
   );
-
-  console.log(results, status, search);
 
   const hasNextPage = status === "CanLoadMore";
   const isFetchingNextPage = status === "LoadingMore";
@@ -66,5 +72,6 @@ export function usePaginatedMeals() {
     isFetchingNextPage,
     hasNextPage,
     loadMoreRef,
+    loadMore,
   };
 }
