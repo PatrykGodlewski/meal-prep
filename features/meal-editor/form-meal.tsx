@@ -51,6 +51,7 @@ const DEFAULT_ADD_VALUES = {
   prepTimeMinutes: 0,
   cookTimeMinutes: 0,
   servings: 0,
+  calories: 0,
   category: MEAL_CATEGORIES[1],
   imageUrl: "",
   isPublic: false,
@@ -251,6 +252,31 @@ export default function AddMealForm({ preloadedIngredients }: Props) {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Servings</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      placeholder="4"
+                      {...field}
+                      value={field.value ?? ""}
+                      onChange={(e) =>
+                        field.onChange(
+                          e.target.value === ""
+                            ? null
+                            : Number.parseInt(e.target.value),
+                        )
+                      }
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={control}
+              name="calories"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Calories</FormLabel>
                   <FormControl>
                     <Input
                       type="number"

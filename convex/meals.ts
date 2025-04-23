@@ -15,7 +15,7 @@ export const addMeal = mutation({
     cookTimeMinutes: v.optional(v.number()),
     servings: v.optional(v.number()),
     category: v.union(...MEAL_CATEGORIES.map((c) => v.literal(c))),
-    calories: v.number(),
+    calories: v.optional(v.number()),
     imageUrl: v.optional(v.string()),
     isPublic: v.boolean(),
     ingredients: v.array(
