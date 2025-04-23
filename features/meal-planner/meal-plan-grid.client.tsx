@@ -52,7 +52,7 @@ export const MealPlanDisplay = () => {
               variant="ghost"
               disabled={day.id === selectedPlanId || !day.id}
               className={cn(
-                "disabled:bg-neutral-700 h-auto rounded-xl w-full cursor-pointer bg-neutral-900 flex flex-col items-center justify-center p-8 aspect-square",
+                "disabled:bg-neutral-700 h-auto rounded-xl w-full cursor-pointer bg-neutral-200 dark:bg-neutral-900 flex flex-col items-center justify-center p-8 aspect-square",
               )}
               onClick={() => {
                 mealPlannerState$.selectedPlanId.set(day.id);

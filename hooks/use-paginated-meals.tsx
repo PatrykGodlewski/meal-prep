@@ -3,8 +3,10 @@ import { useSearchParams } from "next/navigation";
 import { api } from "@/convex/_generated/api";
 import { usePaginatedQuery } from "convex/react";
 import { MEAL_CATEGORIES } from "@/convex/schema";
+import { z } from "zod";
 
 export const SEARCH_PARAM_KEY = "q";
+export const FILTER_PARAM_KEY = "f";
 const PAGE_SIZE = 10;
 
 function useIntersection(
@@ -40,19 +42,26 @@ type Props = {
   categoryFilter?: (typeof MEAL_CATEGORIES)[number]; // Add the filter prop
 };
 
+const categorySchema = z.enum(MEAL_CATEGORIES);
+
 export function usePaginatedMeals({
   clientSearch,
   categoryFilter,
 }: Props = {}) {
   const loadMoreRef = useRef<HTMLDivElement>(null);
   const searchParams = useSearchParams();
+
   const search = clientSearch
     ? clientSearch
     : (searchParams.get(SEARCH_PARAM_KEY) ?? "");
 
+  const filter = categoryFilter
+    ? categoryFilter
+    : categorySchema.safeParse(searchParams.get(FILTER_PARAM_KEY)).data;
+
   const { results, status, loadMore, isLoading } = usePaginatedQuery(
     api.meals.getMeals,
-    { search, filter: categoryFilter },
+    { search, filter },
     { initialNumItems: PAGE_SIZE },
   );
 

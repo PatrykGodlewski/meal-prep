@@ -39,7 +39,6 @@ const MealCardSkeleton = () => (
 // export const SEARCH_PARAM_KEY = "q"; // This is now defined in the hook
 
 const PaginatedMealList: React.FC = () => {
-  // Use the hook to get data and state
   const {
     allMeals,
     status,
@@ -65,8 +64,7 @@ const PaginatedMealList: React.FC = () => {
         <For
           each={allMeals}
           empty={
-            // Show empty message only when not initially fetching and no meals exist
-            !isFetching && allMeals.length === 0 ? (
+            !isFetching ? (
               <p className="col-span-full text-center py-10 text-neutral-500 dark:text-neutral-400">
                 No meals found matching your criteria.
               </p>
@@ -75,18 +73,14 @@ const PaginatedMealList: React.FC = () => {
         >
           {(meal) => <MealCard key={meal._id} meal={meal} />}
         </For>
-        {/* Show skeletons while fetching the next page */}
         {isFetchingNextPage &&
           Array.from({ length: 3 }).map((_, index) => (
             <MealCardSkeleton key={`loading-${index}`} />
           ))}
       </div>
 
-      {/* Load More Trigger Element (Invisible) */}
-      {/* Assign the ref obtained from the hook */}
-      <div ref={loadMoreRef} className="h-10" />
+      <div data-loader-ref ref={loadMoreRef} className="h-10" />
 
-      {/* Optional: Status indicator */}
       <div className="flex justify-center items-center mt-6 mb-4 h-10">
         {!isFetchingNextPage && hasNextPage && (
           <span className="text-neutral-500 dark:text-neutral-400">
@@ -98,8 +92,6 @@ const PaginatedMealList: React.FC = () => {
             You've reached the end.
           </span>
         )}
-        {/* Optional: Show loading indicator even when not fetching next page but initial fetch is happening */}
-        {/* {isFetching && !isFetchingNextPage && <p>Loading...</p>} */}
       </div>
     </div>
   );

@@ -13,6 +13,7 @@ import { useConvexMutation } from "@convex-dev/react-query";
 import { api } from "@/convex/_generated/api";
 import { toast } from "@/hooks/use-toast";
 import type { Id } from "@/convex/_generated/dataModel";
+import { ShoppingCart } from "lucide-react";
 
 export function ShoppingListDisplay() {
   const { shoppingListData: list } = useMealPlanner();
@@ -27,6 +28,10 @@ export function ShoppingListDisplay() {
 
   return (
     <div className="p-4 border rounded-lg shadow-sm bg-white dark:bg-neutral-800">
+      <h1 className="text-3xl font-bold flex items-center gap-4 border-b pb-4">
+        <ShoppingCart />
+        Shopping List
+      </h1>
       <ul className="space-y-2">
         <For each={shoppingItems} empty={"empty shopping list"}>
           {([category, categoryItems]) => (
