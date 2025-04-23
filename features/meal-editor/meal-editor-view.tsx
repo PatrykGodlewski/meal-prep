@@ -50,14 +50,14 @@ export default function MealDetailView({
 
       {isEditing ? (
         <MealEditForm
-          meal={meal}
+          meal={meal!}
           availableIngredients={ingredientList}
           onSuccess={() => setIsEditing(false)}
         />
       ) : (
         <MealDisplayDetails
-          meal={meal} // Pass the whole meal object from pageData
-          mealIngredients={meal.mealIngredients} // Pass the ingredients array
+          meal={meal!} // Pass the whole meal object from pageData
+          mealIngredients={meal?.mealIngredients!} // Pass the ingredients array
         />
       )}
     </div>
