@@ -14,7 +14,7 @@ import {
   useSelector,
 } from "@legendapp/state/react";
 
-export const MealPlanDisplay = observer(() => {
+export const MealPlanDisplay = () => {
   const {
     isBusy,
     isGenerating,
@@ -29,7 +29,7 @@ export const MealPlanDisplay = observer(() => {
     <div className="flex flex-col gap-4">
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-7 gap-4 relative">
         {(isBusy || isGenerating) && (
-          <div className="absolute inset-0 flex items-center justify-center bg-white/70 dark:bg-black/50 z-10 rounded-lg">
+          <div className="w-full col-span-7 flex items-center justify-center bg-white/70 dark:bg-black/50 z-10 rounded-lg min-h-48">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
           </div>
         )}
@@ -47,17 +47,16 @@ export const MealPlanDisplay = observer(() => {
           !!mealPlanData &&
           !!mealPlanData.length &&
           mealPlanData.map((planDay) => (
-            <div
+            <Button
+              key={planDay._id}
+              variant="ghost"
+              disabled={planDay._id === selectedPlanId}
+              className={cn(
+                "disabled:bg-neutral-700 h-auto rounded-xl w-full cursor-pointer bg-neutral-900 flex flex-col items-center justify-center p-8 aspect-square",
+              )}
               onClick={() => {
                 mealPlannerState$.selectedPlanId.set(planDay._id);
               }}
-              key={planDay._id}
-              className={cn(
-                "rounded-xl  cursor-pointer bg-neutral-900 flex flex-col items-center justify-center p-8 aspect-square",
-                {
-                  "bg-neutral-700 cursor-auto": planDay._id === selectedPlanId,
-                },
-              )}
             >
               <span className="text-xs font-medium uppercase text-muted-foreground">
                 {format(planDay.date, "EEEEE")}
@@ -65,7 +64,7 @@ export const MealPlanDisplay = observer(() => {
               <span className="text-lg font-semibold">
                 {format(planDay.date, "d")}
               </span>
-            </div>
+            </Button>
           ))}
       </div>
 
@@ -74,7 +73,7 @@ export const MealPlanDisplay = observer(() => {
       />
     </div>
   );
-});
+};
 
 export function MealPlannerHeader() {
   const {
