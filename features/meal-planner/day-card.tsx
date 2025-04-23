@@ -33,7 +33,6 @@ export function PlanCard({ plan }: PlanCardProps) {
     );
   }
 
-  // Handle the case where plan data exists but the date is invalid
   if (!isValid(toDate(plan.date))) {
     return (
       <Card className="shadow-sm flex flex-col min-h-[150px] border-red-500">
@@ -57,13 +56,13 @@ export function PlanCard({ plan }: PlanCardProps) {
         <CardTitle className="flex items-center justify-between text-sm font-medium ">
           <span>{format(plan.date, "EEEE")}</span>
 
-          <span className="text-xs text-gray-500">
+          <span className="text-xs text-neutral-500">
             {format(plan.date, DATE_FORMAT_DISPLAY_CARD)}
           </span>
         </CardTitle>
       </CardHeader>
       <CardContent className="p-3 justify-between  flex flex-col space-y-2 flex-grow">
-        <ul className="space-y-1 text-xs group">
+        <ul className="space-y-2 text-xs group">
           <For
             each={plan.plannedMeals.sort((a, b) =>
               (a.meal?.category ?? "").localeCompare(b.meal?.category ?? ""),
@@ -74,21 +73,37 @@ export function PlanCard({ plan }: PlanCardProps) {
               </li>
             }
           >
-            {(plannedMeal) => (
-              <li
-                key={`${plan._id}-${plannedMeal.meal?.category}-${plannedMeal._id}`}
-              >
-                <Link
-                  className="hover:underline"
-                  href={`/meals/${plannedMeal.meal?._id}`}
+            {(plannedMeal) => {
+              const isPlannedMeal = plannedMeal.meal?.name;
+              return (
+                <li
+                  className={cn({
+                    "rounded-xl p-2 border-dashed border-2 border-neutral-500":
+                      !isPlannedMeal,
+                  })}
+                  key={`${plan._id}-${plannedMeal.meal?.category}-${plannedMeal._id}`}
                 >
-                  <span className="font-semibold capitalize">
-                    {plannedMeal.meal?.category}:
-                  </span>{" "}
-                  {plannedMeal.meal?.name}
-                </Link>
-              </li>
-            )}
+                  {isPlannedMeal ? (
+                    <Link
+                      className="hover:underline"
+                      href={`/meals/${plannedMeal.meal?._id}`}
+                    >
+                      <span className="font-semibold capitalize">
+                        {plannedMeal.meal?.category}:
+                      </span>
+                      {plannedMeal.meal?.name}
+                    </Link>
+                  ) : (
+                    <Link
+                      className="text-neutral-500 underline"
+                      href={`/plans/${plan._id}`}
+                    >
+                      Planned Meal missing, add one!
+                    </Link>
+                  )}
+                </li>
+              );
+            }}
           </For>
         </ul>
 

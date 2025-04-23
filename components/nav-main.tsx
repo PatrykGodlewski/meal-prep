@@ -16,24 +16,6 @@ import {
 } from "@/components/ui/sidebar";
 import Link from "next/link";
 
-const items = [
-  {
-    title: "Meal Planner",
-    url: "/",
-    icon: LayoutDashboardIcon,
-  },
-  {
-    title: "Meal List",
-    url: "/meals",
-    icon: ListIcon,
-  },
-  {
-    title: "Plans",
-    url: "/plans",
-    icon: CalendarCog,
-  },
-];
-
 export function NavMain() {
   return (
     <SidebarGroup>
@@ -47,22 +29,10 @@ export function NavMain() {
             >
               <Link href="/meals/add">
                 <PlusCircleIcon />
-                <span>Quick Create</span>
+                <span>Quick Create a Meal</span>
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
-        </SidebarMenu>
-        <SidebarMenu>
-          {items.map((item) => (
-            <SidebarMenuItem key={item.title}>
-              <SidebarMenuButton asChild tooltip={item.title}>
-                <Link href={item.url} passHref>
-                  {item.icon && <item.icon />}
-                  <span>{item.title}</span>
-                </Link>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          ))}
         </SidebarMenu>
       </SidebarGroupContent>
     </SidebarGroup>

@@ -9,12 +9,6 @@ import { Suspense } from "react";
 import { ErrorBoundary } from "@/components/error-boundary";
 
 export default function Home() {
-  // const preloaded = await preloadQuery(api.myFunctions.listNumbers, {
-  //   count: 3,
-  // });
-  //
-  // const data = preloadedQueryResult(preloaded);
-
   return (
     <div>
       <h1 className="text-3xl font-semibold mb-6 flex items-center space-x-2">

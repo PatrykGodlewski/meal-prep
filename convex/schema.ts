@@ -78,9 +78,10 @@ export default defineSchema({
     updatedAt: v.number(),
   })
     .index("by_author", ["createdBy"])
-    // Add a search index on the 'name' field
+    .index("by_category", ["category"])
     .searchIndex("search_name", {
       searchField: "name",
+      filterFields: ["category"],
     }),
 
   mealIngredients: defineTable({

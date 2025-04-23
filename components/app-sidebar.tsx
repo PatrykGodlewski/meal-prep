@@ -1,5 +1,10 @@
 "use client";
-import { Triangle } from "lucide-react";
+import {
+  CalendarCog,
+  LayoutDashboardIcon,
+  ListIcon,
+  Triangle,
+} from "lucide-react";
 import { NavMain } from "@/components/nav-main";
 import { NavSecondary } from "@/components/nav-secondary";
 import { NavUser } from "@/components/nav-user";
@@ -14,6 +19,8 @@ import {
 } from "@/components/ui/sidebar";
 import { NavGuest } from "./nav-guest";
 import { useConvexAuth } from "convex/react";
+import { NavList } from "./nav-list";
+import { Separator } from "./ui/separator";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { isAuthenticated } = useConvexAuth();
@@ -36,7 +43,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        {isAuthenticated ? <NavMain /> : <NavGuest />}
+        {isAuthenticated ? <Nav /> : <NavGuest />}
         {!!isAuthenticated && <NavSecondary className="mt-auto" />}
       </SidebarContent>
       <SidebarFooter>
@@ -50,5 +57,36 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         )}
       </SidebarFooter>
     </Sidebar>
+  );
+}
+
+function Nav() {
+  const featureList = [
+    {
+      title: "Meal Planner",
+      url: "/",
+      icon: LayoutDashboardIcon,
+    },
+  ];
+
+  const entityList = [
+    {
+      title: "Meals",
+      url: "/meals",
+      icon: ListIcon,
+    },
+    {
+      title: "Plans",
+      url: "/plans",
+      icon: CalendarCog,
+    },
+  ];
+
+  return (
+    <>
+      <NavMain />
+      <NavList title={"Features"} items={featureList} />
+      <NavList title={"Entities"} items={entityList} />
+    </>
   );
 }

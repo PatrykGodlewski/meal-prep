@@ -1,10 +1,10 @@
 // convex/meals.ts
 import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
-import type { Id } from "./_generated/dataModel";
+import type { DataModel, Id } from "./_generated/dataModel";
 import { INGREDIENT_CATEGORIES, MEAL_CATEGORIES, UNITS } from "./schema";
 import { getAuthUserId } from "@convex-dev/auth/server";
-import { paginationOptsValidator } from "convex/server";
+import { NamedTableInfo, paginationOptsValidator, Query } from "convex/server";
 
 export const addMeal = mutation({
   args: {
@@ -267,26 +267,50 @@ export const getMeals = query({
   args: {
     paginationOpts: paginationOptsValidator,
     search: v.optional(v.string()),
+    filter: v.optional(v.union(...MEAL_CATEGORIES.map((c) => v.literal(c)))),
   },
-  handler: async (ctx, { paginationOpts, search = "" }) => {
+  handler: async (ctx, { paginationOpts, search = "", filter }) => {
     const userId = await getAuthUserId(ctx);
     if (!userId) {
       throw new Error("Authentication required");
     }
 
     const trimmedSearch = search.trim();
-    const isSearching = trimmedSearch !== "";
+    const isSearching = !!trimmedSearch;
+    const isFiltering = !!filter;
 
-    const queryBase = isSearching
-      ? ctx.db
-          .query("meals")
-          .withSearchIndex("search_name", (q) =>
-            q.search("name", trimmedSearch),
-          )
-      : ctx.db.query("meals");
+    if (isSearching) {
+      const query = ctx.db
+        .query("meals")
+        .withSearchIndex("search_name", (q) => {
+          if (isFiltering) {
+            return q.search("name", trimmedSearch).eq("category", filter);
+          }
+          return q.search("name", trimmedSearch);
+        });
 
-    // Apply pagination
-    const results = await queryBase.paginate(
+      const results = await query.paginate(
+        paginationOpts ?? { numItems: 10, cursor: null },
+      );
+
+      return results;
+    }
+
+    if (isFiltering) {
+      const query = ctx.db
+        .query("meals")
+        .withIndex("by_category", (q) => q.eq("category", filter));
+
+      const results = await query.paginate(
+        paginationOpts ?? { numItems: 10, cursor: null },
+      );
+
+      return results;
+    }
+
+    const query = ctx.db.query("meals");
+
+    const results = await query.paginate(
       paginationOpts ?? { numItems: 10, cursor: null },
     );
 

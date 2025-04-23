@@ -1,51 +1,80 @@
 "use client";
 
-import { format, isValid } from "date-fns";
+import { Swiper, SwiperSlide } from "swiper/react";
+import { format, isToday } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { Loader2, ChevronLeft, ChevronRight } from "lucide-react";
 import { PlanCard } from "./day-card";
 import { useMealPlanner } from "./store";
+import { cn } from "@/lib/utils";
+import {
+  observer,
+  use$,
+  useObservable,
+  useSelector,
+} from "@legendapp/state/react";
 
-export function MealPlanDisplay() {
+export const MealPlanDisplay = observer(() => {
   const {
     isBusy,
     isGenerating,
     mealPlanData,
     isMealPlanLoading,
     mealPlanError,
+    selectedPlanId,
+    mealPlannerState$,
   } = useMealPlanner();
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-7 gap-4 relative min-h-[200px]">
-      {(isBusy || isGenerating) && (
-        <div className="absolute inset-0 flex items-center justify-center bg-white/70 dark:bg-black/50 z-10 rounded-lg">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        </div>
-      )}
+    <div className="flex flex-col gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-7 gap-4 relative">
+        {(isBusy || isGenerating) && (
+          <div className="absolute inset-0 flex items-center justify-center bg-white/70 dark:bg-black/50 z-10 rounded-lg">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          </div>
+        )}
 
-      {/* Display meal plan error if it exists and we are not currently loading */}
-      {mealPlanError && !isMealPlanLoading && (
-        <div className="col-span-full text-center text-red-500 mt-8">
-          Error loading meal plan:{" "}
-          {mealPlanError instanceof Error
-            ? mealPlanError.message
-            : "Unknown error"}{" "}
-          {/* Consider adding a retry button */}
-        </div>
-      )}
+        {mealPlanError && !isMealPlanLoading && (
+          <div className="col-span-full text-center text-red-500 mt-8">
+            Error loading meal plan:{" "}
+            {mealPlanError instanceof Error
+              ? mealPlanError.message
+              : "Unknown error"}{" "}
+          </div>
+        )}
 
-      {/* Render day cards only if there are no errors */}
-      {/* We can still render the grid structure even if data is loading */}
-      {!mealPlanError && !!mealPlanData && !!mealPlanData.length
-        ? mealPlanData.map((planDay) => (
-            <PlanCard key={planDay._id} plan={planDay} />
-          ))
-        : Array.from({ length: 7 }, (_, idx) => (
-            <PlanCard key={`placeholder-${idx}`} /> // Added placeholder prefix to key for clarity
+        {!mealPlanError &&
+          !!mealPlanData &&
+          !!mealPlanData.length &&
+          mealPlanData.map((planDay) => (
+            <div
+              onClick={() => {
+                mealPlannerState$.selectedPlanId.set(planDay._id);
+              }}
+              key={planDay._id}
+              className={cn(
+                "rounded-xl  cursor-pointer bg-neutral-900 flex flex-col items-center justify-center p-8 aspect-square",
+                {
+                  "bg-neutral-700 cursor-auto": planDay._id === selectedPlanId,
+                },
+              )}
+            >
+              <span className="text-xs font-medium uppercase text-muted-foreground">
+                {format(planDay.date, "EEEEE")}
+              </span>
+              <span className="text-lg font-semibold">
+                {format(planDay.date, "d")}
+              </span>
+            </div>
           ))}
+      </div>
+
+      <PlanCard
+        plan={mealPlanData?.find((plan) => plan._id === selectedPlanId)}
+      />
     </div>
   );
-}
+});
 
 export function MealPlannerHeader() {
   const {

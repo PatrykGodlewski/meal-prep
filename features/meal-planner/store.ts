@@ -1,8 +1,8 @@
 "use client";
-import { observable } from "@legendapp/state";
-import { use$ } from "@legendapp/state/react";
+import { observable, whenReady } from "@legendapp/state"; // Import syncEffect
+import { use$, useWhenReady } from "@legendapp/state/react";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { addDays, subDays } from "date-fns";
+import { addDays, subDays, isToday } from "date-fns"; // Import isToday
 import { useToast } from "@/hooks/use-toast";
 import { getMonday } from "./utils";
 import { convexQuery, useConvexMutation } from "@convex-dev/react-query";
@@ -12,9 +12,10 @@ export const MEAL_PLAN_QUERY_KEY_BASE = "meal-planner-QK";
 export const SHOPPING_LIST_QUERY_KEY_BASE = "shopping-list-QK";
 
 // --- Observable State ---
-// Using a global observable for the current week's start date
+// Using a global observable for the current week's start date and selected plan ID
 const mealPlannerState$ = observable({
   currentWeek: getMonday(new Date()),
+  selectedPlanId: undefined as string | undefined, // Add selectedPlanId state
 });
 
 // --- Actions ---
@@ -40,6 +41,7 @@ const handleNavigateNext = () => {
 export const useMealPlanner = () => {
   // const currentWeek = useObservable(mealPlannerState$.currentWeek);
   const currentWeek = use$(mealPlannerState$.currentWeek);
+  const selectedPlanId = use$(mealPlannerState$.selectedPlanId); // Get reactive selectedPlanId
 
   // TanStack Query setup
   const { toast } = useToast();
@@ -91,8 +93,17 @@ export const useMealPlanner = () => {
 
   const isBusy = isMealPlanLoading || isShoppingListLoading;
 
+  useWhenReady(mealPlanData, (mealPlans) =>
+    mealPlannerState$.selectedPlanId.set(
+      mealPlans?.find((plan) => isToday(plan.date))?._id,
+    ),
+  );
+
   return {
+    mealPlannerState$,
+    selectedPlanId, // Expose reactive selectedPlanId
     currentWeek, // The reactive state value
+
     setCurrentWeek, // Action to set the week
     handleNavigatePrevious, // Action for previous week
     handleNavigateNext, // Action for next week

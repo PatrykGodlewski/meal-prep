@@ -2,7 +2,7 @@ import { mutation, query } from "./_generated/server";
 
 import type { Id } from "./_generated/dataModel";
 import { v } from "convex/values";
-import { startOfWeek, endOfWeek, addDays } from "date-fns";
+import { endOfWeek, addDays } from "date-fns";
 import { MEAL_CATEGORIES } from "./schema";
 import { getAuthUserId } from "@convex-dev/auth/server";
 
@@ -82,11 +82,8 @@ export const getWeeklyMealPlan = query({
     }
 
     // 2. Calculate start (Monday) and end (Sunday) of the week
-    const inputDate = new Date(weekStart);
-    const monday = startOfWeek(inputDate, { weekStartsOn: 1 });
-    const startOfWeekTimestamp = monday.getTime();
-    const sunday = endOfWeek(inputDate, { weekStartsOn: 1 });
-    const endOfWeekTimestamp = sunday.getTime();
+    const startOfWeekTimestamp = weekStart;
+    const endOfWeekTimestamp = addDays(weekStart, 6).getTime();
 
     // 3. Fetch meal plans for the user within the date range
     const weeklyMealPlans = await ctx.db
@@ -142,10 +139,8 @@ export const generateMealPlan = mutation({
     }
     const userId = identity;
 
-    // --- 2. Calculate week dates (Monday to Sunday) ---
-    const weekStartDate = startOfWeek(new Date(weekStart), { weekStartsOn: 1 });
     const weekDates = Array.from({ length: 7 }, (_, i) =>
-      addDays(weekStartDate, i).getTime(),
+      addDays(weekStart, i).getTime(),
     );
 
     // --- 3. Delete existing meal plans and planned meals for this week ---
@@ -177,15 +172,7 @@ export const generateMealPlan = mutation({
     );
 
     // --- 4. Fetch all available meals (user's or public) ---
-    const allMeals = await ctx.db
-      .query("meals")
-      .filter((q) =>
-        q.or(
-          q.eq(q.field("createdBy"), userId),
-          q.eq(q.field("isPublic"), true),
-        ),
-      )
-      .collect();
+    const allMeals = await ctx.db.query("meals").collect();
 
     if (allMeals.length === 0) {
       // Consider more specific error or returning an empty plan indication
@@ -238,37 +225,57 @@ export const generateMealPlan = mutation({
 
 export const updatePlannedMealByCategory = mutation({
   args: {
-    mealPlanId: v.id("mealPlans"),
+    // Use date instead of mealPlanId
+    date: v.number(), // Expecting a timestamp (milliseconds since epoch)
     category: v.union(...MEAL_CATEGORIES.map((c) => v.literal(c))),
     newMealId: v.id("meals"),
   },
-  handler: async (ctx, { mealPlanId, category, newMealId }) => {
+  handler: async (ctx, { date, category, newMealId }) => {
     // 1. --- Authentication ---
     const userId = await getAuthUserId(ctx);
     if (!userId) {
       throw new Error("User must be authenticated to update a meal plan.");
     }
 
-    // 2. --- Authorization & Validation ---
-    // Fetch the meal plan to ensure it exists and belongs to the user
-    const mealPlan = await ctx.db.get(mealPlanId);
-    if (!mealPlan) {
-      throw new Error("Meal plan not found.");
+    // 2. --- Find or Create Meal Plan ---
+    let mealPlanId: Id<"mealPlans">;
+    const existingPlan = await ctx.db
+      .query("mealPlans")
+      .withIndex("by_user_and_date", (q) =>
+        q.eq("userId", userId as Id<"users">).eq("date", date),
+      )
+      .first();
+
+    const now = Date.now();
+    if (existingPlan) {
+      mealPlanId = existingPlan._id;
+      // Optional: Update the updatedAt timestamp for the meal plan itself
+      // await ctx.db.patch(mealPlanId, { updatedAt: now });
+    } else {
+      // Create a new meal plan if it doesn't exist for this user and date
+      mealPlanId = await ctx.db.insert("mealPlans", {
+        userId: userId as Id<"users">,
+        date,
+        createdAt: now,
+        updatedAt: now,
+      });
+      console.log(
+        `Created new meal plan ${mealPlanId} for user ${userId} on date ${new Date(date).toISOString().split("T")[0]}`,
+      );
     }
-    if (mealPlan.userId !== userId) {
-      throw new Error("User is not authorized to modify this meal plan.");
-    }
-    // Optional: Validate that the newMealId exists and is accessible by the user
+
+    // 3. --- Validate New Meal ---
+    // Validate that the newMealId exists and is accessible by the user
     const newMeal = await ctx.db.get(newMealId);
     if (!newMeal) {
       throw new Error("The selected meal does not exist.");
     }
-    // Add check if meal is not public and not created by user if needed
+    // Optional: Add check if meal is not public and not created by user if needed
     // if (!newMeal.isPublic && newMeal.createdBy !== userId) {
     //   throw new Error("User is not authorized to use this meal.");
     // }
 
-    // 3. --- Find Existing Planned Meal for the Category ---
+    // 4. --- Find Existing Planned Meal for the Category in this Meal Plan ---
     // Fetch all planned meals for this specific meal plan
     const plannedMeals = await ctx.db
       .query("plannedMeals")

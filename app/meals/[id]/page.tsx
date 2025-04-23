@@ -1,4 +1,4 @@
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { preloadQuery } from "convex/nextjs";
 import { convexAuthNextjsToken } from "@convex-dev/auth/nextjs/server";
 import { api } from "@/convex/_generated/api";
@@ -13,7 +13,7 @@ export default async function MealDetailPage({
   const mealId = (await params).id;
 
   if (!mealId) {
-    notFound();
+    redirect("/meals");
   }
 
   const preloadedMeal = await preloadQuery(
@@ -29,7 +29,7 @@ export default async function MealDetailPage({
   );
 
   if (!preloadedMeal || !mealId) {
-    notFound();
+    redirect("/meals");
   }
 
   return (

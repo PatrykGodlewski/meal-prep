@@ -10,7 +10,6 @@ export const DATE_FORMAT_DISPLAY_CARD = "MMM dd";
  * @returns The Date object representing the Monday of that week.
  */
 export const getMonday = (date: Date): Date => {
-  // Default to today if input is invalid, ensuring function always returns a valid Date
   const validDate = isValid(date) ? date : new Date();
   return startOfWeek(validDate, { weekStartsOn: 1 });
 };

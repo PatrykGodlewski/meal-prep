@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, type RefObject } from "react";
 import { useSearchParams } from "next/navigation";
 import { api } from "@/convex/_generated/api";
 import { usePaginatedQuery } from "convex/react";
+import { MEAL_CATEGORIES } from "@/convex/schema";
 
 export const SEARCH_PARAM_KEY = "q";
 const PAGE_SIZE = 10;
@@ -21,13 +22,11 @@ function useIntersection(
     const currentElement = ref.current;
 
     if (currentElement) {
-      console.log("OBSERV");
       observer.observe(currentElement);
     }
 
     return () => {
       if (currentElement) {
-        console.log("UNOBSERV");
         observer.unobserve(currentElement);
       }
     };
@@ -38,9 +37,13 @@ function useIntersection(
 
 type Props = {
   clientSearch?: string;
+  categoryFilter?: (typeof MEAL_CATEGORIES)[number]; // Add the filter prop
 };
 
-export function usePaginatedMeals({ clientSearch }: Props = {}) {
+export function usePaginatedMeals({
+  clientSearch,
+  categoryFilter,
+}: Props = {}) {
   const loadMoreRef = useRef<HTMLDivElement>(null);
   const searchParams = useSearchParams();
   const search = clientSearch
@@ -49,7 +52,7 @@ export function usePaginatedMeals({ clientSearch }: Props = {}) {
 
   const { results, status, loadMore, isLoading } = usePaginatedQuery(
     api.meals.getMeals,
-    { search },
+    { search, filter: categoryFilter },
     { initialNumItems: PAGE_SIZE },
   );
 

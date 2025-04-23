@@ -1,8 +1,7 @@
 "use client";
-import { useState, useEffect, type ReactNode } from "react";
-import { useRouter, usePathname, useSearchParams } from "next/navigation";
-import type { Doc, Id } from "@/convex/_generated/dataModel";
-import { usePaginatedMeals } from "@/hooks/use-paginated-meals"; // Assuming this path is correct
+import { useState, useEffect, type ReactNode, type ChangeEvent } from "react";
+import type { Id } from "@/convex/_generated/dataModel";
+import { usePaginatedMeals } from "@/hooks/use-paginated-meals";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -10,19 +9,19 @@ import {
   DialogHeader,
   DialogTitle,
   DialogDescription,
-  DialogClose,
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Loader2 } from "lucide-react"; // Or your preferred loading spinner
-import { useDebounceCallback } from "usehooks-ts";
+import { Loader2 } from "lucide-react";
+import { useDebounceFn } from "ahooks";
+import type { MEAL_CATEGORIES } from "@/convex/schema";
 
 interface ModalMealsProps {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
   onMealSelect: (mealId: Id<"meals">) => void;
-  trigger?: ReactNode; // Optional trigger element
-  filter?: (meal: Doc<"meals">) => boolean; // Add the filter prop
+  trigger?: ReactNode;
+  filter?: (typeof MEAL_CATEGORIES)[number];
 }
 
 export function ModalMeals({
@@ -33,6 +32,7 @@ export function ModalMeals({
   filter,
 }: ModalMealsProps) {
   const [searchTerm, setSearchTerm] = useState("");
+  const [inputValue, setInputValue] = useState("");
 
   const {
     allMeals,
@@ -41,19 +41,39 @@ export function ModalMeals({
     isFetchingNextPage,
     hasNextPage,
     loadMore,
-  } = usePaginatedMeals({ clientSearch: searchTerm });
+  } = usePaginatedMeals({ clientSearch: searchTerm, categoryFilter: filter });
 
-  const debouncedUpdateSearchQuery = useDebounceCallback((term: string) => {
-    setSearchTerm(term);
-  }, 300);
+  const debouncedUpdateSearchQuery = useDebounceFn(
+    (term: string) => {
+      setSearchTerm(term);
+    },
+    { wait: 300 },
+  );
 
   const handleSelectMeal = (mealId: Id<"meals">) => {
-    setSearchTerm(""); // Clear search term on selection
+    setSearchTerm("");
+    setInputValue("");
     onMealSelect(mealId);
-    onOpenChange(false); // Close modal on selection
+    onOpenChange(false);
   };
 
-  const filteredMeals = filter ? allMeals.filter(filter) : allMeals;
+  useEffect(() => {
+    if (!isOpen) {
+      setInputValue("");
+      setSearchTerm("");
+    }
+  }, [isOpen]);
+
+  const handleInputValue = (e: ChangeEvent<HTMLInputElement>) => {
+    const newValue = e.target.value;
+    setInputValue(newValue);
+    debouncedUpdateSearchQuery.run(newValue);
+  };
+
+  const handleClearInput = () => {
+    setInputValue("");
+    setSearchTerm("");
+  };
 
   return (
     <Dialog modal open={isOpen} onOpenChange={onOpenChange}>
@@ -65,15 +85,20 @@ export function ModalMeals({
             Search for a meal and click on it to add it to your plan.
           </DialogDescription>
         </DialogHeader>
-        <div className="p-4 border-b">
+        <div className="flex-col sm:flex-row flex gap-4 sm:gap-2 py-4 border-b">
           <Input
             placeholder="Search meals by name..."
-            value={searchTerm}
-            onChange={(e) => debouncedUpdateSearchQuery(e.target.value)}
-            className="w-full"
+            value={inputValue}
+            onChange={handleInputValue}
           />
+          <Button
+            className="w-full sm:basis-1/4 sm:w-auto"
+            onClick={handleClearInput}
+          >
+            Clear
+          </Button>
         </div>
-        <div className="flex-grow overflow-y-auto p-4 space-y-2">
+        <div className="flex-grow overflow-y-auto space-y-2">
           {isFetching && status !== "LoadingMore" && (
             <div className="flex justify-center items-center h-32">
               <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -86,7 +111,7 @@ export function ModalMeals({
             </p>
           )}
 
-          {filteredMeals.map((meal) => (
+          {allMeals.map((meal) => (
             <div
               key={meal._id}
               className="p-3 border rounded-md hover:bg-accent hover:text-accent-foreground cursor-pointer flex justify-between items-center"
@@ -106,12 +131,9 @@ export function ModalMeals({
                   {meal.category}
                 </p>
               </div>
-              {/* Optional: Add a select button if preferred over clicking the whole item */}
-              {/* <Button variant="outline" size="sm" onClick={(e) => { e.stopPropagation(); handleSelectMeal(meal._id); }}>Select</Button> */}
             </div>
           ))}
 
-          {/* Load More Trigger */}
           {hasNextPage && (
             <Button onClick={() => loadMore(20)} className="w-full mt-2">
               Load More
@@ -130,14 +152,6 @@ export function ModalMeals({
             </p>
           )}
         </div>
-        {/* Footer is optional, Close button can be in header or handled by overlay click */}
-        {/* <DialogFooter>
-          <DialogClose asChild>
-             <Button type="button" variant="secondary">
-               Cancel
-             </Button>
-           </DialogClose>
-         </DialogFooter> */}
       </DialogContent>
     </Dialog>
   );

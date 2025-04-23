@@ -9,6 +9,8 @@ import type { FunctionReturnType } from "convex/server";
 import { ModalMeals } from "./ModalMeals";
 import { useState } from "react";
 import { Id } from "@/convex/_generated/dataModel";
+import { MEAL_CATEGORIES } from "@/convex/schema";
+import { cn } from "@/lib/utils";
 
 interface Props {
   preloadedMealPlan: Preloaded<typeof api.mealPlans.getMealPlan>;
@@ -28,15 +30,34 @@ export function MealPlanDetail({ preloadedMealPlan }: Props) {
     );
   }
 
+  const plannedMealsByMealCategory = new Map(
+    MEAL_CATEGORIES.map((category) => [
+      category,
+      mealPlan.plannedMeals.find(
+        (plannedMeal) =>
+          plannedMeal?.meal?.category.toLowerCase() === category.toLowerCase(),
+      ),
+    ]),
+  );
+
+  const sortedPlannedMeals = Array.from(
+    plannedMealsByMealCategory.entries(),
+  ).sort(([categoryA], [categoryB]) => {
+    return (
+      MEAL_CATEGORIES.indexOf(categoryA) - MEAL_CATEGORIES.indexOf(categoryB)
+    );
+  });
+
   return (
     <div className="flex flex-col gap-4">
-      <For
-        each={mealPlan.plannedMeals.sort((a, b) =>
-          (a.meal?.category ?? "").localeCompare(b.meal?.category ?? ""),
-        )}
-      >
-        {(plannedMeal) => (
-          <MealCard key={plannedMeal._id} plannedMeal={plannedMeal} />
+      <For each={sortedPlannedMeals}>
+        {([category, plannedMeal]) => (
+          <MealCard
+            key={category}
+            category={category}
+            plannedMeal={plannedMeal}
+            plan={mealPlan}
+          />
         )}
       </For>
     </div>
@@ -44,12 +65,14 @@ export function MealPlanDetail({ preloadedMealPlan }: Props) {
 }
 
 interface MealCardProps {
-  plannedMeal: NonNullable<
+  plannedMeal?: NonNullable<
     FunctionReturnType<typeof api.mealPlans.getMealPlan>
   >["plannedMeals"][number];
+  category: (typeof MEAL_CATEGORIES)[number];
+  plan: NonNullable<FunctionReturnType<typeof api.mealPlans.getMealPlan>>;
 }
 
-function MealCard({ plannedMeal }: MealCardProps) {
+function MealCard({ plannedMeal, category, plan }: MealCardProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const mealPlanMutation = useConvexMutation(
@@ -57,36 +80,46 @@ function MealCard({ plannedMeal }: MealCardProps) {
   );
 
   const handleMealSelected = async (mealId: Id<"meals">) => {
-    if (!plannedMeal.meal?.category) return;
     await mealPlanMutation({
-      category: plannedMeal.meal?.category,
-      mealPlanId: plannedMeal.mealPlanId,
+      date: plan.mealPlan.date,
+      category: category,
       newMealId: mealId,
     });
   };
 
+  const isMeal = plannedMeal?.meal?.name;
+
   return (
-    <div className="border p-4 rounded-md shadow flex justify-between items-center">
+    <div
+      className={cn(
+        "border p-4 rounded-md shadow flex justify-between items-center",
+        {
+          "": isMeal,
+          "border-dashed border-2 text-neutral-500": !isMeal,
+        },
+      )}
+    >
       <ModalMeals
         isOpen={isModalOpen}
         onOpenChange={setIsModalOpen}
         onMealSelect={handleMealSelected}
-        // TODO: filter should be done on server side
-        filter={(meal) => meal.category === plannedMeal.meal?.category}
+        filter={category}
         // Optionally provide a trigger if you don't want external control button
         // trigger={<Button>Select Meal</Button>}
       />
       <div>
-        <Link href={`/meals/${plannedMeal.meal?._id}`}>
-          <h3 className="font-semibold text-lg hover:underline">
-            {plannedMeal.meal?.name}
+        <Link href={`/meals/${plannedMeal?.meal?._id}`}>
+          <h3 className="font-semibold text-lg hover:underline h-[1lh]">
+            {plannedMeal?.meal?.name ?? "Missing meal, add one!"}
           </h3>
         </Link>
-        <p className="text-sm text-neutral-400 uppercase">
-          {plannedMeal.meal?.category}
-        </p>
+        <p className="text-sm text-neutral-400 uppercase">{category}</p>
       </div>
-      <Button onClick={() => setIsModalOpen(true)} variant="outline">
+      <Button
+        className="text-white"
+        onClick={() => setIsModalOpen(true)}
+        variant="outline"
+      >
         Change Meal
       </Button>
     </div>
