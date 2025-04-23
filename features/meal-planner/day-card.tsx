@@ -55,11 +55,7 @@ export function PlanCard({ plan }: PlanCardProps) {
   }
 
   return (
-    <Card
-      className={cn("shadow-sm flex flex-col min-h-[150px]", {
-        "bg-neutral-200 dark:bg-neutral-800": isToday(plan.date),
-      })}
-    >
+    <Card className={cn("shadow-sm flex flex-col min-h-[150px]")}>
       <CardHeader className="p-3">
         <CardTitle className="flex items-center justify-between text-sm font-medium ">
           <span>{format(plan.date, "EEEE")}</span>

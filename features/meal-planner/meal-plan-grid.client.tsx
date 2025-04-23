@@ -1,6 +1,6 @@
 "use client";
 
-import { addDays, format } from "date-fns";
+import { addDays, format, isToday } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { Loader2, ChevronLeft, ChevronRight } from "lucide-react";
 import { PlanCard } from "./day-card";
@@ -29,9 +29,9 @@ export const MealPlanDisplay = () => {
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-7 gap-4 relative">
+      <div className="grid grid-cols-7 sm:gap-4 gap-1 relative">
         {(isBusy || isGenerating) && (
-          <div className="w-full col-span-7 flex items-center justify-center bg-white/70 dark:bg-black/50 z-10 rounded-lg min-h-48">
+          <div className="w-full col-span-7 flex items-center justify-center bg-white/70 dark:bg-black/50 z-10 rounded-lg min-h-[4lh]">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
           </div>
         )}
@@ -52,7 +52,8 @@ export const MealPlanDisplay = () => {
               variant="ghost"
               disabled={day.id === selectedPlanId || !day.id}
               className={cn(
-                "disabled:bg-neutral-700 h-auto rounded-xl w-full cursor-pointer bg-neutral-200 dark:bg-neutral-900 flex flex-col items-center justify-center p-8 aspect-square",
+                "self-center disabled:bg-neutral-700 h-auto rounded-xl w-full cursor-pointer bg-neutral-200 dark:bg-neutral-900 flex flex-col items-center justify-center p-4 sm:p-8 aspect-square",
+                { "py-5 border-2": isToday(day.date) },
               )}
               onClick={() => {
                 mealPlannerState$.selectedPlanId.set(day.id);
@@ -61,7 +62,7 @@ export const MealPlanDisplay = () => {
               <span className="text-xs font-medium uppercase text-muted-foreground">
                 {format(day.date, "EEEEE")}
               </span>
-              <span className="text-lg font-semibold">
+              <span className="text-md sm:text-lg font-semibold">
                 {format(day.date, "d")}
               </span>
             </Button>
