@@ -1,18 +1,11 @@
 "use client";
 
-import { Swiper, SwiperSlide } from "swiper/react";
-import { addDays, format, isToday } from "date-fns";
+import { addDays, format } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { Loader2, ChevronLeft, ChevronRight } from "lucide-react";
 import { PlanCard } from "./day-card";
 import { useMealPlanner } from "./store";
 import { cn } from "@/lib/utils";
-import {
-  observer,
-  use$,
-  useObservable,
-  useSelector,
-} from "@legendapp/state/react";
 
 export const MealPlanDisplay = () => {
   const {
