@@ -46,6 +46,12 @@ const MealBaseSchema = z.object({
     .positive()
     .optional()
     .or(z.literal(null).transform(() => undefined)),
+  calories: z.coerce
+    .number()
+    .int()
+    .positive()
+    .optional()
+    .or(z.literal(null).transform(() => undefined)),
   category: mealCategoryEnum,
   imageUrl: z
     .string()

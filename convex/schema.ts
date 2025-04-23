@@ -1,9 +1,7 @@
-// convex/schema.ts
 import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
 import { authTables } from "@convex-dev/auth/server";
 
-// --- ENUMS ---
 export const INGREDIENT_CATEGORIES = [
   "dairy",
   "meat",
@@ -69,6 +67,7 @@ export default defineSchema({
     instructions: v.optional(v.string()),
     prepTimeMinutes: v.optional(v.number()),
     cookTimeMinutes: v.optional(v.number()),
+    calories: v.optional(v.number()),
     servings: v.optional(v.number()),
     category: v.union(...MEAL_CATEGORIES.map((c) => v.literal(c))),
     imageUrl: v.optional(v.string()),

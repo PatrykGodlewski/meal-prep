@@ -22,11 +22,10 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import type { Doc } from "@/convex/_generated/dataModel";
-import { Clock, Plus, Save, Trash2, Users } from "lucide-react"; // Added icons
+import { Clock, Plus, Save, Trash2, Users, Weight } from "lucide-react"; // Added icons
 import { useFieldArray, useForm } from "react-hook-form";
 import {
   type IngredientFormValues,
-  MealAddFormValues,
   MealUpdateFormSchema,
   type MealUpdateFormValues,
 } from "./schema";
@@ -81,6 +80,7 @@ const mapPageDataToFormValues = (
     cookTimeMinutes: mealData.cookTimeMinutes ?? undefined,
     servings: mealData.servings ?? undefined,
     category: mealData.category ?? "lunch",
+    calories: mealData.calories ?? 0,
     imageUrl: mealData.imageUrl ?? "",
     instructions: mealData.instructions ?? "",
     isPublic: mealData.isPublic ?? false,
@@ -317,6 +317,33 @@ export function MealEditForm({
                       {" "}
                       <FormLabel className="text-sm flex items-center gap-1">
                         <Users className="h-4 w-4" /> Servings
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          placeholder="4"
+                          {...field}
+                          value={field.value ?? ""}
+                          onChange={(e) =>
+                            field.onChange(
+                              e.target.value === ""
+                                ? null
+                                : Number.parseInt(e.target.value),
+                            )
+                          }
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={control}
+                  name="calories"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-sm flex items-center gap-1">
+                        <Weight className="h-4 w-4" /> Calories
                       </FormLabel>
                       <FormControl>
                         <Input

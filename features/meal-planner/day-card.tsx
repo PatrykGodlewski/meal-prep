@@ -8,6 +8,7 @@ import { For } from "@/components/for-each";
 import { Button } from "@/components/ui/button";
 import type { api } from "@/convex/_generated/api";
 import type { FunctionReturnType } from "convex/server";
+import { Flame } from "lucide-react";
 
 const DATE_FORMAT_DISPLAY_CARD = "MMM dd";
 
@@ -16,6 +17,13 @@ interface PlanCardProps {
 }
 
 export function PlanCard({ plan }: PlanCardProps) {
+  const summarizedCalories = plan?.plannedMeals.reduce(
+    (previousValue, currentValue) => {
+      const calories = currentValue.meal?.calories ?? 0;
+      return previousValue + calories;
+    },
+    0,
+  );
   if (!plan) {
     return (
       <Card className="shadow-sm flex flex-col min-h-[150px] border-neutral-800 bg-neutral-50 dark:bg-neutral-800/50 border-2 border-dashed">
@@ -61,51 +69,59 @@ export function PlanCard({ plan }: PlanCardProps) {
           </span>
         </CardTitle>
       </CardHeader>
-      <CardContent className="p-3 justify-between  flex flex-col space-y-2 flex-grow">
-        <ul className="space-y-2 text-xs group">
-          <For
-            each={plan.plannedMeals.sort((a, b) =>
-              (a.meal?.category ?? "").localeCompare(b.meal?.category ?? ""),
-            )}
-            empty={
-              <li className="text-center text-gray-400 italic pt-4">
-                No meals planned
-              </li>
-            }
-          >
-            {(plannedMeal) => {
-              const isPlannedMeal = plannedMeal.meal?.name;
-              return (
-                <li
-                  className={cn({
-                    "rounded-xl p-2 border-dashed border-2 border-neutral-500":
-                      !isPlannedMeal,
-                  })}
-                  key={`${plan._id}-${plannedMeal.meal?.category}-${plannedMeal._id}`}
-                >
-                  {isPlannedMeal ? (
-                    <Link
-                      className="hover:underline"
-                      href={`/meals/${plannedMeal.meal?._id}`}
-                    >
-                      <span className="font-semibold capitalize">
-                        {plannedMeal.meal?.category}:
-                      </span>
-                      {plannedMeal.meal?.name}
-                    </Link>
-                  ) : (
-                    <Link
-                      className="text-neutral-500 underline"
-                      href={`/plans/${plan._id}`}
-                    >
-                      Planned Meal missing, add one!
-                    </Link>
-                  )}
+      <CardContent className="p-3 justify-between flex flex-col space-y-2 flex-grow">
+        <div className="flex justify-between items-end">
+          <ul className="space-y-2 text-xs group">
+            <For
+              each={plan.plannedMeals.sort((a, b) =>
+                (a.meal?.category ?? "").localeCompare(b.meal?.category ?? ""),
+              )}
+              empty={
+                <li className="text-center text-gray-400 italic pt-4">
+                  No meals planned
                 </li>
-              );
-            }}
-          </For>
-        </ul>
+              }
+            >
+              {(plannedMeal) => {
+                const isPlannedMeal = plannedMeal.meal?.name;
+                return (
+                  <li
+                    className={cn({
+                      "rounded-xl p-2 border-dashed border-2 border-neutral-500":
+                        !isPlannedMeal,
+                    })}
+                    key={`${plan._id}-${plannedMeal.meal?.category}-${plannedMeal._id}`}
+                  >
+                    {isPlannedMeal ? (
+                      <Link
+                        className="hover:underline"
+                        href={`/meals/${plannedMeal.meal?._id}`}
+                      >
+                        <span className="font-semibold capitalize">
+                          {plannedMeal.meal?.category}:{" "}
+                        </span>
+                        {plannedMeal.meal?.name}
+                      </Link>
+                    ) : (
+                      <Link
+                        className="text-neutral-500 underline"
+                        href={`/plans/${plan._id}`}
+                      >
+                        Planned Meal missing, add one!
+                      </Link>
+                    )}
+                  </li>
+                );
+              }}
+            </For>
+          </ul>
+          <div>
+            <p className="border py-2 px-3 rounded-xl border-dashed border-neutral-400 flex items-center gap-2">
+              {summarizedCalories} Kcal
+              <Flame size={18} className="mb-[2px]" />
+            </p>
+          </div>
+        </div>
 
         <Button size={"sm"} asChild>
           <Link href={`/plans/${plan._id}`}>Go to plan</Link>

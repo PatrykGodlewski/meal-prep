@@ -15,6 +15,7 @@ export const addMeal = mutation({
     cookTimeMinutes: v.optional(v.number()),
     servings: v.optional(v.number()),
     category: v.union(...MEAL_CATEGORIES.map((c) => v.literal(c))),
+    calories: v.number(),
     imageUrl: v.optional(v.string()),
     isPublic: v.boolean(),
     ingredients: v.array(
@@ -32,29 +33,22 @@ export const addMeal = mutation({
     ),
   },
   handler: async (ctx, args) => {
-    // 1. Auth
-    const userId = await getAuthUserId(ctx); // Use the helper
+    const userId = await getAuthUserId(ctx);
+    if (!userId) {
+      throw new Error("Unauthorized");
+    }
 
-    // 2. Create meal
     const now = Date.now();
+    const { ingredients, ...mealData } = args;
     const mealId = await ctx.db.insert("meals", {
-      name: args.name,
-      description: args.description,
-      instructions: args.instructions,
-      prepTimeMinutes: args.prepTimeMinutes,
-      cookTimeMinutes: args.cookTimeMinutes,
-      servings: args.servings,
-      category: args.category,
-      imageUrl: args.imageUrl,
-      isPublic: args.isPublic,
-      createdBy: userId as Id<"users">, // Use userId directly
+      ...mealData,
+      createdBy: userId as Id<"users">,
       createdAt: now,
       updatedAt: now,
     });
 
-    // 3. Add/Update Ingredients and link them via MealIngredients
     await Promise.all(
-      args.ingredients.map(async (ing) => {
+      ingredients.map(async (ing) => {
         let finalIngredientId: Id<"ingredients">; // Variable to hold the correct ID
 
         if (ing.id) {
@@ -106,6 +100,7 @@ export const editMeal = mutation({
     prepTimeMinutes: v.optional(v.number()),
     cookTimeMinutes: v.optional(v.number()),
     servings: v.optional(v.number()),
+    calories: v.optional(v.number()),
     category: v.union(...MEAL_CATEGORIES.map((c) => v.literal(c))),
     imageUrl: v.optional(v.string()),
     isPublic: v.boolean(),
@@ -124,38 +119,28 @@ export const editMeal = mutation({
     ),
   },
   handler: async (ctx, args) => {
-    // 1. Auth and ownership checks (as before)
     const identity = await getAuthUserId(ctx);
     if (!identity) throw new Error("Unauthorized");
     const meal = await ctx.db.get(args.mealId);
     if (!meal) throw new Error("Meal not found");
     if (meal.createdBy !== identity) throw new Error("Not your meal");
 
-    // 2. Update meal fields
     const now = Date.now();
+    const { ingredients, mealId, ...mealData } = args;
+
     await ctx.db.patch(args.mealId, {
-      name: args.name,
-      description: args.description,
-      instructions: args.instructions,
-      prepTimeMinutes: args.prepTimeMinutes,
-      cookTimeMinutes: args.cookTimeMinutes,
-      servings: args.servings,
-      category: args.category,
-      imageUrl: args.imageUrl,
-      isPublic: args.isPublic,
+      ...mealData,
       updatedAt: now,
     });
 
-    // 3. Remove old mealIngredients
     const oldMealIngredients = await ctx.db
       .query("mealIngredients")
       .withIndex("by_meal", (q) => q.eq("mealId", args.mealId))
       .collect();
     await Promise.all(oldMealIngredients.map((mi) => ctx.db.delete(mi._id)));
 
-    // 4. For each ingredient row, use existing or create new ingredient
     await Promise.all(
-      args.ingredients.map(async (ing) => {
+      ingredients.map(async (ing) => {
         let ingredientId = ing.id;
 
         if (!ingredientId) {

@@ -1,6 +1,13 @@
 import Image from "next/image";
 import Link from "next/link";
-import { Clock, Users, ChefHat, UtensilsCrossed } from "lucide-react";
+import {
+  Clock,
+  Users,
+  ChefHat,
+  UtensilsCrossed,
+  Weight,
+  Flame,
+} from "lucide-react";
 import type { Doc } from "@/convex/_generated/dataModel";
 
 type Props = {
@@ -44,8 +51,8 @@ export function MealCard({ meal }: Props) {
             {meal.description || "No description available."}
           </p>
 
-          <div className="flex items-center text-sm mb-3 text-neutral-600 dark:text-neutral-400">
-            <span className="flex items-center mr-4" title="Total time">
+          <div className="flex items-center text-sm mb-3 gap-4 text-neutral-600 dark:text-neutral-400">
+            <span className="flex items-center" title="Total time">
               <Clock className="h-4 w-4 mr-1 flex-shrink-0" />
               {totalTime > 0 ? `${totalTime} min` : "N/A"}
             </span>
@@ -54,6 +61,13 @@ export function MealCard({ meal }: Props) {
               <span className="flex items-center" title="Servings">
                 <Users className="h-4 w-4 mr-1 flex-shrink-0" />
                 {meal.servings} {meal.servings === 1 ? "serving" : "servings"}
+              </span>
+            )}
+
+            {meal.calories && (
+              <span className="flex items-center" title="Calories">
+                <Flame className="h-4 w-4 mr-1 flex-shrink-0" />
+                {meal.calories} {meal.calories === 1 ? "calorie" : "calories"}
               </span>
             )}
           </div>

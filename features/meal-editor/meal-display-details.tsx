@@ -2,7 +2,15 @@
 import React from "react";
 import Image from "next/image";
 import { format } from "date-fns";
-import { Clock, Users, ChefHat, Calendar, type LucideIcon } from "lucide-react";
+import {
+  Clock,
+  Users,
+  ChefHat,
+  Calendar,
+  type LucideIcon,
+  Weight,
+  Flame,
+} from "lucide-react";
 import type { Meal, MealIngredients } from "./types";
 
 interface MealDisplayDetailsProps {
@@ -79,6 +87,9 @@ export const MealDisplayDetails: React.FC<MealDisplayDetailsProps> = React.memo(
                 icon={Users}
                 text={`${meal.servings} ${meal.servings === 1 ? "serving" : "servings"}`}
               />
+            )}
+            {meal.calories && (
+              <MealLabel icon={Flame} text={`${meal.calories} ${"calories"}`} />
             )}
           </div>
 
