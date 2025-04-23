@@ -1,5 +1,5 @@
 interface ForProps<T> {
-  each: readonly T[] | undefined | null;
+  each: T[] | undefined | null;
   empty?: React.ReactNode;
   children: (item: T, index: number) => React.ReactNode;
 }

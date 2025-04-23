@@ -1,7 +1,7 @@
 "use client";
 
 import { Swiper, SwiperSlide } from "swiper/react";
-import { format, isToday } from "date-fns";
+import { addDays, format, isToday } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { Loader2, ChevronLeft, ChevronRight } from "lucide-react";
 import { PlanCard } from "./day-card";
@@ -23,7 +23,16 @@ export const MealPlanDisplay = () => {
     mealPlanError,
     selectedPlanId,
     mealPlannerState$,
+    currentWeek,
   } = useMealPlanner();
+
+  const planExist = mealPlanData && !!mealPlanData.length;
+  const days = planExist
+    ? mealPlanData.map((plan) => ({ date: plan.date, id: plan._id }))
+    : new Array(7).fill(null).map((_, index) => ({
+        date: addDays(currentWeek, index),
+        id: undefined,
+      }));
 
   return (
     <div className="flex flex-col gap-4">
@@ -42,27 +51,25 @@ export const MealPlanDisplay = () => {
               : "Unknown error"}{" "}
           </div>
         )}
-
-        {!mealPlanError &&
-          !!mealPlanData &&
-          !!mealPlanData.length &&
-          mealPlanData.map((planDay) => (
+        {!isBusy &&
+          !isGenerating &&
+          days.map((day) => (
             <Button
-              key={planDay._id}
+              key={day.id}
               variant="ghost"
-              disabled={planDay._id === selectedPlanId}
+              disabled={day.id === selectedPlanId || !day.id}
               className={cn(
                 "disabled:bg-neutral-700 h-auto rounded-xl w-full cursor-pointer bg-neutral-900 flex flex-col items-center justify-center p-8 aspect-square",
               )}
               onClick={() => {
-                mealPlannerState$.selectedPlanId.set(planDay._id);
+                mealPlannerState$.selectedPlanId.set(day.id);
               }}
             >
               <span className="text-xs font-medium uppercase text-muted-foreground">
-                {format(planDay.date, "EEEEE")}
+                {format(day.date, "EEEEE")}
               </span>
               <span className="text-lg font-semibold">
-                {format(planDay.date, "d")}
+                {format(day.date, "d")}
               </span>
             </Button>
           ))}
