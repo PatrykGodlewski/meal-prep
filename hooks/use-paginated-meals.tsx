@@ -60,7 +60,7 @@ export function usePaginatedMeals({
     : categorySchema.safeParse(searchParams.get(FILTER_PARAM_KEY)).data;
 
   const { results, status, loadMore, isLoading } = usePaginatedQuery(
-    api.meals.getMeals,
+    api.meals.queries.getMeals,
     { search, filter },
     { initialNumItems: PAGE_SIZE },
   );

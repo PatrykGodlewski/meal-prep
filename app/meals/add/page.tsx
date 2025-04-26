@@ -5,7 +5,7 @@ import { preloadQuery } from "convex/nextjs";
 
 export default async function Home() {
   const preloadedIngredients = await preloadQuery(
-    api.ingredients.getIngredients,
+    api.ingredients.queries.getIngredients,
     {},
     { token: await convexAuthNextjsToken() },
   );

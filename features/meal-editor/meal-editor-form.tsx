@@ -24,11 +24,7 @@ import { Textarea } from "@/components/ui/textarea";
 import type { Doc } from "@/convex/_generated/dataModel";
 import { Clock, Plus, Save, Trash2, Users, Weight } from "lucide-react"; // Added icons
 import { useFieldArray, useForm } from "react-hook-form";
-import {
-  type IngredientFormValues,
-  MealUpdateFormSchema,
-  type MealUpdateFormValues,
-} from "./schema";
+import type { IngredientFormValues } from "./schema";
 import { MEAL_CATEGORIES } from "@/convex/schema";
 import type { Meal } from "./types";
 import type { api } from "@/convex/_generated/api";
@@ -48,21 +44,26 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { useMealEditor } from "./store";
+import {
+  mutationMealEditSchema,
+  type MutationMealEditValues,
+} from "@/convex/meals/validators";
 
-const mapPageDataToFormValues = (
-  meal: FunctionReturnType<typeof api.meals.getMeal>,
-): MealUpdateFormValues | undefined => {
+const mapPreloadedDataToFormValues = (
+  meal: FunctionReturnType<typeof api.meals.queries.getMeal>,
+): MutationMealEditValues | undefined => {
   if (!meal) return undefined; // Return undefined if no data
 
   const { mealIngredients, ...mealData } = meal; // Separate meal base data
 
   const formIngredients = (mealIngredients || []) // Handle potentially undefined mealIngredients
     .filter((mi) => mi.ingredient !== null) // Process only valid links
-    .map((mi) => {
+    .map((mi): MutationMealEditValues["ingredients"][number] => {
       const ingredient = mi.ingredient!; // Safe due to filter
       return {
-        id: ingredient._id, // Ingredient definition ID
+        ingredientId: ingredient._id, // Ingredient definition ID
         name: ingredient.name,
+        calories: ingredient.calories ?? 0,
         category: ingredient.category ?? "other",
         unit: ingredient.unit ?? "g",
         quantity: mi.quantity, // From junction record
@@ -75,7 +76,7 @@ const mapPageDataToFormValues = (
   return {
     mealId: mealData._id,
     name: mealData.name,
-    description: mealData.description,
+    description: mealData.description ?? "",
     prepTimeMinutes: mealData.prepTimeMinutes ?? undefined,
     cookTimeMinutes: mealData.cookTimeMinutes ?? undefined,
     servings: mealData.servings ?? undefined,
@@ -91,6 +92,7 @@ const mapPageDataToFormValues = (
 const NEW_INGREDIENT_DEFAULT: IngredientFormValues = {
   name: "",
   quantity: 0,
+  calories: 0,
   unit: "g",
   category: "other",
   isOptional: false,
@@ -113,8 +115,8 @@ export function MealEditForm({
   });
 
   const form = useForm({
-    resolver: zodResolver(MealUpdateFormSchema),
-    defaultValues: mapPageDataToFormValues(meal),
+    resolver: zodResolver(mutationMealEditSchema),
+    defaultValues: mapPreloadedDataToFormValues(meal),
   });
 
   const { control, setValue } = form;
@@ -124,10 +126,9 @@ export function MealEditForm({
     name: "ingredients",
   });
 
-  const onSubmitEdit = (values: MealUpdateFormValues) => {
+  const onSubmitEdit = (values: MutationMealEditValues) => {
     if (!meal?._id) return;
-    // biome-ignore lint/suspicious/noExplicitAny: <explanation>
-    editMeal(values as any);
+    editMeal(values);
   };
 
   const handleAddIngredient = () => {

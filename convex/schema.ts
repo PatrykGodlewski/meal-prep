@@ -1,7 +1,16 @@
 import { defineSchema, defineTable } from "convex/server";
+import {
+  zCustomQuery,
+  convexToZodFields,
+  convexToZod,
+  zodOutputToConvex,
+  zid,
+} from "convex-helpers/server/zod";
 import { v } from "convex/values";
 import { authTables } from "@convex-dev/auth/server";
+import { z } from "zod";
 
+export const DEFAULT_INGREDIENT_CATEGORY = "other" as const;
 export const INGREDIENT_CATEGORIES = [
   "dairy",
   "meat",
@@ -18,7 +27,7 @@ export const INGREDIENT_CATEGORIES = [
   "condiment",
   "beverage",
   "baking",
-  "other",
+  DEFAULT_INGREDIENT_CATEGORY,
 ] as const;
 
 export const MEAL_CATEGORIES = [
@@ -43,39 +52,94 @@ export const UNITS = [
   "pinch",
 ] as const;
 
+export const ingredientSchema = z.object({
+  name: z.string(),
+  category: z.enum(INGREDIENT_CATEGORIES),
+  unit: z.enum(UNITS),
+  calories: z.number().optional(),
+  createdAt: z.number(),
+  updatedAt: z.number(),
+});
+
+export const ingredientValidator = zodOutputToConvex(ingredientSchema);
+
+export const mealIngredientsSchema = z.object({
+  mealId: zid("meals"),
+  ingredientId: zid("ingredients"),
+  quantity: z.number(),
+  isOptional: z.boolean(),
+  notes: z.string().optional(),
+  createdAt: z.number(),
+  updatedAt: z.number(),
+});
+
+export const mealIngredientsValidator = zodOutputToConvex(
+  mealIngredientsSchema,
+);
+
+export const profileValidator = v.object({
+  userId: v.id("users"),
+  nickname: v.optional(v.string()),
+  createdAt: v.number(),
+  updatedAt: v.number(),
+});
+
+export const mealSchema = z.object({
+  name: z.string(),
+  description: z.string().optional(),
+  instructions: z.string().optional(),
+  prepTimeMinutes: z.number().optional(),
+  cookTimeMinutes: z.number().optional(),
+  calories: z.number().optional(),
+  servings: z.number().optional(),
+  category: z.enum(MEAL_CATEGORIES),
+  imageUrl: z.string().optional(),
+  isPublic: z.boolean().default(false),
+  createdBy: zid("users"),
+  createdAt: z.number(),
+  updatedAt: z.number(),
+});
+
+const mealValidator = zodOutputToConvex(mealSchema);
+
+export const mealPlanValidator = v.object({
+  userId: v.id("users"),
+  date: v.number(),
+  createdAt: v.number(),
+  updatedAt: v.number(),
+});
+
+export const plannedMealValidator = v.object({
+  mealPlanId: v.id("mealPlans"),
+  mealId: v.id("meals"),
+  createdAt: v.number(),
+  updatedAt: v.number(),
+});
+
+export const shoppingListValidator = v.object({
+  userId: v.id("users"),
+  weekStart: v.number(),
+  createdAt: v.number(),
+  updatedAt: v.number(),
+});
+
+export const shoppingListItemValidator = v.object({
+  shoppingListId: v.id("shoppingLists"),
+  ingredientId: v.id("ingredients"),
+  amount: v.number(),
+  isChecked: v.boolean(),
+  createdAt: v.number(),
+  updatedAt: v.number(),
+});
+
 export default defineSchema({
   ...authTables,
 
-  profiles: defineTable({
-    userId: v.id("users"),
-    nickname: v.optional(v.string()),
-    createdAt: v.number(),
-    updatedAt: v.number(),
-  }).index("by_user", ["userId"]),
+  profiles: defineTable(profileValidator).index("by_user", ["userId"]),
 
-  ingredients: defineTable({
-    name: v.string(),
-    category: v.union(...INGREDIENT_CATEGORIES.map((c) => v.literal(c))),
-    unit: v.union(...UNITS.map((u) => v.literal(u))),
-    createdAt: v.number(),
-    updatedAt: v.number(),
-  }).index("by_name", ["name"]),
+  ingredients: defineTable(ingredientValidator).index("by_name", ["name"]),
 
-  meals: defineTable({
-    name: v.string(),
-    description: v.string(),
-    instructions: v.optional(v.string()),
-    prepTimeMinutes: v.optional(v.number()),
-    cookTimeMinutes: v.optional(v.number()),
-    calories: v.optional(v.number()),
-    servings: v.optional(v.number()),
-    category: v.union(...MEAL_CATEGORIES.map((c) => v.literal(c))),
-    imageUrl: v.optional(v.string()),
-    isPublic: v.boolean(),
-    createdBy: v.id("users"),
-    createdAt: v.number(),
-    updatedAt: v.number(),
-  })
+  meals: defineTable(mealValidator)
     .index("by_author", ["createdBy"])
     .index("by_category", ["category"])
     .searchIndex("search_name", {
@@ -83,49 +147,27 @@ export default defineSchema({
       filterFields: ["category"],
     }),
 
-  mealIngredients: defineTable({
-    mealId: v.id("meals"),
-    ingredientId: v.id("ingredients"),
-    quantity: v.number(),
-    isOptional: v.boolean(),
-    notes: v.optional(v.string()),
-    createdAt: v.number(),
-    updatedAt: v.number(),
-  })
+  mealIngredients: defineTable(mealIngredientsValidator)
     .index("by_meal", ["mealId"])
     .index("by_ingredient", ["ingredientId"]),
 
-  mealPlans: defineTable({
-    userId: v.id("users"),
-    date: v.number(),
-    createdAt: v.number(),
-    updatedAt: v.number(),
-  }).index("by_user_and_date", ["userId", "date"]),
+  // TODO: change to plans
+  mealPlans: defineTable(mealPlanValidator).index("by_user_and_date", [
+    "userId",
+    "date",
+  ]),
 
-  plannedMeals: defineTable({
-    mealPlanId: v.id("mealPlans"),
-    mealId: v.id("meals"),
-    createdAt: v.number(),
-    updatedAt: v.number(),
-  })
+  // TODO: change to mealPlanJoin
+  plannedMeals: defineTable(plannedMealValidator)
     .index("by_meal_plan", ["mealPlanId"])
     .index("by_meal", ["mealId"]),
 
-  shoppingLists: defineTable({
-    userId: v.id("users"),
-    weekStart: v.number(),
-    createdAt: v.number(),
-    updatedAt: v.number(),
-  }).index("by_user_and_week", ["userId", "weekStart"]),
+  shoppingLists: defineTable(shoppingListValidator).index("by_user_and_week", [
+    "userId",
+    "weekStart",
+  ]),
 
-  shoppingListItems: defineTable({
-    shoppingListId: v.id("shoppingLists"),
-    ingredientId: v.id("ingredients"),
-    amount: v.number(),
-    isChecked: v.boolean(),
-    createdAt: v.number(),
-    updatedAt: v.number(),
-  })
+  shoppingListItems: defineTable(shoppingListItemValidator)
     .index("by_shopping_list", ["shoppingListId"])
     .index("by_ingredient", ["ingredientId"]),
 });

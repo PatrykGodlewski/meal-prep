@@ -17,6 +17,7 @@ export const IngredientFormSchema = z.object({
   unit: unitEnum,
   // Meal-specific details
   quantity: z.coerce.number().positive("Quantity must be positive"), // Use coerce for input type="number"
+  calories: z.coerce.number().nonnegative("Quantity must be non-negative"), // Use coerce for input type="number"
   isOptional: z.boolean().default(false),
   notes: z.string().optional(),
 });

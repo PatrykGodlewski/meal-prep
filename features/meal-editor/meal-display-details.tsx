@@ -38,6 +38,10 @@ export const MealDisplayDetails: React.FC<MealDisplayDetailsProps> = React.memo(
   ({ meal, mealIngredients }) => {
     const totalTime = (meal.prepTimeMinutes || 0) + (meal.cookTimeMinutes || 0);
     const authorName = meal.createdBy;
+    const caloriesByIngredients = mealIngredients.reduce(
+      (acc, mealIng) => (mealIng.ingredient?.calories ?? 0) + acc,
+      0,
+    );
 
     return (
       <div className="bg-white dark:bg-neutral-900 rounded-lg shadow-md overflow-hidden">
@@ -91,6 +95,10 @@ export const MealDisplayDetails: React.FC<MealDisplayDetailsProps> = React.memo(
             {meal.calories && (
               <MealLabel icon={Flame} text={`${meal.calories} ${"calories"}`} />
             )}
+            <MealLabel
+              icon={Flame}
+              text={`${caloriesByIngredients} ${"calories by ingredients [dev mode]"}`}
+            />
           </div>
 
           {/* Description */}

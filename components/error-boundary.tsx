@@ -1,6 +1,6 @@
 "use client";
 
-import React, { ErrorInfo } from "react";
+import React, { type ErrorInfo } from "react";
 
 export type ErrorBoundaryProps = React.PropsWithChildren & {
   fallback?: React.ReactNode;
@@ -20,7 +20,6 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, State> {
   constructor(props: ErrorBoundaryProps) {
     super(props);
 
-    // Define a state variable to track whether is an error or not
     this.state = { hasError: false };
   }
 
@@ -28,16 +27,14 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, State> {
 
   componentDidUpdate(
     prevProps: Readonly<ErrorBoundaryProps>,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     _prevState: Readonly<State>,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    _snapshot?: any,
+    _snapshot?: unknown,
   ): void {
     if (prevProps.key !== this.props.key) {
       this.resetErrorBoundary();
     }
   }
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+
   static getDerivedStateFromError(error: Error) {
     console.error(error);
     console.log(error);
@@ -66,7 +63,7 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, State> {
     }
 
     return (
-      <div data-testId={this.props.dataTestId || "error-boundary"}>
+      <div data-test-id={this.props.dataTestId || "error-boundary"}>
         <h2>"oopsie kacper zepsół"</h2>
       </div>
     );

@@ -63,7 +63,6 @@ export const IngredientInputRow: React.FC<IngredientInputRowProps> = React.memo(
     const [popoverOpen, setPopoverOpen] = useState(false);
 
     const ingredientDefId = field.id;
-    const isExistingIngredient = !!ingredientDefId;
 
     // Callback to populate fields when an existing ingredient is selected
     const handleSelectExistingIngredient = useCallback(
@@ -87,12 +86,13 @@ export const IngredientInputRow: React.FC<IngredientInputRowProps> = React.memo(
           setValue(`ingredients.${index}.unit`, selected.unit ?? "g", {
             shouldDirty: true,
           });
+          setValue(`ingredients.${index}.calories`, selected.calories ?? 0, {
+            shouldDirty: true,
+          });
         } else {
-          // If selection cleared or invalid, clear the ID to signal a new ingredient
           setValue(`ingredients.${index}._id`, undefined, {
             shouldDirty: true,
           });
-          // Keep the typed name, category, and unit as they might be intentional for a new ingredient
         }
         setPopoverOpen(false);
       },
@@ -316,6 +316,32 @@ export const IngredientInputRow: React.FC<IngredientInputRowProps> = React.memo(
                 >
                   Optional
                 </Label>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={control}
+            name={`ingredients.${index}.calories`}
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Calories</FormLabel>
+                <FormControl>
+                  <Input
+                    type="number"
+                    placeholder="4"
+                    {...field}
+                    value={field.value ?? ""}
+                    onChange={(e) =>
+                      field.onChange(
+                        e.target.value === ""
+                          ? null
+                          : Number.parseInt(e.target.value),
+                      )
+                    }
+                  />
+                </FormControl>
                 <FormMessage />
               </FormItem>
             )}

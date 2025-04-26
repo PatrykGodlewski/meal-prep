@@ -76,6 +76,7 @@ export const seedDatabase = mutation({
 
         const ingredientId = await ctx.db.insert("ingredients", {
           name: ingredientData.name,
+          calories: 0, // Default value
           category: ingredientData.category,
           unit: ingredientData.unit,
           createdAt: Date.now(),

@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import type { FunctionReturnType } from "convex/server";
 import { ModalMeals } from "./ModalMeals";
 import { useState } from "react";
-import { Id } from "@/convex/_generated/dataModel";
+import type { Id } from "@/convex/_generated/dataModel";
 import { MEAL_CATEGORIES } from "@/convex/schema";
 import { cn } from "@/lib/utils";
 

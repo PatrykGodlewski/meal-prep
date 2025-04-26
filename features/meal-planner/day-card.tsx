@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import type { api } from "@/convex/_generated/api";
 import type { FunctionReturnType } from "convex/server";
 import { Flame } from "lucide-react";
+import Image from "next/image";
 
 const DATE_FORMAT_DISPLAY_CARD = "MMM dd";
 
@@ -66,12 +67,11 @@ export function PlanCard({ plan }: PlanCardProps) {
         </CardTitle>
       </CardHeader>
       <CardContent className="p-3 justify-between flex flex-col space-y-2 flex-grow">
-        <div className="flex justify-between items-end">
-          <ul className="space-y-2 text-xs group">
+        {/* // Meal presentation component  */}
+        <div className="flex justify-between items-end gap-4">
+          <ul className="text-xs group flex flex-wrap justify-between gap-4 flex-1">
             <For
-              each={plan.plannedMeals.sort((a, b) =>
-                (a.meal?.category ?? "").localeCompare(b.meal?.category ?? ""),
-              )}
+              each={plan.plannedMeals}
               empty={
                 <li className="text-center text-gray-400 italic pt-4">
                   No meals planned
@@ -82,7 +82,7 @@ export function PlanCard({ plan }: PlanCardProps) {
                 const isPlannedMeal = plannedMeal.meal?.name;
                 return (
                   <li
-                    className={cn({
+                    className={cn("flex-1", {
                       "rounded-xl p-2 border-dashed border-2 border-neutral-500":
                         !isPlannedMeal,
                     })}
@@ -90,13 +90,22 @@ export function PlanCard({ plan }: PlanCardProps) {
                   >
                     {isPlannedMeal ? (
                       <Link
-                        className="hover:underline"
+                        className="hover:underline h-full flex-wrap min-w-24 relative flex items-center justify-center p-2 border-2 border-dashed rounded-xl"
                         href={`/meals/${plannedMeal.meal?._id}`}
                       >
-                        <span className="font-semibold capitalize">
-                          {plannedMeal.meal?.category}:{" "}
+                        <Image
+                          src={plannedMeal.meal?.imageUrl ?? "/placeholder.png"}
+                          width={128}
+                          height={128}
+                          className={"rounded-lg"}
+                          alt={"Meal image"}
+                        />
+                        <span className="absolute p-2 rounded-full shadow-sm bg-neutral-900/25 right-0 top-0 font-semibold capitalize">
+                          {plannedMeal.meal?.category}
                         </span>
-                        {plannedMeal.meal?.name}
+                        <p className="w-full px-2">
+                          {plannedMeal.meal?.name.trim()}
+                        </p>
                       </Link>
                     ) : (
                       <Link
@@ -111,12 +120,14 @@ export function PlanCard({ plan }: PlanCardProps) {
               }}
             </For>
           </ul>
-          <div>
-            <p className="border py-2 px-3 rounded-xl border-dashed border-neutral-400 flex items-center gap-2">
-              {summarizedCalories} Kcal
-              <Flame size={18} className="mb-[2px]" />
-            </p>
-          </div>
+        </div>
+
+        {/* // Statistics component  */}
+        <div className="flex justify-end py-4">
+          <p className="border py-2 px-3 rounded-xl border-dashed border-neutral-400 flex items-center gap-2">
+            {summarizedCalories} Kcal
+            <Flame size={18} className="mb-[2px]" />
+          </p>
         </div>
 
         <Button size={"sm"} asChild>

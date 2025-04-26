@@ -5,9 +5,9 @@
  * You can safely delete it and remove it from package.json scripts.
  */
 
-import fs from "fs";
+import fs from "node:fs";
 import { config as loadEnvFile } from "dotenv";
-import { spawnSync } from "child_process";
+import { spawnSync } from "node:child_process";
 
 if (!fs.existsSync(".env.local")) {
   // Something is off, skip the script.
@@ -29,7 +29,7 @@ const result = spawnSync("npx", ["@convex-dev/auth", "--skip-git-check"], {
 });
 
 if (runOnceWorkflow) {
-  fs.writeFileSync(".env.local", `\nSETUP_SCRIPT_RAN=1\n`, { flag: "a" });
+  fs.writeFileSync(".env.local", "\nSETUP_SCRIPT_RAN=1\n", { flag: "a" });
 }
 
 process.exit(result.status);

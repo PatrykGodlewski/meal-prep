@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { MealEditForm } from "@/features/meal-editor/meal-editor-form"; // Adjust path
 import { MealDisplayDetails } from "@/features/meal-editor/meal-display-details"; // Adjust path
 import type { api } from "@/convex/_generated/api";
@@ -10,8 +10,10 @@ import { Edit, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 interface MealDetailViewProps {
-  preloadedMeal: Preloaded<typeof api.meals.getMeal>;
-  preloadedIngredients: Preloaded<typeof api.ingredients.getIngredients>;
+  preloadedMeal: Preloaded<typeof api.meals.queries.getMeal>;
+  preloadedIngredients: Preloaded<
+    typeof api.ingredients.queries.getIngredients
+  >;
 }
 
 export default function MealDetailView({
@@ -28,8 +30,14 @@ export default function MealDetailView({
     setIsEditing((prev) => !prev);
   };
 
+  useEffect(() => {
+    if (!meal) {
+      router.replace("/meals");
+    }
+  });
+
   if (!meal) {
-    router.replace("/meals");
+    return <div> Meal not found </div>;
   }
 
   return (
@@ -50,7 +58,7 @@ export default function MealDetailView({
 
       {isEditing ? (
         <MealEditForm
-          meal={meal!}
+          meal={meal}
           availableIngredients={ingredientList}
           onSuccess={() => setIsEditing(false)}
         />

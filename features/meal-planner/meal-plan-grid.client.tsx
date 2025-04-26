@@ -46,27 +46,34 @@ export const MealPlanDisplay = () => {
         )}
         {!isBusy &&
           !isGenerating &&
-          days.map((day) => (
-            <Button
-              key={day.id}
-              variant="ghost"
-              disabled={day.id === selectedPlanId || !day.id}
-              className={cn(
-                "self-center disabled:bg-neutral-700 h-auto rounded-xl w-full cursor-pointer bg-neutral-200 dark:bg-neutral-900 flex flex-col items-center justify-center p-4 sm:p-8 aspect-square",
-                { "py-5 border-2": isToday(day.date) },
-              )}
-              onClick={() => {
-                mealPlannerState$.selectedPlanId.set(day.id);
-              }}
-            >
-              <span className="text-xs font-medium uppercase text-muted-foreground">
-                {format(day.date, "EEEEE")}
-              </span>
-              <span className="text-md sm:text-lg font-semibold">
-                {format(day.date, "d")}
-              </span>
-            </Button>
-          ))}
+          days.map((day, idx) => {
+            const isSelected = day.id === selectedPlanId || !day.id;
+            return (
+              <Button
+                key={`${day?.id}${idx}`}
+                variant="ghost"
+                disabled={isSelected}
+                className={cn(
+                  "self-center h-auto rounded-xl w-full cursor-pointer bg-neutral-200 dark:bg-neutral-900 flex flex-col items-center justify-center p-4 sm:p-8 aspect-square",
+                  {
+                    "border-white border-dashed border-2": isSelected,
+                    "py-5 border-2 bg-neutral-900 dark:bg-neutral-200 text-neutral-200 dark:text-neutral-900":
+                      isToday(day.date),
+                  },
+                )}
+                onClick={() => {
+                  mealPlannerState$.selectedPlanId.set(day.id);
+                }}
+              >
+                <span className="text-xs font-medium uppercase text-muted-foreground">
+                  {format(day.date, "EEEEE")}
+                </span>
+                <span className="text-md sm:text-lg font-semibold">
+                  {format(day.date, "d")}
+                </span>
+              </Button>
+            );
+          })}
       </div>
 
       <PlanCard

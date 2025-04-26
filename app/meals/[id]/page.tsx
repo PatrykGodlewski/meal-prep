@@ -17,13 +17,13 @@ export default async function MealDetailPage({
   }
 
   const preloadedMeal = await preloadQuery(
-    api.meals.getMeal,
+    api.meals.queries.getMeal,
     { mealId },
     { token: await convexAuthNextjsToken() },
   );
 
   const preloadedIngredients = await preloadQuery(
-    api.ingredients.getIngredients,
+    api.ingredients.queries.getIngredients,
     {},
     { token: await convexAuthNextjsToken() },
   );

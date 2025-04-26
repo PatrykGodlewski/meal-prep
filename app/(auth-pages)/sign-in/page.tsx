@@ -45,12 +45,13 @@ export default function SignIn() {
               ? "Don't have an account?"
               : "Already have an account?"}
           </span>
-          <span
+          <Button
+            variant="link"
             className="text-foreground underline hover:no-underline cursor-pointer"
             onClick={() => setFlow(flow === "signIn" ? "signIn" : "signIn")}
           >
             {flow === "signIn" ? "Sign up instead" : "Sign in instead"}
-          </span>
+          </Button>
         </div>
         {error && (
           <div className="bg-red-500/20 border-2 border-red-500/50 rounded-md p-2">

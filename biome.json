@@ -8,7 +8,9 @@
 	"files": {
 		"ignoreUnknown": false,
 		"ignore": [
-			"node_modules/**"
+			"node_modules/**",
+			".next/**",
+			"_*/**"
 		]
 	},
 	"formatter": {
@@ -28,6 +30,9 @@
 			"suspicious": {
 				"noArrayIndexKey": "off",
 				"useAwait": "error"
+			},
+			"correctness": {
+				"useExhaustiveDependencies": "off"
 			}
 		}
 	},

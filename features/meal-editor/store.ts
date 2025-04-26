@@ -11,7 +11,7 @@ export function useMealEditor({
   onSuccess?: (id?: Id<"meals">) => void;
 }) {
   const { mutate: deleteMeal, isPending: isPendingDelete } = useMutation({
-    mutationFn: useConvexMutation(api.meals.deleteMeal),
+    mutationFn: useConvexMutation(api.meals.mutations.deleteMeal),
     onSuccess: () => {
       toast({
         title: "Success",
@@ -31,7 +31,7 @@ export function useMealEditor({
   });
 
   const { mutate: editMeal, isPending: isPendingEdit } = useMutation({
-    mutationFn: useConvexMutation(api.meals.editMeal),
+    mutationFn: useConvexMutation(api.meals.mutations.editMeal),
     onSuccess: () => {
       toast({
         title: "Success",
@@ -51,8 +51,10 @@ export function useMealEditor({
   });
 
   const { mutate: addMeal, isPending: isPendingAdd } = useMutation({
-    mutationFn: useConvexMutation(api.meals.addMeal),
-    onSuccess: (response: FunctionReturnType<typeof api.meals.addMeal>) => {
+    mutationFn: useConvexMutation(api.meals.mutations.addMeal),
+    onSuccess: (
+      response: FunctionReturnType<typeof api.meals.mutations.addMeal>,
+    ) => {
       toast({
         title: "Success",
         description: "Meal added successfully",

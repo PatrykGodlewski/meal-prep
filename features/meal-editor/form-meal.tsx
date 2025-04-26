@@ -1,9 +1,12 @@
 "use client";
 
+import {
+  mutationMealAddSchema,
+  type MutationMealAddValues,
+} from "@/convex/meals/validators";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useTransition } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 
 import { Button } from "@/components/ui/button";
@@ -29,48 +32,39 @@ import { Textarea } from "@/components/ui/textarea";
 import { BackButton } from "@/components/back-button";
 import { type Preloaded, usePreloadedQuery } from "convex/react";
 import type { api } from "@/convex/_generated/api";
-import { INGREDIENT_CATEGORIES, MEAL_CATEGORIES, UNITS } from "@/convex/schema";
-import { MealAddFormSchema, type MealAddFormValues } from "./schema";
+import {
+  DEFAULT_INGREDIENT_CATEGORY,
+  MEAL_CATEGORIES,
+  UNITS,
+} from "@/convex/schema";
 import { IngredientInputRow } from "./ingredient-input-row";
 import { useMealEditor } from "./store";
-
-const NEW_INGREDIENT_DEFAULT = {
-  id: undefined,
-  name: "",
-  quantity: 0,
-  unit: UNITS[0],
-  category: INGREDIENT_CATEGORIES[0],
-  isOptional: false,
-  notes: "",
-};
-
-const DEFAULT_ADD_VALUES = {
-  name: "",
-  description: "",
-  instructions: "",
-  prepTimeMinutes: 0,
-  cookTimeMinutes: 0,
-  servings: 0,
-  calories: 0,
-  category: MEAL_CATEGORIES[1],
-  imageUrl: "",
-  isPublic: false,
-  ingredients: [NEW_INGREDIENT_DEFAULT],
-};
+import type { MutationMealIngredientValues } from "@/convex/ingredients/validators";
 
 type Props = {
-  preloadedIngredients: Preloaded<typeof api.ingredients.getIngredients>;
+  preloadedIngredients: Preloaded<
+    typeof api.ingredients.queries.getIngredients
+  >;
+};
+
+const NEW_INGREDIENT_DEFAULT: MutationMealIngredientValues = {
+  name: "",
+  quantity: 1,
+  calories: 0,
+  category: DEFAULT_INGREDIENT_CATEGORY,
+  isOptional: false,
+  notes: "",
+  unit: UNITS[0],
 };
 
 export default function AddMealForm({ preloadedIngredients }: Props) {
   const availableIngredients = usePreloadedQuery(preloadedIngredients);
-  const [isPending, startTransition] = useTransition();
   const router = useRouter();
 
   const form = useForm({
-    resolver: zodResolver(MealAddFormSchema),
-    defaultValues: DEFAULT_ADD_VALUES,
+    resolver: zodResolver(mutationMealAddSchema),
   });
+
   const { control, setValue } = form;
 
   const { fields, append, remove } = useFieldArray({
@@ -78,16 +72,14 @@ export default function AddMealForm({ preloadedIngredients }: Props) {
     name: "ingredients",
   });
 
-  const { addMeal } = useMealEditor({
+  const { addMeal, isPending } = useMealEditor({
     onSuccess: (mealId) => {
       if (mealId) router.push(`/meals/${mealId}`);
     },
   });
 
-  const onSubmit = (values: MealAddFormValues) => {
-    startTransition(() => {
-      addMeal(values);
-    });
+  const onSubmit = (values: MutationMealAddValues) => {
+    addMeal(values);
   };
 
   const handleAddIngredient = () => {
@@ -104,7 +96,6 @@ export default function AddMealForm({ preloadedIngredients }: Props) {
       <h1 className="text-2xl font-bold mb-6">Add New Meal</h1>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-          {/* Meal Name and Category */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <FormField
               control={control}
