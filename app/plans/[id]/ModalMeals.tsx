@@ -127,9 +127,16 @@ export function ModalMeals({
             >
               <div>
                 <p className="font-medium">{meal.name}</p>
-                <p className="text-sm text-muted-foreground capitalize">
-                  {meal.category}
-                </p>
+                <div className="flex gap-1">
+                  {meal.categories.map((cat, idx) => (
+                    <p
+                      key={idx}
+                      className="text-sm text-muted-foreground capitalize"
+                    >
+                      {cat}
+                    </p>
+                  ))}
+                </div>
               </div>
             </div>
           ))}

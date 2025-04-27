@@ -6,6 +6,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -13,16 +14,18 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import type { Doc } from "@/convex/_generated/dataModel";
-import { Clock, Plus, Save, Trash2, Users, Weight } from "lucide-react"; // Added icons
+import {
+  Check,
+  Clock,
+  Plus,
+  Save,
+  Trash2,
+  Users,
+  Weight,
+  X,
+} from "lucide-react"; // Added icons
 import { useFieldArray, useForm } from "react-hook-form";
 import type { IngredientFormValues } from "./schema";
 import { MEAL_CATEGORIES } from "@/convex/schema";
@@ -48,6 +51,23 @@ import {
   mutationMealEditSchema,
   type MutationMealEditValues,
 } from "@/convex/meals/validators";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
+import { Badge } from "@/components/ui/badge";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import type { MealCategory } from "@/validators";
+import { MultiSelect } from "@/components/multi-select";
 
 const mapPreloadedDataToFormValues = (
   meal: FunctionReturnType<typeof api.meals.queries.getMeal>,
@@ -80,7 +100,7 @@ const mapPreloadedDataToFormValues = (
     prepTimeMinutes: mealData.prepTimeMinutes ?? undefined,
     cookTimeMinutes: mealData.cookTimeMinutes ?? undefined,
     servings: mealData.servings ?? undefined,
-    category: mealData.category ?? "lunch",
+    categories: mealData.categories ?? [],
     calories: mealData.calories ?? 0,
     imageUrl: mealData.imageUrl ?? "",
     instructions: mealData.instructions ?? "",
@@ -367,31 +387,22 @@ export function MealEditForm({
                 />
                 <FormField
                   control={control}
-                  name="category"
+                  name="categories"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-sm">Meal Category</FormLabel>
-                      <Select
-                        value={field.value ?? ""}
-                        onValueChange={field.onChange}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select Meal" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {MEAL_CATEGORIES.map((cat) => (
-                            <SelectItem
-                              key={cat}
-                              value={cat}
-                              className="capitalize"
-                            >
-                              {cat}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      <FormLabel>Categories</FormLabel>
+                      <FormControl>
+                        <MultiSelect
+                          options={MEAL_CATEGORIES.map((cat) => ({
+                            label: cat,
+                            value: cat,
+                          }))}
+                          onValueChange={field.onChange}
+                          defaultValue={field.value}
+                          placeholder="Select category"
+                          variant="inverted"
+                        />
+                      </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}

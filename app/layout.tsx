@@ -1,4 +1,4 @@
-import { Geist, Playfair_Display } from "next/font/google";
+import { Geist } from "next/font/google";
 import "./globals.css";
 import Providers from "./providers";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
@@ -7,8 +7,8 @@ import { ConvexAuthNextjsServerProvider } from "@convex-dev/auth/nextjs/server";
 import { SiteHeader } from "@/components/site-header";
 
 export const metadata = {
-  title: "Next.js and Supabase Starter Kit",
-  description: "The fastest way to build apps with Next.js and Supabase",
+  title: "Skibidi Obiadex",
+  description: "The fastest way to plan meals for a week",
 };
 
 const geistSans = Geist({

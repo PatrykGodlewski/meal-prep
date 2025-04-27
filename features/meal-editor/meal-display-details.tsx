@@ -62,11 +62,16 @@ export const MealDisplayDetails: React.FC<MealDisplayDetailsProps> = React.memo(
               </span>
             </div>
           )}
-          {meal.category && (
-            <span className="absolute top-4 right-4 bg-blue-600 text-white px-3 py-1 rounded-full text-xs font-medium uppercase tracking-wide">
-              {meal.category}
-            </span>
-          )}
+          <div className="absolute top-4 right-4 flex flex-col gap-2 items-end">
+            {meal?.categories?.map((cat, idx) => (
+              <span
+                key={cat + idx}
+                className="bg-blue-600 text-white px-3 py-1 rounded-full text-xs text-right font-medium uppercase tracking-wide"
+              >
+                {cat}
+              </span>
+            ))}
+          </div>
         </div>
 
         {/* Details Section */}

@@ -35,7 +35,7 @@ export function MealPlanDetail({ preloadedMealPlan }: Props) {
       category,
       mealPlan.plannedMeals.find(
         (plannedMeal) =>
-          plannedMeal?.category.toLowerCase() === category.toLowerCase(),
+          plannedMeal?.category?.toLowerCase() === category.toLowerCase(),
       ),
     ]),
   );
@@ -108,11 +108,17 @@ function MealCard({ plannedMeal, category, plan }: MealCardProps) {
         // trigger={<Button>Select Meal</Button>}
       />
       <div>
-        <Link href={`/meals/${plannedMeal?.meal?._id}`}>
-          <h3 className="font-semibold text-lg hover:underline h-[1lh]">
-            {plannedMeal?.meal?.name ?? "Missing meal, add one!"}
+        {plannedMeal?.meal?._id ? (
+          <Link href={`/meals/${plannedMeal?.meal?._id}`}>
+            <h3 className="font-semibold text-lg hover:underline h-[1lh]">
+              {plannedMeal?.meal?.name}
+            </h3>
+          </Link>
+        ) : (
+          <h3 className="font-semibold text-lg hover:underline h-[1lh] cursor-pointer">
+            {"Missing meal, add one!"}
           </h3>
-        </Link>
+        )}
         <p className="text-sm text-neutral-400 uppercase">{category}</p>
       </div>
       <Button

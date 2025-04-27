@@ -40,6 +40,7 @@ import {
 import { IngredientInputRow } from "./ingredient-input-row";
 import { useMealEditor } from "./store";
 import type { MutationMealIngredientValues } from "@/convex/ingredients/validators";
+import { MultiSelect } from "@/components/multi-select";
 
 type Props = {
   preloadedIngredients: Preloaded<
@@ -112,31 +113,22 @@ export default function AddMealForm({ preloadedIngredients }: Props) {
             />
             <FormField
               control={control}
-              name="category"
+              name="categories"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Meal Category</FormLabel>
-                  <Select
-                    onValueChange={field.onChange}
-                    value={field.value ?? ""}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select a meal category" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {MEAL_CATEGORIES.map((category) => (
-                        <SelectItem
-                          key={category}
-                          value={category}
-                          className="capitalize"
-                        >
-                          {category}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <FormLabel>Categories</FormLabel>
+                  <FormControl>
+                    <MultiSelect
+                      options={MEAL_CATEGORIES.map((cat) => ({
+                        label: cat,
+                        value: cat,
+                      }))}
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                      placeholder="Select category"
+                      variant="inverted"
+                    />
+                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )}

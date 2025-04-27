@@ -94,9 +94,14 @@ export const editMeal = authMutation({
         .collect();
 
       await Promise.all(
-        currentMealPlannedMeals.map((plannedMeal) =>
-          ctx.db.delete(plannedMeal._id),
-        ),
+        currentMealPlannedMeals.map((plannedMeal) => {
+          if (
+            plannedMeal?.category &&
+            newMeal.categories.includes(plannedMeal.category)
+          )
+            return;
+          return ctx.db.delete(plannedMeal._id);
+        }),
       );
     }
 

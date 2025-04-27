@@ -1,4 +1,5 @@
 import { v } from "convex/values";
+import { filter } from "convex-helpers/server/filter";
 import { authQuery } from "../custom/query";
 import { MEAL_CATEGORIES } from "../schema";
 import { paginationOptsValidator } from "convex/server";
@@ -9,22 +10,22 @@ export const getMeals = authQuery({
     search: v.optional(v.string()),
     filter: v.optional(v.union(...MEAL_CATEGORIES.map((c) => v.literal(c)))),
   },
-  handler: async (ctx, { paginationOpts, search = "", filter }) => {
+  handler: async (
+    ctx,
+    { paginationOpts, search = "", filter: categoryFilter },
+  ) => {
     const trimmedSearch = search.trim();
     const isSearching = !!trimmedSearch;
-    const isFiltering = !!filter;
+    const isFiltering = !!categoryFilter;
 
     if (isSearching) {
-      const query = ctx.db
-        .query("meals")
-        .withSearchIndex("search_name", (q) => {
-          if (isFiltering) {
-            // Use the correct filter field 'categories'
-            // .eq() on an array filter field checks for containment
-            return q.search("name", trimmedSearch).eq("categories", [filter]);
-          }
+      const query = filter(
+        ctx.db.query("meals").withSearchIndex("search_name", (q) => {
           return q.search("name", trimmedSearch);
-        });
+        }),
+        (meal) =>
+          categoryFilter ? meal.categories.includes(categoryFilter) : true,
+      );
 
       const results = await query.paginate(
         paginationOpts ?? { numItems: 10, cursor: null },
@@ -34,11 +35,9 @@ export const getMeals = authQuery({
     }
 
     if (isFiltering) {
-      const query = ctx.db
-        .query("meals")
-        // Use the renamed index 'by_categories' and the correct field 'categories'
-        // .eq() on an array index checks for containment
-        .withIndex("by_categories", (q) => q.eq("categories", [filter]));
+      const query = filter(ctx.db.query("meals"), (meal) =>
+        meal.categories.includes(categoryFilter),
+      );
 
       const results = await query.paginate(
         paginationOpts ?? { numItems: 10, cursor: null },
