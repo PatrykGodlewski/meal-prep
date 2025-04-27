@@ -2,7 +2,7 @@ import { mutation, query } from "./_generated/server";
 
 import type { Id } from "./_generated/dataModel";
 import { v } from "convex/values";
-import { endOfWeek, addDays } from "date-fns";
+import { addDays } from "date-fns";
 import { MEAL_CATEGORIES } from "./schema";
 import { getAuthUserId } from "@convex-dev/auth/server";
 
@@ -43,7 +43,8 @@ export const getMealPlan = query({
     // 2. Fetch associated planned meals using the index
     const plannedMeals = await ctx.db
       .query("plannedMeals")
-      .withIndex("by_meal_plan", (q) => q.eq("mealPlanId", mealPlanId))
+      // TODO: use both category and meal pland id if possible and necessary
+      .withIndex("by_plan_and_category", (q) => q.eq("mealPlanId", mealPlanId))
       .collect();
 
     // 3. Extract meal IDs from plannedMeals
@@ -102,7 +103,10 @@ export const getWeeklyMealPlan = query({
         // Fetch plannedMeals for this mealPlan
         const plannedMeals = await ctx.db
           .query("plannedMeals")
-          .withIndex("by_meal_plan", (q) => q.eq("mealPlanId", mealPlan._id))
+          // TODO: use both category and meal pland id if possible and necessary
+          .withIndex("by_plan_and_category", (q) =>
+            q.eq("mealPlanId", mealPlan._id),
+          )
           .collect();
 
         // Fetch all mealIds for this mealPlan
@@ -160,7 +164,10 @@ export const generateMealPlan = mutation({
         // Find planned meals associated with this specific meal plan using the index
         const oldPlannedMeals = await ctx.db
           .query("plannedMeals")
-          .withIndex("by_meal_plan", (q) => q.eq("mealPlanId", plan._id))
+          // TODO: use both category and meal pland id if possible and necessary
+          .withIndex("by_plan_and_category", (q) =>
+            q.eq("mealPlanId", plan._id),
+          )
           .collect();
 
         // Delete associated planned meals
@@ -181,16 +188,36 @@ export const generateMealPlan = mutation({
       );
     }
 
-    // Group meals by category
-    const mealsByCategory: Record<string, typeof allMeals> = {};
-    for (const cat of MEAL_CATEGORIES) mealsByCategory[cat] = [];
+    // Define categories to generate for
+    const categoriesToGenerate: (typeof MEAL_CATEGORIES)[number][] = [
+      "breakfast",
+      "lunch",
+      "dinner",
+      "snack",
+    ];
+
+    // Group meals by category, handling array categories
+    const mealsByCategory: Record<
+      (typeof MEAL_CATEGORIES)[number],
+      typeof allMeals
+    > = {
+      breakfast: [],
+      lunch: [],
+      dinner: [],
+      snack: [],
+      dessert: [], // Keep dessert empty or handle if needed elsewhere
+    };
+
     for (const meal of allMeals) {
-      // Ensure category exists before pushing
-      if (mealsByCategory[meal.category]) {
-        mealsByCategory[meal.category].push(meal);
-      } else {
-        // This case shouldn't happen if MEAL_CATEGORIES is exhaustive
-        console.warn(`Meal ${meal._id} has unknown category: ${meal.category}`);
+      // A meal can belong to multiple categories
+      for (const category of meal.categories) {
+        // Only group if it's one of the categories we might generate for
+        if (category in mealsByCategory) {
+          mealsByCategory[category].push(meal);
+        } else {
+          // Log if a meal has a category not defined in MEAL_CATEGORIES (schema issue)
+          console.warn(`Meal ${meal._id} has an invalid category: ${category}`);
+        }
       }
     }
 
@@ -206,13 +233,23 @@ export const generateMealPlan = mutation({
 
       mealPlanIds.push(mealPlanId);
 
-      for (const category of MEAL_CATEGORIES) {
-        const meals = mealsByCategory[category];
-        if (!meals || meals.length === 0) continue;
-        const randomMeal = meals[Math.floor(Math.random() * meals.length)];
+      // Only iterate through the specified categories
+      for (const category of categoriesToGenerate) {
+        const availableMeals = mealsByCategory[category];
+        if (!availableMeals || availableMeals.length === 0) {
+          console.warn(
+            `No meals found for category: ${category} on ${new Date(date).toISOString().split("T")[0]}`,
+          );
+          continue; // Skip if no meals are available for this category
+        }
+        // Select a random meal from the filtered list for this category
+        const randomMeal =
+          availableMeals[Math.floor(Math.random() * availableMeals.length)];
+
         await ctx.db.insert("plannedMeals", {
           mealPlanId,
           mealId: randomMeal._id,
+          category: category, // Store the category for which this meal was chosen
           createdAt: Date.now(),
           updatedAt: Date.now(),
         });
@@ -275,56 +312,46 @@ export const updatePlannedMealByCategory = mutation({
     //   throw new Error("User is not authorized to use this meal.");
     // }
 
-    // 4. --- Find Existing Planned Meal for the Category in this Meal Plan ---
-    // Fetch all planned meals for this specific meal plan
-    const plannedMeals = await ctx.db
+    // 4. --- Find Existing Planned Meal for the Category ---
+    // Since plannedMeals now has a 'category' field, we can query directly.
+    // Note: We need an index on [mealPlanId, category] for this to be efficient.
+    // Let's assume we'll add ` .index("by_plan_and_category", ["mealPlanId", "category"])` to plannedMeals in schema.ts
+    const existingPlannedMeal = await ctx.db
       .query("plannedMeals")
-      .withIndex("by_meal_plan", (q) => q.eq("mealPlanId", mealPlanId))
-      .collect();
+      .withIndex("by_plan_and_category", (q) =>
+        q.eq("mealPlanId", mealPlanId).eq("category", category),
+      )
+      .first(); // Get the first match (should be unique per plan/category)
 
-    let targetPlannedMealId: Id<"plannedMeals"> | null = null;
+    let plannedMealIdToReturn: Id<"plannedMeals">;
 
-    // Fetch the associated meal data to check categories
-    const mealIds = plannedMeals.map((pm) => pm.mealId);
-    const meals = (
-      await Promise.all(mealIds.map((id) => ctx.db.get(id)))
-    ).filter((meal): meal is NonNullable<typeof meal> => meal !== null);
-    const mealMap = new Map(meals.map((meal) => [meal._id, meal]));
-
-    // Find the plannedMeal matching the category
-    for (const pm of plannedMeals) {
-      const associatedMeal = mealMap.get(pm.mealId);
-      if (associatedMeal && associatedMeal.category === category) {
-        targetPlannedMealId = pm._id;
-        break; // Found the planned meal for this category
-      }
-    }
-
-    // 4. --- Update or Insert Planned Meal ---
-    if (targetPlannedMealId) {
-      // Update the existing planned meal
-      await ctx.db.patch(targetPlannedMealId, {
+    // 5. --- Update or Insert Planned Meal ---
+    if (existingPlannedMeal) {
+      // Update the existing planned meal's mealId
+      await ctx.db.patch(existingPlannedMeal._id, {
         mealId: newMealId,
         updatedAt: Date.now(),
       });
+      plannedMealIdToReturn = existingPlannedMeal._id;
       console.log(
-        `Updated planned meal ${targetPlannedMealId} for category ${category} in meal plan ${mealPlanId}`,
+        `Updated planned meal ${existingPlannedMeal._id} for category ${category} in meal plan ${mealPlanId}`,
       );
     } else {
       // Insert a new planned meal if none existed for this category
       const newPlannedMealId = await ctx.db.insert("plannedMeals", {
         mealPlanId: mealPlanId,
         mealId: newMealId,
+        category: category, // Store the category directly
         createdAt: Date.now(),
         updatedAt: Date.now(),
       });
+      plannedMealIdToReturn = newPlannedMealId;
       console.log(
         `Inserted new planned meal ${newPlannedMealId} for category ${category} in meal plan ${mealPlanId}`,
       );
-      targetPlannedMealId = newPlannedMealId; // Return the ID of the newly created one
     }
 
-    // 5. --- Return Result ---
-    return { success: true, plannedMealId: targetPlannedMealId };
+    // 6. --- Return Result ---
+    return { success: true, plannedMealId: plannedMealIdToReturn };
   },
 });

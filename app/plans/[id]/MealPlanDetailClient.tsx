@@ -35,7 +35,7 @@ export function MealPlanDetail({ preloadedMealPlan }: Props) {
       category,
       mealPlan.plannedMeals.find(
         (plannedMeal) =>
-          plannedMeal?.meal?.category.toLowerCase() === category.toLowerCase(),
+          plannedMeal?.category.toLowerCase() === category.toLowerCase(),
       ),
     ]),
   );

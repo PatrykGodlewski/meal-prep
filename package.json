@@ -5,13 +5,12 @@
 		"dev:backend": "convex dev",
 		"predev": "convex dev --until-success && convex dev --once --run-sh \"node setup.mjs --once\" && convex dashboard",
 		"build": "next build",
-		"start": "next start",
-		"seed": "ts-node -r tsconfig-paths/register ./supabase/seeders/import.ts",
-		"update-types": "npx supabase gen types typescript --project-id \"jfeukaxhtqvfnoqcrpql\" --schema public > supabase/database.types.ts"
+		"start": "next start"
 	},
 	"dependencies": {
 		"@auth/core": "0.37.0",
 		"@convex-dev/auth": "^0.0.81",
+		"@convex-dev/migrations": "^0.2.5",
 		"@convex-dev/react-query": "^0.0.0-alpha.8",
 		"@faker-js/faker": "^9.6.0",
 		"@hookform/resolvers": "^5.0.1",

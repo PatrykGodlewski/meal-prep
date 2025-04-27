@@ -99,7 +99,8 @@ export const generateShoppingList = mutation({
         mealPlanIds.map((id) =>
           ctx.db
             .query("plannedMeals")
-            .withIndex("by_meal_plan", (q) => q.eq("mealPlanId", id))
+            // TODO: use both category and meal pland id if possible and necessary
+            .withIndex("by_plan_and_category", (q) => q.eq("mealPlanId", id))
             .collect(),
         ),
       )

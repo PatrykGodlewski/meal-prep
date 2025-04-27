@@ -66,9 +66,28 @@ export const editMeal = authMutation({
       .withIndex("by_meal", (q) => q.eq("mealId", args.mealId))
       .collect();
 
-    const isDiffrentMealCategory = meal.category !== newMeal.category;
+    // Functionally compare category arrays for differences (length or content)
+    const checkCategoryDifference = (
+      oldCategories: string[],
+      newCategories: string[],
+    ): boolean => {
+      if (oldCategories.length !== newCategories.length) {
+        return true; // Different lengths mean they are different
+      }
+      // If lengths are the same, check if content differs
+      const newCategorySet = new Set(newCategories);
+      // Return true if any old category is NOT found in the new set
+      return oldCategories.some((category) => !newCategorySet.has(category));
+    };
 
-    if (isDiffrentMealCategory) {
+    const isDifferentMealCategory = checkCategoryDifference(
+      meal.categories,
+      newMeal.categories,
+    );
+
+    if (isDifferentMealCategory) {
+      // If categories changed, remove this meal from any existing meal plans
+      // as its category assignment might no longer be valid for those slots.
       const currentMealPlannedMeals = await ctx.db
         .query("plannedMeals")
         .withIndex("by_meal", (q) => q.eq("mealId", args.mealId))

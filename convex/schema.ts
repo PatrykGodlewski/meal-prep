@@ -1,11 +1,5 @@
 import { defineSchema, defineTable } from "convex/server";
-import {
-  zCustomQuery,
-  convexToZodFields,
-  convexToZod,
-  zodOutputToConvex,
-  zid,
-} from "convex-helpers/server/zod";
+import { zodOutputToConvex, zid } from "convex-helpers/server/zod";
 import { v } from "convex/values";
 import { authTables } from "@convex-dev/auth/server";
 import { z } from "zod";
@@ -93,6 +87,7 @@ export const mealSchema = z.object({
   calories: z.number().optional(),
   servings: z.number().optional(),
   category: z.enum(MEAL_CATEGORIES),
+  categories: z.array(z.enum(MEAL_CATEGORIES)),
   imageUrl: z.string().optional(),
   isPublic: z.boolean().default(false),
   createdBy: zid("users"),
@@ -100,7 +95,7 @@ export const mealSchema = z.object({
   updatedAt: z.number(),
 });
 
-const mealValidator = zodOutputToConvex(mealSchema);
+export const mealValidator = zodOutputToConvex(mealSchema);
 
 export const mealPlanValidator = v.object({
   userId: v.id("users"),
@@ -109,12 +104,15 @@ export const mealPlanValidator = v.object({
   updatedAt: v.number(),
 });
 
-export const plannedMealValidator = v.object({
-  mealPlanId: v.id("mealPlans"),
-  mealId: v.id("meals"),
-  createdAt: v.number(),
-  updatedAt: v.number(),
+export const plannedMealSchema = z.object({
+  mealPlanId: zid("mealPlans"),
+  mealId: zid("meals"),
+  category: z.enum(MEAL_CATEGORIES),
+  createdAt: z.number(),
+  updatedAt: z.number(),
 });
+
+const plannedMealValidator = zodOutputToConvex(plannedMealSchema);
 
 export const shoppingListValidator = v.object({
   userId: v.id("users"),
@@ -141,10 +139,10 @@ export default defineSchema({
 
   meals: defineTable(mealValidator)
     .index("by_author", ["createdBy"])
-    .index("by_category", ["category"])
+    .index("by_categories", ["categories"]) // Renamed index
     .searchIndex("search_name", {
       searchField: "name",
-      filterFields: ["category"],
+      filterFields: ["categories"], // Correct filter field
     }),
 
   mealIngredients: defineTable(mealIngredientsValidator)
@@ -159,7 +157,7 @@ export default defineSchema({
 
   // TODO: change to mealPlanJoin
   plannedMeals: defineTable(plannedMealValidator)
-    .index("by_meal_plan", ["mealPlanId"])
+    .index("by_plan_and_category", ["mealPlanId", "category"])
     .index("by_meal", ["mealId"]),
 
   shoppingLists: defineTable(shoppingListValidator).index("by_user_and_week", [

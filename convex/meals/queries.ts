@@ -19,7 +19,9 @@ export const getMeals = authQuery({
         .query("meals")
         .withSearchIndex("search_name", (q) => {
           if (isFiltering) {
-            return q.search("name", trimmedSearch).eq("category", filter);
+            // Use the correct filter field 'categories'
+            // .eq() on an array filter field checks for containment
+            return q.search("name", trimmedSearch).eq("categories", [filter]);
           }
           return q.search("name", trimmedSearch);
         });
@@ -34,7 +36,9 @@ export const getMeals = authQuery({
     if (isFiltering) {
       const query = ctx.db
         .query("meals")
-        .withIndex("by_category", (q) => q.eq("category", filter));
+        // Use the renamed index 'by_categories' and the correct field 'categories'
+        // .eq() on an array index checks for containment
+        .withIndex("by_categories", (q) => q.eq("categories", [filter]));
 
       const results = await query.paginate(
         paginationOpts ?? { numItems: 10, cursor: null },
@@ -62,7 +66,6 @@ export const getMeal = authQuery({
       return null; // Return null if meal not found
     }
 
-    // 2. Fetch associated mealIngredients
     const mealIngredients = await ctx.db
       .query("mealIngredients")
       .withIndex("by_meal", (q) => q.eq("mealId", mealId))
