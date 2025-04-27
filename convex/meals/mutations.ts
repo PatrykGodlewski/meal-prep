@@ -81,8 +81,8 @@ export const editMeal = authMutation({
     };
 
     const isDifferentMealCategory = checkCategoryDifference(
-      meal.categories,
-      newMeal.categories,
+      meal.categories ?? [],
+      newMeal.categories ?? [],
     );
 
     if (isDifferentMealCategory) {
@@ -97,7 +97,7 @@ export const editMeal = authMutation({
         currentMealPlannedMeals.map((plannedMeal) => {
           if (
             plannedMeal?.category &&
-            newMeal.categories.includes(plannedMeal.category)
+            newMeal.categories?.includes(plannedMeal.category)
           )
             return;
           return ctx.db.delete(plannedMeal._id);

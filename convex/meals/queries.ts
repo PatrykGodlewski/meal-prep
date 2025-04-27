@@ -24,7 +24,7 @@ export const getMeals = authQuery({
           return q.search("name", trimmedSearch);
         }),
         (meal) =>
-          categoryFilter ? meal.categories.includes(categoryFilter) : true,
+          categoryFilter ? !!meal.categories?.includes(categoryFilter) : true,
       );
 
       const results = await query.paginate(
@@ -35,8 +35,9 @@ export const getMeals = authQuery({
     }
 
     if (isFiltering) {
-      const query = filter(ctx.db.query("meals"), (meal) =>
-        meal.categories.includes(categoryFilter),
+      const query = filter(
+        ctx.db.query("meals"),
+        (meal) => !!meal.categories?.includes(categoryFilter),
       );
 
       const results = await query.paginate(
