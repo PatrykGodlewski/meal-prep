@@ -48,7 +48,7 @@ export default function SignIn() {
           <Button
             variant="link"
             className="text-foreground underline hover:no-underline cursor-pointer"
-            onClick={() => setFlow(flow === "signIn" ? "signIn" : "signIn")}
+            onClick={() => setFlow(flow === "signIn" ? "signUp" : "signIn")}
           >
             {flow === "signIn" ? "Sign up instead" : "Sign in instead"}
           </Button>
