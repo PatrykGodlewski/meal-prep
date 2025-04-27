@@ -100,7 +100,7 @@ export function PlanCard({ plan }: PlanCardProps) {
                           className={"rounded-lg"}
                           alt={"Meal image"}
                         />
-                        <span className="absolute p-2 rounded-full shadow-sm bg-neutral-900/25 right-0 top-0 font-semibold capitalize">
+                        <span className="absolute px-2 py-1 right-2 top-2 rounded-full shadow-sm bg-neutral-200 dark:bg-neutral-900/25 right-0 top-0 font-semibold capitalize">
                           {plannedMeal.meal?.category}
                         </span>
                         <p className="w-full px-2">

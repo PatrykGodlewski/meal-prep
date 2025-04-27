@@ -121,11 +121,7 @@ function MealCard({ plannedMeal, category, plan }: MealCardProps) {
         )}
         <p className="text-sm text-neutral-400 uppercase">{category}</p>
       </div>
-      <Button
-        className="text-white"
-        onClick={() => setIsModalOpen(true)}
-        variant="outline"
-      >
+      <Button onClick={() => setIsModalOpen(true)} variant="outline">
         Change Meal
       </Button>
     </div>
