@@ -86,7 +86,6 @@ export const mealSchema = z.object({
   cookTimeMinutes: z.number().optional(),
   calories: z.number().optional(),
   servings: z.number().optional(),
-  category: z.enum(MEAL_CATEGORIES),
   categories: z.array(z.enum(MEAL_CATEGORIES)),
   imageUrl: z.string().optional(),
   isPublic: z.boolean().default(false),
