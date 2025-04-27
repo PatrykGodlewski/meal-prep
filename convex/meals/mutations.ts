@@ -54,10 +54,10 @@ export const editMeal = authMutation({
     if (meal.createdBy !== ctx.user.id) throw new Error("Not your meal");
 
     const now = Date.now();
-    const { ingredients, mealId, ...mealData } = args;
+    const { ingredients, mealId, ...newMeal } = args;
 
     await ctx.db.patch(args.mealId, {
-      ...mealData,
+      ...newMeal,
       updatedAt: now,
     });
 
@@ -65,6 +65,21 @@ export const editMeal = authMutation({
       .query("mealIngredients")
       .withIndex("by_meal", (q) => q.eq("mealId", args.mealId))
       .collect();
+
+    const isDiffrentMealCategory = meal.category !== newMeal.category;
+
+    if (isDiffrentMealCategory) {
+      const currentMealPlannedMeals = await ctx.db
+        .query("plannedMeals")
+        .withIndex("by_meal", (q) => q.eq("mealId", args.mealId))
+        .collect();
+
+      await Promise.all(
+        currentMealPlannedMeals.map((plannedMeal) =>
+          ctx.db.delete(plannedMeal._id),
+        ),
+      );
+    }
 
     await Promise.all(oldMealIngredients.map((mi) => ctx.db.delete(mi._id)));
 
