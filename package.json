@@ -4,7 +4,7 @@
 		"dev:frontend": "next dev",
 		"dev:backend": "convex dev",
 		"predev": "convex dev --until-success && convex dev --once --run-sh \"node setup.mjs --once\" && convex dashboard",
-		"deploy": "bunx convex deploy --cmd 'bun run build' && bunx convex run migrations:run --prod",
+		"deploy": "bunx convex deploy --cmd \"bun run build\" && bunx convex run migrations:run --prod",
 		"build": "next build",
 		"start": "next start"
 	},
