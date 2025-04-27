@@ -87,7 +87,8 @@ export const mealSchema = z.object({
   calories: z.number().optional(),
   servings: z.number().optional(),
   category: z.enum(MEAL_CATEGORIES).optional(),
-  categories: z.array(z.enum(MEAL_CATEGORIES)),
+  // TODO: should be required
+  categories: z.array(z.enum(MEAL_CATEGORIES)).optional(),
   imageUrl: z.string().optional(),
   isPublic: z.boolean().default(false),
   createdBy: zid("users"),
