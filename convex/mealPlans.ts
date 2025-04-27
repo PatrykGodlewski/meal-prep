@@ -210,7 +210,7 @@ export const generateMealPlan = mutation({
 
     for (const meal of allMeals) {
       // A meal can belong to multiple categories
-      for (const category of meal.categories) {
+      for (const category of meal?.categories ?? []) {
         // Only group if it's one of the categories we might generate for
         if (category in mealsByCategory) {
           mealsByCategory[category].push(meal);

@@ -86,6 +86,7 @@ export const mealSchema = z.object({
   cookTimeMinutes: z.number().optional(),
   calories: z.number().optional(),
   servings: z.number().optional(),
+  category: z.enum(MEAL_CATEGORIES).optional(),
   categories: z.array(z.enum(MEAL_CATEGORIES)),
   imageUrl: z.string().optional(),
   isPublic: z.boolean().default(false),
@@ -106,7 +107,7 @@ export const mealPlanValidator = v.object({
 export const plannedMealSchema = z.object({
   mealPlanId: zid("mealPlans"),
   mealId: zid("meals"),
-  category: z.enum(MEAL_CATEGORIES),
+  category: z.enum(MEAL_CATEGORIES).optional(),
   createdAt: z.number(),
   updatedAt: z.number(),
 });

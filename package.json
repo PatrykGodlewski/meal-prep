@@ -4,6 +4,7 @@
 		"dev:frontend": "next dev",
 		"dev:backend": "convex dev",
 		"predev": "convex dev --until-success && convex dev --once --run-sh \"node setup.mjs --once\" && convex dashboard",
+		"deploy": "bunx convex deploy --cmd 'bun run build' && bunx convex run migrations:run --prod",
 		"build": "next build",
 		"start": "next start"
 	},
@@ -68,5 +69,3 @@
 		"tailwindcss": "3.4.17",
 		"tailwindcss-animate": "^1.0.7",
 		"typescript": "5.7.2"
-	}
-}
