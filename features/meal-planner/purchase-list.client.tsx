@@ -6,7 +6,6 @@ import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import { useMealPlanner } from "./store";
 import { useMutation } from "@tanstack/react-query";
-import { use$, useObservable } from "@legendapp/state/react";
 import { For } from "@/components/for-each";
 import { startCase } from "lodash";
 import { useConvexMutation } from "@convex-dev/react-query";
@@ -14,10 +13,13 @@ import { api } from "@/convex/_generated/api";
 import { toast } from "@/hooks/use-toast";
 import type { Id } from "@/convex/_generated/dataModel";
 import { ShoppingCart } from "lucide-react";
+import { DatePickerWithPresets } from "./date-picker";
+import { use$ } from "@legendapp/state/react";
 
 export function ShoppingListDisplay() {
   const { shoppingListData: list } = useMealPlanner();
   const items = list?.items ?? [];
+  console.log({ list });
 
   const groupedItems = Object.groupBy(
     items,
@@ -27,11 +29,15 @@ export function ShoppingListDisplay() {
   const shoppingItems = Object.entries(groupedItems).sort();
 
   return (
-    <div className="p-4 border rounded-lg shadow-sm bg-white dark:bg-neutral-800">
-      <h1 className="text-3xl font-bold flex items-center gap-4 border-b pb-4">
-        <ShoppingCart />
-        Shopping List
-      </h1>
+    <div className="p-4 border rounded-lg shadow-sm bg-white dark:bg-neutral-800 min-h-[500px]">
+      <div className={"flex justify-between"}>
+        <h1 className="text-3xl font-bold flex items-center gap-4 border-b pb-4">
+          <ShoppingCart />
+          Shopping List
+        </h1>
+
+        <DatePickerWithPresets />
+      </div>
       <ul className="space-y-2">
         <For each={shoppingItems} empty={"empty shopping list"}>
           {([category, categoryItems]) => (
@@ -55,7 +61,7 @@ export function ShoppingListDisplay() {
                     unit={item.ingredient?.unit}
                     name={item.ingredient?.name}
                     isChecked={item.isChecked}
-                    id={item._id}
+                    ids={item.itemIds}
                   />
                 )}
               </For>
@@ -72,14 +78,17 @@ type Props = {
   unit?: string;
   name?: string;
   isChecked: boolean;
-  id: Id<"shoppingListItems">;
+  ids: Id<"shoppingListItems">[];
 };
 
-function ShoppingListItem({ amount, unit, name, isChecked, id }: Props) {
-  const { currentWeek } = useMealPlanner();
+function ShoppingListItem({ amount, unit, name, isChecked, ids }: Props) {
+  const { mealPlannerState$ } = useMealPlanner();
 
   const uniqueId = useId();
   const labelId = `${uniqueId}-label`;
+
+  const startDate = use$(mealPlannerState$.shoppingListDate)?.from?.getTime();
+  const endDate = use$(mealPlannerState$.shoppingListDate)?.to?.getTime();
 
   const { mutate } = useMutation({
     mutationFn: useConvexMutation(
@@ -87,17 +96,22 @@ function ShoppingListItem({ amount, unit, name, isChecked, id }: Props) {
     ).withOptimisticUpdate((localStore, args) => {
       const { checked } = args;
 
-      const weekStart = currentWeek.getTime();
-
       const currentValue = localStore.getQuery(
-        api.shoppingList.getWeeklyShoppingList,
-        { weekStart },
+        api.shoppingList.getShoppingList,
+        {
+          startDate,
+          endDate,
+        },
       );
 
       if (currentValue) {
-        const updatedItems = currentValue.items.map((item) =>
-          item._id === id ? { ...item, isChecked: checked } : item,
-        );
+        const updatedItems = currentValue.items.map((item) => {
+          const sortedArr1 = [...ids].sort();
+          const sortedArr2 = [...item.itemIds].sort();
+          return sortedArr1.every((value, index) => value === sortedArr2[index])
+            ? { ...item, isChecked: checked }
+            : item;
+        });
 
         const updatedValue = {
           ...currentValue,
@@ -105,8 +119,11 @@ function ShoppingListItem({ amount, unit, name, isChecked, id }: Props) {
         };
 
         localStore.setQuery(
-          api.shoppingList.getWeeklyShoppingList,
-          { weekStart },
+          api.shoppingList.getShoppingList,
+          {
+            startDate,
+            endDate,
+          },
           updatedValue,
         );
       }
@@ -124,7 +141,7 @@ function ShoppingListItem({ amount, unit, name, isChecked, id }: Props) {
   });
 
   const handleCheckChange = () => {
-    mutate({ checked: !isChecked, shoppingListItemId: id });
+    mutate({ checked: !isChecked, shoppingListItemIds: ids });
   };
 
   return (

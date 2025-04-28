@@ -1,25 +1,30 @@
 "use client";
-import { observable, whenReady } from "@legendapp/state"; // Import syncEffect
+import { observable } from "@legendapp/state";
 import { use$, useWhenReady } from "@legendapp/state/react";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { addDays, subDays, isToday } from "date-fns"; // Import isToday
+import { addDays, subDays, isToday } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
-import { getMonday } from "./utils";
+import { getMonday, getSaturday } from "./utils";
 import { convexQuery, useConvexMutation } from "@convex-dev/react-query";
 import { api } from "@/convex/_generated/api";
+import type { DateRange } from "react-day-picker";
 
-export const MEAL_PLAN_QUERY_KEY_BASE = "meal-planner-QK";
-export const SHOPPING_LIST_QUERY_KEY_BASE = "shopping-list-QK";
+type Store = {
+  currentWeek: Date;
+  shoppingListDate: DateRange | undefined;
+  selectedPlanId: string | undefined;
+};
 
-// --- Observable State ---
-// Using a global observable for the current week's start date and selected plan ID
-const mealPlannerState$ = observable({
-  currentWeek: getMonday(new Date()),
-  selectedPlanId: undefined as string | undefined, // Add selectedPlanId state
+const today = new Date();
+const mealPlannerState$ = observable<Store>({
+  currentWeek: getMonday(today),
+  shoppingListDate: {
+    from: getMonday(today),
+    to: getSaturday(today),
+  },
+  selectedPlanId: undefined,
 });
 
-// --- Actions ---
-// Functions to modify the observable state
 const setCurrentWeek = (date: Date) => {
   mealPlannerState$.currentWeek.set(getMonday(date));
 };
@@ -36,14 +41,10 @@ const handleNavigateNext = () => {
   mealPlannerState$.currentWeek.set(nextWeekStart);
 };
 
-// --- Custom Hook ---
-// Combines state access, actions, and API mutation logic
 export const useMealPlanner = () => {
-  // const currentWeek = useObservable(mealPlannerState$.currentWeek);
   const currentWeek = use$(mealPlannerState$.currentWeek);
-  const selectedPlanId = use$(mealPlannerState$.selectedPlanId); // Get reactive selectedPlanId
+  const selectedPlanId = use$(mealPlannerState$.selectedPlanId);
 
-  // TanStack Query setup
   const { toast } = useToast();
 
   const {
@@ -61,8 +62,9 @@ export const useMealPlanner = () => {
     isLoading: isShoppingListLoading,
     error: shoppingListError,
   } = useQuery(
-    convexQuery(api.shoppingList.getWeeklyShoppingList, {
-      weekStart: currentWeek.getTime(),
+    convexQuery(api.shoppingList.getShoppingList, {
+      startDate: use$(mealPlannerState$.shoppingListDate)?.from?.getTime(),
+      endDate: use$(mealPlannerState$.shoppingListDate)?.to?.getTime(),
     }),
   );
 

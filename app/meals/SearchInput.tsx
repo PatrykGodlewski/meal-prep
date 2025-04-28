@@ -11,10 +11,11 @@ import { MEAL_CATEGORIES } from "@/convex/schema";
 import {
   FILTER_PARAM_KEY,
   SEARCH_PARAM_KEY,
-  usePaginatedMeals,
 } from "@/hooks/use-paginated-meals";
+import type { MealCategory } from "@/validators";
 import { useDebounceFn } from "ahooks";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useEffect } from "react";
 
 export function SearchInput() {
   const searchParams = useSearchParams();
@@ -43,6 +44,14 @@ export function SearchInput() {
     }
     router.replace(`${pathname}?${params.toString()}`);
   };
+
+  useEffect(() => {
+    const params = new URLSearchParams(searchParams);
+    const filter = params.get(FILTER_PARAM_KEY) as MealCategory | null;
+    if (filter && !MEAL_CATEGORIES.includes(filter)) {
+      router.replace(pathname);
+    }
+  });
 
   const currentCategory =
     searchParams.get(FILTER_PARAM_KEY)?.toString() ?? "all";

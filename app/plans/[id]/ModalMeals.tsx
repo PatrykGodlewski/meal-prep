@@ -58,6 +58,10 @@ export function ModalMeals({
   };
 
   useEffect(() => {
+    if (!allMeals.length) loadMore(20);
+  }, [allMeals]);
+
+  useEffect(() => {
     if (!isOpen) {
       setInputValue("");
       setSearchTerm("");

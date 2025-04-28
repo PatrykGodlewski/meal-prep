@@ -8,7 +8,6 @@ import { api } from "./_generated/api";
  */
 export const generatePlanAndShoppingList = mutation({
   args: {
-    // Expecting a timestamp (milliseconds since epoch) for the start of the week (Monday)
     weekStart: v.number(),
   },
   handler: async (ctx, { weekStart }) => {
@@ -22,14 +21,13 @@ export const generatePlanAndShoppingList = mutation({
         },
       );
 
-      // Step 2: Generate the shopping list for the same week
-      // This assumes a new mutation `generateWeeklyShoppingList` exists in shoppingList.ts
-      // that takes weekStart, finds all meals for that week, aggregates ingredients,
-      // deletes the old list, and creates the new one.
-      await ctx.runMutation(api.shoppingList.generateShoppingList, {
-        mealPlanIds,
-        weekStart,
-      });
+      await Promise.all(
+        mealPlanIds.map((id) =>
+          ctx.runMutation(api.shoppingList.generateShoppingList, {
+            mealPlanId: id, // Pass the single meal plan ID
+          }),
+        ),
+      );
 
       // Indicate overall success
       return { success: true };

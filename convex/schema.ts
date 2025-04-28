@@ -117,7 +117,8 @@ const plannedMealValidator = zodOutputToConvex(plannedMealSchema);
 
 export const shoppingListValidator = v.object({
   userId: v.id("users"),
-  weekStart: v.number(),
+  mealPlanId: v.id("mealPlans"), // Made non-optional
+  date: v.number(), // Added date field (timestamp for the day)
   createdAt: v.number(),
   updatedAt: v.number(),
 });
@@ -161,10 +162,9 @@ export default defineSchema({
     .index("by_plan_and_category", ["mealPlanId", "category"])
     .index("by_meal", ["mealId"]),
 
-  shoppingLists: defineTable(shoppingListValidator).index("by_user_and_week", [
-    "userId",
-    "weekStart",
-  ]),
+  shoppingLists: defineTable(shoppingListValidator)
+    .index("by_user_and_date", ["userId", "date"]) // New index for date range queries
+    .index("by_meal_plan", ["mealPlanId"]), // Optional: Index by meal plan ID
 
   shoppingListItems: defineTable(shoppingListItemValidator)
     .index("by_shopping_list", ["shoppingListId"])

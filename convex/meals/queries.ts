@@ -17,43 +17,35 @@ export const getMeals = authQuery({
     const trimmedSearch = search.trim();
     const isSearching = !!trimmedSearch;
     const isFiltering = !!categoryFilter;
+    const pagination = paginationOpts ?? { numItems: 10, cursor: null };
+
+    if (isSearching && isFiltering) {
+      return await filter(ctx.db.query("meals"), (meal) =>
+        categoryFilter ? !!meal.categories?.includes(categoryFilter) : true,
+      )
+        .withSearchIndex("search_name", (q) => {
+          return q.search("name", trimmedSearch);
+        })
+        .paginate(pagination);
+    }
 
     if (isSearching) {
-      const query = filter(
-        ctx.db.query("meals").withSearchIndex("search_name", (q) => {
+      return await ctx.db
+        .query("meals")
+        .withSearchIndex("search_name", (q) => {
           return q.search("name", trimmedSearch);
-        }),
-        (meal) =>
-          categoryFilter ? !!meal.categories?.includes(categoryFilter) : true,
-      );
-
-      const results = await query.paginate(
-        paginationOpts ?? { numItems: 10, cursor: null },
-      );
-
-      return results;
+        })
+        .paginate(pagination);
     }
 
     if (isFiltering) {
-      const query = filter(
+      return await filter(
         ctx.db.query("meals"),
         (meal) => !!meal.categories?.includes(categoryFilter),
-      );
-
-      const results = await query.paginate(
-        paginationOpts ?? { numItems: 10, cursor: null },
-      );
-
-      return results;
+      ).paginate(pagination);
     }
 
-    const query = ctx.db.query("meals");
-
-    const results = await query.paginate(
-      paginationOpts ?? { numItems: 10, cursor: null },
-    );
-
-    return results;
+    return await ctx.db.query("meals").paginate(pagination);
   },
 });
 
