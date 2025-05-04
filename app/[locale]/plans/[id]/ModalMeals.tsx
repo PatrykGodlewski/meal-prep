@@ -102,7 +102,7 @@ export function ModalMeals({
             Clear
           </Button>
         </div>
-        <div className="flex-grow overflow-y-auto space-y-2">
+        <div className="grow overflow-y-auto space-y-2">
           {isFetching && status !== "LoadingMore" && (
             <div className="flex justify-center items-center h-32">
               <Loader2 className="h-8 w-8 animate-spin text-primary" />

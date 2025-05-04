@@ -28,7 +28,7 @@ export function PlanList({ preloadedPlans }: Props) {
           {plans.map((plan) => (
             <div
               key={plan._id}
-              className="bg-white flex justify-between dark:bg-neutral-900 gap-8 rounded-lg shadow p-4 hover:shadow-md dark:shadow-neutral-700 transition-shadow"
+              className="bg-white flex justify-between dark:bg-neutral-900 gap-8 rounded-lg shadow-sm p-4 hover:shadow-md dark:shadow-neutral-700 transition-shadow"
             >
               <div className="space-y-2">
                 <h2 className="text-2xl font-semibold">

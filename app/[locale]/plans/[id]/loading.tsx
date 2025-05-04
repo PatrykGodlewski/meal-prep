@@ -19,7 +19,7 @@ export default function LoadingPlanDetail() {
           <div
             key={index}
             // Mimic MealCard styling
-            className="border p-4 rounded-md shadow flex justify-between items-center"
+            className="border p-4 rounded-md shadow-sm flex justify-between items-center"
           >
             {/* Left side: Meal Name and Category */}
             <div className="space-y-2">

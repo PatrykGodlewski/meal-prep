@@ -59,7 +59,7 @@ export default function LoadingMealDetail() {
               <ul className="space-y-3">
                 {[...Array(5)].map((_, i) => (
                   <li key={i} className="flex items-start gap-2">
-                    <Skeleton className="inline-block w-1.5 h-1.5 rounded-full mt-[7px] flex-shrink-0" />
+                    <Skeleton className="inline-block w-1.5 h-1.5 rounded-full mt-[7px] shrink-0" />
                     <div className="w-full">
                       <Skeleton className="h-4 w-full" />
                       <Skeleton className="h-3 w-3/4 mt-1" />{" "}

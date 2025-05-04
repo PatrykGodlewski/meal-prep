@@ -32,7 +32,7 @@ export default function PlannerLoading() {
           {Array.from({ length: skeletonDayCount }).map((_, index) => (
             <div
               key={`skel-day-${index}`}
-              className="border rounded-lg shadow-sm flex flex-col bg-white dark:bg-neutral-900 min-h-[150px]"
+              className="border rounded-lg shadow-xs flex flex-col bg-white dark:bg-neutral-900 min-h-[150px]"
             >
               {/* Day Card Header Skeleton */}
               <div className="p-3 border-b dark:border-neutral-800">
@@ -42,7 +42,7 @@ export default function PlannerLoading() {
                 </div>
               </div>
               {/* Day Card Content Skeleton */}
-              <div className="p-3 space-y-3 flex-grow">
+              <div className="p-3 space-y-3 grow">
                 {/* Simulate 2-3 meal entries */}
                 <div className="space-y-1">
                   <Skeleton className="h-3 w-1/4" /> {/* Category */}

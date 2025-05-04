@@ -60,7 +60,7 @@ export const MealPlanDisplay = () => {
                 className={cn(
                   "self-center h-auto transition-shadow rounded-xl w-full cursor-pointer bg-neutral-200 dark:bg-neutral-900 flex flex-col items-center justify-center p-4 sm:p-8 aspect-square",
                   {
-                    "ring ring-white disabled:opacity-100": isSelected,
+                    "ring-3 ring-white disabled:opacity-100": isSelected,
                     "py-5 border-2 bg-neutral-900 dark:bg-neutral-200 text-neutral-200 dark:text-neutral-900 ":
                       isToday(day.date),
                   },

@@ -395,7 +395,7 @@ export function MealEditForm({
                   control={control}
                   name="isPublic"
                   render={({ field }) => (
-                    <FormItem className="flex flex-row items-center space-x-3 space-y-0 rounded-md border p-3 shadow-sm h-10">
+                    <FormItem className="flex flex-row items-center space-x-3 space-y-0 rounded-md border p-3 shadow-xs h-10">
                       <FormControl>
                         <Checkbox
                           checked={field.value}

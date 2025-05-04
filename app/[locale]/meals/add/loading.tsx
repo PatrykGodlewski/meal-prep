@@ -63,7 +63,7 @@ export default function LoadingAddMeal() {
         </div>
 
         {/* Is Public Skeleton */}
-        <div className="flex flex-row items-center space-x-3 space-y-0 rounded-md border p-4 shadow-sm">
+        <div className="flex flex-row items-center space-x-3 space-y-0 rounded-md border p-4 shadow-xs">
           <Skeleton className="h-5 w-5 rounded-sm" /> {/* Checkbox */}
           <div className="space-y-2 flex-1">
             <Skeleton className="h-4 w-32 rounded-md" /> {/* Label */}

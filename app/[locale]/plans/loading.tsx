@@ -20,7 +20,7 @@ export default function LoadingPlans() {
           <div
             key={index}
             // Apply similar styling as the actual card for consistent spacing/layout
-            className="bg-white dark:bg-neutral-800 rounded-lg shadow p-4"
+            className="bg-white dark:bg-neutral-800 rounded-lg shadow-sm p-4"
           >
             {/* Card Content Skeleton */}
             <Skeleton className="h-6 w-3/4 mb-3 rounded-md" /> {/* Mimics h2 */}

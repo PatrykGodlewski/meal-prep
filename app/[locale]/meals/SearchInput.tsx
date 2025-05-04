@@ -67,7 +67,7 @@ export function SearchInput() {
         placeholder={t("searchMealsByName")}
         onChange={(e) => handleSearch.run(e.target.value)}
         defaultValue={searchParams.get(SEARCH_PARAM_KEY)?.toString()}
-        className="flex-grow px-4 py-2 border border-neutral-300 dark:border-neutral-600 rounded-md bg-white dark:bg-neutral-800 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
+        className="grow px-4 py-2 border border-neutral-300 dark:border-neutral-600 rounded-md bg-white dark:bg-neutral-800 focus:outline-hidden focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
       />
       <Select onValueChange={handleCategoryChange} value={currentCategory}>
         <SelectTrigger className="w-full sm:w-[180px] border-neutral-300 dark:border-neutral-600 bg-white dark:bg-neutral-800">

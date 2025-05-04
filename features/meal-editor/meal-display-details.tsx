@@ -29,7 +29,7 @@ function MealLabel({ icon: Icon, text }: MealLabelProps) {
 
   return (
     <div className="flex items-center mr-4 mb-2 whitespace-nowrap text-sm">
-      <Icon className="h-4 w-4 mr-1.5 flex-shrink-0" />
+      <Icon className="h-4 w-4 mr-1.5 shrink-0" />
       <span className="first-letter:uppercase">{text}</span>
     </div>
   );
@@ -149,7 +149,7 @@ export const MealDisplayDetails: React.FC<MealDisplayDetailsProps> = React.memo(
                         className="flex items-start gap-2"
                       >
                         {" "}
-                        <span className="inline-block w-1.5 h-1.5 rounded-full bg-blue-500 mt-[7px] flex-shrink-0" />
+                        <span className="inline-block w-1.5 h-1.5 rounded-full bg-blue-500 mt-[7px] shrink-0" />
                         <div>
                           <span className="font-medium">
                             {mealIngredient.quantity}{" "}

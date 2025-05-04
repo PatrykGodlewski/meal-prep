@@ -37,13 +37,13 @@ export function PlanCard({ plan }: PlanCardProps) {
 
   if (!plan) {
     return (
-      <Card className="shadow-sm flex flex-col min-h-[150px] border-neutral-800 bg-neutral-50 dark:bg-neutral-950  border-2 border-dashed">
+      <Card className="shadow-xs flex flex-col min-h-[150px] border-neutral-800 bg-neutral-50 dark:bg-neutral-950  border-2 border-dashed">
         <CardHeader className="p-3">
           <CardTitle className="text-sm font-medium text-neutral-400 dark:text-neutral-600">
             {t("notCreated")}
           </CardTitle>
         </CardHeader>
-        <CardContent className="p-3 flex-grow flex items-center justify-center">
+        <CardContent className="p-3 grow flex items-center justify-center">
           <span className="text-xs text-neutral-400 dark:text-neutral-600 italic">
             {t("empty")}
           </span>
@@ -54,7 +54,7 @@ export function PlanCard({ plan }: PlanCardProps) {
 
   if (!isValid(toDate(plan.date))) {
     return (
-      <Card className="shadow-sm flex flex-col min-h-[150px] border-red-500">
+      <Card className="shadow-xs flex flex-col min-h-[150px] border-red-500">
         <CardHeader className="p-3">
           <CardTitle className="text-sm text-red-600">
             {t("dateError")}
@@ -70,7 +70,7 @@ export function PlanCard({ plan }: PlanCardProps) {
   return (
     <Card
       className={cn(
-        "shadow-sm flex flex-col min-h-[150px] hover:bg-neutral-100 dark:hover:bg-neutral-900 transition-colors duration-700",
+        "shadow-xs flex flex-col min-h-[150px] hover:bg-neutral-100 dark:hover:bg-neutral-900 transition-colors duration-700",
       )}
     >
       <CardHeader className="p-3">
@@ -89,7 +89,7 @@ export function PlanCard({ plan }: PlanCardProps) {
             )}
           </Button>
 
-          <span className="flex-grow first-letter:uppercase">
+          <span className="grow first-letter:uppercase">
             {format(plan.date, "EEEE", { locale: dateLocale })}
           </span>
 
@@ -100,7 +100,7 @@ export function PlanCard({ plan }: PlanCardProps) {
           </span>
         </CardTitle>
       </CardHeader>
-      <CardContent className="p-3 justify-between flex flex-col space-y-2 flex-grow">
+      <CardContent className="p-3 justify-between flex flex-col space-y-2 grow">
         <div className="flex justify-between items-end gap-4">
           <ul className="text-xs group flex flex-wrap justify-between gap-4 flex-1">
             <For
@@ -133,7 +133,7 @@ export function PlanCard({ plan }: PlanCardProps) {
                           className={"rounded-lg"}
                           alt={"Meal image"}
                         />
-                        <span className="absolute px-2 py-1 right-2 top-2 rounded-full shadow-sm bg-neutral-200 dark:bg-neutral-900/25 font-semibold capitalize">
+                        <span className="absolute px-2 py-1 right-2 top-2 rounded-full shadow-xs bg-neutral-200 dark:bg-neutral-900/25 font-semibold capitalize">
                           {tMeal(camelCase(plannedMeal.category))}
                         </span>
                         <p className="w-full px-2">

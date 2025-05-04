@@ -144,7 +144,7 @@ export const IngredientInputRow: React.FC<IngredientInputRowProps> = React.memo(
                       </Button>
                     </FormControl>
                   </PopoverTrigger>
-                  <PopoverContent className="w-[--radix-popover-trigger-width] max-h-[--radix-popover-content-available-height] p-0">
+                  <PopoverContent className="w-(--radix-popover-trigger-width) max-h-(--radix-popover-content-available-height) p-0">
                     <Command shouldFilter={true}>
                       {/* Input tracks the name field */}
                       <CommandInput

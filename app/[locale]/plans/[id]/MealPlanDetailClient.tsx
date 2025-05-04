@@ -96,7 +96,7 @@ function MealCard({ plannedMeal, category, plan }: MealCardProps) {
   return (
     <div
       className={cn(
-        "border p-4 rounded-md shadow flex justify-between items-center",
+        "border p-4 rounded-md shadow-sm flex justify-between items-center",
         {
           "": isMeal,
           "border-dashed border-2 text-neutral-500": !isMeal,

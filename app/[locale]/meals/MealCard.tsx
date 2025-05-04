@@ -30,7 +30,7 @@ export function MealCard({ meal }: Props) {
   return (
     <Link href={`/meals/${meal._id}`}>
       <div className="bg-neutral-200 dark:bg-neutral-700 rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow h-full flex flex-col">
-        <div className="relative h-48 w-full bg-neutral-300 dark:bg-neutral-600 flex-shrink-0">
+        <div className="relative h-48 w-full bg-neutral-300 dark:bg-neutral-600 shrink-0">
           {meal.imageUrl ? (
             <Image
               src={meal.imageUrl}
@@ -45,36 +45,36 @@ export function MealCard({ meal }: Props) {
             </div>
           )}
           {meal.category && (
-            <span className="absolute uppercase top-2 right-2 bg-blue-600 text-white text-xs px-2 py-1 rounded-full shadow">
+            <span className="absolute uppercase top-2 right-2 bg-blue-600 text-white text-xs px-2 py-1 rounded-full shadow-sm">
               {tMeal(meal.category)}
             </span>
           )}
         </div>
 
-        <div className="p-4 text-neutral-700 dark:text-neutral-300 flex flex-col flex-grow">
+        <div className="p-4 text-neutral-700 dark:text-neutral-300 flex flex-col grow">
           <h2 className="text-xl font-semibold mb-2 line-clamp-1">
             {meal.name}
           </h2>
-          <p className="text-sm mb-4 line-clamp-2 flex-grow">
+          <p className="text-sm mb-4 line-clamp-2 grow">
             {meal.description || "No description available."}
           </p>
 
           <div className="flex items-center text-sm mb-3 gap-4 text-neutral-600 dark:text-neutral-400">
             <span className="flex items-center" title="Total time">
-              <Clock className="h-4 w-4 mr-1 flex-shrink-0" />
+              <Clock className="h-4 w-4 mr-1 shrink-0" />
               {totalTime > 0 ? `${totalTime} min` : "N/A"}
             </span>
 
             {meal.servings && (
               <span className="flex items-center" title="Servings">
-                <Users className="h-4 w-4 mr-1 flex-shrink-0" />
+                <Users className="h-4 w-4 mr-1 shrink-0" />
                 {t("servings", { count: meal.servings })}
               </span>
             )}
 
             {meal.calories && (
               <span className="flex items-center" title="Calories">
-                <Flame className="h-4 w-4 mr-1 flex-shrink-0" />
+                <Flame className="h-4 w-4 mr-1 shrink-0" />
                 {t("calories", { count: meal.calories })}
               </span>
             )}
@@ -85,11 +85,11 @@ export function MealCard({ meal }: Props) {
               className="flex items-center text-sm text-neutral-600 dark:text-neutral-400"
               title="Author"
             >
-              <ChefHat className="h-4 w-4 mr-1 flex-shrink-0" />
+              <ChefHat className="h-4 w-4 mr-1 shrink-0" />
               <span className="truncate">By {displayAuthor}</span>
             </div>
 
-            <span className="first-letter:uppercase text-xs text-neutral-500 dark:text-neutral-400 flex-shrink-0">
+            <span className="first-letter:uppercase text-xs text-neutral-500 dark:text-neutral-400 shrink-0">
               {format(meal.createdAt, DATE_FORMAT_DISPLAY_CARD, {
                 locale: dateLocale,
               })}
