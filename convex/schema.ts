@@ -101,7 +101,7 @@ export const mealValidator = zodOutputToConvex(mealSchema);
 export const mealPlanSchema = z.object({
   userId: zid("users"),
   date: z.number(),
-  locked: z.boolean().default(false),
+  locked: z.boolean().optional().default(false),
   createdAt: z.number(),
   updatedAt: z.number(),
 });
