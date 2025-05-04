@@ -23,7 +23,19 @@
 		"removeRecipe": "Remove recipe",
 		"removeIngredient": "Remove ingredient",
 		"removeMeal": "Remove meal",
-		"saveChanges": "Save changes"
+		"saveChanges": "Save changes",
+		"toast": {
+			"successTitle": "Success",
+			"errorTitle": "Error"
+		},
+		"generatePlanSuccessDescription": "Meal plan generated and shopping list updated!",
+		"generatePlanErrorUnknown": "An unknown error occurred while generating the meal plan.",
+		"lockPlanSuccessDescription": "Meal plan locked successfully!",
+		"lockPlanErrorFallback": "Failed to lock meal plan.",
+		"unlockPlanSuccessDescription": "Meal plan unlocked successfully!",
+		"unlockPlanErrorFallback": "Failed to unlock meal plan.",
+		"lockPlan": "Lock plan",
+		"unlockPlan": "Unlock plan"
 	},
 	"appSidebar": {
 		"features": "Features",

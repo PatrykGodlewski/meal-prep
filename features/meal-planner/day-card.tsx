@@ -8,12 +8,12 @@ import { For } from "@/components/for-each";
 import { Button } from "@/components/ui/button";
 import type { api } from "@/convex/_generated/api";
 import type { FunctionReturnType } from "convex/server";
-import { Flame } from "lucide-react";
+import { Flame, Lock, Unlock } from "lucide-react"; // Import Unlock icon
 import Image from "next/image";
 import { useTranslations } from "use-intl";
 import { useDateLocale } from "@/hooks/use-date-locale";
 import { camelCase } from "lodash";
-import { MEAL_CATEGORIES } from "@/convex/schema";
+import { useMealPlanner } from "./store";
 
 const DATE_FORMAT_DISPLAY_CARD = "MMM dd";
 
@@ -22,6 +22,7 @@ interface PlanCardProps {
 }
 
 export function PlanCard({ plan }: PlanCardProps) {
+  const { lockMealPlan, isLocking } = useMealPlanner();
   const t = useTranslations("mealPlanner");
   const tMeal = useTranslations("meal");
   const dateLocale = useDateLocale();
@@ -36,7 +37,7 @@ export function PlanCard({ plan }: PlanCardProps) {
 
   if (!plan) {
     return (
-      <Card className="shadow-sm flex flex-col min-h-[150px] border-neutral-800 bg-neutral-50 dark:bg-neutral-800/50 border-2 border-dashed">
+      <Card className="shadow-sm flex flex-col min-h-[150px] border-neutral-800 bg-neutral-50 dark:bg-neutral-950  border-2 border-dashed">
         <CardHeader className="p-3">
           <CardTitle className="text-sm font-medium text-neutral-400 dark:text-neutral-600">
             {t("notCreated")}
@@ -67,10 +68,28 @@ export function PlanCard({ plan }: PlanCardProps) {
   }
 
   return (
-    <Card className={cn("shadow-sm flex flex-col min-h-[150px]")}>
+    <Card
+      className={cn(
+        "shadow-sm flex flex-col min-h-[150px] hover:bg-neutral-100 dark:hover:bg-neutral-900 transition-colors duration-700",
+      )}
+    >
       <CardHeader className="p-3">
         <CardTitle className="flex items-center justify-between text-sm font-medium ">
-          <span className="first-letter:uppercase">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => lockMealPlan(plan._id)}
+            disabled={isLocking}
+            aria-label={plan.locked ? t("unlockPlan") : t("lockPlan")}
+          >
+            {plan.locked ? (
+              <Lock className="w-4 h-4" />
+            ) : (
+              <Unlock className="w-4 h-4" />
+            )}
+          </Button>
+
+          <span className="flex-grow first-letter:uppercase">
             {format(plan.date, "EEEE", { locale: dateLocale })}
           </span>
 
@@ -104,7 +123,7 @@ export function PlanCard({ plan }: PlanCardProps) {
                   >
                     {isPlannedMeal ? (
                       <Link
-                        className="hover:underline h-full flex-wrap min-w-24 relative flex items-center justify-center p-2 border-2 border-dashed rounded-xl"
+                        className="hover:underline h-full dark:bg-neutral-950 bg-white flex-wrap min-w-24 relative flex items-center justify-center p-2 border-2 border-dashed border-neutral-700 rounded-xl"
                         href={`/meals/${plannedMeal.meal?._id}`}
                       >
                         <Image

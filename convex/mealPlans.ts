@@ -178,19 +178,34 @@ export const generateMealPlan = authMutation({
       }
     }
 
-    const mealPlanIds: Id<"mealPlans">[] = [];
-    // --- 5. Insert new meal plans and planned meals ---
+    const generatedMealPlanIds: Id<"mealPlans">[] = [];
+    const lockedPlanDates = new Set(
+      oldPlans.filter((plan) => plan.locked).map((plan) => plan.date),
+    );
+
+    // --- 5. Insert new meal plans and planned meals for non-locked dates ---
     for (const date of weekDates) {
+      // Check if a locked plan already exists for this date
+      if (lockedPlanDates.has(date)) {
+        console.log(
+          `Skipping generation for locked date: ${new Date(date).toISOString().split("T")[0]}`,
+        );
+        continue; // Skip this date as it's locked
+      }
+
+      // Proceed with creating a new meal plan for this date
       const mealPlanId = await ctx.db.insert("mealPlans", {
         userId: ctx.user.id, // Use validated userId
         date,
         createdAt: Date.now(),
         updatedAt: Date.now(),
+        // Ensure new plans are not locked by default
+        locked: false,
       });
 
-      mealPlanIds.push(mealPlanId);
+      generatedMealPlanIds.push(mealPlanId);
 
-      // Only iterate through the specified categories
+      // Only iterate through the specified categories to add planned meals
       for (const category of categoriesToGenerate) {
         const availableMeals = mealsByCategory[category];
         if (!availableMeals || availableMeals.length === 0) {
@@ -213,7 +228,8 @@ export const generateMealPlan = authMutation({
       }
     }
 
-    return { success: true, mealPlanIds };
+    // Return IDs of the newly generated plans (excluding the locked ones)
+    return { success: true, mealPlanIds: generatedMealPlanIds };
   },
 });
 
@@ -328,10 +344,10 @@ export const lockMealPlan = authMutation({
     }
 
     await ctx.db.patch(mealPlanId, {
-      locked: true,
+      locked: !mealPlan.locked,
       updatedAt: Date.now(),
     });
 
-    return { success: true };
+    return { success: true, locked: !mealPlan.locked };
   },
 });

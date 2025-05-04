@@ -69,9 +69,14 @@ export const MealPlanDisplay = () => {
                   mealPlannerState$.selectedPlanId.set(day.id);
                 }}
               >
-                <span className="text-xs font-medium uppercase text-muted-foreground">
-                  {format(day.date, "EEEEE", { locale: dateLocale })}
+                <span className="text-xs hidden @sm/main:block font-medium uppercase text-muted-foreground">
+                  {format(day.date, "EEEEEEE", { locale: dateLocale })}
                 </span>
+
+                <span className="text-xs font-medium @sm/main:hidden uppercase text-muted-foreground">
+                  {format(day.date, "EEEEEE", { locale: dateLocale })}
+                </span>
+
                 <span className="text-md sm:text-lg font-semibold">
                   {format(day.date, "d", { locale: dateLocale })}
                 </span>

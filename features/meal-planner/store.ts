@@ -4,10 +4,13 @@ import { use$, useWhenReady } from "@legendapp/state/react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { addDays, subDays, isToday } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
+import { useTranslations } from "next-intl";
 import { getMonday, getSaturday } from "./utils";
 import { convexQuery, useConvexMutation } from "@convex-dev/react-query";
 import { api } from "@/convex/_generated/api";
+import type { Id } from "@/convex/_generated/dataModel";
 import type { DateRange } from "react-day-picker";
+import { FunctionReturnType, FunctionType } from "convex/server";
 
 type Store = {
   currentWeek: Date;
@@ -45,6 +48,7 @@ export const useMealPlanner = () => {
   const currentWeek = use$(mealPlannerState$.currentWeek);
   const selectedPlanId = use$(mealPlannerState$.selectedPlanId);
 
+  const t = useTranslations("mealPlanner");
   const { toast } = useToast();
 
   const {
@@ -68,29 +72,60 @@ export const useMealPlanner = () => {
     }),
   );
 
-  const { mutate, isPending: isGenerating } = useMutation({
-    mutationFn: useConvexMutation(api.planAndList.generatePlanAndShoppingList),
-    onSuccess: () => {
+  const { mutate: generatePlanAndShoppingListMutate, isPending: isGenerating } =
+    useMutation({
+      mutationFn: useConvexMutation(
+        api.planAndList.generatePlanAndShoppingList,
+      ),
+      onSuccess: () => {
+        toast({
+          title: t("toast.successTitle"),
+          description: t("generatePlanSuccessDescription"),
+        });
+      },
+      onError: (error) => {
+        console.error("Error generating meal plan:", error);
+        toast({
+          title: t("toast.errorTitle"),
+          description:
+            error instanceof Error
+              ? error.message
+              : t("generatePlanErrorUnknown"),
+          variant: "destructive",
+        });
+      },
+    });
+
+  const handleGenerateMealPlan = () => {
+    const weekStart = mealPlannerState$.currentWeek.get().getTime();
+    generatePlanAndShoppingListMutate({ weekStart });
+  };
+
+  const { mutate: lockPlanMutate, isPending: isLocking } = useMutation({
+    mutationFn: useConvexMutation(api.mealPlans.lockMealPlan),
+    onSuccess: (
+      data: FunctionReturnType<typeof api.mealPlans.lockMealPlan>,
+    ) => {
       toast({
-        title: "Success",
-        description: "Meal plan generated and shopping list updated!",
+        title: t("toast.successTitle"),
+        description: data.locked
+          ? t("lockPlanSuccessDescription")
+          : t("unlockPlanSuccessDescription"),
       });
     },
     onError: (error) => {
-      console.error("Error generating meal plan:", error);
+      console.error("Error locking meal plan:", error);
       toast({
-        title: "Error",
+        title: t("toast.errorTitle"),
         description:
-          error instanceof Error ? error.message : "An unknown error occurred.",
+          error instanceof Error ? error.message : t("lockPlanErrorFallback"),
         variant: "destructive",
       });
     },
   });
 
-  // Action to trigger the mutation using the current state
-  const handleGenerateMealPlan = () => {
-    const weekStart = mealPlannerState$.currentWeek.get().getTime(); // Get current value directly
-    mutate({ weekStart });
+  const lockMealPlan = (mealPlanId: Id<"mealPlans">) => {
+    lockPlanMutate({ mealPlanId });
   };
 
   const isBusy = isMealPlanLoading || isShoppingListLoading;
@@ -104,22 +139,22 @@ export const useMealPlanner = () => {
 
   return {
     mealPlannerState$,
-    selectedPlanId, // Expose reactive selectedPlanId
-    currentWeek, // The reactive state value
+    selectedPlanId,
+    currentWeek,
 
-    setCurrentWeek, // Action to set the week
-    handleNavigatePrevious, // Action for previous week
-    handleNavigateNext, // Action for next week
-    handleGenerateMealPlan, // Action to trigger generation
-    isGenerating, // Loading state from the mutation
+    setCurrentWeek,
+    handleNavigatePrevious,
+    handleNavigateNext,
+    handleGenerateMealPlan,
+    isGenerating,
+    lockMealPlan,
+    isLocking,
     isBusy,
 
-    // Meal Plan Query Results
     mealPlanData,
     isMealPlanLoading,
     mealPlanError,
 
-    // Shopping List Query Results
     shoppingListData,
     isShoppingListLoading,
     shoppingListError,

@@ -23,7 +23,19 @@
 		"removeRecipe": "Usuń przepis",
 		"removeIngredient": "Usuń składnik",
 		"removeMeal": "Usuń posiłek",
-		"saveChanges": "Zapisz zmiany"
+		"saveChanges": "Zapisz zmiany",
+		"toast": {
+			"successTitle": "Sukces",
+			"errorTitle": "Błąd"
+		},
+		"generatePlanSuccessDescription": "Plan posiłków wygenerowany, a lista zakupów zaktualizowana!",
+		"generatePlanErrorUnknown": "Wystąpił nieznany błąd podczas generowania planu posiłków.",
+		"lockPlanSuccessDescription": "Plan posiłków został pomyślnie zablokowany!",
+		"lockPlanErrorFallback": "Nie udało się zablokować planu posiłków.",
+		"unlockPlanSuccessDescription": "Plan posiłków został pomyślnie odblokowany!",
+		"unlockPlanErrorFallback": "Nie udało się odblokować planu posiłków.",
+		"lockPlan": "Zablokuj plan",
+		"unlockPlan": "Odblokuj plan"
 	},
 	"appSidebar": {
 		"features": "Funkcje",
