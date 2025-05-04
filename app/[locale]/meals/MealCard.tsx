@@ -9,12 +9,20 @@ import {
   Flame,
 } from "lucide-react";
 import type { Doc } from "@/convex/_generated/dataModel";
+import { useTranslations } from "next-intl";
+import { useDateLocale } from "@/hooks/use-date-locale";
+import { format } from "date-fns";
+import { DATE_FORMAT_DISPLAY_CARD } from "@/features/meal-planner/utils";
 
 type Props = {
   meal: Doc<"meals">;
 };
 
 export function MealCard({ meal }: Props) {
+  const t = useTranslations("mealDetails");
+  const tMeal = useTranslations("meal");
+  const dateLocale = useDateLocale();
+
   const totalTime = (meal.prepTimeMinutes || 0) + (meal.cookTimeMinutes || 0);
 
   const displayAuthor = meal.createdBy || "Skibidi Obiadex";
@@ -38,7 +46,7 @@ export function MealCard({ meal }: Props) {
           )}
           {meal.category && (
             <span className="absolute uppercase top-2 right-2 bg-blue-600 text-white text-xs px-2 py-1 rounded-full shadow">
-              {meal.category}
+              {tMeal(meal.category)}
             </span>
           )}
         </div>
@@ -60,14 +68,14 @@ export function MealCard({ meal }: Props) {
             {meal.servings && (
               <span className="flex items-center" title="Servings">
                 <Users className="h-4 w-4 mr-1 flex-shrink-0" />
-                {meal.servings} {meal.servings === 1 ? "serving" : "servings"}
+                {t("servings", { count: meal.servings })}
               </span>
             )}
 
             {meal.calories && (
               <span className="flex items-center" title="Calories">
                 <Flame className="h-4 w-4 mr-1 flex-shrink-0" />
-                {meal.calories} {meal.calories === 1 ? "calorie" : "calories"}
+                {t("calories", { count: meal.calories })}
               </span>
             )}
           </div>
@@ -81,8 +89,10 @@ export function MealCard({ meal }: Props) {
               <span className="truncate">By {displayAuthor}</span>
             </div>
 
-            <span className="text-xs text-neutral-500 dark:text-neutral-400 flex-shrink-0">
-              {new Date(meal.createdAt).toLocaleDateString()}
+            <span className="first-letter:uppercase text-xs text-neutral-500 dark:text-neutral-400 flex-shrink-0">
+              {format(meal.createdAt, DATE_FORMAT_DISPLAY_CARD, {
+                locale: dateLocale,
+              })}
             </span>
           </div>
         </div>

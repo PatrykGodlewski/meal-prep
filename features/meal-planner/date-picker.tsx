@@ -20,10 +20,12 @@ import {
 import { getMonday, getSaturday } from "./utils";
 import { useMealPlanner } from "./store";
 import { use$ } from "@legendapp/state/react";
+import { useDateLocale } from "@/hooks/use-date-locale";
 
 export function DatePickerWithPresets() {
   const { mealPlannerState$ } = useMealPlanner();
   const shoppingListDate = use$(mealPlannerState$.shoppingListDate);
+  const dateLocale = useDateLocale();
 
   const handlePresetSelection = (value: string) => {
     const today = new Date();
@@ -65,7 +67,7 @@ export function DatePickerWithPresets() {
         <Button
           variant={"outline"}
           className={cn(
-            "w-[280px] justify-start text-left font-normal",
+            "flex-1 sm:max-w-[280px] justify-start text-left font-normal",
             !shoppingListDate && "text-muted-foreground",
           )}
         >
@@ -73,8 +75,13 @@ export function DatePickerWithPresets() {
           {shoppingListDate?.from ? (
             shoppingListDate.to ? (
               <>
-                {format(shoppingListDate.from, "LLL dd, y")} -{" "}
-                {format(shoppingListDate.to, "LLL dd, y")}
+                {format(shoppingListDate.from, "LLL dd, y", {
+                  locale: dateLocale,
+                })}{" "}
+                -{" "}
+                {format(shoppingListDate.to, "LLL dd, y", {
+                  locale: dateLocale,
+                })}
               </>
             ) : (
               format(shoppingListDate.from, "LLL dd, y")

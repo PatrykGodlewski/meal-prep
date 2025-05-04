@@ -64,8 +64,8 @@ export default function MealDetailView({
         />
       ) : (
         <MealDisplayDetails
-          meal={meal} // Pass the whole meal object from pageData
-          mealIngredients={meal?.mealIngredients!} // Pass the ingredients array
+          meal={meal}
+          mealIngredients={meal?.mealIngredients}
         />
       )}
     </div>

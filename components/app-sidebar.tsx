@@ -21,6 +21,7 @@ import { NavGuest } from "./nav-guest";
 import { useConvexAuth } from "convex/react";
 import { NavList } from "./nav-list";
 import { Separator } from "./ui/separator";
+import { useTranslations } from "next-intl";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { isAuthenticated } = useConvexAuth();
@@ -61,9 +62,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 }
 
 function Nav() {
+  const t = useTranslations("appSidebar");
   const featureList = [
     {
-      title: "Meal Planner",
+      title: t("mealPlanner"),
       url: "/",
       icon: LayoutDashboardIcon,
     },
@@ -71,12 +73,12 @@ function Nav() {
 
   const entityList = [
     {
-      title: "Meals",
+      title: t("meals"),
       url: "/meals",
       icon: ListIcon,
     },
     {
-      title: "Plans",
+      title: t("plans"),
       url: "/plans",
       icon: CalendarCog,
     },
@@ -85,8 +87,8 @@ function Nav() {
   return (
     <>
       <NavMain />
-      <NavList title={"Features"} items={featureList} />
-      <NavList title={"Entities"} items={entityList} />
+      <NavList title={t("features")} items={featureList} />
+      <NavList title={t("entities")} items={entityList} />
     </>
   );
 }

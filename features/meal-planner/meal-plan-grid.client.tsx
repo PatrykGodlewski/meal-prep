@@ -6,6 +6,9 @@ import { Loader2, ChevronLeft, ChevronRight } from "lucide-react";
 import { PlanCard } from "./day-card";
 import { useMealPlanner } from "./store";
 import { cn } from "@/lib/utils";
+import { useLocale, useTranslations } from "next-intl";
+import { pl, enUS } from "date-fns/locale";
+import { useDateLocale } from "@/hooks/use-date-locale";
 
 export const MealPlanDisplay = () => {
   const {
@@ -18,6 +21,7 @@ export const MealPlanDisplay = () => {
     mealPlannerState$,
     currentWeek,
   } = useMealPlanner();
+  const dateLocale = useDateLocale();
 
   const planExist = mealPlanData && !!mealPlanData.length;
   const days = planExist
@@ -54,10 +58,10 @@ export const MealPlanDisplay = () => {
                 variant="ghost"
                 disabled={isSelected}
                 className={cn(
-                  "self-center h-auto rounded-xl w-full cursor-pointer bg-neutral-200 dark:bg-neutral-900 flex flex-col items-center justify-center p-4 sm:p-8 aspect-square",
+                  "self-center h-auto transition-shadow rounded-xl w-full cursor-pointer bg-neutral-200 dark:bg-neutral-900 flex flex-col items-center justify-center p-4 sm:p-8 aspect-square",
                   {
-                    "border-white border-dashed border-2": isSelected,
-                    "py-5 border-2 bg-neutral-900 dark:bg-neutral-200 text-neutral-200 dark:text-neutral-900":
+                    "ring ring-white disabled:opacity-100": isSelected,
+                    "py-5 border-2 bg-neutral-900 dark:bg-neutral-200 text-neutral-200 dark:text-neutral-900 ":
                       isToday(day.date),
                   },
                 )}
@@ -66,10 +70,10 @@ export const MealPlanDisplay = () => {
                 }}
               >
                 <span className="text-xs font-medium uppercase text-muted-foreground">
-                  {format(day.date, "EEEEE")}
+                  {format(day.date, "EEEEE", { locale: dateLocale })}
                 </span>
                 <span className="text-md sm:text-lg font-semibold">
-                  {format(day.date, "d")}
+                  {format(day.date, "d", { locale: dateLocale })}
                 </span>
               </Button>
             );
@@ -92,8 +96,12 @@ export function MealPlannerHeader() {
     handleGenerateMealPlan,
     isBusy,
   } = useMealPlanner();
+  const t = useTranslations("mealPlanner");
+  const dateLocale = useDateLocale();
 
-  const title = format(currentWeek, "MMMM d, yyyy");
+  const formatedWeek = format(currentWeek, "MMMM d, yyyy", {
+    locale: dateLocale,
+  });
 
   return (
     <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
@@ -108,7 +116,7 @@ export function MealPlannerHeader() {
           <ChevronLeft className="h-4 w-4" />
         </Button>
         <h2 className="text-xl font-semibold text-center sm:text-left whitespace-nowrap tabular-nums">
-          {`Week of ${title}`}
+          {t("weekOf", { week: formatedWeek })}
         </h2>
         <Button
           variant="outline"
@@ -125,7 +133,7 @@ export function MealPlannerHeader() {
         disabled={isBusy || isGenerating}
       >
         {isGenerating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-        Generate for This Week
+        {t("generateThisWeek")}
       </Button>
     </div>
   );

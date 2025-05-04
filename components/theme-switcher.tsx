@@ -8,24 +8,30 @@ import {
   DropdownMenuRadioItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Laptop, Moon, Sun } from "lucide-react";
+import { use$, useIsMounted } from "@legendapp/state/react";
+import { Laptop, Loader2, Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
-import { useEffect, useState } from "react";
 
 const ThemeSwitcher = () => {
-  const [mounted, setMounted] = useState(false);
+  const isMounted = use$(useIsMounted());
   const { theme, setTheme } = useTheme();
 
-  // useEffect only runs on the client, so now we can safely show the UI
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  if (!mounted) {
-    return null;
-  }
-
   const ICON_SIZE = 16;
+
+  if (!isMounted) {
+    return (
+      <Button
+        className="animate-pulse pointer-events-none"
+        variant="ghost"
+        size={"sm"}
+      >
+        <Loader2
+          size={ICON_SIZE}
+          className={"animate-spin text-muted-foreground"}
+        />
+      </Button>
+    );
+  }
 
   return (
     <DropdownMenu>

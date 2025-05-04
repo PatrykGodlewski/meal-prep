@@ -2,7 +2,7 @@
 import { For } from "@/components/for-each";
 import { usePreloadedQuery, type Preloaded } from "convex/react";
 import Link from "next/link";
-import { useConvexMutation, useConvexQuery } from "@convex-dev/react-query";
+import { useConvexMutation } from "@convex-dev/react-query";
 import { api } from "@/convex/_generated/api";
 import { Button } from "@/components/ui/button";
 import type { FunctionReturnType } from "convex/server";
@@ -11,6 +11,7 @@ import { useState } from "react";
 import type { Id } from "@/convex/_generated/dataModel";
 import { MEAL_CATEGORIES } from "@/convex/schema";
 import { cn } from "@/lib/utils";
+import { useTranslations } from "next-intl";
 
 interface Props {
   preloadedMealPlan: Preloaded<typeof api.mealPlans.getMealPlan>;
@@ -18,13 +19,14 @@ interface Props {
 
 export function MealPlanDetail({ preloadedMealPlan }: Props) {
   const mealPlan = usePreloadedQuery(preloadedMealPlan);
+  const t = useTranslations("mealPlanDetail");
 
   if (!mealPlan) {
     return (
       <p className="text-center text-gray-500 dark:text-gray-400">
-        No meal plan found. Start by creating one!
+        {t("noMealPlanDetails")}
         <Button variant="outline" size="sm" asChild className="mt-2">
-          <Link href="/">Create a Meal Plan</Link>
+          <Link href="/">{t("createMealPlan")}</Link>
         </Button>
       </p>
     );
@@ -74,6 +76,8 @@ interface MealCardProps {
 
 function MealCard({ plannedMeal, category, plan }: MealCardProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const t = useTranslations("mealPlanDetail");
+  const tMeal = useTranslations("meal");
 
   const mealPlanMutation = useConvexMutation(
     api.mealPlans.updatePlannedMealByCategory,
@@ -116,13 +120,13 @@ function MealCard({ plannedMeal, category, plan }: MealCardProps) {
           </Link>
         ) : (
           <h3 className="font-semibold text-lg hover:underline h-[1lh] cursor-pointer">
-            {"Missing meal, add one!"}
+            {t("missingMeal")}
           </h3>
         )}
-        <p className="text-sm text-neutral-400 uppercase">{category}</p>
+        <p className="text-sm text-neutral-400 uppercase">{tMeal(category)}</p>
       </div>
       <Button onClick={() => setIsModalOpen(true)} variant="outline">
-        Change Meal
+        {t("changeMeal")}
       </Button>
     </div>
   );

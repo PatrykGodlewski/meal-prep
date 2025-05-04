@@ -1,12 +1,6 @@
 "use client";
 
-import {
-  CalendarCog,
-  LayoutDashboardIcon,
-  ListIcon,
-  PlusCircleIcon,
-} from "lucide-react";
-
+import { PlusCircleIcon } from "lucide-react";
 import {
   SidebarGroup,
   SidebarGroupContent,
@@ -15,8 +9,10 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 
 export function NavMain() {
+  const t = useTranslations("navMain");
   return (
     <SidebarGroup>
       <SidebarGroupContent className="flex flex-col gap-2">
@@ -29,7 +25,7 @@ export function NavMain() {
             >
               <Link href="/meals/add">
                 <PlusCircleIcon />
-                <span>Quick Create a Meal</span>
+                <span>{t("quickCreate")}</span>
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>

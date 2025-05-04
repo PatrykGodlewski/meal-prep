@@ -94,6 +94,7 @@ export const useMealPlanner = () => {
   };
 
   const isBusy = isMealPlanLoading || isShoppingListLoading;
+
   useWhenReady(mealPlanData, (mealPlans) =>
     mealPlannerState$.selectedPlanId.set(
       mealPlans?.find((plan) => isToday(plan.date))?._id ??

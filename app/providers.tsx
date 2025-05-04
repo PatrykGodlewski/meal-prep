@@ -8,6 +8,9 @@ import { Toaster } from "@/components/ui/toaster";
 import { ConvexReactClient } from "convex/react";
 import { ConvexAuthNextjsProvider } from "@convex-dev/auth/nextjs";
 import { ConvexQueryClient } from "@convex-dev/react-query";
+import { hasLocale, NextIntlClientProvider } from "next-intl";
+import { routing } from "@/i18n/routing";
+import { notFound } from "next/navigation";
 
 const convex = new ConvexReactClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
 const convexQueryClient = new ConvexQueryClient(convex);

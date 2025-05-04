@@ -98,12 +98,15 @@ export const mealSchema = z.object({
 
 export const mealValidator = zodOutputToConvex(mealSchema);
 
-export const mealPlanValidator = v.object({
-  userId: v.id("users"),
-  date: v.number(),
-  createdAt: v.number(),
-  updatedAt: v.number(),
+export const mealPlanSchema = z.object({
+  userId: zid("users"),
+  date: z.number(),
+  locked: z.boolean().default(false),
+  createdAt: z.number(),
+  updatedAt: z.number(),
 });
+
+export const mealPlanValidator = zodOutputToConvex(mealPlanSchema);
 
 export const plannedMealSchema = z.object({
   mealPlanId: zid("mealPlans"),
@@ -117,8 +120,8 @@ const plannedMealValidator = zodOutputToConvex(plannedMealSchema);
 
 export const shoppingListValidator = v.object({
   userId: v.id("users"),
-  mealPlanId: v.id("mealPlans"), // Made non-optional
-  date: v.number(), // Added date field (timestamp for the day)
+  mealPlanId: v.id("mealPlans"),
+  date: v.number(),
   createdAt: v.number(),
   updatedAt: v.number(),
 });
@@ -141,10 +144,10 @@ export default defineSchema({
 
   meals: defineTable(mealValidator)
     .index("by_author", ["createdBy"])
-    .index("by_categories", ["categories"]) // Renamed index
+    .index("by_categories", ["categories"])
     .searchIndex("search_name", {
       searchField: "name",
-      filterFields: ["categories"], // Correct filter field
+      filterFields: ["categories"],
     }),
 
   mealIngredients: defineTable(mealIngredientsValidator)

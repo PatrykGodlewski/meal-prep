@@ -1,10 +1,7 @@
 import { Geist } from "next/font/google";
 import "./globals.css";
 import Providers from "./providers";
-import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
-import { AppSidebar } from "@/components/app-sidebar";
 import { ConvexAuthNextjsServerProvider } from "@convex-dev/auth/nextjs/server";
-import { SiteHeader } from "@/components/site-header";
 
 export const metadata = {
   title: "Skibidi Obiadex",
@@ -20,28 +17,13 @@ export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
+  params: Promise<{ locale: string }>;
 }>) {
   return (
     <html lang="en" className={geistSans.className} suppressHydrationWarning>
       <body className="bg-background text-foreground">
         <ConvexAuthNextjsServerProvider>
-          <Providers>
-            <main className="flex flex-col gap-8">
-              <SidebarProvider>
-                <AppSidebar variant="inset" />
-                <SidebarInset>
-                  <SiteHeader />
-                  <div className="flex flex-1 flex-col">
-                    <div className="@container/main flex flex-1 flex-col gap-2">
-                      <div className="flex flex-col gap-4 pt-4 md:gap-6 md:py-6">
-                        <div className="container">{children}</div>
-                      </div>
-                    </div>
-                  </div>
-                </SidebarInset>
-              </SidebarProvider>
-            </main>
-          </Providers>
+          <Providers>{children}</Providers>
         </ConvexAuthNextjsServerProvider>
       </body>
     </html>

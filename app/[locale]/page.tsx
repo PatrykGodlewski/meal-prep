@@ -1,5 +1,4 @@
 import { CalendarDays } from "lucide-react";
-import { redirect } from "next/navigation";
 import {
   MealPlanDisplay,
   MealPlannerHeader,
@@ -7,13 +6,15 @@ import {
 import { ShoppingListDisplay } from "@/features/meal-planner/purchase-list.client";
 import { Suspense } from "react";
 import { ErrorBoundary } from "@/components/error-boundary";
+import { getTranslations } from "next-intl/server";
 
-export default function Home() {
+export default async function Home() {
+  const t = await getTranslations("mealPlanner");
   return (
     <div>
       <h1 className="text-3xl font-semibold mb-6 flex items-center space-x-2">
         <CalendarDays className="h-7 w-7" />
-        <span>This Week's Meal Plan</span>
+        <span>{t("header")}</span>
       </h1>
 
       <div className="flex flex-col gap-4">

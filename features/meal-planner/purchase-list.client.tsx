@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 import { useMealPlanner } from "./store";
 import { useMutation } from "@tanstack/react-query";
 import { For } from "@/components/for-each";
-import { startCase } from "lodash";
+import { camelCase, snakeCase } from "lodash";
 import { useConvexMutation } from "@convex-dev/react-query";
 import { api } from "@/convex/_generated/api";
 import { toast } from "@/hooks/use-toast";
@@ -15,11 +15,15 @@ import type { Id } from "@/convex/_generated/dataModel";
 import { ShoppingCart } from "lucide-react";
 import { DatePickerWithPresets } from "./date-picker";
 import { use$ } from "@legendapp/state/react";
+import { useTranslations } from "next-intl";
+import { Separator } from "@/components/ui/separator";
 
 export function ShoppingListDisplay() {
   const { shoppingListData: list } = useMealPlanner();
+  const t = useTranslations("mealPlanner");
+  const tIngredient = useTranslations("ingredient");
+
   const items = list?.items ?? [];
-  console.log({ list });
 
   const groupedItems = Object.groupBy(
     items,
@@ -29,21 +33,22 @@ export function ShoppingListDisplay() {
   const shoppingItems = Object.entries(groupedItems).sort();
 
   return (
-    <div className="p-4 border rounded-lg shadow-sm bg-white dark:bg-neutral-800 min-h-[500px]">
-      <div className={"flex justify-between"}>
+    <div className="p-4 border rounded-lg shadow-sm bg-white hover:bg-neutral-100/75 dark:hover:bg-neutral-900 dark:bg-neutral-950/75 ease-in duration-700 transition-colors min-h-[500px]">
+      <div className={"flex  flex-wrap justify-between"}>
         <h1 className="text-3xl font-bold flex items-center gap-4 border-b pb-4">
           <ShoppingCart />
-          Shopping List
+          {t("shoppingList")}
         </h1>
 
         <DatePickerWithPresets />
       </div>
+      <Separator className="my-2" />
       <ul className="space-y-2">
         <For each={shoppingItems} empty={"empty shopping list"}>
           {([category, categoryItems]) => (
             <div key={category} className="space-y-2">
               <h2 className="capitalize font-bold text-2xl py-2">
-                {startCase(category)}
+                {tIngredient(camelCase(category))}
               </h2>
               <For
                 each={categoryItems.sort(
@@ -52,7 +57,7 @@ export function ShoppingListDisplay() {
                       b.ingredient?.name ?? "",
                     ) ?? 0,
                 )}
-                empty={"no ingredients found"}
+                empty={t("noIngredients")}
               >
                 {(item) => (
                   <ShoppingListItem

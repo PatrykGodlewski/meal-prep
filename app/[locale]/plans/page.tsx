@@ -4,6 +4,7 @@ import { preloadQuery } from "convex/nextjs";
 import { notFound } from "next/navigation";
 import { PlanList } from "./PlanList";
 import { convexAuthNextjsToken } from "@convex-dev/auth/nextjs/server";
+import { getTranslations } from "next-intl/server";
 
 export default async function WeeklyPlanPage() {
   const preloadedPlans = await preloadQuery(
@@ -17,10 +18,12 @@ export default async function WeeklyPlanPage() {
     return notFound();
   }
 
+  const t = await getTranslations("planList");
+
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">Meal Plans</h1>
+        <h1 className="text-3xl font-bold">{t("header")}</h1>
       </div>
       <PlanList preloadedPlans={preloadedPlans} />
     </div>

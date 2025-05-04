@@ -2,6 +2,8 @@ import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { BreadcrumbClient } from "./breadcrumbs";
 import { ThemeSwitcher } from "./theme-switcher";
+import { LanguageSwitcher } from "./language-switcher";
+import { Suspense } from "react";
 
 export function SiteHeader() {
   return (
@@ -17,7 +19,21 @@ export function SiteHeader() {
           orientation="vertical"
           className="mx-2 data-[orientation=vertical]:h-4"
         />
-        <ThemeSwitcher />
+        <Suspense
+          fallback={
+            <div className="h-4 w-24 animate-pulse rounded-md bg-gray-200" />
+          }
+        >
+          <ThemeSwitcher />
+        </Suspense>
+
+        <Suspense
+          fallback={
+            <div className="h-4 w-24 animate-pulse rounded-md bg-gray-200" />
+          }
+        >
+          <LanguageSwitcher />
+        </Suspense>
       </div>
     </header>
   );

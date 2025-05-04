@@ -14,10 +14,14 @@ import {
 } from "@/hooks/use-paginated-meals";
 import type { MealCategory } from "@/validators";
 import { useDebounceFn } from "ahooks";
+import { useTranslations } from "next-intl";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect } from "react";
 
 export function SearchInput() {
+  const t = useTranslations("searchInput");
+  const tMeal = useTranslations("meal");
+
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
@@ -60,20 +64,20 @@ export function SearchInput() {
     <div className="mb-6 flex flex-col sm:flex-row gap-4">
       <Input
         type="text"
-        placeholder="Search meals by name..."
+        placeholder={t("searchMealsByName")}
         onChange={(e) => handleSearch.run(e.target.value)}
-        defaultValue={searchParams.get(SEARCH_PARAM_KEY)?.toString()} // Set initial value from URL
+        defaultValue={searchParams.get(SEARCH_PARAM_KEY)?.toString()}
         className="flex-grow px-4 py-2 border border-neutral-300 dark:border-neutral-600 rounded-md bg-white dark:bg-neutral-800 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
       />
       <Select onValueChange={handleCategoryChange} value={currentCategory}>
         <SelectTrigger className="w-full sm:w-[180px] border-neutral-300 dark:border-neutral-600 bg-white dark:bg-neutral-800">
-          <SelectValue placeholder="Filter by category" />
+          <SelectValue placeholder={t("filterByCategory")} />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value={"all"}>{"ALL"}</SelectItem>
+          <SelectItem value={"all"}>{tMeal("all")}</SelectItem>
           {MEAL_CATEGORIES.map((category) => (
             <SelectItem key={category} value={category}>
-              {category.toUpperCase()}
+              {tMeal(category)}
             </SelectItem>
           ))}
         </SelectContent>

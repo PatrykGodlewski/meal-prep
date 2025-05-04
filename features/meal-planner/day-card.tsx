@@ -1,5 +1,5 @@
 "use client";
-import { format, isToday, isValid, toDate } from "date-fns";
+import { format, isValid, toDate } from "date-fns";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import React from "react";
 import { cn } from "@/lib/utils";
@@ -10,6 +10,10 @@ import type { api } from "@/convex/_generated/api";
 import type { FunctionReturnType } from "convex/server";
 import { Flame } from "lucide-react";
 import Image from "next/image";
+import { useTranslations } from "use-intl";
+import { useDateLocale } from "@/hooks/use-date-locale";
+import { camelCase } from "lodash";
+import { MEAL_CATEGORIES } from "@/convex/schema";
 
 const DATE_FORMAT_DISPLAY_CARD = "MMM dd";
 
@@ -18,6 +22,10 @@ interface PlanCardProps {
 }
 
 export function PlanCard({ plan }: PlanCardProps) {
+  const t = useTranslations("mealPlanner");
+  const tMeal = useTranslations("meal");
+  const dateLocale = useDateLocale();
+
   const summarizedCalories = plan?.plannedMeals.reduce(
     (previousValue, currentValue) => {
       const calories = currentValue.meal?.calories ?? 0;
@@ -25,17 +33,18 @@ export function PlanCard({ plan }: PlanCardProps) {
     },
     0,
   );
+
   if (!plan) {
     return (
       <Card className="shadow-sm flex flex-col min-h-[150px] border-neutral-800 bg-neutral-50 dark:bg-neutral-800/50 border-2 border-dashed">
         <CardHeader className="p-3">
           <CardTitle className="text-sm font-medium text-neutral-400 dark:text-neutral-600">
-            Plan not yet created
+            {t("notCreated")}
           </CardTitle>
         </CardHeader>
         <CardContent className="p-3 flex-grow flex items-center justify-center">
           <span className="text-xs text-neutral-400 dark:text-neutral-600 italic">
-            Empty
+            {t("empty")}
           </span>
         </CardContent>
       </Card>
@@ -46,10 +55,12 @@ export function PlanCard({ plan }: PlanCardProps) {
     return (
       <Card className="shadow-sm flex flex-col min-h-[150px] border-red-500">
         <CardHeader className="p-3">
-          <CardTitle className="text-sm text-red-600">Data Error</CardTitle>
+          <CardTitle className="text-sm text-red-600">
+            {t("dateError")}
+          </CardTitle>
         </CardHeader>
         <CardContent className="p-3 text-xs text-red-500">
-          Invalid date encountered.
+          {t("invalidDate")}
         </CardContent>
       </Card>
     );
@@ -59,22 +70,25 @@ export function PlanCard({ plan }: PlanCardProps) {
     <Card className={cn("shadow-sm flex flex-col min-h-[150px]")}>
       <CardHeader className="p-3">
         <CardTitle className="flex items-center justify-between text-sm font-medium ">
-          <span>{format(plan.date, "EEEE")}</span>
+          <span className="first-letter:uppercase">
+            {format(plan.date, "EEEE", { locale: dateLocale })}
+          </span>
 
           <span className="text-xs text-neutral-500">
-            {format(plan.date, DATE_FORMAT_DISPLAY_CARD)}
+            {format(plan.date, DATE_FORMAT_DISPLAY_CARD, {
+              locale: dateLocale,
+            })}
           </span>
         </CardTitle>
       </CardHeader>
       <CardContent className="p-3 justify-between flex flex-col space-y-2 flex-grow">
-        {/* // Meal presentation component  */}
         <div className="flex justify-between items-end gap-4">
           <ul className="text-xs group flex flex-wrap justify-between gap-4 flex-1">
             <For
               each={plan.plannedMeals}
               empty={
                 <li className="text-center text-gray-400 italic pt-4">
-                  No meals planned
+                  {t("noMeals")}
                 </li>
               }
             >
@@ -100,8 +114,8 @@ export function PlanCard({ plan }: PlanCardProps) {
                           className={"rounded-lg"}
                           alt={"Meal image"}
                         />
-                        <span className="absolute px-2 py-1 right-2 top-2 rounded-full shadow-sm bg-neutral-200 dark:bg-neutral-900/25 right-0 top-0 font-semibold capitalize">
-                          {plannedMeal.meal?.category}
+                        <span className="absolute px-2 py-1 right-2 top-2 rounded-full shadow-sm bg-neutral-200 dark:bg-neutral-900/25 font-semibold capitalize">
+                          {tMeal(camelCase(plannedMeal.category))}
                         </span>
                         <p className="w-full px-2">
                           {plannedMeal.meal?.name.trim()}
@@ -112,7 +126,7 @@ export function PlanCard({ plan }: PlanCardProps) {
                         className="text-neutral-500 underline"
                         href={`/plans/${plan._id}`}
                       >
-                        Planned Meal missing, add one!
+                        {t("plannedMealMissing")}
                       </Link>
                     )}
                   </li>
@@ -131,7 +145,7 @@ export function PlanCard({ plan }: PlanCardProps) {
         </div>
 
         <Button size={"sm"} asChild>
-          <Link href={`/plans/${plan._id}`}>Go to plan</Link>
+          <Link href={`/plans/${plan._id}`}>{t("goToPlan")}</Link>
         </Button>
       </CardContent>
     </Card>

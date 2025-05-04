@@ -1,12 +1,9 @@
-// components/meal-edit-form.tsx
 "use client";
-
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -16,16 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import type { Doc } from "@/convex/_generated/dataModel";
-import {
-  Check,
-  Clock,
-  Plus,
-  Save,
-  Trash2,
-  Users,
-  Weight,
-  X,
-} from "lucide-react"; // Added icons
+import { Clock, Plus, Save, Trash2, Users, Weight } from "lucide-react"; // Added icons
 import { useFieldArray, useForm } from "react-hook-form";
 import type { IngredientFormValues } from "./schema";
 import { MEAL_CATEGORIES } from "@/convex/schema";
@@ -47,26 +35,11 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { useMealEditor } from "./store";
+import { useTranslations } from "next-intl";
 import {
   mutationMealEditSchema,
   type MutationMealEditValues,
 } from "@/convex/meals/validators";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { cn } from "@/lib/utils";
-import { Badge } from "@/components/ui/badge";
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "@/components/ui/command";
-import type { MealCategory } from "@/validators";
 import { MultiSelect } from "@/components/multi-select";
 
 const mapPreloadedDataToFormValues = (
@@ -130,6 +103,9 @@ export function MealEditForm({
   meal,
   onSuccess,
 }: MealEditFormProps) {
+  const t = useTranslations("mealEditor");
+  const tMeal = useTranslations("meal");
+
   const { isPending, editMeal, deleteMeal } = useMealEditor({
     onSuccess,
   });
@@ -162,8 +138,8 @@ export function MealEditForm({
   const handleDeleteConfirm = () => {
     if (!meal?._id) {
       toast({
-        title: "Error",
-        description: "Cannot delete meal: ID missing.",
+        title: t("toastErrorTitle"),
+        description: t("toastDeleteErrorMissingId"),
         variant: "destructive",
       });
       return;
@@ -171,6 +147,10 @@ export function MealEditForm({
     deleteMeal({ mealId: meal._id });
   };
 
+  // Note: Cannot use the hook 't' here as it's outside the main component body return.
+  // If this loading state needs translation, consider a different approach,
+  // maybe rendering a small component that uses the hook.
+  // For now, leaving it as is or using a simple placeholder.
   if (!meal) {
     return (
       <div className="container mx-auto py-8 px-4 text-center">
@@ -187,29 +167,33 @@ export function MealEditForm({
           disabled={isPending || !form.formState.isDirty}
         >
           <Save className="h-4 w-4 mr-1" />{" "}
-          {isPending ? "Saving..." : "Save Changes"}
+          {isPending ? t("saving") : t("saveChanges")}
         </Button>
         <AlertDialog>
           <AlertDialogTrigger asChild>
             <Button variant="destructive" disabled={isPending}>
-              <Trash2 className="h-4 w-4 mr-1" /> Delete
+              <Trash2 className="h-4 w-4 mr-1" /> {t("delete")}
             </Button>
           </AlertDialogTrigger>
           <AlertDialogContent>
             <AlertDialogHeader>
-              <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+              <AlertDialogTitle>
+                {t("deleteConfirmationTitle")}
+              </AlertDialogTitle>
               <AlertDialogDescription>
-                This action cannot be undone.
+                {t("deleteConfirmationDescription")}
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
-              <AlertDialogCancel disabled={isPending}>Cancel</AlertDialogCancel>
+              <AlertDialogCancel disabled={isPending}>
+                {t("cancel")}
+              </AlertDialogCancel>
               <AlertDialogAction
                 onClick={handleDeleteConfirm}
                 className="bg-red-600 hover:bg-red-700"
                 disabled={isPending}
               >
-                {isPending ? "Deleting..." : "Delete"}
+                {isPending ? t("deleting") : t("delete")}
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
@@ -223,7 +207,7 @@ export function MealEditForm({
               <div className="absolute inset-0 flex items-center justify-center p-4 bg-black bg-opacity-60">
                 <div className="w-full max-w-md space-y-2">
                   <Label htmlFor="imageUrlEdit" className="text-white">
-                    Image URL
+                    {t("imageUrlLabel")}
                   </Label>
                   <FormField
                     control={control}
@@ -234,7 +218,7 @@ export function MealEditForm({
                           <Input
                             id="imageUrlEdit"
                             type="text"
-                            placeholder="https://example.com/image.jpg"
+                            placeholder={t("imageUrlPlaceholder")}
                             {...field}
                             value={field.value ?? ""}
                             className="bg-white dark:bg-neutral-700 border-gray-300 dark:border-neutral-600"
@@ -257,15 +241,15 @@ export function MealEditForm({
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel className="text-xs font-medium sr-only">
-                      Meal Name
+                      {t("mealNameLabel")}
                     </FormLabel>
                     <FormControl>
                       <Input
                         type="text"
                         {...field}
                         className="text-3xl font-bold h-auto py-2 bg-white dark:bg-neutral-800 border-gray-300 dark:border-neutral-600"
-                        aria-label="Meal Name"
-                        placeholder="Meal Name*"
+                        aria-label={t("mealNameLabel")}
+                        placeholder={t("mealNamePlaceholder")}
                       />
                     </FormControl>
                     <FormMessage />
@@ -281,12 +265,12 @@ export function MealEditForm({
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className="text-sm flex items-center gap-1">
-                        <Clock className="h-4 w-4" /> Prep Time (min)
+                        <Clock className="h-4 w-4" /> {t("prepTimeLabel")}
                       </FormLabel>
                       <FormControl>
                         <Input
                           type="number"
-                          placeholder="15"
+                          placeholder={t("prepTimePlaceholder")}
                           {...field}
                           value={field.value ?? ""}
                           onChange={(e) =>
@@ -309,12 +293,12 @@ export function MealEditForm({
                     <FormItem>
                       {" "}
                       <FormLabel className="text-sm flex items-center gap-1">
-                        <Clock className="h-4 w-4" /> Cook Time (min)
+                        <Clock className="h-4 w-4" /> {t("cookTimeLabel")}
                       </FormLabel>
                       <FormControl>
                         <Input
                           type="number"
-                          placeholder="30"
+                          placeholder={t("cookTimePlaceholder")}
                           {...field}
                           value={field.value ?? ""}
                           onChange={(e) =>
@@ -337,12 +321,12 @@ export function MealEditForm({
                     <FormItem>
                       {" "}
                       <FormLabel className="text-sm flex items-center gap-1">
-                        <Users className="h-4 w-4" /> Servings
+                        <Users className="h-4 w-4" /> {t("servingsLabel")}
                       </FormLabel>
                       <FormControl>
                         <Input
                           type="number"
-                          placeholder="4"
+                          placeholder={t("servingsPlaceholder")}
                           {...field}
                           value={field.value ?? ""}
                           onChange={(e) =>
@@ -364,12 +348,12 @@ export function MealEditForm({
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className="text-sm flex items-center gap-1">
-                        <Weight className="h-4 w-4" /> Calories
+                        <Weight className="h-4 w-4" /> {t("caloriesLabel")}
                       </FormLabel>
                       <FormControl>
                         <Input
                           type="number"
-                          placeholder="4"
+                          placeholder={t("caloriesPlaceholder")}
                           {...field}
                           value={field.value ?? ""}
                           onChange={(e) =>
@@ -390,16 +374,16 @@ export function MealEditForm({
                   name="categories"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Categories</FormLabel>
+                      <FormLabel>{t("categoriesLabel")}</FormLabel>
                       <FormControl>
                         <MultiSelect
                           options={MEAL_CATEGORIES.map((cat) => ({
-                            label: cat,
+                            label: tMeal(cat),
                             value: cat,
                           }))}
                           onValueChange={field.onChange}
                           defaultValue={field.value}
-                          placeholder="Select category"
+                          placeholder={t("categoriesPlaceholder")}
                           variant="inverted"
                         />
                       </FormControl>
@@ -423,7 +407,7 @@ export function MealEditForm({
                         htmlFor="isPublicEdit"
                         className="text-sm font-normal"
                       >
-                        Make Public
+                        {t("makePublicLabel")}
                       </FormLabel>
                       <FormMessage />
                     </FormItem>
@@ -438,13 +422,13 @@ export function MealEditForm({
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel className="text-lg font-semibold">
-                      Description*
+                      {t("descriptionLabel")}
                     </FormLabel>
                     <FormControl>
                       <Textarea
                         {...field}
                         className="min-h-24"
-                        placeholder="Brief description of the meal..."
+                        placeholder={t("descriptionPlaceholder")}
                       />
                     </FormControl>
                     <FormMessage />
@@ -455,7 +439,9 @@ export function MealEditForm({
               {/* --- Ingredients Section (MODIFIED) --- */}
               <div className="space-y-6 border-t pt-6">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-xl font-semibold">Ingredients*</h3>
+                  <h3 className="text-xl font-semibold">
+                    {t("ingredientsTitle")}
+                  </h3>
                   <Button
                     type="button"
                     variant="outline"
@@ -463,7 +449,7 @@ export function MealEditForm({
                     onClick={handleAddIngredient}
                     className="flex items-center gap-1"
                   >
-                    <Plus className="h-4 w-4" /> Add Ingredient
+                    <Plus className="h-4 w-4" /> {t("addIngredientButton")}
                   </Button>
                 </div>
                 <FormMessage>
@@ -493,14 +479,14 @@ export function MealEditForm({
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel className="text-lg font-semibold">
-                      Instructions
+                      {t("instructionsLabel")}
                     </FormLabel>
                     <FormControl>
                       <Textarea
                         {...field}
                         value={field.value ?? ""}
                         className="min-h-40"
-                        placeholder="Step-by-step instructions..."
+                        placeholder={t("instructionsPlaceholder")}
                       />
                     </FormControl>
                     <FormMessage />

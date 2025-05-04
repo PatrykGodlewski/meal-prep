@@ -3,6 +3,7 @@ import PaginatedMealList from "./PaginatedMealList"; // Import the new component
 import { Suspense } from "react";
 import { Skeleton } from "@/components/ui/skeleton"; // Import Skeleton for page level suspense
 import { SearchInput } from "./SearchInput";
+import { getTranslations } from "next-intl/server";
 
 const ListSkeleton = () => (
   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -35,16 +36,17 @@ const ListSkeleton = () => (
   </div>
 );
 
-export default function MealsPage() {
+export default async function MealsPage() {
+  const t = await getTranslations("mealList");
   return (
     <div>
       <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold">Meals</h1>
+        <h1 className="text-3xl font-bold">{t("meals")}</h1>
         <Link
           href="/meals/add"
           className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
         >
-          Add New Meal
+          {t("addMeal")}
         </Link>
       </div>
 

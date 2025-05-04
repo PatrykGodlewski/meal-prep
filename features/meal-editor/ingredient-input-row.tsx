@@ -44,6 +44,7 @@ import type { Doc } from "@/convex/_generated/dataModel";
 import { cn } from "@/lib/utils";
 import { INGREDIENT_CATEGORIES, UNITS } from "@/convex/schema";
 import type { MealAddFormValues, MealUpdateFormValues } from "./schema"; // Import both types
+import { useTranslations } from "next-intl";
 
 interface IngredientInputRowProps {
   index: number;
@@ -61,6 +62,7 @@ interface IngredientInputRowProps {
 export const IngredientInputRow: React.FC<IngredientInputRowProps> = React.memo(
   ({ index, control, availableIngredients, onRemove, setValue, field }) => {
     const [popoverOpen, setPopoverOpen] = useState(false);
+    const t = useTranslations("ingredient");
 
     const ingredientDefId = field.id;
 
@@ -238,7 +240,7 @@ export const IngredientInputRow: React.FC<IngredientInputRowProps> = React.memo(
                   <SelectContent>
                     {UNITS.map((unit) => (
                       <SelectItem key={unit} value={unit}>
-                        {unit}
+                        {t(unit)}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -255,7 +257,7 @@ export const IngredientInputRow: React.FC<IngredientInputRowProps> = React.memo(
               <FormItem>
                 <FormLabel className="text-xs">Category*</FormLabel>
                 <Select
-                  value={field.value ?? "other"} // Default to 'other'
+                  value={field.value ?? "other"}
                   onValueChange={field.onChange}
                 >
                   <FormControl>
@@ -266,7 +268,7 @@ export const IngredientInputRow: React.FC<IngredientInputRowProps> = React.memo(
                   <SelectContent>
                     {INGREDIENT_CATEGORIES.map((cat) => (
                       <SelectItem key={cat} value={cat} className="capitalize">
-                        {cat.replace(/_/g, " ")}
+                        {t(cat)}
                       </SelectItem>
                     ))}
                   </SelectContent>

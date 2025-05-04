@@ -1,17 +1,18 @@
-// components/meal-display-details.tsx
 import React from "react";
 import Image from "next/image";
-import { format } from "date-fns";
+import { useTranslations } from "next-intl";
 import {
   Clock,
   Users,
   ChefHat,
   Calendar,
   type LucideIcon,
-  Weight,
   Flame,
 } from "lucide-react";
 import type { Meal, MealIngredients } from "./types";
+import { format } from "date-fns";
+import { useDateLocale } from "@/hooks/use-date-locale";
+import { DATE_FORMAT_FULL } from "../meal-planner/utils";
 
 interface MealDisplayDetailsProps {
   meal: Meal;
@@ -29,13 +30,17 @@ function MealLabel({ icon: Icon, text }: MealLabelProps) {
   return (
     <div className="flex items-center mr-4 mb-2 whitespace-nowrap text-sm">
       <Icon className="h-4 w-4 mr-1.5 flex-shrink-0" />
-      <span>{text}</span>
+      <span className="first-letter:uppercase">{text}</span>
     </div>
   );
 }
 
 export const MealDisplayDetails: React.FC<MealDisplayDetailsProps> = React.memo(
   ({ meal, mealIngredients }) => {
+    const t = useTranslations("mealDetails");
+    const tIngredient = useTranslations("ingredient");
+    const dateLocale = useDateLocale();
+
     const totalTime = (meal.prepTimeMinutes || 0) + (meal.cookTimeMinutes || 0);
     const authorName = meal.createdBy;
     const caloriesByIngredients = mealIngredients.reduce(
@@ -45,7 +50,6 @@ export const MealDisplayDetails: React.FC<MealDisplayDetailsProps> = React.memo(
 
     return (
       <div className="bg-white dark:bg-neutral-900 rounded-lg shadow-md overflow-hidden">
-        {/* Image Section */}
         <div className="relative h-64 md:h-96 w-full bg-gray-200 dark:bg-neutral-800">
           {meal.imageUrl ? (
             <Image
@@ -54,11 +58,11 @@ export const MealDisplayDetails: React.FC<MealDisplayDetailsProps> = React.memo(
               fill
               className="object-cover"
               priority
-            /> // Added priority for potential LCP
+            />
           ) : (
             <div className="flex items-center justify-center h-full bg-gray-100 dark:bg-neutral-700">
               <span className="text-gray-500 dark:text-neutral-400 text-lg">
-                No image available
+                {t("noImage")}
               </span>
             </div>
           )}
@@ -74,95 +78,91 @@ export const MealDisplayDetails: React.FC<MealDisplayDetailsProps> = React.memo(
           </div>
         </div>
 
-        {/* Details Section */}
         <div className="p-6">
-          {/* Title */}
           <h1 className="text-3xl font-bold mb-2 text-gray-900 dark:text-white">
             {meal.name}
           </h1>
 
-          {/* Meta Info */}
           <div className="flex flex-wrap items-center text-gray-600 dark:text-neutral-400 mb-6">
-            <MealLabel icon={ChefHat} text={`By ${authorName}`} />
+            <MealLabel
+              icon={ChefHat}
+              text={t("author", { name: authorName })}
+            />
             <MealLabel
               icon={Calendar}
-              text={format(new Date(meal.createdAt), "P")}
+              text={format(meal.createdAt, DATE_FORMAT_FULL, {
+                locale: dateLocale,
+              })}
             />
             {totalTime > 0 && (
-              <MealLabel icon={Clock} text={`${totalTime} min total`} />
+              <MealLabel
+                icon={Clock}
+                text={t("totalTime", { count: totalTime })}
+              />
             )}
             {meal.servings && (
               <MealLabel
                 icon={Users}
-                text={`${meal.servings} ${meal.servings === 1 ? "serving" : "servings"}`}
+                text={t("servings", { count: meal.servings })}
               />
             )}
             {meal.calories && (
-              <MealLabel icon={Flame} text={`${meal.calories} ${"calories"}`} />
+              <MealLabel
+                icon={Flame}
+                text={t("calories", { count: meal.calories })}
+              />
             )}
             <MealLabel
               icon={Flame}
-              text={`${caloriesByIngredients} ${"calories by ingredients [dev mode]"}`}
+              text={t("caloriesByIngredients", {
+                count: caloriesByIngredients,
+              })}
             />
           </div>
 
-          {/* Description */}
-          {meal.description && ( // Conditionally render description section
+          {meal.description && (
             <div className="mb-8">
               <h2 className="text-xl font-semibold mb-2 text-gray-800 dark:text-gray-200">
-                Description
+                {t("descriptionTitle")}
               </h2>
-              {/* Use dangerouslySetInnerHTML ONLY if description contains trusted HTML, otherwise render as text */}
               <p className="text-gray-700 dark:text-neutral-300 prose prose-sm dark:prose-invert max-w-none">
                 {meal.description}
               </p>
             </div>
           )}
 
-          {/* Ingredients & Instructions Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Ingredients Column */}
             <div className="lg:col-span-1">
               <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-200">
-                Ingredients
+                {t("ingredientsTitle")}
               </h2>
               {mealIngredients && mealIngredients.length > 0 ? (
                 <ul className="space-y-2 text-sm text-gray-700 dark:text-neutral-300">
-                  {/* Map over mealIngredientsData */}
                   {mealIngredients.map((mealIngredient) => {
-                    // Gracefully handle if the nested ingredient is somehow null
                     if (!mealIngredient.ingredient) {
-                      console.warn(
-                        "Missing ingredient data for mealIngredient:",
-                        mealIngredient,
-                      );
-                      return null; // Skip rendering this item
+                      return null;
                     }
-                    const ingredient = mealIngredient.ingredient; // Alias for readability
+                    const ingredient = mealIngredient.ingredient;
                     return (
                       <li
                         key={ingredient._id}
                         className="flex items-start gap-2"
                       >
                         {" "}
-                        {/* Use ingredient.id as key */}
                         <span className="inline-block w-1.5 h-1.5 rounded-full bg-blue-500 mt-[7px] flex-shrink-0" />
                         <div>
-                          {/* Display quantity (from junction) and unit/name (from ingredient) */}
                           <span className="font-medium">
-                            {mealIngredient.quantity} {ingredient.unit}{" "}
-                            {ingredient.name}
+                            {mealIngredient.quantity}{" "}
+                            {tIngredient(ingredient.unit)} {ingredient.name}
                           </span>
-                          {/* Display category (from ingredient) */}
                           {ingredient.category && (
                             <span className="ml-2 text-xs text-gray-500 dark:text-neutral-400 capitalize">
-                              ({ingredient.category.replace(/_/g, " ")})
+                              ({tIngredient(ingredient.category)})
                             </span>
                           )}
-                          {/* Display optional/notes (from junction) */}
                           {mealIngredient.isOptional && (
                             <span className="ml-2 text-xs text-gray-500 dark:text-neutral-500">
-                              (optional)
+                              {t("optionalMarker")}
                             </span>
                           )}
                           {mealIngredient.notes && (
@@ -177,15 +177,14 @@ export const MealDisplayDetails: React.FC<MealDisplayDetailsProps> = React.memo(
                 </ul>
               ) : (
                 <p className="text-sm text-gray-500 dark:text-neutral-500 italic">
-                  No ingredients listed.
+                  {t("noIngredients")}
                 </p>
               )}
             </div>
 
-            {/* Instructions Column */}
             <div className="lg:col-span-2">
               <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-200">
-                Instructions
+                {t("instructionsTitle")}
               </h2>
               <div className="prose prose-sm dark:prose-invert max-w-none text-gray-700 dark:text-neutral-300">
                 {meal.instructions ? (
@@ -199,7 +198,7 @@ export const MealDisplayDetails: React.FC<MealDisplayDetailsProps> = React.memo(
                   )
                 ) : (
                   <p className="text-gray-500 dark:text-neutral-500 italic">
-                    No instructions provided.
+                    {t("noInstructions")}
                   </p>
                 )}
               </div>
