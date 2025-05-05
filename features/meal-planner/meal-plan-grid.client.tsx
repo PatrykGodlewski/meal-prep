@@ -61,7 +61,7 @@ export const MealPlanDisplay = () => {
                   "self-center h-auto transition-shadow rounded-xl w-full cursor-pointer bg-neutral-200 dark:bg-neutral-900 flex flex-col items-center justify-center p-4 sm:p-8 aspect-square",
                   {
                     "ring-3 ring-white disabled:opacity-100": isSelected,
-                    "py-5 border-2 bg-neutral-900 dark:bg-neutral-200 text-neutral-200 dark:text-neutral-900 ":
+                    "py-5 border-2 bg-neutral-900 dark:bg-neutral-200 text-neutral-200 dark:text-neutral-900 dark:hover:bg-neutral-100 ring-offset-2 ring-offset-neutral-950":
                       isToday(day.date),
                   },
                 )}
@@ -69,11 +69,11 @@ export const MealPlanDisplay = () => {
                   mealPlannerState$.selectedPlanId.set(day.id);
                 }}
               >
-                <span className="text-xs hidden @sm/main:block font-medium uppercase text-muted-foreground">
+                <span className="text-xs hidden @lg/main:block font-medium uppercase text-muted-foreground">
                   {format(day.date, "EEEEEEE", { locale: dateLocale })}
                 </span>
 
-                <span className="text-xs font-medium @sm/main:hidden uppercase text-muted-foreground">
+                <span className="text-xs font-medium @lg/main:hidden uppercase text-muted-foreground">
                   {format(day.date, "EEEEEE", { locale: dateLocale })}
                 </span>
 

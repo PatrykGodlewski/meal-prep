@@ -70,14 +70,15 @@ export function PlanCard({ plan }: PlanCardProps) {
   return (
     <Card
       className={cn(
-        "shadow-xs flex flex-col min-h-[150px] hover:bg-neutral-100 dark:hover:bg-neutral-900 transition-colors duration-700",
+        "shadow-xs flex py-0 flex-col min-h-[150px] hover:bg-neutral-100 dark:hover:bg-neutral-900 dark:bg-neutral-950 transition-colors duration-700",
       )}
     >
-      <CardHeader className="p-3">
-        <CardTitle className="flex items-center justify-between text-sm font-medium ">
+      <CardHeader className="pt-3 px-3">
+        <CardTitle className="flex items-center py-0 justify-between text-sm font-medium ">
           <Button
             variant="ghost"
             size="icon"
+            className="mr-2"
             onClick={() => lockMealPlan(plan._id)}
             disabled={isLocking}
             aria-label={plan.locked ? t("unlockPlan") : t("lockPlan")}
@@ -119,7 +120,7 @@ export function PlanCard({ plan }: PlanCardProps) {
                       "rounded-xl p-2 border-dashed border-2 border-neutral-500":
                         !isPlannedMeal,
                     })}
-                    key={`${plan._id}-${plannedMeal.meal?.category}-${plannedMeal._id}`}
+                    key={`${plan._id}-${plannedMeal.meal?.categories?.toString}-${plannedMeal._id}`}
                   >
                     {isPlannedMeal ? (
                       <Link

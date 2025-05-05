@@ -1,16 +1,12 @@
 "use client";
 
-import { ThemeProvider } from "next-themes";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
-import { useState } from "react";
 import { Toaster } from "@/components/ui/toaster";
-import { ConvexReactClient } from "convex/react";
 import { ConvexAuthNextjsProvider } from "@convex-dev/auth/nextjs";
 import { ConvexQueryClient } from "@convex-dev/react-query";
-import { hasLocale, NextIntlClientProvider } from "next-intl";
-import { routing } from "@/i18n/routing";
-import { notFound } from "next/navigation";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+import { ConvexReactClient } from "convex/react";
+import { ThemeProvider } from "next-themes";
 
 const convex = new ConvexReactClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
 const convexQueryClient = new ConvexQueryClient(convex);
@@ -22,6 +18,7 @@ const queryClient = new QueryClient({
     },
   },
 });
+
 convexQueryClient.connect(queryClient);
 
 export function ConvexClientProvider({

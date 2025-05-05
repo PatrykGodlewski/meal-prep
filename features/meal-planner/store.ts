@@ -1,5 +1,5 @@
 "use client";
-import { observable } from "@legendapp/state";
+import { batch, observable } from "@legendapp/state";
 import { use$, useWhenReady } from "@legendapp/state/react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { addDays, subDays, isToday } from "date-fns";
@@ -10,7 +10,7 @@ import { convexQuery, useConvexMutation } from "@convex-dev/react-query";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
 import type { DateRange } from "react-day-picker";
-import { FunctionReturnType, FunctionType } from "convex/server";
+import type { FunctionReturnType } from "convex/server";
 
 type Store = {
   currentWeek: Date;
@@ -35,13 +35,25 @@ const setCurrentWeek = (date: Date) => {
 const handleNavigatePrevious = () => {
   const currentMonday = getMonday(mealPlannerState$.currentWeek.get());
   const previousWeekStart = subDays(currentMonday, 7);
-  mealPlannerState$.currentWeek.set(previousWeekStart);
+  batch(() => {
+    mealPlannerState$.currentWeek.set(previousWeekStart);
+    mealPlannerState$.shoppingListDate.set({
+      from: previousWeekStart,
+      to: addDays(previousWeekStart, 6),
+    });
+  });
 };
 
 const handleNavigateNext = () => {
   const currentMonday = getMonday(mealPlannerState$.currentWeek.get());
   const nextWeekStart = addDays(currentMonday, 7);
-  mealPlannerState$.currentWeek.set(nextWeekStart);
+  batch(() => {
+    mealPlannerState$.currentWeek.set(nextWeekStart);
+    mealPlannerState$.shoppingListDate.set({
+      from: nextWeekStart,
+      to: addDays(nextWeekStart, 6),
+    });
+  });
 };
 
 export const useMealPlanner = () => {
@@ -132,8 +144,7 @@ export const useMealPlanner = () => {
 
   useWhenReady(mealPlanData, (mealPlans) =>
     mealPlannerState$.selectedPlanId.set(
-      mealPlans?.find((plan) => isToday(plan.date))?._id ??
-        mealPlans?.find((plan) => plan.date === currentWeek.getTime())?._id,
+      mealPlans?.find((plan) => plan.date === currentWeek.getTime())?._id,
     ),
   );
 

@@ -5,6 +5,7 @@ import { api } from "@/convex/_generated/api";
 import { notFound } from "next/navigation";
 import { MealPlanDetail } from "./MealPlanDetailClient";
 import { getTranslations } from "next-intl/server";
+import { convexAuthNextjsToken } from "@convex-dev/auth/nextjs/server";
 
 interface PlanDetailPageProps {
   params: Promise<{ id: Id<"mealPlans"> }>;
@@ -13,9 +14,13 @@ interface PlanDetailPageProps {
 export default async function PlanDetailPage({ params }: PlanDetailPageProps) {
   const planId = (await params).id;
 
-  const preloadedMealPlan = await preloadQuery(api.mealPlans.getMealPlan, {
-    mealPlanId: planId,
-  });
+  const preloadedMealPlan = await preloadQuery(
+    api.mealPlans.getMealPlan,
+    {
+      mealPlanId: planId,
+    },
+    { token: await convexAuthNextjsToken() },
+  );
 
   if (!preloadedMealPlan) {
     notFound();

@@ -35,7 +35,7 @@ export function ShoppingListDisplay() {
   return (
     <div className="p-4 border rounded-lg shadow-xs bg-white hover:bg-neutral-100/75 dark:hover:bg-neutral-900 dark:bg-neutral-950/75 ease-in duration-700 transition-colors min-h-[500px]">
       <div className={"flex  flex-wrap justify-between"}>
-        <h1 className="text-3xl font-bold flex items-center gap-4 border-b pb-4">
+        <h1 className="text-3xl font-bold flex items-center gap-4  pb-4">
           <ShoppingCart />
           {t("shoppingList")}
         </h1>
@@ -155,8 +155,8 @@ function ShoppingListItem({ amount, unit, name, isChecked, ids }: Props) {
         htmlFor={uniqueId}
         id={labelId}
         className={cn(
-          "flex items-center p-3 justify-between rounded-md border bg-neutral-0 dark:bg-neutral-800 border-neutral-700 shadow-xs transition-colors",
-          "hover:bg-neutral-100 dark:hover:bg-neutral-700/50 cursor-pointer",
+          "flex items-center p-3 justify-between rounded-md border bg-neutral-0 dark:bg-neutral-950 border-neutral-700 shadow-xs transition-colors",
+          "hover:bg-neutral-100 dark:hover:bg-neutral-800 cursor-pointer",
         )}
       >
         <div className="flex items-center gap-2">

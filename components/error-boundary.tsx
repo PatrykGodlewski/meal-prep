@@ -64,7 +64,10 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, State> {
 
     return (
       <div data-test-id={this.props.dataTestId || "error-boundary"}>
-        <h2>"oopsie kacper zepsół"</h2>
+        <h2>
+          "Client side error"{" "}
+          {this.state.error instanceof Error ? this.state.error.message : ""}
+        </h2>
       </div>
     );
   }
