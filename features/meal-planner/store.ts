@@ -1,15 +1,15 @@
 "use client";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
-import { useToast } from "@/hooks/use-toast";
 import { convexQuery, useConvexMutation } from "@convex-dev/react-query";
 import { batch, observable } from "@legendapp/state";
 import { use$, useWhenReady } from "@legendapp/state/react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import type { FunctionReturnType } from "convex/server";
-import { addDays, isToday, subDays } from "date-fns";
+import { addDays, subDays } from "date-fns";
 import { useTranslations } from "next-intl";
 import type { DateRange } from "react-day-picker";
+import { toast } from "sonner";
 import { getMonday, getSaturday } from "./utils";
 
 type Store = {
@@ -61,7 +61,6 @@ export const useMealPlanner = () => {
   const selectedPlanId = use$(mealPlannerState$.selectedPlanId);
 
   const t = useTranslations("mealPlanner");
-  const { toast } = useToast();
 
   const {
     data: mealPlanData,
@@ -90,20 +89,17 @@ export const useMealPlanner = () => {
         api.planAndList.generatePlanAndShoppingList,
       ),
       onSuccess: () => {
-        toast({
-          title: t("toast.successTitle"),
+        toast(t("toast.successTitle"), {
           description: t("generatePlanSuccessDescription"),
         });
       },
       onError: (error) => {
         console.error("Error generating meal plan:", error);
-        toast({
-          title: t("toast.errorTitle"),
+        toast(t("toast.errorTitle"), {
           description:
             error instanceof Error
               ? error.message
               : t("generatePlanErrorUnknown"),
-          variant: "destructive",
         });
       },
     });
@@ -118,8 +114,7 @@ export const useMealPlanner = () => {
     onSuccess: (
       data: FunctionReturnType<typeof api.mealPlans.lockMealPlan>,
     ) => {
-      toast({
-        title: t("toast.successTitle"),
+      toast(t("toast.successTitle"), {
         description: data.locked
           ? t("lockPlanSuccessDescription")
           : t("unlockPlanSuccessDescription"),
@@ -127,11 +122,9 @@ export const useMealPlanner = () => {
     },
     onError: (error) => {
       console.error("Error locking meal plan:", error);
-      toast({
-        title: t("toast.errorTitle"),
+      toast(t("toast.errorTitle"), {
         description:
           error instanceof Error ? error.message : t("lockPlanErrorFallback"),
-        variant: "destructive",
       });
     },
   });

@@ -31,12 +31,12 @@ import {
   mutationMealEditSchema,
 } from "@/convex/meals/validators";
 import { MEAL_CATEGORIES } from "@/convex/schema";
-import { toast } from "@/hooks/use-toast";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { FunctionReturnType } from "convex/server";
 import { Clock, Plus, Save, Trash2, Users, Weight } from "lucide-react"; // Added icons
 import { useTranslations } from "next-intl";
 import { useFieldArray, useForm } from "react-hook-form";
+import { toast } from "sonner";
 import { IngredientInputRow } from "./ingredient-input-row";
 import type { IngredientFormValues } from "./schema";
 import { useMealEditor } from "./store";
@@ -137,10 +137,8 @@ export function MealEditForm({
 
   const handleDeleteConfirm = () => {
     if (!meal?._id) {
-      toast({
-        title: t("toastErrorTitle"),
+      toast(t("toastErrorTitle"), {
         description: t("toastDeleteErrorMissingId"),
-        variant: "destructive",
       });
       return;
     }

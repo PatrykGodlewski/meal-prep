@@ -73,6 +73,9 @@ export const mealIngredientsValidator = zodOutputToConvex(
 
 export const profileValidator = v.object({
   userId: v.id("users"),
+  settings: v.object({
+    servings: v.number(),
+  }),
   nickname: v.optional(v.string()),
   createdAt: v.number(),
   updatedAt: v.number(),

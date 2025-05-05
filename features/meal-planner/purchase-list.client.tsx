@@ -6,7 +6,6 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
-import { toast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { useConvexMutation } from "@convex-dev/react-query";
 import { use$ } from "@legendapp/state/react";
@@ -15,6 +14,7 @@ import { camelCase, snakeCase } from "lodash";
 import { ShoppingCart } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useId } from "react";
+import { toast } from "sonner";
 import { DatePickerWithPresets } from "./date-picker";
 import { useMealPlanner } from "./store";
 
@@ -136,11 +136,9 @@ function ShoppingListItem({ amount, unit, name, isChecked, ids }: Props) {
 
     onError: (error) => {
       console.error(error);
-      toast({
-        title: "Error",
+      toast("Error", {
         description:
           error instanceof Error ? error.message : "An unknown error occurred.",
-        variant: "destructive",
       });
     },
   });
