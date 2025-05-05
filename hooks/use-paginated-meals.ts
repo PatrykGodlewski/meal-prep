@@ -1,8 +1,8 @@
-import { useEffect, useRef, useState, type RefObject } from "react";
-import { useSearchParams } from "next/navigation";
 import { api } from "@/convex/_generated/api";
-import { usePaginatedQuery } from "convex/react";
 import { MEAL_CATEGORIES } from "@/convex/schema";
+import { usePaginatedQuery } from "convex/react";
+import { useSearchParams } from "next/navigation";
+import { type RefObject, useEffect, useRef, useState } from "react";
 import { z } from "zod";
 
 export const SEARCH_PARAM_KEY = "q";

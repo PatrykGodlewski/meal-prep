@@ -1,5 +1,10 @@
 "use client";
 
+import { Link, usePathname } from "@/i18n/navigation";
+import { LOCALES } from "@/i18n/routing";
+import { Globe2 } from "lucide-react";
+import { useLocale } from "next-intl";
+import { Button } from "./ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -7,11 +12,6 @@ import {
   DropdownMenuRadioItem,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
-import { LOCALES } from "@/i18n/routing";
-import { Globe2 } from "lucide-react";
-import { Button } from "./ui/button";
-import { Link, usePathname } from "@/i18n/navigation";
-import { useLocale } from "next-intl";
 
 export function LanguageSwitcher() {
   const locale = useLocale();

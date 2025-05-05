@@ -1,7 +1,7 @@
-import { defineSchema, defineTable } from "convex/server";
-import { zodOutputToConvex, zid } from "convex-helpers/server/zod";
-import { v } from "convex/values";
 import { authTables } from "@convex-dev/auth/server";
+import { zid, zodOutputToConvex } from "convex-helpers/server/zod";
+import { defineSchema, defineTable } from "convex/server";
+import { v } from "convex/values";
 import { z } from "zod";
 
 export const DEFAULT_INGREDIENT_CATEGORY = "other" as const;

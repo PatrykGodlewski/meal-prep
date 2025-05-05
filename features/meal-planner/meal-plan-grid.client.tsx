@@ -1,14 +1,14 @@
 "use client";
 
-import { addDays, format, isToday } from "date-fns";
 import { Button } from "@/components/ui/button";
-import { Loader2, ChevronLeft, ChevronRight } from "lucide-react";
+import { useDateLocale } from "@/hooks/use-date-locale";
+import { cn } from "@/lib/utils";
+import { addDays, format, isToday } from "date-fns";
+import { enUS, pl } from "date-fns/locale";
+import { ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
+import { useLocale, useTranslations } from "next-intl";
 import { PlanCard } from "./day-card";
 import { useMealPlanner } from "./store";
-import { cn } from "@/lib/utils";
-import { useLocale, useTranslations } from "next-intl";
-import { pl, enUS } from "date-fns/locale";
-import { useDateLocale } from "@/hooks/use-date-locale";
 
 export const MealPlanDisplay = () => {
   const {

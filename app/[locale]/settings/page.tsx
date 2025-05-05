@@ -1,8 +1,8 @@
 import { LanguageSwitcher } from "@/components/language-switcher";
 import { ThemeSwitcher } from "@/components/theme-switcher";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Users2 } from "lucide-react";
-import { Input } from "@/components/ui/input";
 
 export default function SettingsPage() {
   return (

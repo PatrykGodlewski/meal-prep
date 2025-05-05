@@ -1,6 +1,6 @@
 import { v } from "convex/values";
-import { authMutation } from "../custom/mutation";
 import { internal } from "../_generated/api";
+import { authMutation } from "../custom/mutation";
 import {
   mutationMealAddValidator,
   mutationMealEditValidator,

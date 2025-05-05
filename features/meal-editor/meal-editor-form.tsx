@@ -1,4 +1,16 @@
 "use client";
+import { MultiSelect } from "@/components/multi-select";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -12,35 +24,23 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import type { Doc } from "@/convex/_generated/dataModel";
-import { Clock, Plus, Save, Trash2, Users, Weight } from "lucide-react"; // Added icons
-import { useFieldArray, useForm } from "react-hook-form";
-import type { IngredientFormValues } from "./schema";
-import { MEAL_CATEGORIES } from "@/convex/schema";
-import type { Meal } from "./types";
 import type { api } from "@/convex/_generated/api";
+import type { Doc } from "@/convex/_generated/dataModel";
+import {
+  type MutationMealEditValues,
+  mutationMealEditSchema,
+} from "@/convex/meals/validators";
+import { MEAL_CATEGORIES } from "@/convex/schema";
 import { toast } from "@/hooks/use-toast";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { FunctionReturnType } from "convex/server";
-import { IngredientInputRow } from "./ingredient-input-row";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
-import { useMealEditor } from "./store";
+import { Clock, Plus, Save, Trash2, Users, Weight } from "lucide-react"; // Added icons
 import { useTranslations } from "next-intl";
-import {
-  mutationMealEditSchema,
-  type MutationMealEditValues,
-} from "@/convex/meals/validators";
-import { MultiSelect } from "@/components/multi-select";
+import { useFieldArray, useForm } from "react-hook-form";
+import { IngredientInputRow } from "./ingredient-input-row";
+import type { IngredientFormValues } from "./schema";
+import { useMealEditor } from "./store";
+import type { Meal } from "./types";
 
 const mapPreloadedDataToFormValues = (
   meal: FunctionReturnType<typeof api.meals.queries.getMeal>,

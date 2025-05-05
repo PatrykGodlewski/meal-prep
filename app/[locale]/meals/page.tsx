@@ -1,9 +1,9 @@
-import Link from "next/link";
-import PaginatedMealList from "./PaginatedMealList"; // Import the new component
-import { Suspense } from "react";
 import { Skeleton } from "@/components/ui/skeleton"; // Import Skeleton for page level suspense
-import { SearchInput } from "./SearchInput";
 import { getTranslations } from "next-intl/server";
+import Link from "next/link";
+import { Suspense } from "react";
+import PaginatedMealList from "./PaginatedMealList"; // Import the new component
+import { SearchInput } from "./SearchInput";
 
 const ListSkeleton = () => (
   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

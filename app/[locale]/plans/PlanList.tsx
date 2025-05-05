@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button";
 import type { api } from "@/convex/_generated/api";
 import { useDateLocale } from "@/hooks/use-date-locale";
-import { usePreloadedQuery, type Preloaded } from "convex/react";
+import { type Preloaded, usePreloadedQuery } from "convex/react";
 import { format } from "date-fns";
 import { useTranslations } from "next-intl";
 import Link from "next/link";

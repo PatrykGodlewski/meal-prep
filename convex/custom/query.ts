@@ -1,6 +1,6 @@
-import { customQuery, customCtx } from "convex-helpers/server/customFunctions";
-import { query } from "../_generated/server";
 import { getAuthUserId } from "@convex-dev/auth/server";
+import { customCtx, customQuery } from "convex-helpers/server/customFunctions";
+import { query } from "../_generated/server";
 
 export const authQuery = customQuery(
   query,

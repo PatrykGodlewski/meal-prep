@@ -1,9 +1,9 @@
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
-import { BreadcrumbClient } from "./breadcrumbs";
-import { ThemeSwitcher } from "./theme-switcher";
-import { LanguageSwitcher } from "./language-switcher";
 import { Suspense } from "react";
+import { BreadcrumbClient } from "./breadcrumbs";
+import { LanguageSwitcher } from "./language-switcher";
+import { ThemeSwitcher } from "./theme-switcher";
 
 export function SiteHeader() {
   return (

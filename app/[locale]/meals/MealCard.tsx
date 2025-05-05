@@ -1,18 +1,18 @@
-import Image from "next/image";
-import Link from "next/link";
-import {
-  Clock,
-  Users,
-  ChefHat,
-  UtensilsCrossed,
-  Weight,
-  Flame,
-} from "lucide-react";
 import type { Doc } from "@/convex/_generated/dataModel";
-import { useTranslations } from "next-intl";
+import { DATE_FORMAT_DISPLAY_CARD } from "@/features/meal-planner/utils";
 import { useDateLocale } from "@/hooks/use-date-locale";
 import { format } from "date-fns";
-import { DATE_FORMAT_DISPLAY_CARD } from "@/features/meal-planner/utils";
+import {
+  ChefHat,
+  Clock,
+  Flame,
+  Users,
+  UtensilsCrossed,
+  Weight,
+} from "lucide-react";
+import { useTranslations } from "next-intl";
+import Image from "next/image";
+import Link from "next/link";
 
 type Props = {
   meal: Doc<"meals">;

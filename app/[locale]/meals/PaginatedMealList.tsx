@@ -1,10 +1,10 @@
 "use client";
 
-import type React from "react";
 import { For } from "@/components/for-each";
 import { Skeleton } from "@/components/ui/skeleton";
-import { MealCard } from "./MealCard";
 import { usePaginatedMeals } from "@/hooks/use-paginated-meals";
+import type React from "react";
+import { MealCard } from "./MealCard";
 
 // --- Skeleton Loader for Meal Card (Keep this presentation logic here) ---
 const MealCardSkeleton = () => (

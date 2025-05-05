@@ -1,4 +1,4 @@
-import { startOfWeek, isValid, endOfWeek } from "date-fns";
+import { endOfWeek, isValid, startOfWeek } from "date-fns";
 
 export const DATE_FORMAT_DISPLAY_HEADER = "MMMM do";
 export const DATE_FORMAT_DISPLAY_CARD = "MMM dd";

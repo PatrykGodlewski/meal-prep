@@ -1,17 +1,17 @@
 "use client";
 import { For } from "@/components/for-each";
-import { usePreloadedQuery, type Preloaded } from "convex/react";
-import Link from "next/link";
-import { useConvexMutation } from "@convex-dev/react-query";
-import { api } from "@/convex/_generated/api";
 import { Button } from "@/components/ui/button";
-import type { FunctionReturnType } from "convex/server";
-import { ModalMeals } from "./ModalMeals";
-import { useState } from "react";
+import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
 import { MEAL_CATEGORIES } from "@/convex/schema";
 import { cn } from "@/lib/utils";
+import { useConvexMutation } from "@convex-dev/react-query";
+import { type Preloaded, usePreloadedQuery } from "convex/react";
+import type { FunctionReturnType } from "convex/server";
 import { useTranslations } from "next-intl";
+import Link from "next/link";
+import { useState } from "react";
+import { ModalMeals } from "./ModalMeals";
 
 interface Props {
   preloadedMealPlan: Preloaded<typeof api.mealPlans.getMealPlan>;

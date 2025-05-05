@@ -1,7 +1,7 @@
-import { z } from "zod";
-import { mealSchema } from "../schema";
-import { mutationMealIngredientsSchema } from "../ingredients/validators";
 import { zid, zodOutputToConvex } from "convex-helpers/server/zod";
+import { z } from "zod";
+import { mutationMealIngredientsSchema } from "../ingredients/validators";
+import { mealSchema } from "../schema";
 
 export const mutationMealAddSchema = mealSchema
   .merge(z.object({ ingredients: z.array(mutationMealIngredientsSchema) }))

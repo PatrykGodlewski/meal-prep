@@ -1,6 +1,6 @@
 import { zid, zodOutputToConvex } from "convex-helpers/server/zod";
-import { ingredientSchema, mealIngredientsSchema } from "../schema";
 import type { z } from "zod";
+import { ingredientSchema, mealIngredientsSchema } from "../schema";
 
 export const mutationIngredientSchema = ingredientSchema.omit({
   createdAt: true,

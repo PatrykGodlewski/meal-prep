@@ -1,10 +1,10 @@
-import React from "react";
 import { api } from "@/convex/_generated/api";
-import { preloadQuery } from "convex/nextjs";
-import { notFound } from "next/navigation";
-import { PlanList } from "./PlanList";
 import { convexAuthNextjsToken } from "@convex-dev/auth/nextjs/server";
+import { preloadQuery } from "convex/nextjs";
 import { getTranslations } from "next-intl/server";
+import { notFound } from "next/navigation";
+import React from "react";
+import { PlanList } from "./PlanList";
 
 export default async function WeeklyPlanPage() {
   const preloadedPlans = await preloadQuery(

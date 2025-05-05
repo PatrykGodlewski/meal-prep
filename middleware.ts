@@ -3,8 +3,8 @@ import {
   createRouteMatcher,
   nextjsMiddlewareRedirect,
 } from "@convex-dev/auth/nextjs/server";
-import { routing } from "./i18n/routing";
 import createMiddleware from "next-intl/middleware";
+import { routing } from "./i18n/routing";
 
 const isSignInPage = createRouteMatcher([
   "/sign-in",

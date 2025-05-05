@@ -1,45 +1,45 @@
 {
-    "$schema": "https://biomejs.dev/schemas/1.9.4/schema.json",
-    "vcs": {
-        "enabled": false,
-        "clientKind": "git",
-        "useIgnoreFile": false
-    },
-    "files": {
-        "ignoreUnknown": false,
-        "ignore": ["node_modules/**", ".next/**", "_*/**"]
-    },
-    "formatter": {
-        "enabled": true,
-        "ignore": [],
-        "attributePosition": "auto",
-        "indentStyle": "space",
-        "indentWidth": 2,
-        "lineWidth": 80,
-        "lineEnding": "lf"
-    },
-    "organizeImports": {
-        "enabled": true
-    },
-    "linter": {
-        "enabled": true,
-        "rules": {
-            "recommended": true,
-            "style": {
-                "noNonNullAssertion": "off"
-            },
-            "suspicious": {
-                "noArrayIndexKey": "off",
-                "useAwait": "error"
-            },
-            "correctness": {
-                "useExhaustiveDependencies": "off"
-            }
-        }
-    },
-    "javascript": {
-        "formatter": {
-            "quoteStyle": "double"
-        }
+  "$schema": "https://biomejs.dev/schemas/1.9.4/schema.json",
+  "vcs": {
+    "enabled": false,
+    "clientKind": "git",
+    "useIgnoreFile": false
+  },
+  "files": {
+    "ignoreUnknown": false,
+    "ignore": ["node_modules/**", ".next/**", "_*/**"]
+  },
+  "formatter": {
+    "enabled": true,
+    "ignore": [],
+    "attributePosition": "auto",
+    "indentStyle": "space",
+    "indentWidth": 2,
+    "lineWidth": 80,
+    "lineEnding": "lf"
+  },
+  "organizeImports": {
+    "enabled": true
+  },
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "recommended": true,
+      "style": {
+        "noNonNullAssertion": "off"
+      },
+      "suspicious": {
+        "noArrayIndexKey": "off",
+        "useAwait": "error"
+      },
+      "correctness": {
+        "useExhaustiveDependencies": "off"
+      }
     }
+  },
+  "javascript": {
+    "formatter": {
+      "quoteStyle": "double"
+    }
+  }
 }

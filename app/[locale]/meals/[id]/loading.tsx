@@ -1,5 +1,5 @@
 import { Skeleton } from "@/components/ui/skeleton";
-import { Clock, Users, ChefHat, Calendar } from "lucide-react";
+import { Calendar, ChefHat, Clock, Users } from "lucide-react";
 
 // Helper component for meta labels skeleton
 function MealLabelSkeleton() {

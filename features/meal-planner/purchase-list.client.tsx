@@ -1,22 +1,22 @@
 "use client";
 
-import { useId } from "react";
+import { For } from "@/components/for-each";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
-import { cn } from "@/lib/utils";
-import { useMealPlanner } from "./store";
-import { useMutation } from "@tanstack/react-query";
-import { For } from "@/components/for-each";
-import { camelCase, snakeCase } from "lodash";
-import { useConvexMutation } from "@convex-dev/react-query";
-import { api } from "@/convex/_generated/api";
-import { toast } from "@/hooks/use-toast";
-import type { Id } from "@/convex/_generated/dataModel";
-import { ShoppingCart } from "lucide-react";
-import { DatePickerWithPresets } from "./date-picker";
-import { use$ } from "@legendapp/state/react";
-import { useTranslations } from "next-intl";
 import { Separator } from "@/components/ui/separator";
+import { api } from "@/convex/_generated/api";
+import type { Id } from "@/convex/_generated/dataModel";
+import { toast } from "@/hooks/use-toast";
+import { cn } from "@/lib/utils";
+import { useConvexMutation } from "@convex-dev/react-query";
+import { use$ } from "@legendapp/state/react";
+import { useMutation } from "@tanstack/react-query";
+import { camelCase, snakeCase } from "lodash";
+import { ShoppingCart } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { useId } from "react";
+import { DatePickerWithPresets } from "./date-picker";
+import { useMealPlanner } from "./store";
 
 export function ShoppingListDisplay() {
   const { shoppingListData: list } = useMealPlanner();

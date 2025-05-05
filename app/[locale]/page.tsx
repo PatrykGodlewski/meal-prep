@@ -1,12 +1,12 @@
-import { CalendarDays } from "lucide-react";
+import { ErrorBoundary } from "@/components/error-boundary";
 import {
   MealPlanDisplay,
   MealPlannerHeader,
 } from "@/features/meal-planner/meal-plan-grid.client";
 import { ShoppingListDisplay } from "@/features/meal-planner/purchase-list.client";
-import { Suspense } from "react";
-import { ErrorBoundary } from "@/components/error-boundary";
+import { CalendarDays } from "lucide-react";
 import { getTranslations } from "next-intl/server";
+import { Suspense } from "react";
 
 export default async function Home() {
   const t = await getTranslations("mealPlanner");

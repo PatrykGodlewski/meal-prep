@@ -1,22 +1,15 @@
-import * as React from "react";
-import { cva, type VariantProps } from "class-variance-authority";
+import { type VariantProps, cva } from "class-variance-authority";
 import {
   CheckIcon,
-  XCircle,
   ChevronDown,
-  XIcon,
   WandSparkles,
+  XCircle,
+  XIcon,
 } from "lucide-react";
+import * as React from "react";
 
-import { cn } from "@/lib/utils";
-import { Separator } from "@/components/ui/separator";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+import { Button } from "@/components/ui/button";
 import {
   Command,
   CommandEmpty,
@@ -26,6 +19,13 @@ import {
   CommandList,
   CommandSeparator,
 } from "@/components/ui/command";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Separator } from "@/components/ui/separator";
+import { cn } from "@/lib/utils";
 import { useTranslations } from "next-intl";
 
 /**
@@ -118,33 +118,29 @@ interface MultiSelectProps
   className?: string;
 }
 
-export const MultiSelect = (
-  {
-    ref,
-    options,
-    onValueChange,
-    variant,
-    defaultValue = [],
-    placeholder = "Select options",
-    animation = 0,
-    maxCount = 3,
-    modalPopover = false,
-    asChild = false,
-    className,
-    ...props
-  }: MultiSelectProps & {
-    ref: React.RefObject<HTMLButtonElement>;
-  }
-) => {
+export const MultiSelect = ({
+  ref,
+  options,
+  onValueChange,
+  variant,
+  defaultValue = [],
+  placeholder = "Select options",
+  animation = 0,
+  maxCount = 3,
+  modalPopover = false,
+  asChild = false,
+  className,
+  ...props
+}: MultiSelectProps & {
+  ref: React.RefObject<HTMLButtonElement>;
+}) => {
   const [selectedValues, setSelectedValues] =
     React.useState<string[]>(defaultValue);
   const [isPopoverOpen, setIsPopoverOpen] = React.useState(false);
   const [isAnimating, setIsAnimating] = React.useState(false);
   const t = useTranslations();
 
-  const handleInputKeyDown = (
-    event: React.KeyboardEvent<HTMLInputElement>,
-  ) => {
+  const handleInputKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
     if (event.key === "Enter") {
       setIsPopoverOpen(true);
     } else if (event.key === "Backspace" && !event.currentTarget.value) {

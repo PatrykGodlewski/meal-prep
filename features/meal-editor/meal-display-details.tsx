@@ -1,18 +1,18 @@
-import React from "react";
-import Image from "next/image";
-import { useTranslations } from "next-intl";
-import {
-  Clock,
-  Users,
-  ChefHat,
-  Calendar,
-  type LucideIcon,
-  Flame,
-} from "lucide-react";
-import type { Meal, MealIngredients } from "./types";
-import { format } from "date-fns";
 import { useDateLocale } from "@/hooks/use-date-locale";
+import { format } from "date-fns";
+import {
+  Calendar,
+  ChefHat,
+  Clock,
+  Flame,
+  type LucideIcon,
+  Users,
+} from "lucide-react";
+import { useTranslations } from "next-intl";
+import Image from "next/image";
+import React from "react";
 import { DATE_FORMAT_FULL } from "../meal-planner/utils";
+import type { Meal, MealIngredients } from "./types";
 
 interface MealDisplayDetailsProps {
   meal: Meal;

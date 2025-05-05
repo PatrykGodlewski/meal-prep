@@ -1,8 +1,4 @@
 "use client";
-import * as React from "react";
-import { addDays, endOfMonth, format, startOfMonth } from "date-fns";
-import { Calendar as CalendarIcon } from "lucide-react";
-import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import {
@@ -17,10 +13,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { getMonday, getSaturday } from "./utils";
-import { useMealPlanner } from "./store";
-import { use$ } from "@legendapp/state/react";
 import { useDateLocale } from "@/hooks/use-date-locale";
+import { cn } from "@/lib/utils";
+import { use$ } from "@legendapp/state/react";
+import { addDays, endOfMonth, format, startOfMonth } from "date-fns";
+import { Calendar as CalendarIcon } from "lucide-react";
+import * as React from "react";
+import { useMealPlanner } from "./store";
+import { getMonday, getSaturday } from "./utils";
 
 export function DatePickerWithPresets() {
   const { mealPlannerState$ } = useMealPlanner();

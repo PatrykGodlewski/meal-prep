@@ -1,7 +1,7 @@
 import { Geist } from "next/font/google";
 import "./globals.css";
-import Providers from "./providers";
 import { ConvexAuthNextjsServerProvider } from "@convex-dev/auth/nextjs/server";
+import Providers from "./providers";
 
 export const metadata = {
   title: "Skibidi Obiadex",

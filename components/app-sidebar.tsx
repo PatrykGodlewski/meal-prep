@@ -1,10 +1,4 @@
 "use client";
-import {
-  CalendarCog,
-  LayoutDashboardIcon,
-  ListIcon,
-  Triangle,
-} from "lucide-react";
 import { NavMain } from "@/components/nav-main";
 import { NavSecondary } from "@/components/nav-secondary";
 import { NavUser } from "@/components/nav-user";
@@ -17,11 +11,17 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { NavGuest } from "./nav-guest";
 import { useConvexAuth } from "convex/react";
+import {
+  CalendarCog,
+  LayoutDashboardIcon,
+  ListIcon,
+  Triangle,
+} from "lucide-react";
+import { useTranslations } from "next-intl";
+import { NavGuest } from "./nav-guest";
 import { NavList } from "./nav-list";
 import { Separator } from "./ui/separator";
-import { useTranslations } from "next-intl";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { isAuthenticated } = useConvexAuth();

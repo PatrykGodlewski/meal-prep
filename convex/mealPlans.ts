@@ -1,10 +1,10 @@
-import type { Id } from "./_generated/dataModel";
+import { getAuthUserId } from "@convex-dev/auth/server";
 import { v } from "convex/values";
 import { addDays } from "date-fns";
-import { MEAL_CATEGORIES } from "./schema";
-import { getAuthUserId } from "@convex-dev/auth/server";
-import { authQuery } from "./custom/query";
+import type { Id } from "./_generated/dataModel";
 import { authMutation } from "./custom/mutation";
+import { authQuery } from "./custom/query";
+import { MEAL_CATEGORIES } from "./schema";
 
 export const getMealPlans = authQuery({
   handler: async (ctx) => {
