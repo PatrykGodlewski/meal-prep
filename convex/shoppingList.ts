@@ -19,8 +19,8 @@ export const getShoppingList = authQuery({
         (q) =>
           q
             .eq("userId", ctx.user.id)
-            .gt("date", startDate) // Greater than or equal to the start date timestamp
-            .lte("date", endDate), // Less than the end date timestamp
+            .gte("date", startDate)
+            .lte("date", endDate),
       )
       .collect();
 

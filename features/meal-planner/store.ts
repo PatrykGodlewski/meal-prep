@@ -72,14 +72,19 @@ export const useMealPlanner = () => {
     }),
   );
 
+  const startDate = use$(mealPlannerState$.shoppingListDate)?.from?.getTime();
+  const endDate = use$(mealPlannerState$.shoppingListDate)?.to?.getTime();
+
+  console.log({ startDate, endDate });
+
   const {
     data: shoppingListData,
     isLoading: isShoppingListLoading,
     error: shoppingListError,
   } = useQuery(
     convexQuery(api.shoppingList.getShoppingList, {
-      startDate: use$(mealPlannerState$.shoppingListDate)?.from?.getTime(),
-      endDate: use$(mealPlannerState$.shoppingListDate)?.to?.getTime(),
+      startDate,
+      endDate,
     }),
   );
 
