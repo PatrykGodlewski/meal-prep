@@ -4,6 +4,7 @@ import type { Id } from "./_generated/dataModel";
 import { mutation } from "./_generated/server";
 import { authMutation } from "./custom/mutation";
 import { authQuery } from "./custom/query";
+import * as ShoppingList from "./model/shoppingList";
 
 export const getShoppingList = authQuery({
   args: { startDate: v.optional(v.number()), endDate: v.optional(v.number()) },
@@ -114,113 +115,8 @@ export const generateShoppingList = authMutation({
   args: {
     mealPlanId: v.id("mealPlans"),
   },
-  handler: async (ctx, { mealPlanId }) => {
-    const userId = ctx.user.id;
-
-    const mealPlan = await ctx.db.get(mealPlanId);
-    if (!mealPlan) {
-      throw new Error(`Meal plan with ID ${mealPlanId} not found.`);
-    }
-    if (mealPlan.userId !== userId) {
-      throw new Error("User does not own the provided meal plan.");
-    }
-    const mealPlanDate = mealPlan.date; // Get the date from the meal plan
-
-    // 3. Fetch Planned Meals for the specific Meal Plan
-    const plannedMeals = await ctx.db
-      .query("plannedMeals")
-      .withIndex("by_plan_and_category", (q) => q.eq("mealPlanId", mealPlanId))
-      .collect();
-
-    if (plannedMeals.length === 0) {
-      // No meals planned for this specific meal plan.
-      console.log(`No planned meals found for meal plan ${mealPlanId}.`);
-      // We will proceed to create an empty shopping list after cleanup.
-    }
-
-    // 4. Fetch all unique Meal IDs from the planned meals
-    const mealIds = [...new Set(plannedMeals.map((pm) => pm.mealId))];
-
-    // 5. Fetch Meal Ingredients for all meals in the plan
-    const allMealIngredients = (
-      await Promise.all(
-        mealIds.map((id) =>
-          ctx.db
-            .query("mealIngredients")
-            .withIndex("by_meal", (q) => q.eq("mealId", id))
-            .collect(),
-        ),
-      )
-    ).flat(); // Flatten the array of arrays
-
-    // 6. Aggregate Ingredients by ID
-    const aggregatedIngredients = new Map<Id<"ingredients">, number>();
-    for (const mi of allMealIngredients) {
-      // Optionally skip optional ingredients
-      // if (mi.isOptional) continue;
-
-      const currentAmount = aggregatedIngredients.get(mi.ingredientId) ?? 0;
-      aggregatedIngredients.set(mi.ingredientId, currentAmount + mi.quantity);
-    }
-
-    // 7. (Step removed as weekStart is no longer used)
-
-    // 8. Delete Existing Shopping List for this specific Meal Plan
-    // Use the by_meal_plan index to find the list associated with this meal plan
-    const existingList = await ctx.db
-      .query("shoppingLists")
-      .withIndex("by_meal_plan", (q) => q.eq("mealPlanId", mealPlanId))
-      .first(); // Assuming only one shopping list per meal plan
-
-    if (existingList) {
-      console.log(
-        `Deleting existing shopping list ${existingList._id} for meal plan ${mealPlanId}`,
-      );
-      // Delete existing items associated with the old list
-      const existingItems = await ctx.db
-        .query("shoppingListItems")
-        .withIndex("by_shopping_list", (q) =>
-          q.eq("shoppingListId", existingList._id),
-        )
-        .collect();
-      await Promise.all(existingItems.map((item) => ctx.db.delete(item._id)));
-
-      // Delete the list itself
-      await ctx.db.delete(existingList._id);
-    }
-
-    // 9. Create New Shopping List linked to the Meal Plan and Date
-    const now = Date.now();
-    const shoppingListId = await ctx.db.insert("shoppingLists", {
-      userId: userId,
-      mealPlanId: mealPlanId, // Link to the specific meal plan
-      date: mealPlanDate, // Store the date of the meal plan
-      createdAt: now,
-      updatedAt: now,
-    });
-
-    // 10. Create Shopping List Items from Aggregated Ingredients
-    await Promise.all(
-      Array.from(aggregatedIngredients.entries()).map(
-        ([ingredientId, amount]) =>
-          ctx.db.insert("shoppingListItems", {
-            shoppingListId,
-            ingredientId,
-            amount,
-            isChecked: false, // Default to not checked
-            createdAt: now,
-            updatedAt: now,
-          }),
-      ),
-    );
-
-    console.log(
-      `Generated shopping list ${shoppingListId} for meal plan ${mealPlanId} (Date: ${new Date(
-        mealPlanDate,
-      ).toDateString()})`,
-    );
-
-    return { success: true, shoppingListId };
+  handler: async (ctx, args) => {
+    return await ShoppingList.generateShoppingList(ctx, args);
   },
 });
 

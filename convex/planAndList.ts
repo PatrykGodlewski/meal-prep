@@ -1,8 +1,9 @@
 import { v } from "convex/values";
 import { api } from "./_generated/api";
-import { mutation } from "./_generated/server";
+import { authMutation } from "./custom/mutation";
+import * as ShoppingList from "./model/shoppingList";
 
-export const generatePlanAndShoppingList = mutation({
+export const generatePlanAndShoppingList = authMutation({
   args: {
     weekStart: v.number(),
   },
@@ -15,11 +16,11 @@ export const generatePlanAndShoppingList = mutation({
         },
       );
 
+      console.log({ mealPlanIds });
+
       await Promise.all(
         mealPlanIds.map((id) =>
-          ctx.runMutation(api.shoppingList.generateShoppingList, {
-            mealPlanId: id,
-          }),
+          ShoppingList.generateShoppingList(ctx, { mealPlanId: id }),
         ),
       );
 

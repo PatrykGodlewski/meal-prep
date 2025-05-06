@@ -17,7 +17,6 @@ export function LanguageSwitcher() {
   const locale = useLocale();
   const pathname = usePathname();
 
-  console.log({ locale, pathname });
   return (
     <DropdownMenu>
       <DropdownMenuTrigger className="uppercase" asChild>

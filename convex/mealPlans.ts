@@ -1,9 +1,9 @@
-import { getAuthUserId } from "@convex-dev/auth/server";
 import { v } from "convex/values";
 import { addDays } from "date-fns";
 import type { Id } from "./_generated/dataModel";
 import { authMutation } from "./custom/mutation";
 import { authQuery } from "./custom/query";
+import * as ShoppingList from "./model/shoppingList";
 import { MEAL_CATEGORIES } from "./schema";
 
 export const getMealPlans = authQuery({
@@ -121,10 +121,10 @@ export const generateMealPlan = authMutation({
       .collect();
 
     // Filter out locked plans before deletion
-    const plansToDelete = oldPlans.filter((plan) => !plan.locked);
+    const plansToClearMeals = oldPlans.filter((plan) => !plan.locked);
 
     await Promise.all(
-      plansToDelete.map(async (plan) => {
+      plansToClearMeals.map(async (plan) => {
         const oldPlannedMeals = await ctx.db
           .query("plannedMeals")
           // TODO: use both category and meal pland id if possible and necessary
@@ -134,8 +134,6 @@ export const generateMealPlan = authMutation({
           .collect();
 
         await Promise.all(oldPlannedMeals.map((pm) => ctx.db.delete(pm._id)));
-
-        await ctx.db.delete(plan._id);
       }),
     );
 
@@ -162,7 +160,7 @@ export const generateMealPlan = authMutation({
       lunch: [],
       dinner: [],
       snack: [],
-      dessert: [], // Keep dessert empty or handle if needed elsewhere
+      dessert: [],
     };
 
     for (const meal of allMeals) {
@@ -194,14 +192,24 @@ export const generateMealPlan = authMutation({
       }
 
       // Proceed with creating a new meal plan for this date
-      const mealPlanId = await ctx.db.insert("mealPlans", {
-        userId: ctx.user.id, // Use validated userId
-        date,
-        createdAt: Date.now(),
-        updatedAt: Date.now(),
-        // Ensure new plans are not locked by default
-        locked: false,
-      });
+      let mealPlanId = null;
+
+      const existingMealPlanId = plansToClearMeals.find(
+        (plan) => plan.date === date,
+      );
+
+      if (existingMealPlanId) {
+        mealPlanId = existingMealPlanId._id;
+      } else {
+        mealPlanId = await ctx.db.insert("mealPlans", {
+          userId: ctx.user.id, // Use validated userId
+          date,
+          createdAt: Date.now(),
+          updatedAt: Date.now(),
+          // Ensure new plans are not locked by default
+          locked: false,
+        });
+      }
 
       generatedMealPlanIds.push(mealPlanId);
 
@@ -240,18 +248,11 @@ export const updatePlannedMealByCategory = authMutation({
     newMealId: v.id("meals"),
   },
   handler: async (ctx, { date, category, newMealId }) => {
-    // 1. --- Authentication ---
-    const userId = await getAuthUserId(ctx);
-    if (!userId) {
-      throw new Error("User must be authenticated to update a meal plan.");
-    }
-
-    // 2. --- Find or Create Meal Plan ---
     let mealPlanId: Id<"mealPlans">;
     const existingPlan = await ctx.db
       .query("mealPlans")
       .withIndex("by_user_and_date", (q) =>
-        q.eq("userId", userId as Id<"users">).eq("date", date),
+        q.eq("userId", ctx.user.id as Id<"users">).eq("date", date),
       )
       .first();
 
@@ -263,13 +264,13 @@ export const updatePlannedMealByCategory = authMutation({
     } else {
       // Create a new meal plan if it doesn't exist for this user and date
       mealPlanId = await ctx.db.insert("mealPlans", {
-        userId: userId as Id<"users">,
+        userId: ctx.user.id,
         date,
         createdAt: now,
         updatedAt: now,
       });
       console.log(
-        `Created new meal plan ${mealPlanId} for user ${userId} on date ${new Date(date).toISOString().split("T")[0]}`,
+        `Created new meal plan ${mealPlanId} for user ${ctx.user.id} on date ${new Date(date).toISOString().split("T")[0]}`,
       );
     }
 
@@ -322,6 +323,8 @@ export const updatePlannedMealByCategory = authMutation({
         `Inserted new planned meal ${newPlannedMealId} for category ${category} in meal plan ${mealPlanId}`,
       );
     }
+
+    await ShoppingList.generateShoppingList(ctx, { mealPlanId });
 
     // 6. --- Return Result ---
     return { success: true, plannedMealId: plannedMealIdToReturn };

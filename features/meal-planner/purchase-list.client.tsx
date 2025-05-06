@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils";
 import { useConvexMutation } from "@convex-dev/react-query";
 import { use$ } from "@legendapp/state/react";
 import { useMutation } from "@tanstack/react-query";
-import { camelCase, snakeCase } from "lodash";
+import { camelCase } from "lodash";
 import { ShoppingCart } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useId } from "react";

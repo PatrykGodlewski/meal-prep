@@ -20,6 +20,7 @@ import type * as meals_mutations from "../meals/mutations.js";
 import type * as meals_queries from "../meals/queries.js";
 import type * as meals_validators from "../meals/validators.js";
 import type * as migrations from "../migrations.js";
+import type * as model_shoppingList from "../model/shoppingList.js";
 import type * as planAndList from "../planAndList.js";
 import type * as shoppingList from "../shoppingList.js";
 
@@ -50,6 +51,7 @@ declare const fullApi: ApiFromModules<{
   "meals/queries": typeof meals_queries;
   "meals/validators": typeof meals_validators;
   migrations: typeof migrations;
+  "model/shoppingList": typeof model_shoppingList;
   planAndList: typeof planAndList;
   shoppingList: typeof shoppingList;
 }>;

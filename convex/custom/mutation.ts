@@ -3,7 +3,8 @@ import {
   customCtx,
   customMutation,
 } from "convex-helpers/server/customFunctions";
-import { mutation } from "../_generated/server";
+import type { Id } from "../_generated/dataModel";
+import { type MutationCtx, mutation } from "../_generated/server";
 
 export const authMutation = customMutation(
   mutation,
@@ -11,6 +12,8 @@ export const authMutation = customMutation(
     const userId = await getAuthUserId(ctx);
     if (!userId) throw new Error("Authentication required");
     const user = { id: userId };
-    return { ...ctx, user };
+    return { ...ctx, user } satisfies AuthMutationCtx;
   }),
 );
+
+export type AuthMutationCtx = MutationCtx & { user: { id: Id<"users"> } };
