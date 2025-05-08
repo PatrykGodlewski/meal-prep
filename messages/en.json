@@ -1,5 +1,6 @@
 {
   "mealPlanner": {
+    "today": "Today",
     "header": "Meal Planner",
     "generateThisWeek": "Generate meal for this week",
     "weekOf": "Week of {week}",

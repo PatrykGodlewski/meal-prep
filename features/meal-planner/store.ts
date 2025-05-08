@@ -2,11 +2,13 @@
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
 import { convexQuery, useConvexMutation } from "@convex-dev/react-query";
-import { batch, observable } from "@legendapp/state";
+import { batch, observable, syncState } from "@legendapp/state";
+import { ObservablePersistLocalStorage } from "@legendapp/state/persist-plugins/local-storage";
 import { use$, useWhenReady } from "@legendapp/state/react";
+import { syncObservable } from "@legendapp/state/sync";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import type { FunctionReturnType } from "convex/server";
-import { addDays, subDays } from "date-fns";
+import { addDays, isToday, subDays } from "date-fns";
 import { useTranslations } from "next-intl";
 import type { DateRange } from "react-day-picker";
 import { toast } from "sonner";
@@ -28,6 +30,13 @@ const mealPlannerState$ = observable<Store>({
   selectedPlanId: undefined,
 });
 
+syncObservable(mealPlannerState$, {
+  persist: {
+    name: "persistKey",
+    plugin: ObservablePersistLocalStorage,
+  },
+});
+
 const setCurrentWeek = (date: Date) => {
   mealPlannerState$.currentWeek.set(getMonday(date));
 };
@@ -36,6 +45,7 @@ const handleNavigatePrevious = () => {
   const currentMonday = getMonday(mealPlannerState$.currentWeek.get());
   const previousWeekStart = subDays(currentMonday, 7);
   batch(() => {
+    mealPlannerState$.selectedPlanId.set(undefined);
     mealPlannerState$.currentWeek.set(previousWeekStart);
     mealPlannerState$.shoppingListDate.set({
       from: previousWeekStart,
@@ -48,6 +58,7 @@ const handleNavigateNext = () => {
   const currentMonday = getMonday(mealPlannerState$.currentWeek.get());
   const nextWeekStart = addDays(currentMonday, 7);
   batch(() => {
+    mealPlannerState$.selectedPlanId.set(undefined);
     mealPlannerState$.currentWeek.set(nextWeekStart);
     mealPlannerState$.shoppingListDate.set({
       from: nextWeekStart,
@@ -56,9 +67,27 @@ const handleNavigateNext = () => {
   });
 };
 
+const handleNavigateToday = () => {
+  const today = new Date();
+  const currentMonday = getMonday(today);
+  const currentSaturday = getSaturday(today);
+
+  batch(() => {
+    mealPlannerState$.selectedPlanId.set(undefined);
+    mealPlannerState$.currentWeek.set(currentMonday);
+    mealPlannerState$.shoppingListDate.set({
+      from: currentMonday,
+      to: currentSaturday,
+    });
+  });
+};
+
 export const useMealPlanner = () => {
   const currentWeek = use$(mealPlannerState$.currentWeek);
   const selectedPlanId = use$(mealPlannerState$.selectedPlanId);
+
+  const startDate = use$(mealPlannerState$.shoppingListDate)?.from?.getTime();
+  const endDate = use$(mealPlannerState$.shoppingListDate)?.to?.getTime();
 
   const t = useTranslations("mealPlanner");
 
@@ -71,11 +100,6 @@ export const useMealPlanner = () => {
       weekStart: currentWeek.getTime(),
     }),
   );
-
-  const startDate = use$(mealPlannerState$.shoppingListDate)?.from?.getTime();
-  const endDate = use$(mealPlannerState$.shoppingListDate)?.to?.getTime();
-
-  console.log({ startDate, endDate });
 
   const {
     data: shoppingListData,
@@ -109,11 +133,6 @@ export const useMealPlanner = () => {
       },
     });
 
-  const handleGenerateMealPlan = () => {
-    const weekStart = mealPlannerState$.currentWeek.get().getTime();
-    generatePlanAndShoppingListMutate({ weekStart });
-  };
-
   const { mutate: lockPlanMutate, isPending: isLocking } = useMutation({
     mutationFn: useConvexMutation(api.mealPlans.lockMealPlan),
     onSuccess: (
@@ -134,26 +153,39 @@ export const useMealPlanner = () => {
     },
   });
 
+  const handleGenerateMealPlan = () => {
+    const weekStart = mealPlannerState$.currentWeek.get().getTime();
+    generatePlanAndShoppingListMutate({ weekStart });
+  };
+
   const lockMealPlan = (mealPlanId: Id<"mealPlans">) => {
     lockPlanMutate({ mealPlanId });
   };
 
   const isBusy = isMealPlanLoading || isShoppingListLoading;
 
-  useWhenReady(mealPlanData, (mealPlans) =>
-    mealPlannerState$.selectedPlanId.set(
-      mealPlans?.find((plan) => plan.date === currentWeek.getTime())?._id,
-    ),
-  );
+  useWhenReady(mealPlanData, (mealPlans) => {
+    if (mealPlannerState$.selectedPlanId.get()) return;
+
+    const id =
+      mealPlans?.find((plan) => isToday(plan.date))?._id ||
+      mealPlans?.find((plan) => plan.date === currentWeek.getTime())?._id;
+
+    return mealPlannerState$.selectedPlanId.set(id);
+  });
 
   return {
     mealPlannerState$,
     selectedPlanId,
     currentWeek,
 
+    // deprecate
     setCurrentWeek,
+
     handleNavigatePrevious,
     handleNavigateNext,
+    handleNavigateToday,
+
     handleGenerateMealPlan,
     isGenerating,
     lockMealPlan,

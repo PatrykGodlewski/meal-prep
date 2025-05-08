@@ -60,8 +60,9 @@ export const MealPlanDisplay = () => {
                 className={cn(
                   "self-center h-auto transition-shadow rounded-xl w-full cursor-pointer bg-neutral-200 dark:bg-neutral-900 flex flex-col items-center justify-center p-4 sm:p-8 aspect-square",
                   {
-                    "ring-3 ring-white disabled:opacity-100": isSelected,
-                    "py-5 border-2 bg-neutral-900 dark:bg-neutral-200 text-neutral-200 dark:text-neutral-900 dark:hover:bg-neutral-100 ring-offset-2 ring-offset-neutral-950":
+                    "ring-3 dark:ring-white ring-black disabled:opacity-100":
+                      isSelected,
+                    "py-5 border-2 bg-neutral-900 dark:bg-neutral-200 text-neutral-200 dark:text-neutral-900 hover:text-neutral-200 hover:bg-neutral-800 dark:hover:bg-neutral-100 ring-offset-2 ring-offset-neutral-950":
                       isToday(day.date),
                   },
                 )}
@@ -99,8 +100,10 @@ export function MealPlannerHeader() {
     handleNavigateNext,
     handleNavigatePrevious,
     handleGenerateMealPlan,
+    handleNavigateToday,
     isBusy,
   } = useMealPlanner();
+
   const t = useTranslations("mealPlanner");
   const dateLocale = useDateLocale();
 
@@ -131,6 +134,15 @@ export function MealPlannerHeader() {
           aria-label="Next Week"
         >
           <ChevronRight className="h-4 w-4" />
+        </Button>
+
+        <Button
+          variant="outline"
+          onClick={handleNavigateToday}
+          disabled={isBusy}
+          aria-label={t("today")}
+        >
+          {t("today")}
         </Button>
       </div>
       <Button

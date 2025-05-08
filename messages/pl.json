@@ -1,5 +1,6 @@
 {
   "mealPlanner": {
+    "today": "Dziś",
     "header": "Plan posiłków",
     "generateThisWeek": "Wygeneruj posiłki na ten tydzień",
     "weekOf": "Tydzień od {week}",

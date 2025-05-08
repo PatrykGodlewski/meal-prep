@@ -1,9 +1,10 @@
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
 import MealDetailView from "@/features/meal-editor/meal-editor-view";
+import { redirect } from "@/i18n/navigation";
 import { convexAuthNextjsToken } from "@convex-dev/auth/nextjs/server";
 import { preloadQuery } from "convex/nextjs";
-import { notFound, redirect } from "next/navigation";
+import { getLocale } from "next-intl/server";
 
 export default async function MealDetailPage({
   params,
@@ -13,7 +14,7 @@ export default async function MealDetailPage({
   const mealId = (await params).id;
 
   if (!mealId) {
-    redirect("/meals");
+    redirect({ href: "/meals", locale: await getLocale() });
   }
 
   const preloadedMeal = await preloadQuery(
@@ -29,7 +30,7 @@ export default async function MealDetailPage({
   );
 
   if (!preloadedMeal || !mealId) {
-    redirect("/meals");
+    redirect({ href: "/meals", locale: await getLocale() });
   }
 
   return (

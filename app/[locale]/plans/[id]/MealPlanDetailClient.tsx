@@ -8,7 +8,9 @@ import { cn } from "@/lib/utils";
 import { useConvexMutation } from "@convex-dev/react-query";
 import { type Preloaded, usePreloadedQuery } from "convex/react";
 import type { FunctionReturnType } from "convex/server";
+import { UtensilsCrossed } from "lucide-react";
 import { useTranslations } from "next-intl";
+import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 import { ModalMeals } from "./ModalMeals";
@@ -111,19 +113,42 @@ function MealCard({ plannedMeal, category, plan }: MealCardProps) {
         // Optionally provide a trigger if you don't want external control button
         // trigger={<Button>Select Meal</Button>}
       />
-      <div>
-        {plannedMeal?.meal?._id ? (
-          <Link href={`/meals/${plannedMeal?.meal?._id}`}>
-            <h3 className="font-semibold text-lg hover:underline h-[1lh]">
-              {plannedMeal?.meal?.name}
-            </h3>
-          </Link>
+      <div className="flex gap-4">
+        {plannedMeal?.meal?.imageUrl ? (
+          <div className="relative size-32">
+            <Image
+              alt={plannedMeal.meal.name}
+              fill
+              className="object-cover"
+              priority
+              src={plannedMeal.meal.imageUrl}
+            />
+          </div>
         ) : (
-          <h3 className="font-semibold text-lg hover:underline h-[1lh] cursor-pointer">
-            {t("missingMeal")}
-          </h3>
+          <div
+            className={
+              "size-32 rounded-lg border border-dashed grid place-content-center dark:bg-neutral-900 dark:border-neutral-800"
+            }
+          >
+            <UtensilsCrossed className="h-8 w-8 text-neutral-300 dark:text-neutral-800" />
+          </div>
         )}
-        <p className="text-sm text-neutral-400 uppercase">{tMeal(category)}</p>
+        <div>
+          {plannedMeal?.meal?._id ? (
+            <Link href={`/meals/${plannedMeal?.meal?._id}`}>
+              <h3 className="font-semibold text-lg hover:underline h-[1lh]">
+                {plannedMeal?.meal?.name}
+              </h3>
+            </Link>
+          ) : (
+            <h3 className="font-semibold text-lg hover:underline h-[1lh] cursor-pointer">
+              {t("missingMeal")}
+            </h3>
+          )}
+          <p className="text-sm text-neutral-400 uppercase">
+            {tMeal(category)}
+          </p>
+        </div>
       </div>
       <Button onClick={() => setIsModalOpen(true)} variant="outline">
         {t("changeMeal")}
