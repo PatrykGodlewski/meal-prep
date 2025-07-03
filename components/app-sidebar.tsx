@@ -16,6 +16,7 @@ import {
   CalendarCog,
   LayoutDashboardIcon,
   ListIcon,
+  SquareStack,
   Triangle,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
@@ -81,6 +82,11 @@ function Nav() {
       title: t("plans"),
       url: "/plans",
       icon: CalendarCog,
+    },
+    {
+      title: t("ingredients"),
+      url: "/ingredients",
+      icon: SquareStack,
     },
   ];
 

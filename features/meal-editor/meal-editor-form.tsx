@@ -33,7 +33,7 @@ import {
 import { MEAL_CATEGORIES } from "@/convex/schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { FunctionReturnType } from "convex/server";
-import { Clock, Plus, Save, Trash2, Users, Weight } from "lucide-react"; // Added icons
+import { Clock, Plus, Save, Trash2, Users, Weight } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useFieldArray, useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -45,34 +45,31 @@ import type { Meal } from "./types";
 const mapPreloadedDataToFormValues = (
   meal: FunctionReturnType<typeof api.meals.queries.getMeal>,
 ): MutationMealEditValues | undefined => {
-  if (!meal) return undefined; // Return undefined if no data
+  if (!meal) return undefined;
 
   const { mealIngredients, ...mealData } = meal; // Separate meal base data
 
   const formIngredients = (mealIngredients || []) // Handle potentially undefined mealIngredients
-    .filter((mi) => mi.ingredient !== null) // Process only valid links
     .map((mi): MutationMealEditValues["ingredients"][number] => {
-      const ingredient = mi.ingredient!; // Safe due to filter
+      const ingredient = mi.ingredient; // Safe due to filter
       return {
-        ingredientId: ingredient._id, // Ingredient definition ID
-        name: ingredient.name,
-        calories: ingredient.calories ?? 0,
-        category: ingredient.category ?? "other",
-        unit: ingredient.unit ?? "g",
+        ingredientId: ingredient?._id, // Ingredient definition ID
+        name: ingredient?.name ?? "_TODO_should_be_empty_name_TODO_",
+        calories: ingredient?.calories ?? 0,
+        category: ingredient?.category ?? "other",
+        unit: ingredient?.unit ?? "g",
         quantity: mi.quantity, // From junction record
         isOptional: mi.isOptional ?? false, // From junction record
         notes: mi.notes ?? "", // From junction record
       };
     });
 
-  // Map the main meal data
   return {
     mealId: mealData._id,
     name: mealData.name,
     description: mealData.description ?? "",
     prepTimeMinutes: mealData.prepTimeMinutes ?? undefined,
     cookTimeMinutes: mealData.cookTimeMinutes ?? undefined,
-    servings: mealData.servings ?? undefined,
     categories: mealData.categories ?? [],
     calories: mealData.calories ?? 0,
     imageUrl: mealData.imageUrl ?? "",
@@ -128,7 +125,7 @@ export function MealEditForm({
   };
 
   const handleAddIngredient = () => {
-    append(NEW_INGREDIENT_DEFAULT); // Append a new ingredient with default values
+    append(NEW_INGREDIENT_DEFAULT);
   };
 
   const handleRemoveIngredient = (index: number) => {
@@ -145,26 +142,22 @@ export function MealEditForm({
     deleteMeal({ mealId: meal._id });
   };
 
-  // Note: Cannot use the hook 't' here as it's outside the main component body return.
-  // If this loading state needs translation, consider a different approach,
-  // maybe rendering a small component that uses the hook.
-  // For now, leaving it as is or using a simple placeholder.
   if (!meal) {
     return (
       <div className="container mx-auto py-8 px-4 text-center">
-        Loading meal data...
+        {t("loading")}
       </div>
     );
   }
 
   return (
     <>
-      <div className="flex gap-2">
+      <div className="flex gap-2 justify-end mb-8">
         <Button
           onClick={form.handleSubmit(onSubmitEdit)}
           disabled={isPending || !form.formState.isDirty}
         >
-          <Save className="h-4 w-4 mr-1" />{" "}
+          <Save className="h-4 w-4 mr-1" />
           {isPending ? t("saving") : t("saveChanges")}
         </Button>
         <AlertDialog>
@@ -297,34 +290,6 @@ export function MealEditForm({
                         <Input
                           type="number"
                           placeholder={t("cookTimePlaceholder")}
-                          {...field}
-                          value={field.value ?? ""}
-                          onChange={(e) =>
-                            field.onChange(
-                              e.target.value === ""
-                                ? null
-                                : Number.parseInt(e.target.value),
-                            )
-                          }
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={control}
-                  name="servings"
-                  render={({ field }) => (
-                    <FormItem>
-                      {" "}
-                      <FormLabel className="text-sm flex items-center gap-1">
-                        <Users className="h-4 w-4" /> {t("servingsLabel")}
-                      </FormLabel>
-                      <FormControl>
-                        <Input
-                          type="number"
-                          placeholder={t("servingsPlaceholder")}
                           {...field}
                           value={field.value ?? ""}
                           onChange={(e) =>

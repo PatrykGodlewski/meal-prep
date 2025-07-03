@@ -40,7 +40,7 @@ export async function generateShoppingList(
     const aggregatedIngredients = new Map<Id<"ingredients">, number>();
     for (const mi of allMealIngredients) {
       // Optionally skip optional ingredients
-      // if (mi.isOptional) continue;
+      if (!mi.ingredientId) continue;
 
       const currentAmount = aggregatedIngredients.get(mi.ingredientId) ?? 0;
       aggregatedIngredients.set(mi.ingredientId, currentAmount + mi.quantity);

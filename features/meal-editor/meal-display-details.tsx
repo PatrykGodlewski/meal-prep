@@ -1,4 +1,8 @@
+import { For } from "@/components/for-each";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { useDateLocale } from "@/hooks/use-date-locale";
+import { use$, useObservable } from "@legendapp/state/react";
 import { format } from "date-fns";
 import {
   Calendar,
@@ -6,11 +10,13 @@ import {
   Clock,
   Flame,
   type LucideIcon,
-  Users,
+  Minus,
+  Plus,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Image from "next/image";
 import React from "react";
+import { useMealPlanner } from "../meal-planner/store";
 import { DATE_FORMAT_FULL } from "../meal-planner/utils";
 import type { Meal, MealIngredients } from "./types";
 
@@ -37,6 +43,10 @@ function MealLabel({ icon: Icon, text }: MealLabelProps) {
 
 export const MealDisplayDetails: React.FC<MealDisplayDetailsProps> = React.memo(
   ({ meal, mealIngredients }) => {
+    const { mealPlannerState$ } = useMealPlanner();
+    const servings$ = useObservable(mealPlannerState$.peopleAmount.get());
+    const servings = use$(servings$);
+
     const t = useTranslations("mealDetails");
     const tIngredient = useTranslations("ingredient");
     const dateLocale = useDateLocale();
@@ -78,12 +88,12 @@ export const MealDisplayDetails: React.FC<MealDisplayDetailsProps> = React.memo(
           </div>
         </div>
 
-        <div className="p-6">
-          <h1 className="text-3xl font-bold mb-2 text-gray-900 dark:text-white">
+        <div className="p-6 space-y-6">
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
             {meal.name}
           </h1>
 
-          <div className="flex flex-wrap items-center text-gray-600 dark:text-neutral-400 mb-6">
+          <div className="flex flex-wrap items-center text-gray-600 dark:text-neutral-400 ">
             <MealLabel
               icon={ChefHat}
               text={t("author", { name: authorName })}
@@ -100,16 +110,10 @@ export const MealDisplayDetails: React.FC<MealDisplayDetailsProps> = React.memo(
                 text={t("totalTime", { count: totalTime })}
               />
             )}
-            {meal.servings && (
-              <MealLabel
-                icon={Users}
-                text={t("servings", { count: meal.servings })}
-              />
-            )}
             {meal.calories && (
               <MealLabel
                 icon={Flame}
-                text={t("calories", { count: meal.calories })}
+                text={t("calories", { count: meal.calories * servings })}
               />
             )}
             <MealLabel
@@ -121,7 +125,7 @@ export const MealDisplayDetails: React.FC<MealDisplayDetailsProps> = React.memo(
           </div>
 
           {meal.description && (
-            <div className="mb-8">
+            <div>
               <h2 className="text-xl font-semibold mb-2 text-gray-800 dark:text-gray-200">
                 {t("descriptionTitle")}
               </h2>
@@ -131,33 +135,66 @@ export const MealDisplayDetails: React.FC<MealDisplayDetailsProps> = React.memo(
             </div>
           )}
 
+          <div className="flex items-center space-x-2 w-48">
+            <Button
+              variant="outline"
+              size="icon"
+              aria-label="Decrease people size"
+              onClick={() => servings$.set(Math.max(1, servings - 1))}
+            >
+              <Minus className="size-4" />
+            </Button>
+            <Input
+              id="people-size"
+              type="number"
+              placeholder="e.g. 4"
+              value={servings}
+              onChange={(e) =>
+                mealPlannerState$.peopleAmount.set(e.target.valueAsNumber)
+              }
+            />
+            <Button
+              variant="outline"
+              size="icon"
+              aria-label="Increase serving size"
+              onClick={() => servings$.set(servings + 1)}
+            >
+              <Plus className="size-4" />
+            </Button>
+          </div>
+
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="lg:col-span-1">
               <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-200">
                 {t("ingredientsTitle")}
               </h2>
-              {mealIngredients && mealIngredients.length > 0 ? (
-                <ul className="space-y-2 text-sm text-gray-700 dark:text-neutral-300">
-                  {mealIngredients.map((mealIngredient) => {
-                    if (!mealIngredient.ingredient) {
-                      return null;
-                    }
+
+              <ul className="space-y-2 text-sm text-gray-700 dark:text-neutral-300">
+                <For
+                  each={mealIngredients}
+                  empty={
+                    <p className="text-sm text-gray-500 dark:text-neutral-500 italic">
+                      {t("noIngredients")}
+                    </p>
+                  }
+                >
+                  {(mealIngredient) => {
                     const ingredient = mealIngredient.ingredient;
                     return (
                       <li
-                        key={ingredient._id}
+                        key={ingredient?._id}
                         className="flex items-start gap-2"
                       >
-                        {" "}
                         <span className="inline-block w-1.5 h-1.5 rounded-full bg-blue-500 mt-[7px] shrink-0" />
                         <div>
                           <span className="font-medium">
-                            {mealIngredient.quantity}{" "}
-                            {tIngredient(ingredient.unit)} {ingredient.name}
+                            {mealIngredient.quantity * servings}{" "}
+                            {tIngredient(ingredient?.unit ?? "unknown")}{" "}
+                            {ingredient?.name}
                           </span>
-                          {ingredient.category && (
+                          {ingredient?.category && (
                             <span className="ml-2 text-xs text-gray-500 dark:text-neutral-400 capitalize">
-                              ({tIngredient(ingredient.category)})
+                              ({tIngredient(ingredient?.category)})
                             </span>
                           )}
                           {mealIngredient.isOptional && (
@@ -173,13 +210,9 @@ export const MealDisplayDetails: React.FC<MealDisplayDetailsProps> = React.memo(
                         </div>
                       </li>
                     );
-                  })}
-                </ul>
-              ) : (
-                <p className="text-sm text-gray-500 dark:text-neutral-500 italic">
-                  {t("noIngredients")}
-                </p>
-              )}
+                  }}
+                </For>
+              </ul>
             </div>
 
             <div className="lg:col-span-2">
@@ -187,20 +220,22 @@ export const MealDisplayDetails: React.FC<MealDisplayDetailsProps> = React.memo(
                 {t("instructionsTitle")}
               </h2>
               <div className="prose prose-sm dark:prose-invert max-w-none text-gray-700 dark:text-neutral-300">
-                {meal.instructions ? (
-                  meal.instructions.split("\n").map(
-                    (paragraph, idx) =>
-                      paragraph.trim() && (
-                        <p key={idx} className="mb-3">
-                          {paragraph}
-                        </p>
-                      ),
-                  )
-                ) : (
-                  <p className="text-gray-500 dark:text-neutral-500 italic">
-                    {t("noInstructions")}
-                  </p>
-                )}
+                <For
+                  each={meal.instructions?.split("\n")}
+                  empty={
+                    <p className="text-gray-500 dark:text-neutral-500 italic">
+                      {t("noInstructions")}
+                    </p>
+                  }
+                >
+                  {(paragraph, idx) =>
+                    paragraph.trim() && (
+                      <p key={idx} className="mb-3">
+                        {paragraph}
+                      </p>
+                    )
+                  }
+                </For>
               </div>
             </div>
           </div>
@@ -209,4 +244,3 @@ export const MealDisplayDetails: React.FC<MealDisplayDetailsProps> = React.memo(
     );
   },
 );
-MealDisplayDetails.displayName = "MealDisplayDetails";

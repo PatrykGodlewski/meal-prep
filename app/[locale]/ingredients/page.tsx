@@ -4,16 +4,16 @@ import { preloadQuery } from "convex/nextjs";
 import { getTranslations } from "next-intl/server";
 import { notFound } from "next/navigation";
 import React from "react";
-import { PlanList } from "./PlanList";
+import { IngredientList } from "./IngredientList";
 
-export default async function MealPlansPage() {
-  const preloadedPlans = await preloadQuery(
-    api.mealPlans.getMealPlans,
+export default async function IngredientsPage() {
+  const preloadedIngredients = await preloadQuery(
+    api.ingredients.queries.getIngredients,
     {},
     { token: await convexAuthNextjsToken() },
   );
 
-  if (!preloadedPlans) {
+  if (!preloadedIngredients) {
     // TODO: check if should be early returned
     return notFound();
   }
@@ -25,7 +25,7 @@ export default async function MealPlansPage() {
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold">{t("header")}</h1>
       </div>
-      <PlanList preloadedPlans={preloadedPlans} />
+      <IngredientList preloadedIngredients={preloadedIngredients} />
     </div>
   );
 }

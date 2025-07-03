@@ -59,7 +59,7 @@ export const ingredientValidator = zodOutputToConvex(ingredientSchema);
 
 export const mealIngredientsSchema = z.object({
   mealId: zid("meals"),
-  ingredientId: zid("ingredients"),
+  ingredientId: zid("ingredients").optional(),
   quantity: z.number(),
   isOptional: z.boolean(),
   notes: z.string().optional(),
@@ -114,6 +114,7 @@ export const mealPlanValidator = zodOutputToConvex(mealPlanSchema);
 export const plannedMealSchema = z.object({
   mealPlanId: zid("mealPlans"),
   mealId: zid("meals"),
+  servingAmount: z.number().optional(),
   category: z.enum(MEAL_CATEGORIES).optional(),
   createdAt: z.number(),
   updatedAt: z.number(),

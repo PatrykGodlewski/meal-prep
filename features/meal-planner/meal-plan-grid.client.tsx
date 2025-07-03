@@ -112,8 +112,8 @@ export function MealPlannerHeader() {
   });
 
   return (
-    <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
-      <div className="flex items-center gap-2">
+    <div className="flex flex-col sm:flex-row justify-between flex-wrap gap-4">
+      <div className="flex justify-between items-center gap-2">
         <Button
           variant="outline"
           size="icon"
@@ -123,9 +123,11 @@ export function MealPlannerHeader() {
         >
           <ChevronLeft className="h-4 w-4" />
         </Button>
+
         <h2 className="text-xl font-semibold text-center sm:text-left whitespace-nowrap tabular-nums">
           {t("weekOf", { week: formatedWeek })}
         </h2>
+
         <Button
           variant="outline"
           size="icon"
@@ -135,7 +137,9 @@ export function MealPlannerHeader() {
         >
           <ChevronRight className="h-4 w-4" />
         </Button>
+      </div>
 
+      <div className="flex flex-col sm:flex-row gap-4 flex-wrap">
         <Button
           variant="outline"
           onClick={handleNavigateToday}
@@ -144,14 +148,15 @@ export function MealPlannerHeader() {
         >
           {t("today")}
         </Button>
+
+        <Button
+          onClick={handleGenerateMealPlan}
+          disabled={isBusy || isGenerating}
+        >
+          {isGenerating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+          {t("generateThisWeek")}
+        </Button>
       </div>
-      <Button
-        onClick={handleGenerateMealPlan}
-        disabled={isBusy || isGenerating}
-      >
-        {isGenerating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-        {t("generateThisWeek")}
-      </Button>
     </div>
   );
 }

@@ -66,6 +66,8 @@ export const getMeal = authQuery({
     // 3. Fetch the full ingredient details for each mealIngredient
     const detailedIngredients = await Promise.all(
       mealIngredients.map(async (mi) => {
+        if (!mi.ingredientId) return { ...mi, ingredient: null };
+
         const ingredient = await ctx.db.get(mi.ingredientId);
         if (!ingredient) {
           // Handle case where ingredient might be missing (optional, log error, etc.)

@@ -97,13 +97,10 @@ function MealCard({ plannedMeal, category, plan }: MealCardProps) {
 
   return (
     <div
-      className={cn(
-        "border p-4 rounded-md shadow-sm flex justify-between items-center",
-        {
-          "": isMeal,
-          "border-dashed border-2 text-neutral-500": !isMeal,
-        },
-      )}
+      className={cn("border flex-col gap-4 p-4 rounded-md shadow-sm flex ", {
+        "": isMeal,
+        "border-dashed border-2 text-neutral-500": !isMeal,
+      })}
     >
       <ModalMeals
         isOpen={isModalOpen}
@@ -133,15 +130,15 @@ function MealCard({ plannedMeal, category, plan }: MealCardProps) {
             <UtensilsCrossed className="h-8 w-8 text-neutral-300 dark:text-neutral-800" />
           </div>
         )}
-        <div>
+        <div className="flex flex-col">
           {plannedMeal?.meal?._id ? (
             <Link href={`/meals/${plannedMeal?.meal?._id}`}>
-              <h3 className="font-semibold text-lg hover:underline h-[1lh]">
+              <h3 className="font-semibold text-lg hover:underline">
                 {plannedMeal?.meal?.name}
               </h3>
             </Link>
           ) : (
-            <h3 className="font-semibold text-lg hover:underline h-[1lh] cursor-pointer">
+            <h3 className="font-semibold text-lg hover:underline cursor-pointer">
               {t("missingMeal")}
             </h3>
           )}
@@ -150,7 +147,11 @@ function MealCard({ plannedMeal, category, plan }: MealCardProps) {
           </p>
         </div>
       </div>
-      <Button onClick={() => setIsModalOpen(true)} variant="outline">
+      <Button
+        className="flex-1"
+        onClick={() => setIsModalOpen(true)}
+        variant="outline"
+      >
         {t("changeMeal")}
       </Button>
     </div>

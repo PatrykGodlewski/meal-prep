@@ -1,3 +1,4 @@
+import { v } from "convex/values";
 import { z } from "zod";
 import { internalMutation } from "../_generated/server";
 import { authMutation } from "../custom/mutation";
@@ -56,5 +57,12 @@ export const upsertIngredient = internalMutation({
     });
 
     return ingredientId;
+  },
+});
+
+export const deleteIngredient = authMutation({
+  args: { ingredientId: v.id("ingredients") },
+  handler: async (ctx, { ingredientId }) => {
+    return await ctx.db.delete(ingredientId);
   },
 });

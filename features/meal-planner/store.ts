@@ -18,10 +18,12 @@ type Store = {
   currentWeek: Date;
   shoppingListDate: DateRange | undefined;
   selectedPlanId: string | undefined;
+  peopleAmount: number;
 };
 
 const today = new Date();
 const mealPlannerState$ = observable<Store>({
+  peopleAmount: 1,
   currentWeek: getMonday(today),
   shoppingListDate: {
     from: getMonday(today),
@@ -63,21 +65,6 @@ const handleNavigateNext = () => {
     mealPlannerState$.shoppingListDate.set({
       from: nextWeekStart,
       to: addDays(nextWeekStart, 6),
-    });
-  });
-};
-
-const handleNavigateToday = () => {
-  const today = new Date();
-  const currentMonday = getMonday(today);
-  const currentSaturday = getSaturday(today);
-
-  batch(() => {
-    mealPlannerState$.selectedPlanId.set(undefined);
-    mealPlannerState$.currentWeek.set(currentMonday);
-    mealPlannerState$.shoppingListDate.set({
-      from: currentMonday,
-      to: currentSaturday,
     });
   });
 };
@@ -152,6 +139,22 @@ export const useMealPlanner = () => {
       });
     },
   });
+
+  const handleNavigateToday = () => {
+    const currentMonday = getMonday(today);
+    const currentSaturday = getSaturday(today);
+
+    const todayId = mealPlanData?.find((plan) => isToday(plan.date))?._id;
+
+    batch(() => {
+      mealPlannerState$.selectedPlanId.set(todayId);
+      mealPlannerState$.currentWeek.set(currentMonday);
+      mealPlannerState$.shoppingListDate.set({
+        from: currentMonday,
+        to: currentSaturday,
+      });
+    });
+  };
 
   const handleGenerateMealPlan = () => {
     const weekStart = mealPlannerState$.currentWeek.get().getTime();
