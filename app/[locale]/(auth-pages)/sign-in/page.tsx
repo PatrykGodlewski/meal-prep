@@ -6,14 +6,18 @@ import { useAuthActions } from "@convex-dev/auth/react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+import { useTranslations } from "next-intl";
+
 export default function SignIn() {
   const { signIn } = useAuthActions();
   const [flow, setFlow] = useState<"signIn" | "signUp">("signIn");
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
+  const t = useTranslations("auth");
+
   return (
     <div className="flex flex-col gap-8 w-96 mx-auto h-screen justify-center items-center">
-      <p>Log in to see the numbers</p>
+      <p>{t("logInToSeeNumbers")}</p>
       <form
         className="flex flex-col gap-2"
         onSubmit={(e) => {
@@ -29,34 +33,37 @@ export default function SignIn() {
             });
         }}
       >
-        <Input type="email" name="email" placeholder="Email" required />
+        <Input
+          type="email"
+          name="email"
+          placeholder={t("emailPlaceholder")}
+          required
+        />
         <Input
           type="password"
           name="password"
-          placeholder="Password"
+          placeholder={t("passwordPlaceholder")}
           required
         />
         <Button type="submit">
-          {flow === "signIn" ? "Sign in" : "Sign up"}
+          {flow === "signIn" ? t("signIn") : t("signUp")}
         </Button>
         <div className="flex flex-row gap-2">
           <span>
-            {flow === "signIn"
-              ? "Don't have an account?"
-              : "Already have an account?"}
+            {flow === "signIn" ? t("dontHaveAccount") : t("alreadyHaveAccount")}
           </span>
           <Button
             variant="link"
             className="text-foreground underline hover:no-underline cursor-pointer"
-            onClick={() => setFlow(flow === "signIn" ? "signIn" : "signIn")}
+            onClick={() => setFlow(flow === "signIn" ? "signUp" : "signIn")}
           >
-            {flow === "signIn" ? "Sign up instead" : "Sign in instead"}
+            {flow === "signIn" ? t("signUpInstead") : t("signInInstead")}
           </Button>
         </div>
         {error && (
           <div className="bg-red-500/20 border-2 border-red-500/50 rounded-md p-2">
             <p className="text-foreground font-mono text-xs">
-              Error signing in: {error}
+              {t("errorSigningIn", { error })}
             </p>
           </div>
         )}

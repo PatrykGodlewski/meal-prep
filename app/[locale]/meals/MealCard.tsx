@@ -56,24 +56,24 @@ export function MealCard({ meal }: Props) {
             {meal.name}
           </h2>
           <p className="text-sm mb-4 line-clamp-2 grow">
-            {meal.description || "No description available."}
+            {meal.description || t("noDescription")}
           </p>
 
           <div className="flex items-center text-sm mb-3 gap-4 text-neutral-600 dark:text-neutral-400">
-            <span className="flex items-center" title="Total time">
+            <span className="flex items-center" title={t("totalTimeTitle")}>
               <Clock className="h-4 w-4 mr-1 shrink-0" />
-              {totalTime > 0 ? `${totalTime} min` : "N/A"}
+              {totalTime > 0 ? `${totalTime} min` : t("notApplicable")}
             </span>
 
             {meal.servings && (
-              <span className="flex items-center" title="Servings">
+              <span className="flex items-center" title={t("servingsTitle")}>
                 <Users className="h-4 w-4 mr-1 shrink-0" />
                 {t("servings", { count: meal.servings })}
               </span>
             )}
 
             {meal.calories && (
-              <span className="flex items-center" title="Calories">
+              <span className="flex items-center" title={t("caloriesTitle")}>
                 <Flame className="h-4 w-4 mr-1 shrink-0" />
                 {t("calories", { count: meal.calories })}
               </span>
@@ -83,10 +83,10 @@ export function MealCard({ meal }: Props) {
           <div className="flex justify-between items-center mt-auto pt-2 border-t border-neutral-300 dark:border-neutral-600">
             <div
               className="flex items-center text-sm text-neutral-600 dark:text-neutral-400"
-              title="Author"
+              title={t("authorTitle")}
             >
               <ChefHat className="h-4 w-4 mr-1 shrink-0" />
-              <span className="truncate">By {displayAuthor}</span>
+              <span className="truncate">{t("author", { name: displayAuthor })}</span>
             </div>
 
             <span className="first-letter:uppercase text-xs text-neutral-500 dark:text-neutral-400 shrink-0">

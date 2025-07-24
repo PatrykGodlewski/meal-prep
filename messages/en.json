@@ -68,14 +68,21 @@
     "optionalMarker": "(optional)",
     "noIngredients": "No ingredients listed.",
     "instructionsTitle": "Instructions",
-    "noInstructions": "No instructions provided."
+    "noInstructions": "No instructions provided.",
+    "noDescription": "No description available.",
+    "totalTimeTitle": "Total time",
+    "servingsTitle": "Servings",
+    "caloriesTitle": "Calories",
+    "authorTitle": "Author",
+    "notApplicable": "N/A"
   },
   "planList": {
     "header": "Meal Plans",
     "noMealPlans": "No meal plans found. Start by creating one!",
     "viewPlan": "View Plan",
     "createdAt": "Created at",
-    "lastUpdate": "Last updated"
+    "lastUpdate": "Last updated",
+    "id": "ID"
   },
   "mealList": {
     "meals": "Meals",
@@ -188,5 +195,20 @@
   "navMain": {
     "quickCreate": "Quick Create a Meal"
   },
-  "selectAll": "Select All"
+  "selectAll": "Select All",
+  "auth": {
+    "logInToSeeNumbers": "Log in to see the numbers",
+    "emailPlaceholder": "Email",
+    "passwordPlaceholder": "Password",
+    "signIn": "Sign in",
+    "signUp": "Sign up",
+    "dontHaveAccount": "Don't have an account?",
+    "alreadyHaveAccount": "Already have an account?",
+    "signUpInstead": "Sign up instead",
+    "signInInstead": "Sign in instead",
+    "errorSigningIn": "Error signing in: {error}"
+  },
+  "layout": {
+    "description": "The fastest way to plan meals for a week"
+  }
 }
