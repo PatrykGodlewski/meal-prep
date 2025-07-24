@@ -16,6 +16,7 @@ import type * as ingredients_mutations from "../ingredients/mutations.js";
 import type * as ingredients_queries from "../ingredients/queries.js";
 import type * as ingredients_validators from "../ingredients/validators.js";
 import type * as mealPlans from "../mealPlans.js";
+import type * as meals_helpers from "../meals/helpers.js";
 import type * as meals_mutations from "../meals/mutations.js";
 import type * as meals_queries from "../meals/queries.js";
 import type * as meals_validators from "../meals/validators.js";
@@ -47,6 +48,7 @@ declare const fullApi: ApiFromModules<{
   "ingredients/queries": typeof ingredients_queries;
   "ingredients/validators": typeof ingredients_validators;
   mealPlans: typeof mealPlans;
+  "meals/helpers": typeof meals_helpers;
   "meals/mutations": typeof meals_mutations;
   "meals/queries": typeof meals_queries;
   "meals/validators": typeof meals_validators;
@@ -127,83 +129,6 @@ export declare const components: {
         }>
       >;
       migrate: FunctionReference<
-        "mutation",
-        "internal",
-        {
-          batchSize?: number;
-          cursor?: string | null;
-          dryRun: boolean;
-          fnHandle: string;
-          name: string;
-          next?: Array<{ fnHandle: string; name: string }>;
-        },
-        {
-          batchSize?: number;
-          cursor?: string | null;
-          error?: string;
-          isDone: boolean;
-          latestEnd?: number;
-          latestStart: number;
-          name: string;
-          next?: Array<string>;
-          processed: number;
-          state: "inProgress" | "success" | "failed" | "canceled" | "unknown";
-        }
-      >;
-    };
-    public: {
-      cancel: FunctionReference<
-        "mutation",
-        "internal",
-        { name: string },
-        {
-          batchSize?: number;
-          cursor?: string | null;
-          error?: string;
-          isDone: boolean;
-          latestEnd?: number;
-          latestStart: number;
-          name: string;
-          next?: Array<string>;
-          processed: number;
-          state: "inProgress" | "success" | "failed" | "canceled" | "unknown";
-        }
-      >;
-      cancelAll: FunctionReference<
-        "mutation",
-        "internal",
-        { sinceTs?: number },
-        Array<{
-          batchSize?: number;
-          cursor?: string | null;
-          error?: string;
-          isDone: boolean;
-          latestEnd?: number;
-          latestStart: number;
-          name: string;
-          next?: Array<string>;
-          processed: number;
-          state: "inProgress" | "success" | "failed" | "canceled" | "unknown";
-        }>
-      >;
-      getStatus: FunctionReference<
-        "query",
-        "internal",
-        { limit?: number; migrationNames?: Array<string> },
-        Array<{
-          batchSize?: number;
-          cursor?: string | null;
-          error?: string;
-          isDone: boolean;
-          latestEnd?: number;
-          latestStart: number;
-          name: string;
-          next?: Array<string>;
-          processed: number;
-          state: "inProgress" | "success" | "failed" | "canceled" | "unknown";
-        }>
-      >;
-      runMigration: FunctionReference<
         "mutation",
         "internal",
         {
