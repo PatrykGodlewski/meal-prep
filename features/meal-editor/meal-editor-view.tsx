@@ -50,7 +50,7 @@ export default function MealDetailView({
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
-        <BackButton />
+        <BackButton destination="/meals" />
 
         {isEditing ? (
           <Button variant="outline" onClick={toggleEditMode}>

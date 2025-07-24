@@ -1,6 +1,6 @@
 "use client";
 import type { Doc } from "@/convex/_generated/dataModel";
-import MealForm from "./meal-form";
+import { MealForm } from "./meal-form";
 import type { Meal } from "./types";
 
 interface MealEditFormProps {
@@ -14,8 +14,11 @@ export function MealEditForm({
   meal,
   onSuccess,
 }: MealEditFormProps) {
-  // The props for MealForm are derived from the props of MealEditForm,
-  // so we can just pass them through.
-  // The availableIngredients are preloaded in the page component.
-  return <MealForm preloadedIngredients={availableIngredients} meal={meal} />;
+  return (
+    <MealForm
+      availableIngredients={availableIngredients}
+      meal={meal}
+      onSuccess={onSuccess}
+    />
+  );
 }

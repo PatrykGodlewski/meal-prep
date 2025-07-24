@@ -2,7 +2,8 @@
 
 import type { api } from "@/convex/_generated/api";
 import type { Preloaded } from "convex/react";
-import MealForm from "./meal-form";
+import { usePreloadedQuery } from "convex/react";
+import { MealForm } from "./meal-form";
 
 type Props = {
   preloadedIngredients: Preloaded<
@@ -11,5 +12,6 @@ type Props = {
 };
 
 export default function AddMealForm({ preloadedIngredients }: Props) {
-  return <MealForm preloadedIngredients={preloadedIngredients} />;
+  const availableIngredients = usePreloadedQuery(preloadedIngredients);
+  return <MealForm availableIngredients={availableIngredients} />;
 }

@@ -1,4 +1,7 @@
 {
+  "common": {
+    "back": "Wstecz"
+  },
   "mealPlanner": {
     "today": "Dziś",
     "header": "Plan posiłków",
