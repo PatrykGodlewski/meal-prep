@@ -1,8 +1,9 @@
-import { Geist_Sans as Geist } from "next/font/google";
-import "./globals.css";
 import { ConvexAuthNextjsServerProvider } from "@convex-dev/auth/nextjs/server";
-import Providers from "./providers";
 import { getTranslations } from "next-intl/server";
+import { Geist } from "next/font/google";
+import Providers from "./providers";
+
+import "./globals.css";
 
 export async function generateMetadata() {
   const t = await getTranslations("layout");
