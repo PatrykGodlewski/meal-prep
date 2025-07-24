@@ -3,7 +3,6 @@ import {
   MealPlanDisplay,
   MealPlannerHeader,
 } from "@/features/meal-planner/meal-plan-grid.client";
-import { MealPlanOptions } from "@/features/meal-planner/meal-plan-options.client";
 import { ShoppingListDisplay } from "@/features/meal-planner/purchase-list.client";
 import { CalendarDays } from "lucide-react";
 import { getTranslations } from "next-intl/server";

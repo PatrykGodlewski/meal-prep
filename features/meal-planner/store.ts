@@ -4,7 +4,7 @@ import type { Id } from "@/convex/_generated/dataModel";
 import { convexQuery, useConvexMutation } from "@convex-dev/react-query";
 import { batch, observable, syncState } from "@legendapp/state";
 import { ObservablePersistLocalStorage } from "@legendapp/state/persist-plugins/local-storage";
-import { use$, useWhenReady } from "@legendapp/state/react";
+import { use$, useObservable, useWhenReady } from "@legendapp/state/react";
 import { syncObservable } from "@legendapp/state/sync";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import type { FunctionReturnType } from "convex/server";
@@ -22,6 +22,7 @@ type Store = {
 };
 
 const today = new Date();
+
 const mealPlannerState$ = observable<Store>({
   peopleAmount: 1,
   currentWeek: getMonday(today),
@@ -38,6 +39,8 @@ syncObservable(mealPlannerState$, {
     plugin: ObservablePersistLocalStorage,
   },
 });
+
+const servings$ = observable(mealPlannerState$.peopleAmount.get());
 
 const setCurrentWeek = (date: Date) => {
   mealPlannerState$.currentWeek.set(getMonday(date));
@@ -177,7 +180,12 @@ export const useMealPlanner = () => {
     return mealPlannerState$.selectedPlanId.set(id);
   });
 
+  const servings = use$(servings$);
+
   return {
+    servings$,
+    servings,
+
     mealPlannerState$,
     selectedPlanId,
     currentWeek,

@@ -3,6 +3,7 @@
     "back": "Back"
   },
   "mealPlanner": {
+    "emptyShoppingList": "Your shopping list is empty.",
     "today": "Today",
     "header": "Meal Planner",
     "generateThisWeek": "Generate meal for this week",

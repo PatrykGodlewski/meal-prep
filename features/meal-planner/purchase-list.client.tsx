@@ -1,6 +1,7 @@
 "use client";
 
 import { For } from "@/components/for-each";
+import ServingController from "@/components/serving-controller";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
@@ -8,7 +9,7 @@ import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
 import { cn } from "@/lib/utils";
 import { useConvexMutation } from "@convex-dev/react-query";
-import { use$ } from "@legendapp/state/react";
+import { use$, useObservable } from "@legendapp/state/react";
 import { useMutation } from "@tanstack/react-query";
 import { camelCase } from "lodash";
 import { ShoppingCart } from "lucide-react";
@@ -40,38 +41,38 @@ export function ShoppingListDisplay() {
           {t("shoppingList")}
         </h1>
 
+        <ServingController />
         <DatePickerWithPresets />
       </div>
       <Separator className="my-2" />
       <ul className="space-y-2">
-        <For each={shoppingItems} empty={"empty shopping list"}>
-          {([category, categoryItems]) => (
-            <div key={category} className="space-y-2">
-              <h2 className="capitalize font-bold text-2xl py-2">
-                {tIngredient(camelCase(category))}
-              </h2>
-              <For
-                each={categoryItems.sort(
-                  (a, b) =>
-                    a.ingredient?.name.localeCompare(
-                      b.ingredient?.name ?? "",
-                    ) ?? 0,
-                )}
-                empty={t("noIngredients")}
-              >
-                {(item) => (
-                  <ShoppingListItem
-                    key={item.ingredientId}
-                    amount={item.amount}
-                    unit={item.ingredient?.unit}
-                    name={item.ingredient?.name}
-                    isChecked={item.isChecked}
-                    ids={item.itemIds}
-                  />
-                )}
-              </For>
-            </div>
-          )}
+        <For each={shoppingItems} empty={t("emptyShoppingList")}>
+          {([category, categoryItems]) => {
+            const sortedCategoryItems = categoryItems.sort(
+              (a, b) =>
+                a.ingredient?.name.localeCompare(b.ingredient?.name ?? "") ?? 0,
+            );
+
+            return (
+              <div key={category} className="space-y-2">
+                <h2 className="capitalize font-bold text-2xl py-2">
+                  {tIngredient(camelCase(category))}
+                </h2>
+                <For each={sortedCategoryItems} empty={t("noIngredients")}>
+                  {(item) => (
+                    <ShoppingListItem
+                      key={item.ingredientId}
+                      amount={item.amount}
+                      unit={item.ingredient?.unit}
+                      name={item.ingredient?.name}
+                      isChecked={item.isChecked}
+                      ids={item.itemIds}
+                    />
+                  )}
+                </For>
+              </div>
+            );
+          }}
         </For>
       </ul>
     </div>
@@ -87,7 +88,7 @@ type Props = {
 };
 
 function ShoppingListItem({ amount, unit, name, isChecked, ids }: Props) {
-  const { mealPlannerState$ } = useMealPlanner();
+  const { mealPlannerState$, servings } = useMealPlanner();
 
   const uniqueId = useId();
   const labelId = `${uniqueId}-label`;
@@ -177,7 +178,7 @@ function ShoppingListItem({ amount, unit, name, isChecked, ids }: Props) {
             "text-gray-400": isChecked,
           })}
         >
-          {amount} {unit}
+          {servings * amount} {unit}
         </span>
       </Label>
     </li>

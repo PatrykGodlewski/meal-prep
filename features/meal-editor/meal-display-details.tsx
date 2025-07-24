@@ -1,18 +1,8 @@
 import { For } from "@/components/for-each";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import ServingController from "@/components/serving-controller";
 import { useDateLocale } from "@/hooks/use-date-locale";
-import { use$, useObservable } from "@legendapp/state/react";
 import { format } from "date-fns";
-import {
-  Calendar,
-  ChefHat,
-  Clock,
-  Flame,
-  type LucideIcon,
-  Minus,
-  Plus,
-} from "lucide-react";
+import { Calendar, ChefHat, Clock, Flame, type LucideIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Image from "next/image";
 import React from "react";
@@ -43,9 +33,7 @@ function MealLabel({ icon: Icon, text }: MealLabelProps) {
 
 export const MealDisplayDetails: React.FC<MealDisplayDetailsProps> = React.memo(
   ({ meal, mealIngredients }) => {
-    const { mealPlannerState$ } = useMealPlanner();
-    const servings$ = useObservable(mealPlannerState$.peopleAmount.get());
-    const servings = use$(servings$);
+    const { servings } = useMealPlanner();
 
     const t = useTranslations("mealDetails");
     const tIngredient = useTranslations("ingredient");
@@ -135,33 +123,7 @@ export const MealDisplayDetails: React.FC<MealDisplayDetailsProps> = React.memo(
             </div>
           )}
 
-          <div className="flex items-center space-x-2 w-48">
-            <Button
-              variant="outline"
-              size="icon"
-              aria-label="Decrease people size"
-              onClick={() => servings$.set(Math.max(1, servings - 1))}
-            >
-              <Minus className="size-4" />
-            </Button>
-            <Input
-              id="people-size"
-              type="number"
-              placeholder="e.g. 4"
-              value={servings}
-              onChange={(e) =>
-                mealPlannerState$.peopleAmount.set(e.target.valueAsNumber)
-              }
-            />
-            <Button
-              variant="outline"
-              size="icon"
-              aria-label="Increase serving size"
-              onClick={() => servings$.set(servings + 1)}
-            >
-              <Plus className="size-4" />
-            </Button>
-          </div>
+          <ServingController />
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="lg:col-span-1">
