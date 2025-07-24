@@ -1,12 +1,16 @@
-import { Geist } from "next/font/google";
+import { Geist_Sans as Geist } from "next/font/google";
 import "./globals.css";
 import { ConvexAuthNextjsServerProvider } from "@convex-dev/auth/nextjs/server";
 import Providers from "./providers";
+import { getTranslations } from "next-intl/server";
 
-export const metadata = {
-  title: "Skibidi Obiadex",
-  description: "The fastest way to plan meals for a week",
-};
+export async function generateMetadata() {
+  const t = await getTranslations("layout");
+  return {
+    title: "Skibidi Obiadex",
+    description: t("description"),
+  };
+}
 
 const geistSans = Geist({
   display: "swap",

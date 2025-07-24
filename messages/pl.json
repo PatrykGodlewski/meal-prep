@@ -68,14 +68,21 @@
     "optionalMarker": "(opcjonalnie)",
     "noIngredients": "Brak składników.",
     "instructionsTitle": "Instrukcje",
-    "noInstructions": "Brak instrukcji."
+    "noInstructions": "Brak instrukcji.",
+    "noDescription": "Brak opisu.",
+    "totalTimeTitle": "Czas całkowity",
+    "servingsTitle": "Porcje",
+    "caloriesTitle": "Kalorie",
+    "authorTitle": "Autor",
+    "notApplicable": "B/D"
   },
   "planList": {
     "header": "Plany posiłków",
     "noMealPlans": "Nie znaleziono planów posiłków. Zacznij od utworzenia jednego!",
     "viewPlan": "Zobacz Plan",
     "createdAt": "Utworzono",
-    "lastUpdate": "Ostatnia aktualizacja"
+    "lastUpdate": "Ostatnia aktualizacja",
+    "id": "ID"
   },
   "mealList": {
     "meals": "Posiłki",
@@ -188,5 +195,20 @@
   "navMain": {
     "quickCreate": "Szybko utwórz posiłek"
   },
-  "selectAll": "Zaznacz wszystko"
+  "selectAll": "Zaznacz wszystko",
+  "auth": {
+    "logInToSeeNumbers": "Zaloguj się, aby zobaczyć liczby",
+    "emailPlaceholder": "Email",
+    "passwordPlaceholder": "Hasło",
+    "signIn": "Zaloguj się",
+    "signUp": "Zarejestruj się",
+    "dontHaveAccount": "Nie masz konta?",
+    "alreadyHaveAccount": "Masz już konto?",
+    "signUpInstead": "Zarejestruj się",
+    "signInInstead": "Zaloguj się",
+    "errorSigningIn": "Błąd logowania: {error}"
+  },
+  "layout": {
+    "description": "Najszybszy sposób na zaplanowanie posiłków na tydzień"
+  }
 }
