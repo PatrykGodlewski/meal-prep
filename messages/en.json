@@ -1,4 +1,7 @@
 {
+  "common": {
+    "back": "Back"
+  },
   "mealPlanner": {
     "today": "Today",
     "header": "Meal Planner",

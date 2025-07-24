@@ -1,0 +1,473 @@
+"use client";
+import { MultiSelect } from "@/components/multi-select";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import type { api } from "@/convex/_generated/api";
+import type { Doc } from "@/convex/_generated/dataModel";
+import {
+  type MutationMealAddValues,
+  type MutationMealEditValues,
+  mutationMealAddSchema,
+  mutationMealEditSchema,
+} from "@/convex/meals/validators";
+import { MEAL_CATEGORIES } from "@/convex/schema";
+import { zodResolver } from "@hookform/resolvers/zod";
+import type { FunctionReturnType } from "convex/server";
+import { Clock, Plus, Save, Trash2, Weight } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { useRouter } from "next/navigation";
+import { useFieldArray, useForm } from "react-hook-form";
+import { toast } from "sonner";
+import { IngredientInputRow } from "./ingredient-input-row";
+import type { IngredientFormValues } from "./schema";
+import { useMealEditor } from "./store";
+import type { Meal } from "./types";
+
+const mapPreloadedDataToFormValues = (
+  meal: FunctionReturnType<typeof api.meals.queries.getMeal>,
+): MutationMealEditValues | undefined => {
+  if (!meal) return undefined;
+
+  const { mealIngredients, ...mealData } = meal; // Separate meal base data
+
+  const formIngredients = (mealIngredients || []) // Handle potentially undefined mealIngredients
+    .map((mi): MutationMealEditValues["ingredients"][number] => {
+      const ingredient = mi.ingredient; // Safe due to filter
+      return {
+        ingredientId: ingredient?._id, // Ingredient definition ID
+        name: ingredient?.name ?? "_TODO_should_be_empty_name_TODO_",
+        calories: ingredient?.calories ?? 0,
+        category: ingredient?.category ?? "other",
+        unit: ingredient?.unit ?? "g",
+        quantity: mi.quantity, // From junction record
+        isOptional: mi.isOptional ?? false, // From junction record
+        notes: mi.notes ?? "", // From junction record
+      };
+    });
+
+  return {
+    mealId: mealData._id,
+    name: mealData.name,
+    description: mealData.description ?? "",
+    prepTimeMinutes: mealData.prepTimeMinutes ?? undefined,
+    cookTimeMinutes: mealData.cookTimeMinutes ?? undefined,
+    categories: mealData.categories ?? [],
+    calories: mealData.calories ?? 0,
+    imageUrl: mealData.imageUrl ?? "",
+    instructions: mealData.instructions ?? "",
+    isPublic: mealData.isPublic ?? false,
+    ingredients: formIngredients,
+  };
+};
+
+const NEW_INGREDIENT_DEFAULT: IngredientFormValues = {
+  name: "",
+  quantity: 0,
+  calories: 0,
+  unit: "g",
+  category: "other",
+  isOptional: false,
+  notes: undefined,
+};
+
+interface MealFormProps {
+  meal?: Meal;
+  availableIngredients: Doc<"ingredients">[];
+  onSuccess?: () => void;
+}
+
+export function MealForm({
+  availableIngredients = [],
+  meal,
+  onSuccess,
+}: MealFormProps) {
+  const t = useTranslations("mealEditor");
+  const tMeal = useTranslations("meal");
+  const router = useRouter();
+
+  const { isPending, editMeal, deleteMeal, addMeal } = useMealEditor({
+    onSuccess: (mealId) => {
+      if (mealId) router.push(`/meals/${mealId}`);
+      if (onSuccess) onSuccess();
+    },
+  });
+
+  const form = useForm({
+    resolver: zodResolver(
+      meal ? mutationMealEditSchema : mutationMealAddSchema,
+    ),
+    defaultValues: mapPreloadedDataToFormValues(meal),
+  });
+
+  const { control, setValue } = form;
+
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: "ingredients",
+  });
+
+  const onSubmit = (values: MutationMealEditValues | MutationMealAddValues) => {
+    if (meal) {
+      editMeal(values as MutationMealEditValues);
+    } else {
+      addMeal(values as MutationMealAddValues);
+    }
+  };
+
+  const handleAddIngredient = () => {
+    append(NEW_INGREDIENT_DEFAULT);
+  };
+
+  const handleRemoveIngredient = (index: number) => {
+    remove(index);
+  };
+
+  const handleDeleteConfirm = () => {
+    if (!meal?._id) {
+      toast(t("toastErrorTitle"), {
+        description: t("toastDeleteErrorMissingId"),
+      });
+      return;
+    }
+    deleteMeal({ mealId: meal._id });
+  };
+
+  const isEditMode = !!meal;
+
+  return (
+    <>
+      <div className="flex gap-2 justify-end mb-8">
+        <Button
+          onClick={form.handleSubmit(onSubmit)}
+          disabled={isPending || !form.formState.isDirty}
+        >
+          <Save className="h-4 w-4 mr-1" />
+          {isPending ? t("saving") : t("saveChanges")}
+        </Button>
+        {isEditMode && (
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button variant="destructive" disabled={isPending}>
+                <Trash2 className="h-4 w-4 mr-1" /> {t("delete")}
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>
+                  {t("deleteConfirmationTitle")}
+                </AlertDialogTitle>
+                <AlertDialogDescription>
+                  {t("deleteConfirmationDescription")}
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel disabled={isPending}>
+                  {t("cancel")}
+                </AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={handleDeleteConfirm}
+                  className="bg-red-600 hover:bg-red-700"
+                  disabled={isPending}
+                >
+                  {isPending ? t("deleting") : t("delete")}
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        )}
+      </div>
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+          <div className="bg-white dark:bg-neutral-900 rounded-lg shadow-md overflow-hidden">
+            {/* Image Section */}
+            <div className="relative h-64 md:h-96 w-full bg-gray-200 dark:bg-neutral-800">
+              <div className="absolute inset-0 flex items-center justify-center p-4 bg-black bg-opacity-60">
+                <div className="w-full max-w-md space-y-2">
+                  <Label htmlFor="imageUrlEdit" className="text-white">
+                    {t("imageUrlLabel")}
+                  </Label>
+                  <FormField
+                    control={control}
+                    name="imageUrl"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormControl>
+                          <Input
+                            id="imageUrlEdit"
+                            type="text"
+                            placeholder={t("imageUrlPlaceholder")}
+                            {...field}
+                            value={field.value ?? ""}
+                            className="bg-white dark:bg-neutral-700 border-gray-300 dark:border-neutral-600"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Details Section */}
+            <div className="p-6 space-y-8">
+              {/* Title */}
+              <FormField
+                control={control}
+                name="name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-xs font-medium sr-only">
+                      {t("mealNameLabel")}
+                    </FormLabel>
+                    <FormControl>
+                      <Input
+                        type="text"
+                        {...field}
+                        className="text-3xl font-bold h-auto py-2 bg-white dark:bg-neutral-800 border-gray-300 dark:border-neutral-600"
+                        aria-label={t("mealNameLabel")}
+                        placeholder={t("mealNamePlaceholder")}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* Meta Info Grid */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-4 items-end">
+                <FormField
+                  control={control}
+                  name="prepTimeMinutes"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-sm flex items-center gap-1">
+                        <Clock className="h-4 w-4" /> {t("prepTimeLabel")}
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          placeholder={t("prepTimePlaceholder")}
+                          {...field}
+                          value={field.value ?? ""}
+                          onChange={(e) =>
+                            field.onChange(
+                              e.target.value === ""
+                                ? null
+                                : Number.parseInt(e.target.value),
+                            )
+                          }
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={control}
+                  name="cookTimeMinutes"
+                  render={({ field }) => (
+                    <FormItem>
+                      {" "}
+                      <FormLabel className="text-sm flex items-center gap-1">
+                        <Clock className="h-4 w-4" /> {t("cookTimeLabel")}
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          placeholder={t("cookTimePlaceholder")}
+                          {...field}
+                          value={field.value ?? ""}
+                          onChange={(e) =>
+                            field.onChange(
+                              e.target.value === ""
+                                ? null
+                                : Number.parseInt(e.target.value),
+                            )
+                          }
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={control}
+                  name="calories"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-sm flex items-center gap-1">
+                        <Weight className="h-4 w-4" /> {t("caloriesLabel")}
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          placeholder={t("caloriesPlaceholder")}
+                          {...field}
+                          value={field.value ?? ""}
+                          onChange={(e) =>
+                            field.onChange(
+                              e.target.value === ""
+                                ? null
+                                : Number.parseInt(e.target.value),
+                            )
+                          }
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={control}
+                  name="categories"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t("categoriesLabel")}</FormLabel>
+                      <FormControl>
+                        <MultiSelect
+                          options={MEAL_CATEGORIES.map((cat) => ({
+                            label: tMeal(cat),
+                            value: cat,
+                          }))}
+                          onValueChange={field.onChange}
+                          defaultValue={field.value}
+                          placeholder={t("categoriesPlaceholder")}
+                          variant="inverted"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={control}
+                  name="isPublic"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-row items-center space-x-3 space-y-0 rounded-md border p-3 shadow-xs h-10">
+                      <FormControl>
+                        <Checkbox
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                          id="isPublicEdit"
+                        />
+                      </FormControl>
+                      <FormLabel
+                        htmlFor="isPublicEdit"
+                        className="text-sm font-normal"
+                      >
+                        {t("makePublicLabel")}
+                      </FormLabel>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              {/* Description */}
+              <FormField
+                control={control}
+                name="description"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-lg font-semibold">
+                      {t("descriptionLabel")}
+                    </FormLabel>
+                    <FormControl>
+                      <Textarea
+                        {...field}
+                        className="min-h-24"
+                        placeholder={t("descriptionPlaceholder")}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* --- Ingredients Section (MODIFIED) --- */}
+              <div className="space-y-6 border-t pt-6">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-xl font-semibold">
+                    {t("ingredientsTitle")}
+                  </h3>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={handleAddIngredient}
+                    className="flex items-center gap-1"
+                  >
+                    <Plus className="h-4 w-4" /> {t("addIngredientButton")}
+                  </Button>
+                </div>
+                <FormMessage>
+                  {form.formState.errors.ingredients?.root?.message}
+                </FormMessage>
+
+                <div className="space-y-4">
+                  {fields.map((field, index) => (
+                    <IngredientInputRow
+                      key={field.id}
+                      index={index}
+                      control={control}
+                      availableIngredients={availableIngredients}
+                      onRemove={() => handleRemoveIngredient(index)}
+                      setValue={setValue}
+                      field={field}
+                    />
+                  ))}
+                </div>
+              </div>
+              {/* --- End Ingredients Section --- */}
+
+              {/* Instructions Section */}
+              <FormField
+                control={control}
+                name="instructions"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-lg font-semibold">
+                      {t("instructionsLabel")}
+                    </FormLabel>
+                    <FormControl>
+                      <Textarea
+                        {...field}
+                        value={field.value ?? ""}
+                        className="min-h-40"
+                        placeholder={t("instructionsPlaceholder")}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+          </div>
+        </form>
+      </Form>
+    </>
+  );
+}
