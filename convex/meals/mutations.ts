@@ -61,72 +61,16 @@ export const editMeal = authMutation({
       updatedAt: now,
     });
 
-    const oldMealIngredients = await ctx.db
-      .query("mealIngredients")
-      .withIndex("by_meal", (q) => q.eq("mealId", args.mealId))
-      .collect();
+    await ctx.runMutation(internal.meals.helpers.handleCategoryChanges, {
+      mealId,
+      oldCategories: meal.categories ?? [],
+      newCategories: newMeal.categories ?? [],
+    });
 
-    // Functionally compare category arrays for differences (length or content)
-    const checkCategoryDifference = (
-      oldCategories: string[],
-      newCategories: string[],
-    ): boolean => {
-      if (oldCategories.length !== newCategories.length) {
-        return true; // Different lengths mean they are different
-      }
-      // If lengths are the same, check if content differs
-      const newCategorySet = new Set(newCategories);
-      // Return true if any old category is NOT found in the new set
-      return oldCategories.some((category) => !newCategorySet.has(category));
-    };
-
-    const isDifferentMealCategory = checkCategoryDifference(
-      meal.categories ?? [],
-      newMeal.categories ?? [],
-    );
-
-    if (isDifferentMealCategory) {
-      // If categories changed, remove this meal from any existing meal plans
-      // as its category assignment might no longer be valid for those slots.
-      const currentMealPlannedMeals = await ctx.db
-        .query("plannedMeals")
-        .withIndex("by_meal", (q) => q.eq("mealId", args.mealId))
-        .collect();
-
-      await Promise.all(
-        currentMealPlannedMeals.map((plannedMeal) => {
-          if (
-            plannedMeal?.category &&
-            newMeal.categories?.includes(plannedMeal.category)
-          )
-            return;
-          return ctx.db.delete(plannedMeal._id);
-        }),
-      );
-    }
-
-    await Promise.all(oldMealIngredients.map((mi) => ctx.db.delete(mi._id)));
-
-    await Promise.all(
-      ingredients.map(async (ingredient) => {
-        const ingredientId = await ctx.runMutation(
-          internal.ingredients.mutations.upsertIngredient,
-          {
-            ingredient,
-          },
-        );
-
-        await ctx.db.insert("mealIngredients", {
-          mealId: args.mealId,
-          ingredientId: ingredientId,
-          quantity: ingredient.quantity,
-          isOptional: ingredient.isOptional ?? false,
-          notes: ingredient.notes,
-          createdAt: now,
-          updatedAt: now,
-        });
-      }),
-    );
+    await ctx.runMutation(internal.meals.helpers.updateMealIngredients, {
+      mealId,
+      ingredients,
+    });
 
     return { success: true };
   },
