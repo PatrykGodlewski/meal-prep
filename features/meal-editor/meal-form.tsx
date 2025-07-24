@@ -118,7 +118,18 @@ export function MealForm({
     resolver: zodResolver(
       meal ? mutationMealEditSchema : mutationMealAddSchema,
     ),
-    defaultValues: mapPreloadedDataToFormValues(meal),
+    defaultValues: meal
+      ? mapPreloadedDataToFormValues(meal)
+      : {
+          name: "",
+          description: "",
+          categories: [],
+          calories: 0,
+          imageUrl: "",
+          instructions: "",
+          isPublic: false,
+          ingredients: [],
+        },
   });
 
   const { control, setValue } = form;
