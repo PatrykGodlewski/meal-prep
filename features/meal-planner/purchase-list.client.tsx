@@ -34,9 +34,9 @@ export function ShoppingListDisplay() {
   const shoppingItems = Object.entries(groupedItems).sort();
 
   return (
-    <div className="p-4 border rounded-lg shadow-xs bg-white hover:bg-neutral-100/75 dark:hover:bg-neutral-900 dark:bg-neutral-950/75 ease-in duration-700 transition-colors min-h-[500px]">
-      <div className={"flex  flex-wrap justify-between"}>
-        <h1 className="text-3xl font-bold flex items-center gap-4  pb-4">
+    <div className="min-h-[500px] rounded-lg border bg-white p-4 shadow-xs transition-colors duration-700 ease-in hover:bg-neutral-100/75 dark:bg-neutral-950/75 dark:hover:bg-neutral-900">
+      <div className={"flex flex-wrap justify-between gap-4"}>
+        <h1 className="flex items-center gap-4 font-bold text-3xl">
           <ShoppingCart />
           {t("shoppingList")}
         </h1>
@@ -55,7 +55,7 @@ export function ShoppingListDisplay() {
 
             return (
               <div key={category} className="space-y-2">
-                <h2 className="capitalize font-bold text-2xl py-2">
+                <h2 className="py-2 font-bold text-2xl capitalize">
                   {tIngredient(camelCase(category))}
                 </h2>
                 <For each={sortedCategoryItems} empty={t("noIngredients")}>
@@ -154,8 +154,8 @@ function ShoppingListItem({ amount, unit, name, isChecked, ids }: Props) {
         htmlFor={uniqueId}
         id={labelId}
         className={cn(
-          "flex items-center p-3 justify-between rounded-md border bg-neutral-0 dark:bg-neutral-950 border-neutral-700 shadow-xs transition-colors",
-          "hover:bg-neutral-100 dark:hover:bg-neutral-800 cursor-pointer",
+          "flex items-center justify-between rounded-md border border-neutral-700 bg-neutral-0 p-3 shadow-xs transition-colors dark:bg-neutral-950",
+          "cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-800",
         )}
       >
         <div className="flex items-center gap-2">
@@ -166,8 +166,8 @@ function ShoppingListItem({ amount, unit, name, isChecked, ids }: Props) {
             aria-labelledby={labelId}
           />
           <span
-            className={cn("text-sm font-medium", {
-              "line-through text-neutral-500": isChecked,
+            className={cn("font-medium text-sm", {
+              "text-neutral-500 line-through": isChecked,
             })}
           >
             {name}

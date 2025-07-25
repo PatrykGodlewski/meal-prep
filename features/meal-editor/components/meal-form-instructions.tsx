@@ -23,7 +23,7 @@ export function MealFormInstructions({ control }: MealFormInstructionsProps) {
       name="instructions"
       render={({ field }) => (
         <FormItem>
-          <FormLabel className="text-lg font-semibold">
+          <FormLabel className="font-semibold text-lg">
             {t("instructionsLabel")}
           </FormLabel>
           <FormControl>

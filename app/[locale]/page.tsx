@@ -12,7 +12,7 @@ export default async function Home() {
   const t = await getTranslations("mealPlanner");
   return (
     <div>
-      <h1 className="text-3xl font-semibold mb-6 flex items-center space-x-2">
+      <h1 className="mb-6 flex items-center space-x-2 font-semibold text-3xl">
         <CalendarDays className="h-7 w-7" />
         <span>{t("header")}</span>
       </h1>

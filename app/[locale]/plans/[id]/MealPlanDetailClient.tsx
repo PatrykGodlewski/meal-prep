@@ -97,9 +97,9 @@ function MealCard({ plannedMeal, category, plan }: MealCardProps) {
 
   return (
     <div
-      className={cn("border flex-col gap-4 p-4 rounded-md shadow-sm flex ", {
+      className={cn("flex flex-col gap-4 rounded-md border p-4 shadow-sm ", {
         "": isMeal,
-        "border-dashed border-2 text-neutral-500": !isMeal,
+        "border-2 border-dashed text-neutral-500": !isMeal,
       })}
     >
       <ModalMeals
@@ -124,7 +124,7 @@ function MealCard({ plannedMeal, category, plan }: MealCardProps) {
         ) : (
           <div
             className={
-              "size-32 rounded-lg border border-dashed grid place-content-center dark:bg-neutral-900 dark:border-neutral-800"
+              "grid size-32 place-content-center rounded-lg border border-dashed dark:border-neutral-800 dark:bg-neutral-900"
             }
           >
             <UtensilsCrossed className="h-8 w-8 text-neutral-300 dark:text-neutral-800" />
@@ -138,11 +138,11 @@ function MealCard({ plannedMeal, category, plan }: MealCardProps) {
               </h3>
             </Link>
           ) : (
-            <h3 className="font-semibold text-lg hover:underline cursor-pointer">
+            <h3 className="cursor-pointer font-semibold text-lg hover:underline">
               {t("missingMeal")}
             </h3>
           )}
-          <p className="text-sm text-neutral-400 uppercase">
+          <p className="text-neutral-400 text-sm uppercase">
             {tMeal(category)}
           </p>
         </div>

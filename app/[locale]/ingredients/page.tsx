@@ -21,8 +21,8 @@ export default async function IngredientsPage() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">{t("header")}</h1>
+      <div className="mb-6 flex items-center justify-between">
+        <h1 className="font-bold text-3xl">{t("header")}</h1>
       </div>
       <IngredientList preloadedIngredients={preloadedIngredients} />
     </div>

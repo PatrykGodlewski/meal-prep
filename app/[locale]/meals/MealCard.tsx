@@ -22,8 +22,8 @@ export function MealCard({ meal }: Props) {
 
   return (
     <Link href={`/meals/${meal._id}`}>
-      <div className="bg-neutral-200 dark:bg-neutral-700 rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow h-full flex flex-col">
-        <div className="relative h-48 w-full bg-neutral-300 dark:bg-neutral-600 shrink-0">
+      <div className="flex h-full flex-col overflow-hidden rounded-lg bg-neutral-200 shadow-md transition-shadow hover:shadow-lg dark:bg-neutral-700">
+        <div className="relative h-48 w-full shrink-0 bg-neutral-300 dark:bg-neutral-600">
           {meal.imageUrl ? (
             <Image
               src={meal.imageUrl}
@@ -33,58 +33,58 @@ export function MealCard({ meal }: Props) {
               className="object-cover"
             />
           ) : (
-            <div className="flex items-center justify-center h-full">
+            <div className="flex h-full items-center justify-center">
               <UtensilsCrossed className="h-12 w-12 text-neutral-500 dark:text-neutral-400" />
             </div>
           )}
           {meal.category && (
-            <span className="absolute uppercase top-2 right-2 bg-blue-600 text-white text-xs px-2 py-1 rounded-full shadow-sm">
+            <span className="absolute top-2 right-2 rounded-full bg-blue-600 px-2 py-1 text-white text-xs uppercase shadow-sm">
               {tMeal(meal.category)}
             </span>
           )}
         </div>
 
-        <div className="p-4 text-neutral-700 dark:text-neutral-300 flex flex-col grow">
-          <h2 className="text-xl font-semibold mb-2 line-clamp-1">
+        <div className="flex grow flex-col p-4 text-neutral-700 dark:text-neutral-300">
+          <h2 className="mb-2 line-clamp-1 font-semibold text-xl">
             {meal.name}
           </h2>
-          <p className="text-sm mb-4 line-clamp-2 grow">
+          <p className="mb-4 line-clamp-2 grow text-sm">
             {meal.description || t("noDescription")}
           </p>
 
-          <div className="flex items-center text-sm mb-3 gap-4 text-neutral-600 dark:text-neutral-400">
+          <div className="mb-3 flex items-center gap-4 text-neutral-600 text-sm dark:text-neutral-400">
             <span className="flex items-center" title={t("totalTimeTitle")}>
-              <Clock className="h-4 w-4 mr-1 shrink-0" />
+              <Clock className="mr-1 h-4 w-4 shrink-0" />
               {totalTime > 0 ? `${totalTime} min` : t("notApplicable")}
             </span>
 
             {meal.servings && (
               <span className="flex items-center" title={t("servingsTitle")}>
-                <Users className="h-4 w-4 mr-1 shrink-0" />
+                <Users className="mr-1 h-4 w-4 shrink-0" />
                 {t("servings", { count: meal.servings })}
               </span>
             )}
 
             {meal.calories && (
               <span className="flex items-center" title={t("caloriesTitle")}>
-                <Flame className="h-4 w-4 mr-1 shrink-0" />
+                <Flame className="mr-1 h-4 w-4 shrink-0" />
                 {t("calories", { count: meal.calories })}
               </span>
             )}
           </div>
 
-          <div className="flex justify-between items-center mt-auto pt-2 border-t border-neutral-300 dark:border-neutral-600">
+          <div className="mt-auto flex items-center justify-between border-neutral-300 border-t pt-2 dark:border-neutral-600">
             <div
-              className="flex items-center text-sm text-neutral-600 dark:text-neutral-400"
+              className="flex items-center text-neutral-600 text-sm dark:text-neutral-400"
               title={t("authorTitle")}
             >
-              <ChefHat className="h-4 w-4 mr-1 shrink-0" />
+              <ChefHat className="mr-1 h-4 w-4 shrink-0" />
               <span className="truncate">
                 {t("author", { name: displayAuthor })}
               </span>
             </div>
 
-            <span className="first-letter:uppercase text-xs text-neutral-500 dark:text-neutral-400 shrink-0">
+            <span className="shrink-0 text-neutral-500 text-xs first-letter:uppercase dark:text-neutral-400">
               {format(meal.createdAt, DATE_FORMAT_DISPLAY_CARD, {
                 locale: dateLocale,
               })}

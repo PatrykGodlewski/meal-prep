@@ -66,7 +66,7 @@ export function DatePickerWithPresets() {
         <Button
           variant={"outline"}
           className={cn(
-            "flex-1 sm:max-w-[280px] justify-start text-left font-normal",
+            "flex-1 justify-start text-left font-normal sm:max-w-[280px]",
             !shoppingListDate && "text-muted-foreground",
           )}
         >

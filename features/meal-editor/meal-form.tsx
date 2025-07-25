@@ -143,9 +143,9 @@ export function MealForm({
       />
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-          <div className="bg-white dark:bg-neutral-900 rounded-lg shadow-md overflow-hidden">
+          <div className="overflow-hidden rounded-lg bg-white shadow-md dark:bg-neutral-900">
             <MealFormImage control={form.control} />
-            <div className="p-6 space-y-8">
+            <div className="space-y-8 p-6">
               <MealFormDetails control={form.control} />
               <MealFormIngredients
                 control={form.control}

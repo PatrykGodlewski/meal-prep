@@ -36,7 +36,7 @@ export function NavList({ items, title }: Props) {
                 </Link>
               </SidebarMenuButton>
               <SidebarMenuBadge>
-                <ChevronRight className="w-4 h-4" />
+                <ChevronRight className="h-4 w-4" />
               </SidebarMenuBadge>
             </SidebarMenuItem>
           ))}

@@ -16,9 +16,9 @@ export function BackButton({ destination }: Props) {
     <Button
       variant="link"
       onClick={() => (destination ? router.push(destination) : router.back())}
-      className="p-0 h-auto text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
+      className="h-auto p-0 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
     >
-      <ArrowLeft className="h-4 w-4 mr-1" /> {t("back")}
+      <ArrowLeft className="mr-1 h-4 w-4" /> {t("back")}
     </Button>
   );
 }

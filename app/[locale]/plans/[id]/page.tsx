@@ -29,9 +29,9 @@ export default async function PlanDetailPage({ params }: PlanDetailPageProps) {
   const t = await getTranslations("mealPlanDetail");
 
   return (
-    <div className="container mx-auto space-y-4 py-8 px-4">
+    <div className="container mx-auto space-y-4 px-4 py-8">
       <BackButton />
-      <h1 className="text-3xl font-bold">{t("header")}</h1>
+      <h1 className="font-bold text-3xl">{t("header")}</h1>
       <MealPlanDetail preloadedMealPlan={preloadedMealPlan} />
     </div>
   );

@@ -32,16 +32,16 @@ export function MealFormActions({
   const t = useTranslations("mealEditor");
 
   return (
-    <div className="flex gap-2 justify-end mb-8">
+    <div className="mb-8 flex justify-end gap-2">
       <Button onClick={onSubmit} disabled={isPending || !isDirty}>
-        <Save className="h-4 w-4 mr-1" />
+        <Save className="mr-1 h-4 w-4" />
         {isPending ? t("saving") : t("saveChanges")}
       </Button>
       {isEditMode && (
         <AlertDialog>
           <AlertDialogTrigger asChild>
             <Button variant="destructive" disabled={isPending}>
-              <Trash2 className="h-4 w-4 mr-1" /> {t("delete")}
+              <Trash2 className="mr-1 h-4 w-4" /> {t("delete")}
             </Button>
           </AlertDialogTrigger>
           <AlertDialogContent>

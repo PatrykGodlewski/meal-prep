@@ -24,25 +24,25 @@ export function PlanList({ preloadedPlans }: Props) {
           {t("noMealPlans")}
         </p>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
           {plans.map((plan) => (
             <div
               key={plan._id}
-              className="bg-white flex justify-between dark:bg-neutral-900 gap-8 rounded-lg shadow-sm p-4 hover:shadow-md dark:shadow-neutral-700 transition-shadow"
+              className="flex justify-between gap-8 rounded-lg bg-white p-4 shadow-sm transition-shadow hover:shadow-md dark:bg-neutral-900 dark:shadow-neutral-700"
             >
               <div className="space-y-2">
-                <h2 className="text-2xl font-semibold">
+                <h2 className="font-semibold text-2xl">
                   {format(plan.date, "MMMM d, yyyy", { locale: dateLocale })}
                 </h2>
                 <div className="space-y-1">
-                  <p className="text-xs text-neutral-500 dark:text-neutral-400">
+                  <p className="text-neutral-500 text-xs dark:text-neutral-400">
                     {t("createdAt")}:{" "}
                     {format(plan.createdAt, "MMMM d, yyyy", {
                       locale: dateLocale,
                     })}
                   </p>
 
-                  <p className="text-xs text-neutral-500 dark:text-neutral-400">
+                  <p className="text-neutral-500 text-xs dark:text-neutral-400">
                     {t("lastUpdate")}:{" "}
                     {format(plan.updatedAt, "MMMM d, yyyy", {
                       locale: dateLocale,
@@ -54,7 +54,7 @@ export function PlanList({ preloadedPlans }: Props) {
               <Button
                 asChild
                 variant="outline"
-                className="flex-1 h-full"
+                className="h-full flex-1"
                 size="sm"
               >
                 <Link href={`/plans/${plan._id}`}>{t("viewPlan")}</Link>

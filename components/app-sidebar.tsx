@@ -37,7 +37,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             >
               <a href="/">
                 <Triangle className="h-5 w-5 rotate-90" />
-                <span className="text-base font-semibold">Skibidi Obiadex</span>
+                <span className="font-semibold text-base">Skibidi Obiadex</span>
               </a>
             </SidebarMenuButton>
           </SidebarMenuItem>

@@ -11,7 +11,7 @@ export function MealPlanOptions() {
   const peopleAmount = use$(mealPlannerState$.peopleAmount);
 
   return (
-    <div className="space-y-4 grid grid-cols-4 border p-8 rounded-xl">
+    <div className="grid grid-cols-4 space-y-4 rounded-xl border p-8">
       <div className="grid w-full items-center gap-1.5">
         <Label htmlFor="people-size">People Size</Label>
         <div className="flex items-center space-x-2">

@@ -50,7 +50,7 @@ export function MealFormIngredients({
   return (
     <div className="space-y-6 border-t pt-6">
       <div className="flex items-center justify-between">
-        <h3 className="text-xl font-semibold">{t("ingredientsTitle")}</h3>
+        <h3 className="font-semibold text-xl">{t("ingredientsTitle")}</h3>
         <Button
           type="button"
           variant="outline"

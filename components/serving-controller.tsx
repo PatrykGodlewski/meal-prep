@@ -7,7 +7,7 @@ import { Input } from "./ui/input";
 export default function ServingController() {
   const { servings$, servings } = useMealPlanner();
   return (
-    <div className="flex items-center space-x-2 w-48">
+    <div className="flex w-48 items-center space-x-2">
       <Button
         variant="outline"
         size="icon"

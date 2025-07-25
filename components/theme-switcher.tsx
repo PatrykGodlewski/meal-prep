@@ -21,7 +21,7 @@ const ThemeSwitcher = () => {
   if (!isMounted) {
     return (
       <Button
-        className="animate-pulse pointer-events-none"
+        className="pointer-events-none animate-pulse"
         variant="ghost"
         size={"sm"}
       >

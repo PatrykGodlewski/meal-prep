@@ -6,26 +6,26 @@ import PaginatedMealList from "./PaginatedMealList"; // Import the new component
 import { SearchInput } from "./SearchInput";
 
 const ListSkeleton = () => (
-  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+  <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
     {Array.from({ length: 6 }).map((_, index) => (
       <div
         key={index}
-        className="bg-neutral-200 dark:bg-neutral-700 rounded-lg overflow-hidden shadow-md h-full flex flex-col"
+        className="flex h-full flex-col overflow-hidden rounded-lg bg-neutral-200 shadow-md dark:bg-neutral-700"
       >
         <Skeleton className="h-48 w-full" />
-        <div className="p-4 flex flex-col grow">
-          <Skeleton className="h-6 w-3/4 mb-2" />
-          <Skeleton className="h-4 w-full mb-1" />
-          <Skeleton className="h-4 w-5/6 mb-4" />
-          <div className="flex items-center text-sm mb-3">
-            <Skeleton className="h-4 w-4 mr-1 rounded-full" />
-            <Skeleton className="h-4 w-12 mr-4" />
-            <Skeleton className="h-4 w-4 mr-1 rounded-full" />
+        <div className="flex grow flex-col p-4">
+          <Skeleton className="mb-2 h-6 w-3/4" />
+          <Skeleton className="mb-1 h-4 w-full" />
+          <Skeleton className="mb-4 h-4 w-5/6" />
+          <div className="mb-3 flex items-center text-sm">
+            <Skeleton className="mr-1 h-4 w-4 rounded-full" />
+            <Skeleton className="mr-4 h-4 w-12" />
+            <Skeleton className="mr-1 h-4 w-4 rounded-full" />
             <Skeleton className="h-4 w-16" />
           </div>
-          <div className="flex justify-between items-center mt-auto pt-2 border-t border-neutral-300 dark:border-neutral-600">
+          <div className="mt-auto flex items-center justify-between border-neutral-300 border-t pt-2 dark:border-neutral-600">
             <div className="flex items-center text-sm">
-              <Skeleton className="h-4 w-4 mr-1 rounded-full" />
+              <Skeleton className="mr-1 h-4 w-4 rounded-full" />
               <Skeleton className="h-4 w-20" />
             </div>
             <Skeleton className="h-4 w-16" />
@@ -40,11 +40,11 @@ export default async function MealsPage() {
   const t = await getTranslations("mealList");
   return (
     <div>
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold">{t("meals")}</h1>
+      <div className="mb-8 flex items-center justify-between">
+        <h1 className="font-bold text-3xl">{t("meals")}</h1>
         <Link
           href="/meals/add"
-          className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+          className="inline-flex items-center rounded-md bg-blue-600 px-4 py-2 text-white transition-colors hover:bg-blue-700"
         >
           {t("addMeal")}
         </Link>

@@ -82,35 +82,35 @@ export function ModalMeals({
   return (
     <Dialog modal open={isOpen} onOpenChange={onOpenChange}>
       {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
-      <DialogContent className="sm:max-w-[425px] md:max-w-2xl max-h-[80vh] flex flex-col">
+      <DialogContent className="flex max-h-[80vh] flex-col sm:max-w-[425px] md:max-w-2xl">
         <DialogHeader>
           <DialogTitle>Select a Meal</DialogTitle>
           <DialogDescription>
             Search for a meal and click on it to add it to your plan.
           </DialogDescription>
         </DialogHeader>
-        <div className="flex-col sm:flex-row flex gap-4 sm:gap-2 py-4 border-b">
+        <div className="flex flex-col gap-4 border-b py-4 sm:flex-row sm:gap-2">
           <Input
             placeholder="Search meals by name..."
             value={inputValue}
             onChange={handleInputValue}
           />
           <Button
-            className="w-full sm:basis-1/4 sm:w-auto"
+            className="w-full sm:w-auto sm:basis-1/4"
             onClick={handleClearInput}
           >
             Clear
           </Button>
         </div>
-        <div className="grow overflow-y-auto space-y-2">
+        <div className="grow space-y-2 overflow-y-auto">
           {isFetching && status !== "LoadingMore" && (
-            <div className="flex justify-center items-center h-32">
+            <div className="flex h-32 items-center justify-center">
               <Loader2 className="h-8 w-8 animate-spin text-primary" />
             </div>
           )}
 
           {!isFetching && allMeals.length === 0 && (
-            <p className="text-center text-gray-500 dark:text-gray-400 py-4">
+            <p className="py-4 text-center text-gray-500 dark:text-gray-400">
               No meals found matching your search.
             </p>
           )}
@@ -118,7 +118,7 @@ export function ModalMeals({
           {allMeals.map((meal) => (
             <div
               key={meal._id}
-              className="p-3 border rounded-md hover:bg-accent hover:text-accent-foreground cursor-pointer flex justify-between items-center"
+              className="flex cursor-pointer items-center justify-between rounded-md border p-3 hover:bg-accent hover:text-accent-foreground"
               onClick={() => handleSelectMeal(meal._id)}
               // biome-ignore lint/a11y/useSemanticElements: <explanation>
               role="button"
@@ -135,7 +135,7 @@ export function ModalMeals({
                   {meal.categories?.map((cat, idx) => (
                     <p
                       key={idx}
-                      className="text-sm text-muted-foreground capitalize"
+                      className="text-muted-foreground text-sm capitalize"
                     >
                       {cat}
                     </p>
@@ -146,19 +146,19 @@ export function ModalMeals({
           ))}
 
           {hasNextPage && (
-            <Button onClick={() => loadMore(20)} className="w-full mt-2">
+            <Button onClick={() => loadMore(20)} className="mt-2 w-full">
               Load More
             </Button>
           )}
 
           {isFetchingNextPage && (
-            <div className="flex justify-center items-center py-4">
+            <div className="flex items-center justify-center py-4">
               <Loader2 className="h-6 w-6 animate-spin text-primary" />
             </div>
           )}
 
           {!hasNextPage && allMeals.length > 0 && (
-            <p className="text-center text-sm text-muted-foreground py-4">
+            <p className="py-4 text-center text-muted-foreground text-sm">
               No more meals to load.
             </p>
           )}

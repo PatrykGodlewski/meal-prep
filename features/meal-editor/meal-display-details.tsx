@@ -24,8 +24,8 @@ function MealLabel({ icon: Icon, text }: MealLabelProps) {
     return null;
 
   return (
-    <div className="flex items-center mr-4 mb-2 whitespace-nowrap text-sm">
-      <Icon className="h-4 w-4 mr-1.5 shrink-0" />
+    <div className="mr-4 mb-2 flex items-center whitespace-nowrap text-sm">
+      <Icon className="mr-1.5 h-4 w-4 shrink-0" />
       <span className="first-letter:uppercase">{text}</span>
     </div>
   );
@@ -47,8 +47,8 @@ export const MealDisplayDetails: React.FC<MealDisplayDetailsProps> = React.memo(
     );
 
     return (
-      <div className="bg-white dark:bg-neutral-900 rounded-lg shadow-md overflow-hidden">
-        <div className="relative h-64 md:h-96 w-full bg-gray-200 dark:bg-neutral-800">
+      <div className="overflow-hidden rounded-lg bg-white shadow-md dark:bg-neutral-900">
+        <div className="relative h-64 w-full bg-gray-200 md:h-96 dark:bg-neutral-800">
           {meal.imageUrl ? (
             <Image
               src={meal.imageUrl}
@@ -58,17 +58,17 @@ export const MealDisplayDetails: React.FC<MealDisplayDetailsProps> = React.memo(
               priority
             />
           ) : (
-            <div className="flex items-center justify-center h-full bg-gray-100 dark:bg-neutral-700">
-              <span className="text-gray-500 dark:text-neutral-400 text-lg">
+            <div className="flex h-full items-center justify-center bg-gray-100 dark:bg-neutral-700">
+              <span className="text-gray-500 text-lg dark:text-neutral-400">
                 {t("noImage")}
               </span>
             </div>
           )}
-          <div className="absolute top-4 right-4 flex flex-col gap-2 items-end">
+          <div className="absolute top-4 right-4 flex flex-col items-end gap-2">
             {meal?.categories?.map((cat, idx) => (
               <span
                 key={cat + idx}
-                className="bg-blue-600 text-white px-3 py-1 rounded-full text-xs text-right font-medium uppercase tracking-wide"
+                className="rounded-full bg-blue-600 px-3 py-1 text-right font-medium text-white text-xs uppercase tracking-wide"
               >
                 {cat}
               </span>
@@ -76,8 +76,8 @@ export const MealDisplayDetails: React.FC<MealDisplayDetailsProps> = React.memo(
           </div>
         </div>
 
-        <div className="p-6 space-y-6">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+        <div className="space-y-6 p-6">
+          <h1 className="font-bold text-3xl text-gray-900 dark:text-white">
             {meal.name}
           </h1>
 
@@ -114,10 +114,10 @@ export const MealDisplayDetails: React.FC<MealDisplayDetailsProps> = React.memo(
 
           {meal.description && (
             <div>
-              <h2 className="text-xl font-semibold mb-2 text-gray-800 dark:text-gray-200">
+              <h2 className="mb-2 font-semibold text-gray-800 text-xl dark:text-gray-200">
                 {t("descriptionTitle")}
               </h2>
-              <p className="text-gray-700 dark:text-neutral-300 prose prose-sm dark:prose-invert max-w-none">
+              <p className="prose prose-sm dark:prose-invert max-w-none text-gray-700 dark:text-neutral-300">
                 {meal.description}
               </p>
             </div>
@@ -125,17 +125,17 @@ export const MealDisplayDetails: React.FC<MealDisplayDetailsProps> = React.memo(
 
           <ServingController />
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
             <div className="lg:col-span-1">
-              <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-200">
+              <h2 className="mb-4 font-semibold text-gray-800 text-xl dark:text-gray-200">
                 {t("ingredientsTitle")}
               </h2>
 
-              <ul className="space-y-2 text-sm text-gray-700 dark:text-neutral-300">
+              <ul className="space-y-2 text-gray-700 text-sm dark:text-neutral-300">
                 <For
                   each={mealIngredients}
                   empty={
-                    <p className="text-sm text-gray-500 dark:text-neutral-500 italic">
+                    <p className="text-gray-500 text-sm italic dark:text-neutral-500">
                       {t("noIngredients")}
                     </p>
                   }
@@ -147,7 +147,7 @@ export const MealDisplayDetails: React.FC<MealDisplayDetailsProps> = React.memo(
                         key={ingredient?._id}
                         className="flex items-start gap-2"
                       >
-                        <span className="inline-block w-1.5 h-1.5 rounded-full bg-blue-500 mt-[7px] shrink-0" />
+                        <span className="mt-[7px] inline-block h-1.5 w-1.5 shrink-0 rounded-full bg-blue-500" />
                         <div>
                           <span className="font-medium">
                             {mealIngredient.quantity * servings}{" "}
@@ -155,17 +155,17 @@ export const MealDisplayDetails: React.FC<MealDisplayDetailsProps> = React.memo(
                             {ingredient?.name}
                           </span>
                           {ingredient?.category && (
-                            <span className="ml-2 text-xs text-gray-500 dark:text-neutral-400 capitalize">
+                            <span className="ml-2 text-gray-500 text-xs capitalize dark:text-neutral-400">
                               ({tIngredient(ingredient?.category)})
                             </span>
                           )}
                           {mealIngredient.isOptional && (
-                            <span className="ml-2 text-xs text-gray-500 dark:text-neutral-500">
+                            <span className="ml-2 text-gray-500 text-xs dark:text-neutral-500">
                               {t("optionalMarker")}
                             </span>
                           )}
                           {mealIngredient.notes && (
-                            <p className="text-xs text-gray-600 dark:text-neutral-400 pl-0 mt-0.5">
+                            <p className="mt-0.5 pl-0 text-gray-600 text-xs dark:text-neutral-400">
                               {mealIngredient.notes}
                             </p>
                           )}
@@ -178,14 +178,14 @@ export const MealDisplayDetails: React.FC<MealDisplayDetailsProps> = React.memo(
             </div>
 
             <div className="lg:col-span-2">
-              <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-200">
+              <h2 className="mb-4 font-semibold text-gray-800 text-xl dark:text-gray-200">
                 {t("instructionsTitle")}
               </h2>
               <div className="prose prose-sm dark:prose-invert max-w-none text-gray-700 dark:text-neutral-300">
                 <For
                   each={meal.instructions?.split("\n")}
                   empty={
-                    <p className="text-gray-500 dark:text-neutral-500 italic">
+                    <p className="text-gray-500 italic dark:text-neutral-500">
                       {t("noInstructions")}
                     </p>
                   }

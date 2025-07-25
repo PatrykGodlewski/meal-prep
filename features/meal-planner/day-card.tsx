@@ -36,14 +36,14 @@ export function PlanCard({ plan }: PlanCardProps) {
 
   if (!plan) {
     return (
-      <Card className="shadow-xs flex flex-col min-h-[150px] border-neutral-800 bg-neutral-50 dark:bg-neutral-950  border-2 border-dashed">
+      <Card className="flex min-h-[150px] flex-col border-2 border-neutral-800 border-dashed bg-neutral-50 shadow-xs dark:bg-neutral-950">
         <CardHeader className="p-3">
-          <CardTitle className="text-sm font-medium text-neutral-400 dark:text-neutral-600">
+          <CardTitle className="font-medium text-neutral-400 text-sm dark:text-neutral-600">
             {t("notCreated")}
           </CardTitle>
         </CardHeader>
-        <CardContent className="p-3 grow flex items-center justify-center">
-          <span className="text-xs text-neutral-400 dark:text-neutral-600 italic">
+        <CardContent className="flex grow items-center justify-center p-3">
+          <span className="text-neutral-400 text-xs italic dark:text-neutral-600">
             {t("empty")}
           </span>
         </CardContent>
@@ -53,13 +53,13 @@ export function PlanCard({ plan }: PlanCardProps) {
 
   if (!isValid(toDate(plan.date))) {
     return (
-      <Card className="shadow-xs flex flex-col min-h-[150px] border-red-500">
+      <Card className="flex min-h-[150px] flex-col border-red-500 shadow-xs">
         <CardHeader className="p-3">
-          <CardTitle className="text-sm text-red-600">
+          <CardTitle className="text-red-600 text-sm">
             {t("dateError")}
           </CardTitle>
         </CardHeader>
-        <CardContent className="p-3 text-xs text-red-500">
+        <CardContent className="p-3 text-red-500 text-xs">
           {t("invalidDate")}
         </CardContent>
       </Card>
@@ -69,11 +69,11 @@ export function PlanCard({ plan }: PlanCardProps) {
   return (
     <Card
       className={cn(
-        "shadow-xs flex py-0 flex-col min-h-[150px] hover:bg-neutral-100 dark:hover:bg-neutral-900 dark:bg-neutral-950 transition-colors duration-700",
+        "flex min-h-[150px] flex-col py-0 shadow-xs transition-colors duration-700 hover:bg-neutral-100 dark:bg-neutral-950 dark:hover:bg-neutral-900",
       )}
     >
-      <CardHeader className="pt-3 px-3">
-        <CardTitle className="flex items-center py-0 justify-between text-sm font-medium ">
+      <CardHeader className="px-3 pt-3">
+        <CardTitle className="flex items-center justify-between py-0 font-medium text-sm ">
           <Button
             variant="ghost"
             size="icon"
@@ -83,9 +83,9 @@ export function PlanCard({ plan }: PlanCardProps) {
             aria-label={plan.locked ? t("unlockPlan") : t("lockPlan")}
           >
             {plan.locked ? (
-              <Lock className="w-4 h-4" />
+              <Lock className="h-4 w-4" />
             ) : (
-              <Unlock className="w-4 h-4" />
+              <Unlock className="h-4 w-4" />
             )}
           </Button>
 
@@ -93,20 +93,20 @@ export function PlanCard({ plan }: PlanCardProps) {
             {format(plan.date, "EEEE", { locale: dateLocale })}
           </span>
 
-          <span className="text-xs text-neutral-500">
+          <span className="text-neutral-500 text-xs">
             {format(plan.date, DATE_FORMAT_DISPLAY_CARD, {
               locale: dateLocale,
             })}
           </span>
         </CardTitle>
       </CardHeader>
-      <CardContent className="p-3 justify-between flex flex-col space-y-2 grow">
-        <div className="flex justify-between items-end gap-4">
-          <ul className="text-xs group flex flex-wrap justify-between gap-4 flex-1">
+      <CardContent className="flex grow flex-col justify-between space-y-2 p-3">
+        <div className="flex items-end justify-between gap-4">
+          <ul className="group flex flex-1 flex-wrap justify-between gap-4 text-xs">
             <For
               each={plan.planMeals}
               empty={
-                <li className="text-center text-gray-400 italic pt-4">
+                <li className="pt-4 text-center text-gray-400 italic">
                   {t("noMeals")}
                 </li>
               }
@@ -116,14 +116,14 @@ export function PlanCard({ plan }: PlanCardProps) {
                 return (
                   <li
                     className={cn("flex-1", {
-                      "rounded-xl p-2 border-dashed border-2 border-neutral-500":
+                      "rounded-xl border-2 border-neutral-500 border-dashed p-2":
                         !isPlannedMeal,
                     })}
                     key={`${plan._id}-${plannedMeal.meal?.categories?.toString}-${plannedMeal._id}`}
                   >
                     {isPlannedMeal ? (
                       <Link
-                        className="hover:underline h-full dark:bg-neutral-950 bg-white flex-wrap min-w-24 relative flex items-center justify-center p-2 border-2 border-dashed border-neutral-700 rounded-xl"
+                        className="relative flex h-full min-w-24 flex-wrap items-center justify-center rounded-xl border-2 border-neutral-700 border-dashed bg-white p-2 hover:underline dark:bg-neutral-950"
                         href={`/meals/${plannedMeal.meal?._id}`}
                       >
                         <Image
@@ -133,7 +133,7 @@ export function PlanCard({ plan }: PlanCardProps) {
                           className={"rounded-lg"}
                           alt={"Meal image"}
                         />
-                        <span className="absolute px-2 py-1 right-2 top-2 rounded-full shadow-xs bg-neutral-200 dark:bg-neutral-900/25 font-semibold capitalize">
+                        <span className="absolute top-2 right-2 rounded-full bg-neutral-200 px-2 py-1 font-semibold capitalize shadow-xs dark:bg-neutral-900/25">
                           {tMeal(camelCase(plannedMeal.category))}
                         </span>
                         <p className="w-full px-2">
@@ -157,7 +157,7 @@ export function PlanCard({ plan }: PlanCardProps) {
 
         {/* // Statistics component  */}
         <div className="flex justify-end py-4">
-          <p className="border py-2 px-3 rounded-xl border-dashed border-neutral-400 flex items-center gap-2">
+          <p className="flex items-center gap-2 rounded-xl border border-neutral-400 border-dashed px-3 py-2">
             {summarizedCalories} Kcal
             <Flame size={18} className="mb-[2px]" />
           </p>
