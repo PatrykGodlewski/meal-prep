@@ -1,22 +1,22 @@
 "use client";
+import { useConvexMutation } from "@convex-dev/react-query";
+import { type Preloaded, usePreloadedQuery } from "convex/react";
+import type { FunctionReturnType } from "convex/server";
+import { UtensilsCrossed } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+import { useTranslations } from "next-intl";
+import { useState } from "react";
 import { For } from "@/components/for-each";
 import { Button } from "@/components/ui/button";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
 import { MEAL_CATEGORIES } from "@/convex/schema";
 import { cn } from "@/lib/utils";
-import { useConvexMutation } from "@convex-dev/react-query";
-import { type Preloaded, usePreloadedQuery } from "convex/react";
-import type { FunctionReturnType } from "convex/server";
-import { UtensilsCrossed } from "lucide-react";
-import { useTranslations } from "next-intl";
-import Image from "next/image";
-import Link from "next/link";
-import { useState } from "react";
 import { ModalMeals } from "./ModalMeals";
 
 interface Props {
-  preloadedMealPlan: Preloaded<typeof api.mealPlans.getMealPlan>;
+  preloadedMealPlan: Preloaded<typeof api.plans.getMealPlan>;
 }
 
 export function MealPlanDetail({ preloadedMealPlan }: Props) {
@@ -37,7 +37,7 @@ export function MealPlanDetail({ preloadedMealPlan }: Props) {
   const plannedMealsByMealCategory = new Map(
     MEAL_CATEGORIES.map((category) => [
       category,
-      mealPlan.plannedMeals.find(
+      mealPlan.planMeals.find(
         (plannedMeal) =>
           plannedMeal?.category?.toLowerCase() === category.toLowerCase(),
       ),
@@ -70,10 +70,10 @@ export function MealPlanDetail({ preloadedMealPlan }: Props) {
 
 interface MealCardProps {
   plannedMeal?: NonNullable<
-    FunctionReturnType<typeof api.mealPlans.getMealPlan>
-  >["plannedMeals"][number];
+    FunctionReturnType<typeof api.plans.getMealPlan>
+  >["planMeals"][number];
   category: (typeof MEAL_CATEGORIES)[number];
-  plan: NonNullable<FunctionReturnType<typeof api.mealPlans.getMealPlan>>;
+  plan: NonNullable<FunctionReturnType<typeof api.plans.getMealPlan>>;
 }
 
 function MealCard({ plannedMeal, category, plan }: MealCardProps) {
@@ -82,7 +82,7 @@ function MealCard({ plannedMeal, category, plan }: MealCardProps) {
   const tMeal = useTranslations("meal");
 
   const mealPlanMutation = useConvexMutation(
-    api.mealPlans.updatePlannedMealByCategory,
+    api.plans.updatePlannedMealByCategory,
   );
 
   const handleMealSelected = async (mealId: Id<"meals">) => {
@@ -97,9 +97,9 @@ function MealCard({ plannedMeal, category, plan }: MealCardProps) {
 
   return (
     <div
-      className={cn("border flex-col gap-4 p-4 rounded-md shadow-sm flex ", {
+      className={cn("flex flex-col gap-4 rounded-md border p-4 shadow-sm ", {
         "": isMeal,
-        "border-dashed border-2 text-neutral-500": !isMeal,
+        "border-2 border-dashed text-neutral-500": !isMeal,
       })}
     >
       <ModalMeals
@@ -124,7 +124,7 @@ function MealCard({ plannedMeal, category, plan }: MealCardProps) {
         ) : (
           <div
             className={
-              "size-32 rounded-lg border border-dashed grid place-content-center dark:bg-neutral-900 dark:border-neutral-800"
+              "grid size-32 place-content-center rounded-lg border border-dashed dark:border-neutral-800 dark:bg-neutral-900"
             }
           >
             <UtensilsCrossed className="h-8 w-8 text-neutral-300 dark:text-neutral-800" />
@@ -138,11 +138,11 @@ function MealCard({ plannedMeal, category, plan }: MealCardProps) {
               </h3>
             </Link>
           ) : (
-            <h3 className="font-semibold text-lg hover:underline cursor-pointer">
+            <h3 className="cursor-pointer font-semibold text-lg hover:underline">
               {t("missingMeal")}
             </h3>
           )}
-          <p className="text-sm text-neutral-400 uppercase">
+          <p className="text-neutral-400 text-sm uppercase">
             {tMeal(category)}
           </p>
         </div>

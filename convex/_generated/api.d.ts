@@ -15,7 +15,6 @@ import type * as http from "../http.js";
 import type * as ingredients_mutations from "../ingredients/mutations.js";
 import type * as ingredients_queries from "../ingredients/queries.js";
 import type * as ingredients_validators from "../ingredients/validators.js";
-import type * as mealPlans from "../mealPlans.js";
 import type * as meals_helpers from "../meals/helpers.js";
 import type * as meals_mutations from "../meals/mutations.js";
 import type * as meals_queries from "../meals/queries.js";
@@ -23,6 +22,7 @@ import type * as meals_validators from "../meals/validators.js";
 import type * as migrations from "../migrations.js";
 import type * as model_shoppingList from "../model/shoppingList.js";
 import type * as planAndList from "../planAndList.js";
+import type * as plans from "../plans.js";
 import type * as shoppingList from "../shoppingList.js";
 
 import type {
@@ -47,7 +47,6 @@ declare const fullApi: ApiFromModules<{
   "ingredients/mutations": typeof ingredients_mutations;
   "ingredients/queries": typeof ingredients_queries;
   "ingredients/validators": typeof ingredients_validators;
-  mealPlans: typeof mealPlans;
   "meals/helpers": typeof meals_helpers;
   "meals/mutations": typeof meals_mutations;
   "meals/queries": typeof meals_queries;
@@ -55,6 +54,7 @@ declare const fullApi: ApiFromModules<{
   migrations: typeof migrations;
   "model/shoppingList": typeof model_shoppingList;
   planAndList: typeof planAndList;
+  plans: typeof plans;
   shoppingList: typeof shoppingList;
 }>;
 declare const fullApiWithMounts: typeof fullApi;

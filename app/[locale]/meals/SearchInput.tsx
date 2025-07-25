@@ -1,4 +1,8 @@
 "use client";
+import { useDebounceFn } from "ahooks";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useTranslations } from "next-intl";
+import { useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -13,10 +17,6 @@ import {
   SEARCH_PARAM_KEY,
 } from "@/hooks/use-paginated-meals";
 import type { MealCategory } from "@/validators";
-import { useDebounceFn } from "ahooks";
-import { useTranslations } from "next-intl";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useEffect } from "react";
 
 export function SearchInput() {
   const t = useTranslations("searchInput");
@@ -61,16 +61,16 @@ export function SearchInput() {
     searchParams.get(FILTER_PARAM_KEY)?.toString() ?? "all";
 
   return (
-    <div className="mb-6 flex flex-col sm:flex-row gap-4">
+    <div className="mb-6 flex flex-col gap-4 sm:flex-row">
       <Input
         type="text"
         placeholder={t("searchMealsByName")}
         onChange={(e) => handleSearch.run(e.target.value)}
         defaultValue={searchParams.get(SEARCH_PARAM_KEY)?.toString()}
-        className="grow px-4 py-2 border border-neutral-300 dark:border-neutral-600 rounded-md bg-white dark:bg-neutral-800 focus:outline-hidden focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
+        className="grow rounded-md border border-neutral-300 bg-white px-4 py-2 focus:outline-hidden focus:ring-2 focus:ring-blue-500 dark:border-neutral-600 dark:bg-neutral-800 dark:focus:ring-blue-400"
       />
       <Select onValueChange={handleCategoryChange} value={currentCategory}>
-        <SelectTrigger className="w-full sm:w-[180px] border-neutral-300 dark:border-neutral-600 bg-white dark:bg-neutral-800">
+        <SelectTrigger className="w-full border-neutral-300 bg-white sm:w-[180px] dark:border-neutral-600 dark:bg-neutral-800">
           <SelectValue placeholder={t("filterByCategory")} />
         </SelectTrigger>
         <SelectContent>

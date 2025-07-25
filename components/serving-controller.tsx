@@ -1,13 +1,13 @@
 "use client";
-import { useMealPlanner } from "@/features/meal-planner/store";
 import { Minus, Plus } from "lucide-react";
+import { useMealPlanner } from "@/features/meal-planner/store";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 
 export default function ServingController() {
   const { servings$, servings } = useMealPlanner();
   return (
-    <div className="flex items-center space-x-2 w-48">
+    <div className="flex gap-2">
       <Button
         variant="outline"
         size="icon"

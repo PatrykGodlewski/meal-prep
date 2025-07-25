@@ -1,26 +1,55 @@
 "use client";
 
-import { For } from "@/components/for-each";
-import ServingController from "@/components/serving-controller";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator";
-import { api } from "@/convex/_generated/api";
-import type { Id } from "@/convex/_generated/dataModel";
-import { cn } from "@/lib/utils";
 import { useConvexMutation } from "@convex-dev/react-query";
-import { use$, useObservable } from "@legendapp/state/react";
+import { use$ } from "@legendapp/state/react";
 import { useMutation } from "@tanstack/react-query";
 import { camelCase } from "lodash";
 import { ShoppingCart } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useId } from "react";
 import { toast } from "sonner";
+import { For } from "@/components/for-each";
+import ServingController from "@/components/serving-controller";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
+import { api } from "@/convex/_generated/api";
+import type { Id } from "@/convex/_generated/dataModel";
+import { cn } from "@/lib/utils";
+import type { IngredientCategory } from "@/validators";
 import { DatePickerWithPresets } from "./date-picker";
 import { useMealPlanner } from "./store";
 
+const LIDL_LAYOUT: (IngredientCategory | undefined)[] = [
+  "grain",
+  "fruit",
+  "vegetable",
+
+  "nut_seed",
+  "spice_herb",
+
+  "meat",
+  "poultry",
+
+  "fat_oil",
+  "condiment",
+  "legume",
+
+  "baking",
+  "sweetener",
+
+  "dairy",
+  "seafood",
+  "beverage",
+
+  "other",
+  undefined,
+];
+
 export function ShoppingListDisplay() {
-  const { shoppingListData: list } = useMealPlanner();
+  const { shoppingListData: list, hideCheckedShoppingListItems$ } =
+    useMealPlanner();
   const t = useTranslations("mealPlanner");
   const tIngredient = useTranslations("ingredient");
 
@@ -31,16 +60,33 @@ export function ShoppingListDisplay() {
     (item) => item?.ingredient?.category ?? "other",
   );
 
-  const shoppingItems = Object.entries(groupedItems).sort();
+  const shoppingItems = Object.entries(groupedItems).sort(([catA], [catB]) => {
+    const indexA = LIDL_LAYOUT.indexOf(catA as IngredientCategory);
+    const indexB = LIDL_LAYOUT.indexOf(catB as IngredientCategory);
+
+    if (indexA === -1 || indexB === -1) {
+      return 0;
+    }
+
+    return indexA - indexB;
+  });
 
   return (
-    <div className="p-4 border rounded-lg shadow-xs bg-white hover:bg-neutral-100/75 dark:hover:bg-neutral-900 dark:bg-neutral-950/75 ease-in duration-700 transition-colors min-h-[500px]">
-      <div className={"flex  flex-wrap justify-between"}>
-        <h1 className="text-3xl font-bold flex items-center gap-4  pb-4">
+    <div className="min-h-[500px] rounded-lg border bg-white p-4 shadow-xs transition-colors duration-700 ease-in hover:bg-neutral-100/75 dark:bg-neutral-950/75 dark:hover:bg-neutral-900">
+      <div
+        className={"flex flex-col flex-wrap justify-between gap-4 md:flex-row"}
+      >
+        <h1 className="flex items-center gap-3 font-bold text-3xl">
           <ShoppingCart />
           {t("shoppingList")}
         </h1>
-
+        <Button
+          onClick={() => {
+            hideCheckedShoppingListItems$.set((prev) => !prev);
+          }}
+        >
+          {t("showHiddenItems")}
+        </Button>
         <ServingController />
         <DatePickerWithPresets />
       </div>
@@ -55,7 +101,7 @@ export function ShoppingListDisplay() {
 
             return (
               <div key={category} className="space-y-2">
-                <h2 className="capitalize font-bold text-2xl py-2">
+                <h2 className="py-2 font-bold text-2xl capitalize">
                   {tIngredient(camelCase(category))}
                 </h2>
                 <For each={sortedCategoryItems} empty={t("noIngredients")}>
@@ -88,7 +134,10 @@ type Props = {
 };
 
 function ShoppingListItem({ amount, unit, name, isChecked, ids }: Props) {
-  const { mealPlannerState$, servings } = useMealPlanner();
+  const { mealPlannerState$, hideCheckedShoppingListItems$, servings } =
+    useMealPlanner();
+
+  const shouldHideItem = use$(hideCheckedShoppingListItems$);
 
   const uniqueId = useId();
   const labelId = `${uniqueId}-label`;
@@ -148,14 +197,18 @@ function ShoppingListItem({ amount, unit, name, isChecked, ids }: Props) {
     mutate({ checked: !isChecked, shoppingListItemIds: ids });
   };
 
+  if (shouldHideItem && isChecked) {
+    return null;
+  }
+
   return (
     <li>
       <Label
         htmlFor={uniqueId}
         id={labelId}
         className={cn(
-          "flex items-center p-3 justify-between rounded-md border bg-neutral-0 dark:bg-neutral-950 border-neutral-700 shadow-xs transition-colors",
-          "hover:bg-neutral-100 dark:hover:bg-neutral-800 cursor-pointer",
+          "flex items-center justify-between rounded-md border border-neutral-700 bg-neutral-0 p-3 shadow-xs transition-colors dark:bg-neutral-950",
+          "cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-800",
         )}
       >
         <div className="flex items-center gap-2">
@@ -166,8 +219,8 @@ function ShoppingListItem({ amount, unit, name, isChecked, ids }: Props) {
             aria-labelledby={labelId}
           />
           <span
-            className={cn("text-sm font-medium", {
-              "line-through text-neutral-500": isChecked,
+            className={cn("font-medium text-sm", {
+              "text-neutral-500 line-through": isChecked,
             })}
           >
             {name}

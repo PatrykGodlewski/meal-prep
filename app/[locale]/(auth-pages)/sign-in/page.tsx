@@ -1,12 +1,11 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { useAuthActions } from "@convex-dev/auth/react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
-
 import { useTranslations } from "next-intl";
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 export default function SignIn() {
   const { signIn } = useAuthActions();
@@ -16,7 +15,7 @@ export default function SignIn() {
   const t = useTranslations("auth");
 
   return (
-    <div className="flex flex-col gap-8 w-96 mx-auto h-screen justify-center items-center">
+    <div className="mx-auto flex h-screen w-96 flex-col items-center justify-center gap-8">
       <p>{t("logInToSeeNumbers")}</p>
       <form
         className="flex flex-col gap-2"
@@ -54,15 +53,15 @@ export default function SignIn() {
           </span>
           <Button
             variant="link"
-            className="text-foreground underline hover:no-underline cursor-pointer"
+            className="cursor-pointer text-foreground underline hover:no-underline"
             onClick={() => setFlow(flow === "signIn" ? "signUp" : "signIn")}
           >
             {flow === "signIn" ? t("signUpInstead") : t("signInInstead")}
           </Button>
         </div>
         {error && (
-          <div className="bg-red-500/20 border-2 border-red-500/50 rounded-md p-2">
-            <p className="text-foreground font-mono text-xs">
+          <div className="rounded-md border-2 border-red-500/50 bg-red-500/20 p-2">
+            <p className="font-mono text-foreground text-xs">
               {t("errorSigningIn", { error })}
             </p>
           </div>

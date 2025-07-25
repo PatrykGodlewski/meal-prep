@@ -1,11 +1,10 @@
 import { Skeleton } from "@/components/ui/skeleton";
-import { Calendar, ChefHat, Clock, Users } from "lucide-react";
 
 // Helper component for meta labels skeleton
 function MealLabelSkeleton() {
   return (
-    <div className="flex items-center mr-4 mb-2">
-      <Skeleton className="h-4 w-4 mr-1.5 rounded-full" />
+    <div className="mr-4 mb-2 flex items-center">
+      <Skeleton className="mr-1.5 h-4 w-4 rounded-full" />
       <Skeleton className="h-4 w-20" />
     </div>
   );
@@ -15,7 +14,7 @@ export default function LoadingMealDetail() {
   return (
     <>
       {/* Top Bar Skeleton (Go Back Link & Action Buttons) */}
-      <div className="flex justify-between items-center mb-4">
+      <div className="mb-4 flex items-center justify-between">
         {/* Go Back Link Skeleton */}
         <Skeleton className="h-6 w-24" />
 
@@ -26,17 +25,17 @@ export default function LoadingMealDetail() {
         </div>
       </div>
 
-      <div className="bg-white dark:bg-neutral-900 rounded-lg shadow-md overflow-hidden animate-pulse">
+      <div className="animate-pulse overflow-hidden rounded-lg bg-white shadow-md dark:bg-neutral-900">
         {/* Image Skeleton */}
-        <Skeleton className="relative h-64 md:h-96 w-full bg-gray-200 dark:bg-neutral-800" />
+        <Skeleton className="relative h-64 w-full bg-gray-200 md:h-96 dark:bg-neutral-800" />
 
         {/* Details Section */}
         <div className="p-6">
           {/* Title Skeleton */}
-          <Skeleton className="h-8 w-3/4 mb-2" />
+          <Skeleton className="mb-2 h-8 w-3/4" />
 
           {/* Meta Info Skeleton */}
-          <div className="flex flex-wrap items-center text-gray-600 dark:text-neutral-400 mb-6">
+          <div className="mb-6 flex flex-wrap items-center text-gray-600 dark:text-neutral-400">
             <MealLabelSkeleton />
             <MealLabelSkeleton />
             <MealLabelSkeleton />
@@ -45,24 +44,24 @@ export default function LoadingMealDetail() {
 
           {/* Description Skeleton */}
           <div className="mb-8">
-            <Skeleton className="h-6 w-1/4 mb-3" /> {/* Description Title */}
-            <Skeleton className="h-4 w-full mb-2" />
-            <Skeleton className="h-4 w-full mb-2" />
+            <Skeleton className="mb-3 h-6 w-1/4" /> {/* Description Title */}
+            <Skeleton className="mb-2 h-4 w-full" />
+            <Skeleton className="mb-2 h-4 w-full" />
             <Skeleton className="h-4 w-5/6" />
           </div>
 
           {/* Ingredients & Instructions Grid Skeleton */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
             {/* Ingredients Column Skeleton */}
             <div className="lg:col-span-1">
-              <Skeleton className="h-6 w-1/3 mb-4" /> {/* Ingredients Title */}
+              <Skeleton className="mb-4 h-6 w-1/3" /> {/* Ingredients Title */}
               <ul className="space-y-3">
                 {[...Array(5)].map((_, i) => (
                   <li key={i} className="flex items-start gap-2">
-                    <Skeleton className="inline-block w-1.5 h-1.5 rounded-full mt-[7px] shrink-0" />
+                    <Skeleton className="mt-[7px] inline-block h-1.5 w-1.5 shrink-0 rounded-full" />
                     <div className="w-full">
                       <Skeleton className="h-4 w-full" />
-                      <Skeleton className="h-3 w-3/4 mt-1" />{" "}
+                      <Skeleton className="mt-1 h-3 w-3/4" />{" "}
                       {/* Optional notes */}
                     </div>
                   </li>
@@ -72,12 +71,12 @@ export default function LoadingMealDetail() {
 
             {/* Instructions Column Skeleton */}
             <div className="lg:col-span-2">
-              <Skeleton className="h-6 w-1/3 mb-4" /> {/* Instructions Title */}
+              <Skeleton className="mb-4 h-6 w-1/3" /> {/* Instructions Title */}
               <div className="space-y-3">
                 <Skeleton className="h-4 w-full" />
                 <Skeleton className="h-4 w-full" />
                 <Skeleton className="h-4 w-5/6" />
-                <Skeleton className="h-4 w-full mt-4" />
+                <Skeleton className="mt-4 h-4 w-full" />
                 <Skeleton className="h-4 w-full" />
                 <Skeleton className="h-4 w-3/4" />
               </div>

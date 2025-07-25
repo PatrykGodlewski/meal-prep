@@ -1,4 +1,7 @@
 "use client";
+import { use$ } from "@legendapp/state/react";
+import { addDays, endOfMonth, format, startOfMonth } from "date-fns";
+import { Calendar as CalendarIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import {
@@ -15,10 +18,6 @@ import {
 } from "@/components/ui/select";
 import { useDateLocale } from "@/hooks/use-date-locale";
 import { cn } from "@/lib/utils";
-import { use$ } from "@legendapp/state/react";
-import { addDays, endOfMonth, format, startOfMonth } from "date-fns";
-import { Calendar as CalendarIcon } from "lucide-react";
-import * as React from "react";
 import { useMealPlanner } from "./store";
 import { getMonday, getSaturday } from "./utils";
 
@@ -67,7 +66,7 @@ export function DatePickerWithPresets() {
         <Button
           variant={"outline"}
           className={cn(
-            "flex-1 sm:max-w-[280px] justify-start text-left font-normal",
+            "flex-1 justify-start text-left font-normal sm:max-w-[280px]",
             !shoppingListDate && "text-muted-foreground",
           )}
         >

@@ -1,12 +1,11 @@
 "use client";
 
+import { addDays, format, isToday } from "date-fns";
+import { ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { useDateLocale } from "@/hooks/use-date-locale";
 import { cn } from "@/lib/utils";
-import { addDays, format, isToday } from "date-fns";
-import { enUS, pl } from "date-fns/locale";
-import { ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
-import { useLocale, useTranslations } from "next-intl";
 import { PlanCard } from "./day-card";
 import { useMealPlanner } from "./store";
 
@@ -33,15 +32,15 @@ export const MealPlanDisplay = () => {
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="grid grid-cols-7 sm:gap-4 gap-1 relative">
+      <div className="relative grid grid-cols-7 gap-1 sm:gap-4">
         {(isBusy || isGenerating) && (
-          <div className="w-full col-span-7 flex items-center justify-center bg-white/70 dark:bg-black/50 z-10 rounded-lg min-h-[4lh]">
+          <div className="z-10 col-span-7 flex min-h-[4lh] w-full items-center justify-center rounded-lg bg-white/70 dark:bg-black/50">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
           </div>
         )}
 
         {mealPlanError && !isMealPlanLoading && (
-          <div className="col-span-full text-center text-red-500 mt-8">
+          <div className="col-span-full mt-8 text-center text-red-500">
             Error loading meal plan:{" "}
             {mealPlanError instanceof Error
               ? mealPlanError.message
@@ -58,11 +57,11 @@ export const MealPlanDisplay = () => {
                 variant="ghost"
                 disabled={isSelected}
                 className={cn(
-                  "self-center h-auto transition-shadow rounded-xl w-full cursor-pointer bg-neutral-200 dark:bg-neutral-900 flex flex-col items-center justify-center p-4 sm:p-8 aspect-square",
+                  "flex aspect-square h-auto w-full cursor-pointer flex-col items-center justify-center self-center rounded-xl bg-neutral-200 p-4 transition-shadow sm:p-8 dark:bg-neutral-900",
                   {
-                    "ring-3 dark:ring-white ring-black disabled:opacity-100":
+                    "ring-3 ring-black disabled:opacity-100 dark:ring-white":
                       isSelected,
-                    "py-5 border-2 bg-neutral-900 dark:bg-neutral-200 text-neutral-200 dark:text-neutral-900 hover:text-neutral-200 hover:bg-neutral-800 dark:hover:bg-neutral-100 ring-offset-2 ring-offset-neutral-950":
+                    "border-2 bg-neutral-900 py-5 text-neutral-200 ring-offset-2 ring-offset-neutral-950 hover:bg-neutral-800 hover:text-neutral-200 dark:bg-neutral-200 dark:text-neutral-900 dark:hover:bg-neutral-100":
                       isToday(day.date),
                   },
                 )}
@@ -70,15 +69,15 @@ export const MealPlanDisplay = () => {
                   mealPlannerState$.selectedPlanId.set(day.id);
                 }}
               >
-                <span className="text-xs hidden @lg/main:block font-medium uppercase text-muted-foreground">
+                <span className="@lg/main:block hidden font-medium text-muted-foreground text-xs uppercase">
                   {format(day.date, "EEEEEEE", { locale: dateLocale })}
                 </span>
 
-                <span className="text-xs font-medium @lg/main:hidden uppercase text-muted-foreground">
+                <span className="@lg/main:hidden font-medium text-muted-foreground text-xs uppercase">
                   {format(day.date, "EEEEEE", { locale: dateLocale })}
                 </span>
 
-                <span className="text-md sm:text-lg font-semibold">
+                <span className="font-semibold text-md sm:text-lg">
                   {format(day.date, "d", { locale: dateLocale })}
                 </span>
               </Button>
@@ -112,8 +111,8 @@ export function MealPlannerHeader() {
   });
 
   return (
-    <div className="flex flex-col sm:flex-row justify-between flex-wrap gap-4">
-      <div className="flex justify-between items-center gap-2">
+    <div className="flex flex-col flex-wrap justify-between gap-4 sm:flex-row">
+      <div className="flex items-center justify-between gap-2">
         <Button
           variant="outline"
           size="icon"
@@ -124,7 +123,7 @@ export function MealPlannerHeader() {
           <ChevronLeft className="h-4 w-4" />
         </Button>
 
-        <h2 className="text-xl font-semibold text-center sm:text-left whitespace-nowrap tabular-nums">
+        <h2 className="whitespace-nowrap text-center font-semibold text-xl tabular-nums sm:text-left">
           {t("weekOf", { week: formatedWeek })}
         </h2>
 
@@ -139,7 +138,7 @@ export function MealPlannerHeader() {
         </Button>
       </div>
 
-      <div className="flex flex-col sm:flex-row gap-4 flex-wrap">
+      <div className="flex flex-col flex-wrap gap-4 sm:flex-row">
         <Button
           variant="outline"
           onClick={handleNavigateToday}

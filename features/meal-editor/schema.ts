@@ -1,5 +1,5 @@
-import { INGREDIENT_CATEGORIES, MEAL_CATEGORIES, UNITS } from "@/convex/schema"; // Assuming schema.ts is in convex/
 import { z } from "zod";
+import { INGREDIENT_CATEGORIES, MEAL_CATEGORIES, UNITS } from "@/convex/schema"; // Assuming schema.ts is in convex/
 
 // Zod enums from Convex schema constants
 const ingredientCategoryEnum = z.enum(INGREDIENT_CATEGORIES);

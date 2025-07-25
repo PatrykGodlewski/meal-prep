@@ -1,5 +1,9 @@
 "use client";
 
+import { type Preloaded, usePreloadedQuery } from "convex/react";
+import { Edit, HelpCircle, X } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import { BackButton } from "@/components/back-button";
 import { Button } from "@/components/ui/button";
 import {
@@ -11,10 +15,6 @@ import {
 import type { api } from "@/convex/_generated/api";
 import { MealDisplayDetails } from "@/features/meal-editor/meal-display-details";
 import { MealEditForm } from "@/features/meal-editor/meal-editor-form";
-import { type Preloaded, usePreloadedQuery } from "convex/react";
-import { Edit, HelpCircle, X } from "lucide-react";
-import { useRouter } from "next/navigation";
-import React, { useEffect, useState } from "react";
 
 interface MealDetailViewProps {
   preloadedMeal: Preloaded<typeof api.meals.queries.getMeal>;
@@ -49,18 +49,18 @@ export default function MealDetailView({
 
   return (
     <div>
-      <div className="flex justify-between items-center mb-6">
+      <div className="mb-6 flex items-center justify-between">
         <BackButton destination="/meals" />
 
         {isEditing ? (
           <Button variant="outline" onClick={toggleEditMode}>
-            <X className="h-4 w-4 mr-1" /> Cancel
+            <X className="mr-1 h-4 w-4" /> Cancel
           </Button>
         ) : (
           <div className="flex gap-2">
             <ServingsTooltip />
             <Button variant="outline" onClick={toggleEditMode}>
-              <Edit className="h-4 w-4 mr-1" /> Edit Meal
+              <Edit className="mr-1 h-4 w-4" /> Edit Meal
             </Button>
           </div>
         )}
@@ -92,7 +92,7 @@ export function ServingsTooltip() {
           </Button>
         </TooltipTrigger>
         <TooltipContent>
-          <p className="text-md max-w-md">
+          <p className="max-w-md text-md">
             Serving is a global setting that multiplies base values of meal.
             Meals should be composed in a way that all instructions are for most
             optimal meal preparation. Batch cooking or joining the factors of a

@@ -1,4 +1,13 @@
 "use client";
+import { useConvexAuth } from "convex/react";
+import {
+  CalendarCog,
+  LayoutDashboardIcon,
+  ListIcon,
+  SquareStack,
+  Triangle,
+} from "lucide-react";
+import { useTranslations } from "next-intl";
 import { NavMain } from "@/components/nav-main";
 import { NavSecondary } from "@/components/nav-secondary";
 import { NavUser } from "@/components/nav-user";
@@ -11,18 +20,8 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { useConvexAuth } from "convex/react";
-import {
-  CalendarCog,
-  LayoutDashboardIcon,
-  ListIcon,
-  SquareStack,
-  Triangle,
-} from "lucide-react";
-import { useTranslations } from "next-intl";
 import { NavGuest } from "./nav-guest";
 import { NavList } from "./nav-list";
-import { Separator } from "./ui/separator";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { isAuthenticated } = useConvexAuth();
@@ -38,7 +37,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             >
               <a href="/">
                 <Triangle className="h-5 w-5 rotate-90" />
-                <span className="text-base font-semibold">Skibidi Obiadex</span>
+                <span className="font-semibold text-base">Skibidi Obiadex</span>
               </a>
             </SidebarMenuButton>
           </SidebarMenuItem>

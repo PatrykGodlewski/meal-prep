@@ -3,25 +3,25 @@ import type { AuthMutationCtx } from "../custom/mutation";
 
 export async function generateShoppingList(
   ctx: AuthMutationCtx,
-  { mealPlanId }: { mealPlanId: Id<"mealPlans"> },
+  { planId }: { planId: Id<"plans"> },
 ) {
   try {
     const userId = ctx.user.id;
-    const mealPlan = await ctx.db.get(mealPlanId);
+    const mealPlan = await ctx.db.get(planId);
 
     if (!mealPlan) {
-      throw new Error(`Meal plan with ID ${mealPlanId} not found.`);
+      throw new Error(`Meal plan with ID ${planId} not found.`);
     }
 
     if (mealPlan.userId !== userId) {
       throw new Error("User does not own the provided meal plan.");
     }
 
-    const mealPlanDate = mealPlan.date;
+    const planDate = mealPlan.date;
 
     const plannedMeals = await ctx.db
-      .query("plannedMeals")
-      .withIndex("by_plan_and_category", (q) => q.eq("mealPlanId", mealPlanId))
+      .query("planMeals")
+      .withIndex("by_plan_and_category", (q) => q.eq("planId", planId))
       .collect();
 
     const mealIds = [...new Set(plannedMeals.map((pm) => pm.mealId))];
@@ -47,8 +47,8 @@ export async function generateShoppingList(
     }
 
     const currentListId = await upsertShoppingList(ctx, {
-      mealPlanId,
-      mealPlanDate,
+      planId,
+      planDate,
     });
 
     const existingItems = await ctx.db
@@ -77,8 +77,8 @@ export async function generateShoppingList(
     );
 
     console.log(
-      `Generated shopping list ${currentListId} for meal plan ${mealPlanId} (Date: ${new Date(
-        mealPlanDate,
+      `Generated shopping list ${currentListId} for meal plan ${planId} (Date: ${new Date(
+        planDate,
       ).toDateString()})`,
     );
 
@@ -94,24 +94,21 @@ export async function generateShoppingList(
 
 export async function upsertShoppingList(
   ctx: AuthMutationCtx,
-  {
-    mealPlanId,
-    mealPlanDate,
-  }: { mealPlanId: Id<"mealPlans">; mealPlanDate: number },
+  { planId, planDate }: { planId: Id<"plans">; planDate: number },
 ) {
   const existingList = await ctx.db
     .query("shoppingLists")
-    .withIndex("by_meal_plan", (q) => q.eq("mealPlanId", mealPlanId))
+    .withIndex("by_plan", (q) => q.eq("planId", planId))
     .first();
 
   if (existingList) return existingList._id;
 
-  const now = new Date().getTime();
+  const now = Date.now();
 
   return await ctx.db.insert("shoppingLists", {
     userId: ctx.user.id,
-    mealPlanId: mealPlanId,
-    date: mealPlanDate,
+    planId,
+    date: planDate,
     createdAt: now,
     updatedAt: now,
   });

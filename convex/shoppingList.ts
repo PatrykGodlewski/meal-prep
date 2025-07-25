@@ -1,7 +1,5 @@
-import { getAuthUserId } from "@convex-dev/auth/server";
 import { v } from "convex/values";
 import type { Id } from "./_generated/dataModel";
-import { mutation } from "./_generated/server";
 import { authMutation } from "./custom/mutation";
 import { authQuery } from "./custom/query";
 import * as ShoppingList from "./model/shoppingList";
@@ -113,7 +111,7 @@ export const getShoppingList = authQuery({
 
 export const generateShoppingList = authMutation({
   args: {
-    mealPlanId: v.id("mealPlans"),
+    planId: v.id("plans"),
   },
   handler: async (ctx, args) => {
     return await ShoppingList.generateShoppingList(ctx, args);

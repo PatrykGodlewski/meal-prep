@@ -1,5 +1,9 @@
 "use client";
 
+import { Check, ChevronsUpDown, X } from "lucide-react";
+import { useTranslations } from "next-intl";
+import React, { useCallback, useState } from "react";
+import type { Control, UseFormSetValue } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -35,16 +39,6 @@ import {
 import type { Doc } from "@/convex/_generated/dataModel";
 import { INGREDIENT_CATEGORIES, UNITS } from "@/convex/schema";
 import { cn } from "@/lib/utils";
-import { Check, ChevronsUpDown, X } from "lucide-react";
-import { useTranslations } from "next-intl";
-import React, { useState, useCallback } from "react";
-import {
-  type Control,
-  type UseFormSetValue,
-  type UseFormWatch,
-  useFormContext,
-} from "react-hook-form";
-import type { MealAddFormValues, MealUpdateFormValues } from "./schema"; // Import both types
 
 interface IngredientInputRowProps {
   index: number;
@@ -102,9 +96,9 @@ export const IngredientInputRow: React.FC<IngredientInputRowProps> = React.memo(
     );
 
     return (
-      <Card className="p-4 bg-gray-50 dark:bg-neutral-800/50 border dark:border-neutral-700">
-        <div className="flex justify-between items-center mb-3">
-          <span className="font-medium text-sm text-gray-700 dark:text-gray-300">
+      <Card className="border bg-gray-50 p-4 dark:border-neutral-700 dark:bg-neutral-800/50">
+        <div className="mb-3 flex items-center justify-between">
+          <span className="font-medium text-gray-700 text-sm dark:text-gray-300">
             Ingredient #{index + 1}
           </span>
           <Button
@@ -118,7 +112,7 @@ export const IngredientInputRow: React.FC<IngredientInputRowProps> = React.memo(
             <X className="h-4 w-4" />
           </Button>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-start">
+        <div className="grid grid-cols-1 items-start gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {/* Ingredient Combobox */}
           <FormField
             control={control}
@@ -144,7 +138,7 @@ export const IngredientInputRow: React.FC<IngredientInputRowProps> = React.memo(
                       </Button>
                     </FormControl>
                   </PopoverTrigger>
-                  <PopoverContent className="w-(--radix-popover-trigger-width) max-h-(--radix-popover-content-available-height) p-0">
+                  <PopoverContent className="max-h-(--radix-popover-content-available-height) w-(--radix-popover-trigger-width) p-0">
                     <Command shouldFilter={true}>
                       {/* Input tracks the name field */}
                       <CommandInput
@@ -302,7 +296,7 @@ export const IngredientInputRow: React.FC<IngredientInputRowProps> = React.memo(
             control={control}
             name={`ingredients.${index}.isOptional`}
             render={({ field }) => (
-              <FormItem className="flex flex-row items-center space-x-2 pt-5 self-end mb-1">
+              <FormItem className="mb-1 flex flex-row items-center space-x-2 self-end pt-5">
                 {" "}
                 {/* Align with bottom of inputs */}
                 <FormControl>
@@ -314,7 +308,7 @@ export const IngredientInputRow: React.FC<IngredientInputRowProps> = React.memo(
                 </FormControl>
                 <Label
                   htmlFor={`ing-opt-${index}`}
-                  className="text-xs font-normal"
+                  className="font-normal text-xs"
                 >
                   Optional
                 </Label>

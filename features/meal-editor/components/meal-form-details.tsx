@@ -1,4 +1,7 @@
 "use client";
+import { Clock, Weight } from "lucide-react";
+import { useTranslations } from "next-intl";
+import type { Control } from "react-hook-form";
 import { MultiSelect } from "@/components/multi-select";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -11,9 +14,6 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { MEAL_CATEGORIES } from "@/convex/schema";
-import { Clock, Weight } from "lucide-react";
-import { useTranslations } from "next-intl";
-import type { Control } from "react-hook-form";
 
 interface MealFormDetailsProps {
   control: Control<any>;
@@ -24,21 +24,21 @@ export function MealFormDetails({ control }: MealFormDetailsProps) {
   const tMeal = useTranslations("meal");
 
   return (
-    <div className="p-6 space-y-8">
+    <div className="space-y-8 p-6">
       {/* Title */}
       <FormField
         control={control}
         name="name"
         render={({ field }) => (
           <FormItem>
-            <FormLabel className="text-xs font-medium sr-only">
+            <FormLabel className="sr-only font-medium text-xs">
               {t("mealNameLabel")}
             </FormLabel>
             <FormControl>
               <Input
                 type="text"
                 {...field}
-                className="text-3xl font-bold h-auto py-2 bg-white dark:bg-neutral-800 border-gray-300 dark:border-neutral-600"
+                className="h-auto border-gray-300 bg-white py-2 font-bold text-3xl dark:border-neutral-600 dark:bg-neutral-800"
                 aria-label={t("mealNameLabel")}
                 placeholder={t("mealNamePlaceholder")}
               />
@@ -49,13 +49,13 @@ export function MealFormDetails({ control }: MealFormDetailsProps) {
       />
 
       {/* Meta Info Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-4 items-end">
+      <div className="grid grid-cols-1 items-end gap-x-6 gap-y-4 sm:grid-cols-2 lg:grid-cols-3">
         <FormField
           control={control}
           name="prepTimeMinutes"
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="text-sm flex items-center gap-1">
+              <FormLabel className="flex items-center gap-1 text-sm">
                 <Clock className="h-4 w-4" /> {t("prepTimeLabel")}
               </FormLabel>
               <FormControl>
@@ -83,7 +83,7 @@ export function MealFormDetails({ control }: MealFormDetailsProps) {
           render={({ field }) => (
             <FormItem>
               {" "}
-              <FormLabel className="text-sm flex items-center gap-1">
+              <FormLabel className="flex items-center gap-1 text-sm">
                 <Clock className="h-4 w-4" /> {t("cookTimeLabel")}
               </FormLabel>
               <FormControl>
@@ -110,7 +110,7 @@ export function MealFormDetails({ control }: MealFormDetailsProps) {
           name="calories"
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="text-sm flex items-center gap-1">
+              <FormLabel className="flex items-center gap-1 text-sm">
                 <Weight className="h-4 w-4" /> {t("caloriesLabel")}
               </FormLabel>
               <FormControl>
@@ -158,7 +158,7 @@ export function MealFormDetails({ control }: MealFormDetailsProps) {
           control={control}
           name="isPublic"
           render={({ field }) => (
-            <FormItem className="flex flex-row items-center space-x-3 space-y-0 rounded-md border p-3 shadow-xs h-10">
+            <FormItem className="flex h-10 flex-row items-center space-x-3 space-y-0 rounded-md border p-3 shadow-xs">
               <FormControl>
                 <Checkbox
                   checked={field.value}
@@ -166,10 +166,7 @@ export function MealFormDetails({ control }: MealFormDetailsProps) {
                   id="isPublicEdit"
                 />
               </FormControl>
-              <FormLabel
-                htmlFor="isPublicEdit"
-                className="text-sm font-normal"
-              >
+              <FormLabel htmlFor="isPublicEdit" className="font-normal text-sm">
                 {t("makePublicLabel")}
               </FormLabel>
               <FormMessage />
@@ -184,7 +181,7 @@ export function MealFormDetails({ control }: MealFormDetailsProps) {
         name="description"
         render={({ field }) => (
           <FormItem>
-            <FormLabel className="text-lg font-semibold">
+            <FormLabel className="font-semibold text-lg">
               {t("descriptionLabel")}
             </FormLabel>
             <FormControl>

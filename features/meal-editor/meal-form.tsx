@@ -1,4 +1,10 @@
 "use client";
+import { zodResolver } from "@hookform/resolvers/zod";
+import type { FunctionReturnType } from "convex/server";
+import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import { Form } from "@/components/ui/form";
 import type { api } from "@/convex/_generated/api";
 import type { Doc } from "@/convex/_generated/dataModel";
@@ -8,12 +14,6 @@ import {
   mutationMealAddSchema,
   mutationMealEditSchema,
 } from "@/convex/meals/validators";
-import { zodResolver } from "@hookform/resolvers/zod";
-import type { FunctionReturnType } from "convex/server";
-import { useTranslations } from "next-intl";
-import { useRouter } from "next/navigation";
-import { useForm } from "react-hook-form";
-import { toast } from "sonner";
 import { MealFormActions } from "./components/meal-form-actions";
 import { MealFormDetails } from "./components/meal-form-details";
 import { MealFormImage } from "./components/meal-form-image";
@@ -22,31 +22,35 @@ import { MealFormInstructions } from "./components/meal-form-instructions";
 import { useMealEditor } from "./store";
 import type { Meal } from "./types";
 
-const mapPreloadedDataToFormValues = (
+/**
+ * Maps a meal query result to form values for editing.
+ * @param meal The meal data fetched from the query.
+ * @returns The meal data formatted for the form.
+ */
+const mapMealToFormValues = (
   meal: FunctionReturnType<typeof api.meals.queries.getMeal>,
 ): MutationMealEditValues | undefined => {
   if (!meal) return undefined;
 
-  const { mealIngredients, ...mealData } = meal; // Separate meal base data
+  const { mealIngredients, ...mealData } = meal;
 
-  const formIngredients = (mealIngredients || []) // Handle potentially undefined mealIngredients
-    .map((mi): MutationMealEditValues["ingredients"][number] => {
-      const ingredient = mi.ingredient; // Safe due to filter
-      return {
-        ingredientId: ingredient?._id, // Ingredient definition ID
-        name: ingredient?.name ?? "_TODO_should_be_empty_name_TODO_",
-        calories: ingredient?.calories ?? 0,
-        category: ingredient?.category ?? "other",
-        unit: ingredient?.unit ?? "g",
-        quantity: mi.quantity, // From junction record
-        isOptional: mi.isOptional ?? false, // From junction record
-        notes: mi.notes ?? "", // From junction record
-      };
-    });
+  const formIngredients =
+    mealIngredients?.map(
+      (mi): MutationMealEditValues["ingredients"][number] => ({
+        ingredientId: mi.ingredient?._id,
+        name: mi.ingredient?.name ?? "",
+        calories: mi.ingredient?.calories ?? 0,
+        category: mi.ingredient?.category ?? "other",
+        unit: mi.ingredient?.unit ?? "g",
+        quantity: mi.quantity,
+        isOptional: mi.isOptional ?? false,
+        notes: mi.notes ?? "",
+      }),
+    ) ?? [];
 
   return {
     mealId: mealData._id,
-    name: mealData.name,
+    ...mealData,
     description: mealData.description ?? "",
     prepTimeMinutes: mealData.prepTimeMinutes ?? undefined,
     cookTimeMinutes: mealData.cookTimeMinutes ?? undefined,
@@ -65,6 +69,16 @@ interface MealFormProps {
   onSuccess?: () => void;
 }
 
+/**
+ * A form for creating and editing meals.
+ * It uses a custom hook `useMealEditor` to handle the mutations.
+ *
+ * @param {MealFormProps} props The component props.
+ * @param {Meal} props.meal The meal to edit. If not provided, the form is in "add" mode.
+ * @param {Doc<"ingredients">[]} props.availableIngredients The list of available ingredients.
+ * @param {() => void} props.onSuccess A callback to execute on success.
+ * @returns {JSX.Element} The `MealForm` component.
+ */
 export function MealForm({
   availableIngredients = [],
   meal,
@@ -85,7 +99,7 @@ export function MealForm({
       meal ? mutationMealEditSchema : mutationMealAddSchema,
     ),
     defaultValues: meal
-      ? mapPreloadedDataToFormValues(meal)
+      ? mapMealToFormValues(meal)
       : {
           name: "",
           description: "",
@@ -129,9 +143,9 @@ export function MealForm({
       />
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-          <div className="bg-white dark:bg-neutral-900 rounded-lg shadow-md overflow-hidden">
+          <div className="overflow-hidden rounded-lg bg-white shadow-md dark:bg-neutral-900">
             <MealFormImage control={form.control} />
-            <div className="p-6 space-y-8">
+            <div className="space-y-8 p-6">
               <MealFormDetails control={form.control} />
               <MealFormIngredients
                 control={form.control}

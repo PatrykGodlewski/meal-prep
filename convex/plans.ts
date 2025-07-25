@@ -8,31 +8,31 @@ import { MEAL_CATEGORIES } from "./schema";
 
 export const getMealPlans = authQuery({
   handler: async (ctx) => {
-    const mealPlans = await ctx.db
-      .query("mealPlans")
+    const plans = await ctx.db
+      .query("plans")
       .withIndex("by_user_and_date", (q) => q.eq("userId", ctx.user.id))
       .collect();
 
-    return mealPlans;
+    return plans;
   },
 });
 
 export const getMealPlan = authQuery({
-  args: { mealPlanId: v.id("mealPlans") },
-  handler: async (ctx, { mealPlanId }) => {
-    const mealPlan = await ctx.db.get(mealPlanId);
+  args: { mealPlanId: v.id("plans") },
+  handler: async (ctx, { mealPlanId: planId }) => {
+    const mealPlan = await ctx.db.get(planId);
 
     if (!mealPlan) {
       return null;
     }
 
-    const plannedMeals = await ctx.db
-      .query("plannedMeals")
+    const planMeals = await ctx.db
+      .query("planMeals")
       // TODO: use both category and meal pland id if possible and necessary
-      .withIndex("by_plan_and_category", (q) => q.eq("mealPlanId", mealPlanId))
+      .withIndex("by_plan_and_category", (q) => q.eq("planId", planId))
       .collect();
 
-    const mealIds = plannedMeals.map((pm) => pm.mealId);
+    const mealIds = planMeals.map((pm) => pm.mealId);
 
     const meals = (
       await Promise.all(mealIds.map((id) => ctx.db.get(id)))
@@ -40,14 +40,14 @@ export const getMealPlan = authQuery({
 
     const mealMap = new Map(meals.map((meal) => [meal._id, meal]));
 
-    const plannedMealsWithDetails = plannedMeals.map((pm) => ({
+    const planMealsWithDetails = planMeals.map((pm) => ({
       ...pm,
       meal: mealMap.get(pm.mealId) || null,
     }));
 
     return {
       mealPlan,
-      plannedMeals: plannedMealsWithDetails,
+      planMeals: planMealsWithDetails,
     };
   },
 });
@@ -58,8 +58,8 @@ export const getWeeklyMealPlan = authQuery({
     const startOfWeekTimestamp = weekStart;
     const endOfWeekTimestamp = addDays(weekStart, 6).getTime();
 
-    const weeklyMealPlans = await ctx.db
-      .query("mealPlans")
+    const weeklyPlans = await ctx.db
+      .query("plans")
       .withIndex("by_user_and_date", (q) =>
         q
           .eq("userId", ctx.user.id)
@@ -69,31 +69,40 @@ export const getWeeklyMealPlan = authQuery({
       .collect();
 
     const results = await Promise.all(
-      weeklyMealPlans.map(async (mealPlan) => {
-        // Fetch plannedMeals for this mealPlan
-        const plannedMeals = await ctx.db
-          .query("plannedMeals")
+      weeklyPlans.map(async (mealPlan) => {
+        // Fetch planMeals for this mealPlan
+        const planMeals = await ctx.db
+          .query("planMeals")
           // TODO: use both category and meal pland id if possible and necessary
           .withIndex("by_plan_and_category", (q) =>
-            q.eq("mealPlanId", mealPlan._id),
+            q.eq("planId", mealPlan._id),
           )
           .collect();
 
         // Fetch all mealIds for this mealPlan
-        const mealIds = plannedMeals.map((pm) => pm.mealId);
+        const mealIds = planMeals.map((pm) => pm.mealId);
 
         // Fetch all meals in one go (batch)
         const meals = await Promise.all(mealIds.map((id) => ctx.db.get(id)));
 
-        // Attach meal data to each plannedMeal
-        const plannedMealsWithMeal = plannedMeals.map((pm) => ({
+        // Attach meal data to each planMeal
+        const planMealsWithMeal = planMeals.map((pm) => ({
           ...pm,
           meal: meals.find((m) => m && m._id === pm.mealId) || null,
         }));
 
         return {
           ...mealPlan,
-          plannedMeals: plannedMealsWithMeal,
+          planMeals: planMealsWithMeal.sort((a, b) => {
+            const indexA = a.category ? MEAL_CATEGORIES.indexOf(a.category) : 0;
+            const indexB = b.category ? MEAL_CATEGORIES.indexOf(b.category) : 0;
+
+            if (indexA === -1 || indexB === -1) {
+              return 0;
+            }
+
+            return indexA - indexB;
+          }),
         };
       }),
     );
@@ -111,7 +120,7 @@ export const generateMealPlan = authMutation({
     );
 
     const oldPlans = await ctx.db
-      .query("mealPlans")
+      .query("plans")
       .withIndex("by_user_and_date", (q) =>
         q
           .eq("userId", ctx.user.id)
@@ -125,15 +134,13 @@ export const generateMealPlan = authMutation({
 
     await Promise.all(
       plansToClearMeals.map(async (plan) => {
-        const oldPlannedMeals = await ctx.db
-          .query("plannedMeals")
+        const oldplanMeals = await ctx.db
+          .query("planMeals")
           // TODO: use both category and meal pland id if possible and necessary
-          .withIndex("by_plan_and_category", (q) =>
-            q.eq("mealPlanId", plan._id),
-          )
+          .withIndex("by_plan_and_category", (q) => q.eq("planId", plan._id))
           .collect();
 
-        await Promise.all(oldPlannedMeals.map((pm) => ctx.db.delete(pm._id)));
+        await Promise.all(oldplanMeals.map((pm) => ctx.db.delete(pm._id)));
       }),
     );
 
@@ -176,7 +183,7 @@ export const generateMealPlan = authMutation({
       }
     }
 
-    const generatedMealPlanIds: Id<"mealPlans">[] = [];
+    const generatedMealPlanIds: Id<"plans">[] = [];
     const lockedPlanDates = new Set(
       oldPlans.filter((plan) => plan.locked).map((plan) => plan.date),
     );
@@ -192,16 +199,16 @@ export const generateMealPlan = authMutation({
       }
 
       // Proceed with creating a new meal plan for this date
-      let mealPlanId = null;
+      let planId = null;
 
       const existingMealPlanId = plansToClearMeals.find(
         (plan) => plan.date === date,
       );
 
       if (existingMealPlanId) {
-        mealPlanId = existingMealPlanId._id;
+        planId = existingMealPlanId._id;
       } else {
-        mealPlanId = await ctx.db.insert("mealPlans", {
+        planId = await ctx.db.insert("plans", {
           userId: ctx.user.id, // Use validated userId
           date,
           createdAt: Date.now(),
@@ -211,7 +218,7 @@ export const generateMealPlan = authMutation({
         });
       }
 
-      generatedMealPlanIds.push(mealPlanId);
+      generatedMealPlanIds.push(planId);
 
       // Only iterate through the specified categories to add planned meals
       for (const category of categoriesToGenerate) {
@@ -226,8 +233,8 @@ export const generateMealPlan = authMutation({
         const randomMeal =
           availableMeals[Math.floor(Math.random() * availableMeals.length)];
 
-        await ctx.db.insert("plannedMeals", {
-          mealPlanId,
+        await ctx.db.insert("planMeals", {
+          planId,
           mealId: randomMeal._id,
           category: category, // Store the category for which this meal was chosen
           createdAt: Date.now(),
@@ -248,9 +255,9 @@ export const updatePlannedMealByCategory = authMutation({
     newMealId: v.id("meals"),
   },
   handler: async (ctx, { date, category, newMealId }) => {
-    let mealPlanId: Id<"mealPlans">;
+    let planId: Id<"plans">;
     const existingPlan = await ctx.db
-      .query("mealPlans")
+      .query("plans")
       .withIndex("by_user_and_date", (q) =>
         q.eq("userId", ctx.user.id as Id<"users">).eq("date", date),
       )
@@ -258,19 +265,19 @@ export const updatePlannedMealByCategory = authMutation({
 
     const now = Date.now();
     if (existingPlan) {
-      mealPlanId = existingPlan._id;
+      planId = existingPlan._id;
       // Optional: Update the updatedAt timestamp for the meal plan itself
       // await ctx.db.patch(mealPlanId, { updatedAt: now });
     } else {
       // Create a new meal plan if it doesn't exist for this user and date
-      mealPlanId = await ctx.db.insert("mealPlans", {
+      planId = await ctx.db.insert("plans", {
         userId: ctx.user.id,
         date,
         createdAt: now,
         updatedAt: now,
       });
       console.log(
-        `Created new meal plan ${mealPlanId} for user ${ctx.user.id} on date ${new Date(date).toISOString().split("T")[0]}`,
+        `Created new meal plan ${planId} for user ${ctx.user.id} on date ${new Date(date).toISOString().split("T")[0]}`,
       );
     }
 
@@ -286,17 +293,17 @@ export const updatePlannedMealByCategory = authMutation({
     // }
 
     // 4. --- Find Existing Planned Meal for the Category ---
-    // Since plannedMeals now has a 'category' field, we can query directly.
+    // Since planMeals now has a 'category' field, we can query directly.
     // Note: We need an index on [mealPlanId, category] for this to be efficient.
-    // Let's assume we'll add ` .index("by_plan_and_category", ["mealPlanId", "category"])` to plannedMeals in schema.ts
+    // Let's assume we'll add ` .index("by_plan_and_category", ["mealPlanId", "category"])` to planMeals in schema.ts
     const existingPlannedMeal = await ctx.db
-      .query("plannedMeals")
+      .query("planMeals")
       .withIndex("by_plan_and_category", (q) =>
-        q.eq("mealPlanId", mealPlanId).eq("category", category),
+        q.eq("planId", planId).eq("category", category),
       )
       .first(); // Get the first match (should be unique per plan/category)
 
-    let plannedMealIdToReturn: Id<"plannedMeals">;
+    let plannedMealIdToReturn: Id<"planMeals">;
 
     // 5. --- Update or Insert Planned Meal ---
     if (existingPlannedMeal) {
@@ -307,12 +314,12 @@ export const updatePlannedMealByCategory = authMutation({
       });
       plannedMealIdToReturn = existingPlannedMeal._id;
       console.log(
-        `Updated planned meal ${existingPlannedMeal._id} for category ${category} in meal plan ${mealPlanId}`,
+        `Updated planned meal ${existingPlannedMeal._id} for category ${category} in meal plan ${planId}`,
       );
     } else {
       // Insert a new planned meal if none existed for this category
-      const newPlannedMealId = await ctx.db.insert("plannedMeals", {
-        mealPlanId: mealPlanId,
+      const newPlannedMealId = await ctx.db.insert("planMeals", {
+        planId,
         mealId: newMealId,
         category: category, // Store the category directly
         createdAt: Date.now(),
@@ -320,11 +327,11 @@ export const updatePlannedMealByCategory = authMutation({
       });
       plannedMealIdToReturn = newPlannedMealId;
       console.log(
-        `Inserted new planned meal ${newPlannedMealId} for category ${category} in meal plan ${mealPlanId}`,
+        `Inserted new planned meal ${newPlannedMealId} for category ${category} in meal plan ${planId}`,
       );
     }
 
-    await ShoppingList.generateShoppingList(ctx, { mealPlanId });
+    await ShoppingList.generateShoppingList(ctx, { planId });
 
     // 6. --- Return Result ---
     return { success: true, plannedMealId: plannedMealIdToReturn };
@@ -333,7 +340,7 @@ export const updatePlannedMealByCategory = authMutation({
 
 export const lockMealPlan = authMutation({
   args: {
-    mealPlanId: v.id("mealPlans"),
+    mealPlanId: v.id("plans"),
   },
   handler: async (ctx, { mealPlanId }) => {
     const mealPlan = await ctx.db.get(mealPlanId);

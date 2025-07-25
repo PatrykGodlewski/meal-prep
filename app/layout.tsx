@@ -1,6 +1,6 @@
 import { ConvexAuthNextjsServerProvider } from "@convex-dev/auth/nextjs/server";
-import { getTranslations } from "next-intl/server";
 import { Geist } from "next/font/google";
+import { getTranslations } from "next-intl/server";
 import Providers from "./providers";
 
 import "./globals.css";

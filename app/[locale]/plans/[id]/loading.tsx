@@ -1,5 +1,4 @@
 import { Skeleton } from "@/components/ui/skeleton";
-import React from "react";
 
 /**
  * Renders a skeleton loading UI for the meal plan detail page.
@@ -7,7 +6,7 @@ import React from "react";
  */
 export default function LoadingPlanDetail() {
   return (
-    <div className="container mx-auto space-y-4 py-8 px-4">
+    <div className="container mx-auto space-y-4 px-4 py-8">
       {/* Back Button Skeleton */}
       <Skeleton className="h-10 w-24 rounded-md" /> {/* Mimics BackButton */}
       {/* Title Skeleton */}
@@ -19,7 +18,7 @@ export default function LoadingPlanDetail() {
           <div
             key={index}
             // Mimic MealCard styling
-            className="border p-4 rounded-md shadow-sm flex justify-between items-center"
+            className="flex items-center justify-between rounded-md border p-4 shadow-sm"
           >
             {/* Left side: Meal Name and Category */}
             <div className="space-y-2">

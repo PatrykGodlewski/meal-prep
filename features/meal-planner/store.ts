@@ -1,10 +1,8 @@
 "use client";
-import { api } from "@/convex/_generated/api";
-import type { Id } from "@/convex/_generated/dataModel";
 import { convexQuery, useConvexMutation } from "@convex-dev/react-query";
-import { batch, observable, syncState } from "@legendapp/state";
+import { batch, observable } from "@legendapp/state";
 import { ObservablePersistLocalStorage } from "@legendapp/state/persist-plugins/local-storage";
-import { use$, useObservable, useWhenReady } from "@legendapp/state/react";
+import { use$, useWhenReady } from "@legendapp/state/react";
 import { syncObservable } from "@legendapp/state/sync";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import type { FunctionReturnType } from "convex/server";
@@ -12,6 +10,8 @@ import { addDays, isToday, subDays } from "date-fns";
 import { useTranslations } from "next-intl";
 import type { DateRange } from "react-day-picker";
 import { toast } from "sonner";
+import { api } from "@/convex/_generated/api";
+import type { Id } from "@/convex/_generated/dataModel";
 import { getMonday, getSaturday } from "./utils";
 
 type Store = {
@@ -41,6 +41,7 @@ syncObservable(mealPlannerState$, {
 });
 
 const servings$ = observable(mealPlannerState$.peopleAmount.get());
+const hideCheckedShoppingListItems$ = observable(true);
 
 const setCurrentWeek = (date: Date) => {
   mealPlannerState$.currentWeek.set(getMonday(date));
@@ -86,7 +87,7 @@ export const useMealPlanner = () => {
     isLoading: isMealPlanLoading,
     error: mealPlanError,
   } = useQuery(
-    convexQuery(api.mealPlans.getWeeklyMealPlan, {
+    convexQuery(api.plans.getWeeklyMealPlan, {
       weekStart: currentWeek.getTime(),
     }),
   );
@@ -124,10 +125,8 @@ export const useMealPlanner = () => {
     });
 
   const { mutate: lockPlanMutate, isPending: isLocking } = useMutation({
-    mutationFn: useConvexMutation(api.mealPlans.lockMealPlan),
-    onSuccess: (
-      data: FunctionReturnType<typeof api.mealPlans.lockMealPlan>,
-    ) => {
+    mutationFn: useConvexMutation(api.plans.lockMealPlan),
+    onSuccess: (data: FunctionReturnType<typeof api.plans.lockMealPlan>) => {
       toast(t("toast.successTitle"), {
         description: data.locked
           ? t("lockPlanSuccessDescription")
@@ -164,18 +163,18 @@ export const useMealPlanner = () => {
     generatePlanAndShoppingListMutate({ weekStart });
   };
 
-  const lockMealPlan = (mealPlanId: Id<"mealPlans">) => {
+  const lockMealPlan = (mealPlanId: Id<"plans">) => {
     lockPlanMutate({ mealPlanId });
   };
 
   const isBusy = isMealPlanLoading || isShoppingListLoading;
 
-  useWhenReady(mealPlanData, (mealPlans) => {
+  useWhenReady(mealPlanData, (plans) => {
     if (mealPlannerState$.selectedPlanId.get()) return;
 
     const id =
-      mealPlans?.find((plan) => isToday(plan.date))?._id ||
-      mealPlans?.find((plan) => plan.date === currentWeek.getTime())?._id;
+      plans?.find((plan) => isToday(plan.date))?._id ||
+      plans?.find((plan) => plan.date === currentWeek.getTime())?._id;
 
     return mealPlannerState$.selectedPlanId.set(id);
   });
@@ -183,6 +182,8 @@ export const useMealPlanner = () => {
   const servings = use$(servings$);
 
   return {
+    hideCheckedShoppingListItems$,
+
     servings$,
     servings,
 

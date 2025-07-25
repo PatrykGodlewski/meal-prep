@@ -1,28 +1,28 @@
 "use client";
 
+import type React from "react";
 import { For } from "@/components/for-each";
 import { Skeleton } from "@/components/ui/skeleton";
 import { usePaginatedMeals } from "@/hooks/use-paginated-meals";
-import type React from "react";
 import { MealCard } from "./MealCard";
 
 // --- Skeleton Loader for Meal Card (Keep this presentation logic here) ---
 const MealCardSkeleton = () => (
-  <div className="bg-neutral-200 dark:bg-neutral-700 rounded-lg overflow-hidden shadow-md h-full flex flex-col">
+  <div className="flex h-full flex-col overflow-hidden rounded-lg bg-neutral-200 shadow-md dark:bg-neutral-700">
     <Skeleton className="h-48 w-full" />
-    <div className="p-4 flex flex-col grow">
-      <Skeleton className="h-6 w-3/4 mb-2" />
-      <Skeleton className="h-4 w-full mb-1" />
-      <Skeleton className="h-4 w-5/6 mb-4" />
-      <div className="flex items-center text-sm mb-3">
-        <Skeleton className="h-4 w-4 mr-1 rounded-full" />
-        <Skeleton className="h-4 w-12 mr-4" />
-        <Skeleton className="h-4 w-4 mr-1 rounded-full" />
+    <div className="flex grow flex-col p-4">
+      <Skeleton className="mb-2 h-6 w-3/4" />
+      <Skeleton className="mb-1 h-4 w-full" />
+      <Skeleton className="mb-4 h-4 w-5/6" />
+      <div className="mb-3 flex items-center text-sm">
+        <Skeleton className="mr-1 h-4 w-4 rounded-full" />
+        <Skeleton className="mr-4 h-4 w-12" />
+        <Skeleton className="mr-1 h-4 w-4 rounded-full" />
         <Skeleton className="h-4 w-16" />
       </div>
-      <div className="flex justify-between items-center mt-auto pt-2 border-t border-neutral-300 dark:border-neutral-600">
+      <div className="mt-auto flex items-center justify-between border-neutral-300 border-t pt-2 dark:border-neutral-600">
         <div className="flex items-center text-sm">
-          <Skeleton className="h-4 w-4 mr-1 rounded-full" />
+          <Skeleton className="mr-1 h-4 w-4 rounded-full" />
           <Skeleton className="h-4 w-20" />
         </div>
         <Skeleton className="h-4 w-16" />
@@ -50,7 +50,7 @@ const PaginatedMealList: React.FC = () => {
 
   if (status === "LoadingFirstPage") {
     return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
         {Array.from({ length: 6 }).map((_, index) => (
           <MealCardSkeleton key={index} />
         ))}
@@ -60,12 +60,12 @@ const PaginatedMealList: React.FC = () => {
 
   return (
     <div>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
         <For
           each={allMeals}
           empty={
             !isFetching ? (
-              <p className="col-span-full text-center py-10 text-neutral-500 dark:text-neutral-400">
+              <p className="col-span-full py-10 text-center text-neutral-500 dark:text-neutral-400">
                 No meals found matching your criteria.
               </p>
             ) : null
@@ -81,7 +81,7 @@ const PaginatedMealList: React.FC = () => {
 
       <div data-loader-ref ref={loadMoreRef} className="h-10" />
 
-      <div className="flex justify-center items-center mt-6 mb-4 h-10">
+      <div className="mt-6 mb-4 flex h-10 items-center justify-center">
         {!isFetchingNextPage && hasNextPage && (
           <span className="text-neutral-500 dark:text-neutral-400">
             Scroll down to load more...

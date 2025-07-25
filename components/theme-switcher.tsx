@@ -1,5 +1,8 @@
 "use client";
 
+import { use$, useIsMounted } from "@legendapp/state/react";
+import { Laptop, Loader2, Moon, Sun } from "lucide-react";
+import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -8,9 +11,6 @@ import {
   DropdownMenuRadioItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { use$, useIsMounted } from "@legendapp/state/react";
-import { Laptop, Loader2, Moon, Sun } from "lucide-react";
-import { useTheme } from "next-themes";
 
 const ThemeSwitcher = () => {
   const isMounted = use$(useIsMounted());
@@ -21,7 +21,7 @@ const ThemeSwitcher = () => {
   if (!isMounted) {
     return (
       <Button
-        className="animate-pulse pointer-events-none"
+        className="pointer-events-none animate-pulse"
         variant="ghost"
         size={"sm"}
       >
