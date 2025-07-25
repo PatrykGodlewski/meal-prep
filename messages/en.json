@@ -3,6 +3,7 @@
     "back": "Back"
   },
   "mealPlanner": {
+    "showHiddenItems": "Show hidden shopping list items",
     "emptyShoppingList": "Your shopping list is empty.",
     "today": "Today",
     "header": "Meal Planner",

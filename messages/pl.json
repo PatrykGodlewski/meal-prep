@@ -3,6 +3,7 @@
     "back": "Wstecz"
   },
   "mealPlanner": {
+    "showHiddenItems": "Pokaż ukryte elementy listy zakupów",
     "emptyShoppingList": "Twoja lista zakupów jest pusta.",
     "today": "Dziś",
     "header": "Planner Posiłków",

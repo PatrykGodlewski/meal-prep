@@ -41,6 +41,7 @@ syncObservable(mealPlannerState$, {
 });
 
 const servings$ = observable(mealPlannerState$.peopleAmount.get());
+const hideCheckedShoppingListItems$ = observable(true);
 
 const setCurrentWeek = (date: Date) => {
   mealPlannerState$.currentWeek.set(getMonday(date));
@@ -181,6 +182,8 @@ export const useMealPlanner = () => {
   const servings = use$(servings$);
 
   return {
+    hideCheckedShoppingListItems$,
+
     servings$,
     servings,
 

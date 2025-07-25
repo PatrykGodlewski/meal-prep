@@ -10,17 +10,46 @@ import { useId } from "react";
 import { toast } from "sonner";
 import { For } from "@/components/for-each";
 import ServingController from "@/components/serving-controller";
+import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
 import { cn } from "@/lib/utils";
+import type { IngredientCategory } from "@/validators";
 import { DatePickerWithPresets } from "./date-picker";
 import { useMealPlanner } from "./store";
 
+const LIDL_LAYOUT: (IngredientCategory | undefined)[] = [
+  "grain",
+  "fruit",
+  "vegetable",
+
+  "nut_seed",
+  "spice_herb",
+
+  "meat",
+  "poultry",
+
+  "fat_oil",
+  "condiment",
+  "legume",
+
+  "baking",
+  "sweetener",
+
+  "dairy",
+  "seafood",
+  "beverage",
+
+  "other",
+  undefined,
+];
+
 export function ShoppingListDisplay() {
-  const { shoppingListData: list } = useMealPlanner();
+  const { shoppingListData: list, hideCheckedShoppingListItems$ } =
+    useMealPlanner();
   const t = useTranslations("mealPlanner");
   const tIngredient = useTranslations("ingredient");
 
@@ -31,16 +60,33 @@ export function ShoppingListDisplay() {
     (item) => item?.ingredient?.category ?? "other",
   );
 
-  const shoppingItems = Object.entries(groupedItems).sort();
+  const shoppingItems = Object.entries(groupedItems).sort(([catA], [catB]) => {
+    const indexA = LIDL_LAYOUT.indexOf(catA as IngredientCategory);
+    const indexB = LIDL_LAYOUT.indexOf(catB as IngredientCategory);
+
+    if (indexA === -1 || indexB === -1) {
+      return 0;
+    }
+
+    return indexA - indexB;
+  });
 
   return (
     <div className="min-h-[500px] rounded-lg border bg-white p-4 shadow-xs transition-colors duration-700 ease-in hover:bg-neutral-100/75 dark:bg-neutral-950/75 dark:hover:bg-neutral-900">
-      <div className={"flex flex-wrap justify-between gap-4"}>
-        <h1 className="flex items-center gap-4 font-bold text-3xl">
+      <div
+        className={"flex flex-col flex-wrap justify-between gap-4 md:flex-row"}
+      >
+        <h1 className="flex items-center gap-3 font-bold text-3xl">
           <ShoppingCart />
           {t("shoppingList")}
         </h1>
-
+        <Button
+          onClick={() => {
+            hideCheckedShoppingListItems$.set((prev) => !prev);
+          }}
+        >
+          {t("showHiddenItems")}
+        </Button>
         <ServingController />
         <DatePickerWithPresets />
       </div>
@@ -88,7 +134,10 @@ type Props = {
 };
 
 function ShoppingListItem({ amount, unit, name, isChecked, ids }: Props) {
-  const { mealPlannerState$, servings } = useMealPlanner();
+  const { mealPlannerState$, hideCheckedShoppingListItems$, servings } =
+    useMealPlanner();
+
+  const shouldHideItem = use$(hideCheckedShoppingListItems$);
 
   const uniqueId = useId();
   const labelId = `${uniqueId}-label`;
@@ -147,6 +196,10 @@ function ShoppingListItem({ amount, unit, name, isChecked, ids }: Props) {
   const handleCheckChange = () => {
     mutate({ checked: !isChecked, shoppingListItemIds: ids });
   };
+
+  if (shouldHideItem && isChecked) {
+    return null;
+  }
 
   return (
     <li>

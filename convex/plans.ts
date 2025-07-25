@@ -93,7 +93,16 @@ export const getWeeklyMealPlan = authQuery({
 
         return {
           ...mealPlan,
-          planMeals: planMealsWithMeal,
+          planMeals: planMealsWithMeal.sort((a, b) => {
+            const indexA = a.category ? MEAL_CATEGORIES.indexOf(a.category) : 0;
+            const indexB = b.category ? MEAL_CATEGORIES.indexOf(b.category) : 0;
+
+            if (indexA === -1 || indexB === -1) {
+              return 0;
+            }
+
+            return indexA - indexB;
+          }),
         };
       }),
     );
