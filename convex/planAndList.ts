@@ -16,11 +16,9 @@ export const generatePlanAndShoppingList = authMutation({
         },
       );
 
-      console.log({ mealPlanIds });
-
       await Promise.all(
         mealPlanIds.map((id) =>
-          ShoppingList.generateShoppingList(ctx, { mealPlanId: id }),
+          ShoppingList.generateShoppingList(ctx, { planId: id }),
         ),
       );
 

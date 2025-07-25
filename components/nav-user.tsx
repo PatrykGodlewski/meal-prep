@@ -1,7 +1,8 @@
 "use client";
 
+import { useAuthActions } from "@convex-dev/auth/react";
 import { LogOutIcon, MoreVerticalIcon, UserCircleIcon } from "lucide-react";
-
+import { useRouter } from "next/navigation";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -18,8 +19,6 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { useAuthActions } from "@convex-dev/auth/react";
-import { useRouter } from "next/navigation";
 
 export function NavUser({
   user,

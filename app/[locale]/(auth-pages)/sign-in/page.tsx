@@ -1,12 +1,11 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { useAuthActions } from "@convex-dev/auth/react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
-
 import { useTranslations } from "next-intl";
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 export default function SignIn() {
   const { signIn } = useAuthActions();

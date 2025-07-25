@@ -1,5 +1,9 @@
 "use client";
 
+import { type Preloaded, usePreloadedQuery } from "convex/react";
+import { Edit, HelpCircle, X } from "lucide-react";
+import { useRouter } from "next/navigation";
+import React, { useEffect, useState } from "react";
 import { BackButton } from "@/components/back-button";
 import { Button } from "@/components/ui/button";
 import {
@@ -11,10 +15,6 @@ import {
 import type { api } from "@/convex/_generated/api";
 import { MealDisplayDetails } from "@/features/meal-editor/meal-display-details";
 import { MealEditForm } from "@/features/meal-editor/meal-editor-form";
-import { type Preloaded, usePreloadedQuery } from "convex/react";
-import { Edit, HelpCircle, X } from "lucide-react";
-import { useRouter } from "next/navigation";
-import React, { useEffect, useState } from "react";
 
 interface MealDetailViewProps {
   preloadedMeal: Preloaded<typeof api.meals.queries.getMeal>;

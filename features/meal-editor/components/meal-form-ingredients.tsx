@@ -1,11 +1,11 @@
 "use client";
-import { Button } from "@/components/ui/button";
-import { FormMessage } from "@/components/ui/form";
-import type { Doc } from "@/convex/_generated/dataModel";
 import { Plus } from "lucide-react";
 import { useTranslations } from "next-intl";
 import type { Control, FieldErrors, UseFormSetValue } from "react-hook-form";
 import { useFieldArray } from "react-hook-form";
+import { Button } from "@/components/ui/button";
+import { FormMessage } from "@/components/ui/form";
+import type { Doc } from "@/convex/_generated/dataModel";
 import { IngredientInputRow } from "../ingredient-input-row";
 import type { IngredientFormValues } from "../schema";
 

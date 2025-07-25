@@ -1,4 +1,8 @@
 "use client";
+import { useDebounceFn } from "ahooks";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useTranslations } from "next-intl";
+import { useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -13,10 +17,6 @@ import {
   SEARCH_PARAM_KEY,
 } from "@/hooks/use-paginated-meals";
 import type { MealCategory } from "@/validators";
-import { useDebounceFn } from "ahooks";
-import { useTranslations } from "next-intl";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useEffect } from "react";
 
 export function SearchInput() {
   const t = useTranslations("searchInput");

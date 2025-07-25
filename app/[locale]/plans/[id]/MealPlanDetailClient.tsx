@@ -1,18 +1,18 @@
 "use client";
+import { useConvexMutation } from "@convex-dev/react-query";
+import { type Preloaded, usePreloadedQuery } from "convex/react";
+import type { FunctionReturnType } from "convex/server";
+import { UtensilsCrossed } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+import { useTranslations } from "next-intl";
+import { useState } from "react";
 import { For } from "@/components/for-each";
 import { Button } from "@/components/ui/button";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
 import { MEAL_CATEGORIES } from "@/convex/schema";
 import { cn } from "@/lib/utils";
-import { useConvexMutation } from "@convex-dev/react-query";
-import { type Preloaded, usePreloadedQuery } from "convex/react";
-import type { FunctionReturnType } from "convex/server";
-import { UtensilsCrossed } from "lucide-react";
-import { useTranslations } from "next-intl";
-import Image from "next/image";
-import Link from "next/link";
-import { useState } from "react";
 import { ModalMeals } from "./ModalMeals";
 
 interface Props {

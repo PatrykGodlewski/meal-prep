@@ -1,10 +1,10 @@
+import { convexAuthNextjsToken } from "@convex-dev/auth/nextjs/server";
+import { preloadQuery } from "convex/nextjs";
+import { getLocale } from "next-intl/server";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
 import MealDetailView from "@/features/meal-editor/meal-editor-view";
 import { redirect } from "@/i18n/navigation";
-import { convexAuthNextjsToken } from "@convex-dev/auth/nextjs/server";
-import { preloadQuery } from "convex/nextjs";
-import { getLocale } from "next-intl/server";
 
 export default async function MealDetailPage({
   params,

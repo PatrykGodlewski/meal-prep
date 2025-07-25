@@ -1,9 +1,9 @@
 "use client";
 
-import { Link, usePathname } from "@/i18n/navigation";
-import { LOCALES } from "@/i18n/routing";
 import { Globe2 } from "lucide-react";
 import { useLocale } from "next-intl";
+import { Link, usePathname } from "@/i18n/navigation";
+import { LOCALES } from "@/i18n/routing";
 import { Button } from "./ui/button";
 import {
   DropdownMenu,

@@ -1,10 +1,4 @@
 "use client";
-import { For } from "@/components/for-each";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import type { api } from "@/convex/_generated/api";
-import { useDateLocale } from "@/hooks/use-date-locale";
-import { cn } from "@/lib/utils";
 import type { FunctionReturnType } from "convex/server";
 import { format, isValid, toDate } from "date-fns";
 import { camelCase } from "lodash";
@@ -13,6 +7,12 @@ import Image from "next/image";
 import Link from "next/link";
 import React from "react";
 import { useTranslations } from "use-intl";
+import { For } from "@/components/for-each";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import type { api } from "@/convex/_generated/api";
+import { useDateLocale } from "@/hooks/use-date-locale";
+import { cn } from "@/lib/utils";
 import { useMealPlanner } from "./store";
 
 const DATE_FORMAT_DISPLAY_CARD = "MMM dd";

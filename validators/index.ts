@@ -1,5 +1,5 @@
-import { INGREDIENT_CATEGORIES, MEAL_CATEGORIES, UNITS } from "@/convex/schema";
 import { z } from "zod";
+import { INGREDIENT_CATEGORIES, MEAL_CATEGORIES, UNITS } from "@/convex/schema";
 
 export const mealCategories = z.enum(MEAL_CATEGORIES);
 export const unitTypes = z.enum(UNITS);

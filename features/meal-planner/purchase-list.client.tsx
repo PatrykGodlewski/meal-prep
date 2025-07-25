@@ -1,13 +1,5 @@
 "use client";
 
-import { For } from "@/components/for-each";
-import ServingController from "@/components/serving-controller";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator";
-import { api } from "@/convex/_generated/api";
-import type { Id } from "@/convex/_generated/dataModel";
-import { cn } from "@/lib/utils";
 import { useConvexMutation } from "@convex-dev/react-query";
 import { use$, useObservable } from "@legendapp/state/react";
 import { useMutation } from "@tanstack/react-query";
@@ -16,6 +8,14 @@ import { ShoppingCart } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useId } from "react";
 import { toast } from "sonner";
+import { For } from "@/components/for-each";
+import ServingController from "@/components/serving-controller";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
+import { api } from "@/convex/_generated/api";
+import type { Id } from "@/convex/_generated/dataModel";
+import { cn } from "@/lib/utils";
 import { DatePickerWithPresets } from "./date-picker";
 import { useMealPlanner } from "./store";
 

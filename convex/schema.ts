@@ -1,7 +1,7 @@
 import { authTables } from "@convex-dev/auth/server";
-import { zid, zodOutputToConvex } from "convex-helpers/server/zod";
 import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
+import { zid, zodOutputToConvex } from "convex-helpers/server/zod";
 import { z } from "zod";
 
 export const DEFAULT_INGREDIENT_CATEGORY = "other" as const;
@@ -100,7 +100,7 @@ export const mealSchema = z.object({
 
 export const mealValidator = zodOutputToConvex(mealSchema);
 
-export const mealPlanSchema = z.object({
+export const planSchema = z.object({
   userId: zid("users"),
   date: z.number(),
   locked: z.boolean().optional().default(false),
@@ -108,10 +108,10 @@ export const mealPlanSchema = z.object({
   updatedAt: z.number(),
 });
 
-export const mealPlanValidator = zodOutputToConvex(mealPlanSchema);
+export const planValidator = zodOutputToConvex(planSchema);
 
-export const plannedMealSchema = z.object({
-  mealPlanId: zid("plans"),
+export const planMealsSchema = z.object({
+  planId: zid("plans"),
   mealId: zid("meals"),
   servingAmount: z.number().optional(),
   category: z.enum(MEAL_CATEGORIES).optional(),
@@ -119,11 +119,11 @@ export const plannedMealSchema = z.object({
   updatedAt: z.number(),
 });
 
-const plannedMealValidator = zodOutputToConvex(plannedMealSchema);
+const planMealsValidator = zodOutputToConvex(planMealsSchema);
 
 export const shoppingListValidator = v.object({
   userId: v.id("users"),
-  mealPlanId: v.id("plans"),
+  planId: v.id("plans"),
   date: v.number(),
   createdAt: v.number(),
   updatedAt: v.number(),
@@ -157,18 +157,18 @@ export default defineSchema({
     .index("by_meal", ["mealId"])
     .index("by_ingredient", ["ingredientId"]),
 
-  plans: defineTable(mealPlanValidator).index("by_user_and_date", [
+  plans: defineTable(planValidator).index("by_user_and_date", [
     "userId",
     "date",
   ]),
 
-  planMeals: defineTable(plannedMealValidator)
-    .index("by_plan_and_category", ["mealPlanId", "category"])
+  planMeals: defineTable(planMealsValidator)
+    .index("by_plan_and_category", ["planId", "category"])
     .index("by_meal", ["mealId"]),
 
   shoppingLists: defineTable(shoppingListValidator)
     .index("by_user_and_date", ["userId", "date"]) // New index for date range queries
-    .index("by_meal_plan", ["mealPlanId"]), // Optional: Index by meal plan ID
+    .index("by_plan", ["planId"]), // Optional: Index by meal plan ID
 
   shoppingListItems: defineTable(shoppingListItemValidator)
     .index("by_shopping_list", ["shoppingListId"])

@@ -1,6 +1,6 @@
 "use client";
-import { useMealPlanner } from "@/features/meal-planner/store";
 import { Minus, Plus } from "lucide-react";
+import { useMealPlanner } from "@/features/meal-planner/store";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 

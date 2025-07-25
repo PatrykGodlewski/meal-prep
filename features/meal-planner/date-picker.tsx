@@ -1,4 +1,8 @@
 "use client";
+import { use$ } from "@legendapp/state/react";
+import { addDays, endOfMonth, format, startOfMonth } from "date-fns";
+import { Calendar as CalendarIcon } from "lucide-react";
+import * as React from "react";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import {
@@ -15,10 +19,6 @@ import {
 } from "@/components/ui/select";
 import { useDateLocale } from "@/hooks/use-date-locale";
 import { cn } from "@/lib/utils";
-import { use$ } from "@legendapp/state/react";
-import { addDays, endOfMonth, format, startOfMonth } from "date-fns";
-import { Calendar as CalendarIcon } from "lucide-react";
-import * as React from "react";
 import { useMealPlanner } from "./store";
 import { getMonday, getSaturday } from "./utils";
 

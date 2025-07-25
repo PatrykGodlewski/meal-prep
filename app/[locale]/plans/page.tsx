@@ -1,9 +1,9 @@
-import { api } from "@/convex/_generated/api";
 import { convexAuthNextjsToken } from "@convex-dev/auth/nextjs/server";
 import { preloadQuery } from "convex/nextjs";
-import { getTranslations } from "next-intl/server";
 import { notFound } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import React from "react";
+import { api } from "@/convex/_generated/api";
 import { PlanList } from "./PlanList";
 
 export default async function MealPlansPage() {

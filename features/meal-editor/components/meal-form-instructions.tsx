@@ -1,4 +1,6 @@
 "use client";
+import { useTranslations } from "next-intl";
+import type { Control } from "react-hook-form";
 import {
   FormControl,
   FormField,
@@ -7,8 +9,6 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Textarea } from "@/components/ui/textarea";
-import { useTranslations } from "next-intl";
-import type { Control } from "react-hook-form";
 
 interface MealFormInstructionsProps {
   control: Control<any>;

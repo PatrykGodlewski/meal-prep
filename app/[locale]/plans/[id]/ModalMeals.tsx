@@ -1,4 +1,7 @@
 "use client";
+import { useDebounceFn } from "ahooks";
+import { Loader2 } from "lucide-react";
+import { type ChangeEvent, type ReactNode, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -12,9 +15,6 @@ import { Input } from "@/components/ui/input";
 import type { Id } from "@/convex/_generated/dataModel";
 import type { MEAL_CATEGORIES } from "@/convex/schema";
 import { usePaginatedMeals } from "@/hooks/use-paginated-meals";
-import { useDebounceFn } from "ahooks";
-import { Loader2 } from "lucide-react";
-import { type ChangeEvent, type ReactNode, useEffect, useState } from "react";
 
 interface ModalMealsProps {
   isOpen: boolean;

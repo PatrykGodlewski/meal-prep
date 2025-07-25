@@ -1,7 +1,7 @@
 "use client";
-import { useRouter } from "@/i18n/navigation";
 import { ArrowLeft } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { useRouter } from "@/i18n/navigation";
 import { Button } from "./ui/button";
 
 interface Props {

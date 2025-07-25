@@ -1,4 +1,7 @@
 "use client";
+import { Clock, Weight } from "lucide-react";
+import { useTranslations } from "next-intl";
+import type { Control } from "react-hook-form";
 import { MultiSelect } from "@/components/multi-select";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -11,9 +14,6 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { MEAL_CATEGORIES } from "@/convex/schema";
-import { Clock, Weight } from "lucide-react";
-import { useTranslations } from "next-intl";
-import type { Control } from "react-hook-form";
 
 interface MealFormDetailsProps {
   control: Control<any>;
@@ -166,10 +166,7 @@ export function MealFormDetails({ control }: MealFormDetailsProps) {
                   id="isPublicEdit"
                 />
               </FormControl>
-              <FormLabel
-                htmlFor="isPublicEdit"
-                className="text-sm font-normal"
-              >
+              <FormLabel htmlFor="isPublicEdit" className="text-sm font-normal">
                 {t("makePublicLabel")}
               </FormLabel>
               <FormMessage />

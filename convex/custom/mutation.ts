@@ -16,5 +16,4 @@ export const authMutation = customMutation(
   }),
 );
 
-
 export type AuthMutationCtx = MutationCtx & { user: { id: Id<"users"> } };

@@ -1,6 +1,3 @@
-import type { Doc } from "@/convex/_generated/dataModel";
-import { DATE_FORMAT_DISPLAY_CARD } from "@/features/meal-planner/utils";
-import { useDateLocale } from "@/hooks/use-date-locale";
 import { format } from "date-fns";
 import {
   ChefHat,
@@ -10,9 +7,12 @@ import {
   UtensilsCrossed,
   Weight,
 } from "lucide-react";
-import { useTranslations } from "next-intl";
 import Image from "next/image";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
+import type { Doc } from "@/convex/_generated/dataModel";
+import { DATE_FORMAT_DISPLAY_CARD } from "@/features/meal-planner/utils";
+import { useDateLocale } from "@/hooks/use-date-locale";
 
 type Props = {
   meal: Doc<"meals">;
@@ -86,7 +86,9 @@ export function MealCard({ meal }: Props) {
               title={t("authorTitle")}
             >
               <ChefHat className="h-4 w-4 mr-1 shrink-0" />
-              <span className="truncate">{t("author", { name: displayAuthor })}</span>
+              <span className="truncate">
+                {t("author", { name: displayAuthor })}
+              </span>
             </div>
 
             <span className="first-letter:uppercase text-xs text-neutral-500 dark:text-neutral-400 shrink-0">

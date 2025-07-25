@@ -1,7 +1,7 @@
 import { v } from "convex/values";
-import * as ShoppingList from "../model/shoppingList";
 import { internal } from "../_generated/api";
 import { authMutation } from "../custom/mutation";
+import * as ShoppingList from "../model/shoppingList";
 import {
   mutationMealAddValidator,
   mutationMealEditValidator,
@@ -102,6 +102,16 @@ export const editMeal = authMutation({
         mealId,
         ingredients,
       });
+
+      // TODO should update items in shopping list of affected ingredients in this meal, currently it is regenerating whole shopping list if meal was edited
+      const plannedMealsEntries = await ctx.db
+        .query("planMeals")
+        .withIndex("by_meal", (q) => q.eq("mealId", args.mealId))
+        .collect();
+
+      for (const { planId } of plannedMealsEntries) {
+        await ShoppingList.generateShoppingList(ctx, { planId });
+      }
 
       return { success: true };
     } catch (error) {

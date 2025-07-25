@@ -1,4 +1,6 @@
 "use client";
+import { useTranslations } from "next-intl";
+import type { Control } from "react-hook-form";
 import {
   FormControl,
   FormField,
@@ -7,8 +9,6 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useTranslations } from "next-intl";
-import type { Control } from "react-hook-form";
 
 interface MealFormImageProps {
   control: Control<any>;

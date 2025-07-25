@@ -1,7 +1,7 @@
-import { Skeleton } from "@/components/ui/skeleton"; // Import Skeleton for page level suspense
-import { getTranslations } from "next-intl/server";
 import Link from "next/link";
+import { getTranslations } from "next-intl/server";
 import { Suspense } from "react";
+import { Skeleton } from "@/components/ui/skeleton"; // Import Skeleton for page level suspense
 import PaginatedMealList from "./PaginatedMealList"; // Import the new component
 import { SearchInput } from "./SearchInput";
 

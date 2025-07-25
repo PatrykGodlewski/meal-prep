@@ -1,4 +1,13 @@
 "use client";
+import { useConvexAuth } from "convex/react";
+import {
+  CalendarCog,
+  LayoutDashboardIcon,
+  ListIcon,
+  SquareStack,
+  Triangle,
+} from "lucide-react";
+import { useTranslations } from "next-intl";
 import { NavMain } from "@/components/nav-main";
 import { NavSecondary } from "@/components/nav-secondary";
 import { NavUser } from "@/components/nav-user";
@@ -11,15 +20,6 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { useConvexAuth } from "convex/react";
-import {
-  CalendarCog,
-  LayoutDashboardIcon,
-  ListIcon,
-  SquareStack,
-  Triangle,
-} from "lucide-react";
-import { useTranslations } from "next-intl";
 import { NavGuest } from "./nav-guest";
 import { NavList } from "./nav-list";
 import { Separator } from "./ui/separator";

@@ -1,9 +1,9 @@
-import { api } from "@/convex/_generated/api";
-import type { Id } from "@/convex/_generated/dataModel";
 import { useConvexMutation } from "@convex-dev/react-query";
 import { useMutation } from "@tanstack/react-query";
 import type { FunctionReturnType } from "convex/server";
 import { toast } from "sonner";
+import { api } from "@/convex/_generated/api";
+import type { Id } from "@/convex/_generated/dataModel";
 
 /**
  * A custom hook for handling meal-related mutations (add, edit, delete).

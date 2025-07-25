@@ -1,10 +1,10 @@
+import { convexAuthNextjsToken } from "@convex-dev/auth/nextjs/server";
+import { preloadQuery } from "convex/nextjs";
+import { notFound } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { BackButton } from "@/components/back-button";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
-import { convexAuthNextjsToken } from "@convex-dev/auth/nextjs/server";
-import { preloadQuery } from "convex/nextjs";
-import { getTranslations } from "next-intl/server";
-import { notFound } from "next/navigation";
 import { MealPlanDetail } from "./MealPlanDetailClient";
 
 interface PlanDetailPageProps {

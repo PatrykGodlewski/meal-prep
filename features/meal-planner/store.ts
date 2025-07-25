@@ -1,6 +1,4 @@
 "use client";
-import { api } from "@/convex/_generated/api";
-import type { Id } from "@/convex/_generated/dataModel";
 import { convexQuery, useConvexMutation } from "@convex-dev/react-query";
 import { batch, observable, syncState } from "@legendapp/state";
 import { ObservablePersistLocalStorage } from "@legendapp/state/persist-plugins/local-storage";
@@ -12,6 +10,8 @@ import { addDays, isToday, subDays } from "date-fns";
 import { useTranslations } from "next-intl";
 import type { DateRange } from "react-day-picker";
 import { toast } from "sonner";
+import { api } from "@/convex/_generated/api";
+import type { Id } from "@/convex/_generated/dataModel";
 import { getMonday, getSaturday } from "./utils";
 
 type Store = {
@@ -125,9 +125,7 @@ export const useMealPlanner = () => {
 
   const { mutate: lockPlanMutate, isPending: isLocking } = useMutation({
     mutationFn: useConvexMutation(api.plans.lockMealPlan),
-    onSuccess: (
-      data: FunctionReturnType<typeof api.plans.lockMealPlan>,
-    ) => {
+    onSuccess: (data: FunctionReturnType<typeof api.plans.lockMealPlan>) => {
       toast(t("toast.successTitle"), {
         description: data.locked
           ? t("lockPlanSuccessDescription")

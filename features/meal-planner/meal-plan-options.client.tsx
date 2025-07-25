@@ -1,9 +1,9 @@
 "use client";
+import { use$ } from "@legendapp/state/react";
+import { Minus, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { use$ } from "@legendapp/state/react";
-import { Minus, Plus } from "lucide-react";
 import { useMealPlanner } from "./store";
 
 export function MealPlanOptions() {

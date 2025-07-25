@@ -1,5 +1,5 @@
-import { Skeleton } from "@/components/ui/skeleton";
 import { CalendarDays, ChevronLeft, ChevronRight } from "lucide-react"; // Keep icons for structure
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function PlannerLoading() {
   // Number of skeleton day cards to display

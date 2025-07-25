@@ -1,4 +1,6 @@
 "use client";
+import Link from "next/link";
+import React from "react";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -8,8 +10,6 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { usePathname } from "@/i18n/navigation";
-import Link from "next/link";
-import React from "react";
 
 function formatSegment(segment: string): string {
   if (!segment) return "";

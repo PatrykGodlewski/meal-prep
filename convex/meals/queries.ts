@@ -1,6 +1,6 @@
-import { filter } from "convex-helpers/server/filter";
 import { paginationOptsValidator } from "convex/server";
 import { v } from "convex/values";
+import { filter } from "convex-helpers/server/filter";
 import { authQuery } from "../custom/query";
 import { MEAL_CATEGORIES } from "../schema";
 
@@ -26,15 +26,13 @@ export const getMeals = authQuery({
     let query;
 
     if (trimmedSearch) {
-      query = ctx.db
-        .query("meals")
-        .withSearchIndex("search_name", (q) => {
-          let builder = q.search("name", trimmedSearch);
-          if (categoryFilter) {
-            builder = builder.eq("categories", [categoryFilter]);
-          }
-          return builder;
-        });
+      query = ctx.db.query("meals").withSearchIndex("search_name", (q) => {
+        let builder = q.search("name", trimmedSearch);
+        if (categoryFilter) {
+          builder = builder.eq("categories", [categoryFilter]);
+        }
+        return builder;
+      });
     } else if (categoryFilter) {
       query = ctx.db
         .query("meals")

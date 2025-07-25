@@ -1,11 +1,11 @@
+import { format } from "date-fns";
+import { Calendar, ChefHat, Clock, Flame, type LucideIcon } from "lucide-react";
+import Image from "next/image";
+import { useTranslations } from "next-intl";
+import React from "react";
 import { For } from "@/components/for-each";
 import ServingController from "@/components/serving-controller";
 import { useDateLocale } from "@/hooks/use-date-locale";
-import { format } from "date-fns";
-import { Calendar, ChefHat, Clock, Flame, type LucideIcon } from "lucide-react";
-import { useTranslations } from "next-intl";
-import Image from "next/image";
-import React from "react";
 import { useMealPlanner } from "../meal-planner/store";
 import { DATE_FORMAT_FULL } from "../meal-planner/utils";
 import type { Meal, MealIngredients } from "./types";

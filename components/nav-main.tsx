@@ -1,5 +1,8 @@
 "use client";
 
+import { PlusCircleIcon } from "lucide-react";
+import Link from "next/link";
+import { useTranslations } from "next-intl";
 import {
   SidebarGroup,
   SidebarGroupContent,
@@ -7,9 +10,6 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { PlusCircleIcon } from "lucide-react";
-import { useTranslations } from "next-intl";
-import Link from "next/link";
 
 export function NavMain() {
   const t = useTranslations("navMain");

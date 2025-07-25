@@ -1,4 +1,6 @@
 "use client";
+import { Save, Trash2 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -11,8 +13,6 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
-import { Save, Trash2 } from "lucide-react";
-import { useTranslations } from "next-intl";
 
 interface MealFormActionsProps {
   isEditMode: boolean;
@@ -46,7 +46,9 @@ export function MealFormActions({
           </AlertDialogTrigger>
           <AlertDialogContent>
             <AlertDialogHeader>
-              <AlertDialogTitle>{t("deleteConfirmationTitle")}</AlertDialogTitle>
+              <AlertDialogTitle>
+                {t("deleteConfirmationTitle")}
+              </AlertDialogTitle>
               <AlertDialogDescription>
                 {t("deleteConfirmationDescription")}
               </AlertDialogDescription>
