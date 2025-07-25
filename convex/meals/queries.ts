@@ -1,6 +1,5 @@
 import { paginationOptsValidator } from "convex/server";
 import { v } from "convex/values";
-import { filter } from "convex-helpers/server/filter";
 import { authQuery } from "../custom/query";
 import { MEAL_CATEGORIES } from "../schema";
 

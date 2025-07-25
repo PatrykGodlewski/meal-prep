@@ -1,8 +1,8 @@
 "use client";
 import { convexQuery, useConvexMutation } from "@convex-dev/react-query";
-import { batch, observable, syncState } from "@legendapp/state";
+import { batch, observable } from "@legendapp/state";
 import { ObservablePersistLocalStorage } from "@legendapp/state/persist-plugins/local-storage";
-import { use$, useObservable, useWhenReady } from "@legendapp/state/react";
+import { use$, useWhenReady } from "@legendapp/state/react";
 import { syncObservable } from "@legendapp/state/sync";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import type { FunctionReturnType } from "convex/server";

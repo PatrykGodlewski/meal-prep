@@ -1,12 +1,5 @@
 import { format } from "date-fns";
-import {
-  ChefHat,
-  Clock,
-  Flame,
-  Users,
-  UtensilsCrossed,
-  Weight,
-} from "lucide-react";
+import { ChefHat, Clock, Flame, Users, UtensilsCrossed } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useTranslations } from "next-intl";

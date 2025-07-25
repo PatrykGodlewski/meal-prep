@@ -2,7 +2,6 @@ import { convexAuthNextjsToken } from "@convex-dev/auth/nextjs/server";
 import { preloadQuery } from "convex/nextjs";
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
-import React from "react";
 import { api } from "@/convex/_generated/api";
 import { PlanList } from "./PlanList";
 

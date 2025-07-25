@@ -1,9 +1,8 @@
 "use client";
 
 import { addDays, format, isToday } from "date-fns";
-import { enUS, pl } from "date-fns/locale";
 import { ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
-import { useLocale, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { useDateLocale } from "@/hooks/use-date-locale";
 import { cn } from "@/lib/utils";

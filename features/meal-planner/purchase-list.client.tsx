@@ -1,7 +1,7 @@
 "use client";
 
 import { useConvexMutation } from "@convex-dev/react-query";
-import { use$, useObservable } from "@legendapp/state/react";
+import { use$ } from "@legendapp/state/react";
 import { useMutation } from "@tanstack/react-query";
 import { camelCase } from "lodash";
 import { ShoppingCart } from "lucide-react";

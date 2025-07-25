@@ -3,12 +3,7 @@
 import { Check, ChevronsUpDown, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import React, { useCallback, useState } from "react";
-import {
-  type Control,
-  type UseFormSetValue,
-  type UseFormWatch,
-  useFormContext,
-} from "react-hook-form";
+import type { Control, UseFormSetValue } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -44,7 +39,6 @@ import {
 import type { Doc } from "@/convex/_generated/dataModel";
 import { INGREDIENT_CATEGORIES, UNITS } from "@/convex/schema";
 import { cn } from "@/lib/utils";
-import type { MealAddFormValues, MealUpdateFormValues } from "./schema"; // Import both types
 
 interface IngredientInputRowProps {
   index: number;

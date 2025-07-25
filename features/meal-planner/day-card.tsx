@@ -5,7 +5,6 @@ import { camelCase } from "lodash";
 import { Flame, Lock, Unlock } from "lucide-react"; // Import Unlock icon
 import Image from "next/image";
 import Link from "next/link";
-import React from "react";
 import { useTranslations } from "use-intl";
 import { For } from "@/components/for-each";
 import { Button } from "@/components/ui/button";

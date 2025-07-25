@@ -3,7 +3,7 @@
 import { type Preloaded, usePreloadedQuery } from "convex/react";
 import { Edit, HelpCircle, X } from "lucide-react";
 import { useRouter } from "next/navigation";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { BackButton } from "@/components/back-button";
 import { Button } from "@/components/ui/button";
 import {

@@ -1,4 +1,3 @@
-import { Calendar, ChefHat, Clock, Users } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 
 // Helper component for meta labels skeleton

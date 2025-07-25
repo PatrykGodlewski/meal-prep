@@ -103,7 +103,7 @@ export async function upsertShoppingList(
 
   if (existingList) return existingList._id;
 
-  const now = new Date().getTime();
+  const now = Date.now();
 
   return await ctx.db.insert("shoppingLists", {
     userId: ctx.user.id,

@@ -55,7 +55,7 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, State> {
     if (this.props.fallback) {
       try {
         return <ErrorBoundary>{this.props.fallback}</ErrorBoundary>;
-      } catch (err: unknown) {
+      } catch (_err: unknown) {
         if (process.env.NODE_ENV === "development") {
           return;
         }

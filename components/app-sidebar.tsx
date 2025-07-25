@@ -22,7 +22,6 @@ import {
 } from "@/components/ui/sidebar";
 import { NavGuest } from "./nav-guest";
 import { NavList } from "./nav-list";
-import { Separator } from "./ui/separator";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { isAuthenticated } = useConvexAuth();
