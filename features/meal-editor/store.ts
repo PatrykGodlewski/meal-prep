@@ -5,6 +5,13 @@ import { useMutation } from "@tanstack/react-query";
 import type { FunctionReturnType } from "convex/server";
 import { toast } from "sonner";
 
+/**
+ * A custom hook for handling meal-related mutations (add, edit, delete).
+ *
+ * @param {object} options - The options for the hook.
+ * @param {(id?: Id<"meals">) => void} [options.onSuccess] - A callback to execute on success.
+ * @returns {object} An object containing the mutation functions and loading state.
+ */
 export function useMealEditor({
   onSuccess,
 }: {
