@@ -4,6 +4,14 @@ import { v } from "convex/values";
 import { authQuery } from "../custom/query";
 import { MEAL_CATEGORIES } from "../schema";
 
+/**
+ * Get a paginated list of meals, with optional search and filtering.
+ *
+ * @param {object} paginationOpts - The pagination options.
+ * @param {string} [search] - The search query.
+ * @param {string} [filter] - The category to filter by.
+ * @returns {Promise<object>} A paginated list of meals.
+ */
 export const getMeals = authQuery({
   args: {
     paginationOpts: paginationOptsValidator,
@@ -15,78 +23,62 @@ export const getMeals = authQuery({
     { paginationOpts, search = "", filter: categoryFilter },
   ) => {
     const trimmedSearch = search.trim();
-    const isSearching = !!trimmedSearch;
-    const isFiltering = !!categoryFilter;
-    const pagination = paginationOpts ?? { numItems: 10, cursor: null };
+    let query;
 
-    if (isSearching && isFiltering) {
-      return await filter(ctx.db.query("meals"), (meal) =>
-        categoryFilter ? !!meal.categories?.includes(categoryFilter) : true,
-      )
-        .withSearchIndex("search_name", (q) => {
-          return q.search("name", trimmedSearch);
-        })
-        .paginate(pagination);
-    }
-
-    if (isSearching) {
-      return await ctx.db
+    if (trimmedSearch) {
+      query = ctx.db
         .query("meals")
         .withSearchIndex("search_name", (q) => {
-          return q.search("name", trimmedSearch);
-        })
-        .paginate(pagination);
+          let builder = q.search("name", trimmedSearch);
+          if (categoryFilter) {
+            builder = builder.eq("categories", [categoryFilter]);
+          }
+          return builder;
+        });
+    } else if (categoryFilter) {
+      query = ctx.db
+        .query("meals")
+        .withIndex("by_categories", (q) =>
+          q.eq("categories", [categoryFilter]),
+        );
+    } else {
+      query = ctx.db.query("meals");
     }
 
-    if (isFiltering) {
-      return await filter(
-        ctx.db.query("meals"),
-        (meal) => !!meal.categories?.includes(categoryFilter),
-      ).paginate(pagination);
-    }
-
-    return await ctx.db.query("meals").paginate(pagination);
+    return await query.paginate(paginationOpts);
   },
 });
 
+/**
+ * Get a meal by its ID, along with its ingredients.
+ *
+ * @param {object} args - The arguments.
+ * @param {string} args.mealId - The ID of the meal to fetch.
+ * @returns {Promise<object|null>} The meal with its ingredients, or null if not found.
+ */
 export const getMeal = authQuery({
   args: { mealId: v.id("meals") },
   handler: async (ctx, { mealId }) => {
     const meal = await ctx.db.get(mealId);
-
-    if (!meal) {
-      return null; // Return null if meal not found
-    }
+    if (!meal) return null;
 
     const mealIngredients = await ctx.db
       .query("mealIngredients")
       .withIndex("by_meal", (q) => q.eq("mealId", mealId))
       .collect();
 
-    // 3. Fetch the full ingredient details for each mealIngredient
-    const detailedIngredients = await Promise.all(
-      mealIngredients.map(async (mi) => {
-        if (!mi.ingredientId) return { ...mi, ingredient: null };
-
-        const ingredient = await ctx.db.get(mi.ingredientId);
-        if (!ingredient) {
-          // Handle case where ingredient might be missing (optional, log error, etc.)
-          console.error(
-            `Ingredient with ID ${mi.ingredientId} not found for meal ${mealId}`,
-          );
-          // Decide how to handle this: return null, skip, or throw?
-          // Returning the mealIngredient without the full ingredient details for now.
-          return { ...mi, ingredient: null };
-        }
-        // Combine mealIngredient info with the full ingredient object
-        return { ...mi, ingredient };
-      }),
-    );
-
-    // 4. Return the meal object augmented with detailed ingredients
-    return {
+    const mealWithIngredients = {
       ...meal,
-      mealIngredients: detailedIngredients, // Add the enriched ingredient list
+      mealIngredients: await Promise.all(
+        mealIngredients.map(async (mi) => {
+          const ingredient = mi.ingredientId
+            ? await ctx.db.get(mi.ingredientId)
+            : null;
+          return { ...mi, ingredient };
+        }),
+      ),
     };
+
+    return mealWithIngredients;
   },
 });

@@ -22,31 +22,35 @@ import { MealFormInstructions } from "./components/meal-form-instructions";
 import { useMealEditor } from "./store";
 import type { Meal } from "./types";
 
-const mapPreloadedDataToFormValues = (
+/**
+ * Maps a meal query result to form values for editing.
+ * @param meal The meal data fetched from the query.
+ * @returns The meal data formatted for the form.
+ */
+const mapMealToFormValues = (
   meal: FunctionReturnType<typeof api.meals.queries.getMeal>,
 ): MutationMealEditValues | undefined => {
   if (!meal) return undefined;
 
-  const { mealIngredients, ...mealData } = meal; // Separate meal base data
+  const { mealIngredients, ...mealData } = meal;
 
-  const formIngredients = (mealIngredients || []) // Handle potentially undefined mealIngredients
-    .map((mi): MutationMealEditValues["ingredients"][number] => {
-      const ingredient = mi.ingredient; // Safe due to filter
-      return {
-        ingredientId: ingredient?._id, // Ingredient definition ID
-        name: ingredient?.name ?? "_TODO_should_be_empty_name_TODO_",
-        calories: ingredient?.calories ?? 0,
-        category: ingredient?.category ?? "other",
-        unit: ingredient?.unit ?? "g",
-        quantity: mi.quantity, // From junction record
-        isOptional: mi.isOptional ?? false, // From junction record
-        notes: mi.notes ?? "", // From junction record
-      };
-    });
+  const formIngredients =
+    mealIngredients?.map(
+      (mi): MutationMealEditValues["ingredients"][number] => ({
+        ingredientId: mi.ingredient?._id,
+        name: mi.ingredient?.name ?? "",
+        calories: mi.ingredient?.calories ?? 0,
+        category: mi.ingredient?.category ?? "other",
+        unit: mi.ingredient?.unit ?? "g",
+        quantity: mi.quantity,
+        isOptional: mi.isOptional ?? false,
+        notes: mi.notes ?? "",
+      }),
+    ) ?? [];
 
   return {
     mealId: mealData._id,
-    name: mealData.name,
+    ...mealData,
     description: mealData.description ?? "",
     prepTimeMinutes: mealData.prepTimeMinutes ?? undefined,
     cookTimeMinutes: mealData.cookTimeMinutes ?? undefined,
@@ -65,6 +69,16 @@ interface MealFormProps {
   onSuccess?: () => void;
 }
 
+/**
+ * A form for creating and editing meals.
+ * It uses a custom hook `useMealEditor` to handle the mutations.
+ *
+ * @param {MealFormProps} props The component props.
+ * @param {Meal} props.meal The meal to edit. If not provided, the form is in "add" mode.
+ * @param {Doc<"ingredients">[]} props.availableIngredients The list of available ingredients.
+ * @param {() => void} props.onSuccess A callback to execute on success.
+ * @returns {JSX.Element} The `MealForm` component.
+ */
 export function MealForm({
   availableIngredients = [],
   meal,
@@ -85,7 +99,7 @@ export function MealForm({
       meal ? mutationMealEditSchema : mutationMealAddSchema,
     ),
     defaultValues: meal
-      ? mapPreloadedDataToFormValues(meal)
+      ? mapMealToFormValues(meal)
       : {
           name: "",
           description: "",
