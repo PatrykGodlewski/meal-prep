@@ -4,7 +4,7 @@ import { useConvexMutation } from "@convex-dev/react-query";
 import { use$ } from "@legendapp/state/react";
 import { useMutation } from "@tanstack/react-query";
 import { camelCase } from "lodash";
-import { ShoppingCart } from "lucide-react";
+import { Eye, EyeOff, ShoppingCart } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useId } from "react";
 import { toast } from "sonner";
@@ -50,6 +50,7 @@ const LIDL_LAYOUT: (IngredientCategory | undefined)[] = [
 export function ShoppingListDisplay() {
   const { shoppingListData: list, hideCheckedShoppingListItems$ } =
     useMealPlanner();
+  const isHiddenCheckedItems = use$(hideCheckedShoppingListItems$);
   const t = useTranslations("mealPlanner");
   const tIngredient = useTranslations("ingredient");
 
@@ -85,7 +86,7 @@ export function ShoppingListDisplay() {
             hideCheckedShoppingListItems$.set((prev) => !prev);
           }}
         >
-          {t("showHiddenItems")}
+          {isHiddenCheckedItems ? <EyeOff /> : <Eye />}
         </Button>
         <ServingController />
         <DatePickerWithPresets />
