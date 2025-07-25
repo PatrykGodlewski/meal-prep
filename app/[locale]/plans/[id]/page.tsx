@@ -8,14 +8,14 @@ import { notFound } from "next/navigation";
 import { MealPlanDetail } from "./MealPlanDetailClient";
 
 interface PlanDetailPageProps {
-  params: Promise<{ id: Id<"mealPlans"> }>;
+  params: Promise<{ id: Id<"plans"> }>;
 }
 
 export default async function PlanDetailPage({ params }: PlanDetailPageProps) {
   const planId = (await params).id;
 
   const preloadedMealPlan = await preloadQuery(
-    api.mealPlans.getMealPlan,
+    api.plans.getMealPlan,
     {
       mealPlanId: planId,
     },

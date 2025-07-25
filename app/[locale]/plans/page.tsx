@@ -8,7 +8,7 @@ import { PlanList } from "./PlanList";
 
 export default async function MealPlansPage() {
   const preloadedPlans = await preloadQuery(
-    api.mealPlans.getMealPlans,
+    api.plans.getMealPlans,
     {},
     { token: await convexAuthNextjsToken() },
   );

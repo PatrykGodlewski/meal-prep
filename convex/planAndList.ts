@@ -10,7 +10,7 @@ export const generatePlanAndShoppingList = authMutation({
   handler: async (ctx, { weekStart }) => {
     try {
       const { mealPlanIds } = await ctx.runMutation(
-        api.mealPlans.generateMealPlan,
+        api.plans.generateMealPlan,
         {
           weekStart,
         },

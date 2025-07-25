@@ -86,7 +86,7 @@ export const useMealPlanner = () => {
     isLoading: isMealPlanLoading,
     error: mealPlanError,
   } = useQuery(
-    convexQuery(api.mealPlans.getWeeklyMealPlan, {
+    convexQuery(api.plans.getWeeklyMealPlan, {
       weekStart: currentWeek.getTime(),
     }),
   );
@@ -124,9 +124,9 @@ export const useMealPlanner = () => {
     });
 
   const { mutate: lockPlanMutate, isPending: isLocking } = useMutation({
-    mutationFn: useConvexMutation(api.mealPlans.lockMealPlan),
+    mutationFn: useConvexMutation(api.plans.lockMealPlan),
     onSuccess: (
-      data: FunctionReturnType<typeof api.mealPlans.lockMealPlan>,
+      data: FunctionReturnType<typeof api.plans.lockMealPlan>,
     ) => {
       toast(t("toast.successTitle"), {
         description: data.locked
@@ -164,18 +164,18 @@ export const useMealPlanner = () => {
     generatePlanAndShoppingListMutate({ weekStart });
   };
 
-  const lockMealPlan = (mealPlanId: Id<"mealPlans">) => {
+  const lockMealPlan = (mealPlanId: Id<"plans">) => {
     lockPlanMutate({ mealPlanId });
   };
 
   const isBusy = isMealPlanLoading || isShoppingListLoading;
 
-  useWhenReady(mealPlanData, (mealPlans) => {
+  useWhenReady(mealPlanData, (plans) => {
     if (mealPlannerState$.selectedPlanId.get()) return;
 
     const id =
-      mealPlans?.find((plan) => isToday(plan.date))?._id ||
-      mealPlans?.find((plan) => plan.date === currentWeek.getTime())?._id;
+      plans?.find((plan) => isToday(plan.date))?._id ||
+      plans?.find((plan) => plan.date === currentWeek.getTime())?._id;
 
     return mealPlannerState$.selectedPlanId.set(id);
   });

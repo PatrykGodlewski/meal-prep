@@ -9,7 +9,7 @@ import { useTranslations } from "next-intl";
 import Link from "next/link";
 
 type Props = {
-  preloadedPlans: Preloaded<typeof api.mealPlans.getMealPlans>;
+  preloadedPlans: Preloaded<typeof api.plans.getMealPlans>;
 };
 
 export function PlanList({ preloadedPlans }: Props) {

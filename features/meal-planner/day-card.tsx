@@ -18,7 +18,7 @@ import { useMealPlanner } from "./store";
 const DATE_FORMAT_DISPLAY_CARD = "MMM dd";
 
 interface PlanCardProps {
-  plan?: FunctionReturnType<typeof api.mealPlans.getWeeklyMealPlan>[number];
+  plan?: FunctionReturnType<typeof api.plans.getWeeklyMealPlan>[number];
 }
 
 export function PlanCard({ plan }: PlanCardProps) {
@@ -27,7 +27,7 @@ export function PlanCard({ plan }: PlanCardProps) {
   const tMeal = useTranslations("meal");
   const dateLocale = useDateLocale();
 
-  const summarizedCalories = plan?.plannedMeals.reduce(
+  const summarizedCalories = plan?.planMeals.reduce(
     (previousValue, currentValue) => {
       const calories = currentValue.meal?.calories ?? 0;
       return previousValue + calories;
@@ -105,7 +105,7 @@ export function PlanCard({ plan }: PlanCardProps) {
         <div className="flex justify-between items-end gap-4">
           <ul className="text-xs group flex flex-wrap justify-between gap-4 flex-1">
             <For
-              each={plan.plannedMeals}
+              each={plan.planMeals}
               empty={
                 <li className="text-center text-gray-400 italic pt-4">
                   {t("noMeals")}
