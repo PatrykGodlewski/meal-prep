@@ -15,7 +15,7 @@ import type * as http from "../http.js";
 import type * as ingredients_mutations from "../ingredients/mutations.js";
 import type * as ingredients_queries from "../ingredients/queries.js";
 import type * as ingredients_validators from "../ingredients/validators.js";
-import type * as mealPlans from "../mealPlans.js";
+import type * as plans from "../plans.js";
 import type * as meals_helpers from "../meals/helpers.js";
 import type * as meals_mutations from "../meals/mutations.js";
 import type * as meals_queries from "../meals/queries.js";
@@ -47,7 +47,7 @@ declare const fullApi: ApiFromModules<{
   "ingredients/mutations": typeof ingredients_mutations;
   "ingredients/queries": typeof ingredients_queries;
   "ingredients/validators": typeof ingredients_validators;
-  mealPlans: typeof mealPlans;
+  plans: typeof plans;
   "meals/helpers": typeof meals_helpers;
   "meals/mutations": typeof meals_mutations;
   "meals/queries": typeof meals_queries;

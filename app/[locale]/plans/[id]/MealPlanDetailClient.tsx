@@ -16,7 +16,7 @@ import { useState } from "react";
 import { ModalMeals } from "./ModalMeals";
 
 interface Props {
-  preloadedMealPlan: Preloaded<typeof api.mealPlans.getMealPlan>;
+  preloadedMealPlan: Preloaded<typeof api.plans.getMealPlan>;
 }
 
 export function MealPlanDetail({ preloadedMealPlan }: Props) {
@@ -37,7 +37,7 @@ export function MealPlanDetail({ preloadedMealPlan }: Props) {
   const plannedMealsByMealCategory = new Map(
     MEAL_CATEGORIES.map((category) => [
       category,
-      mealPlan.plannedMeals.find(
+      mealPlan.planMeals.find(
         (plannedMeal) =>
           plannedMeal?.category?.toLowerCase() === category.toLowerCase(),
       ),
@@ -70,10 +70,10 @@ export function MealPlanDetail({ preloadedMealPlan }: Props) {
 
 interface MealCardProps {
   plannedMeal?: NonNullable<
-    FunctionReturnType<typeof api.mealPlans.getMealPlan>
-  >["plannedMeals"][number];
+    FunctionReturnType<typeof api.plans.getMealPlan>
+  >["planMeals"][number];
   category: (typeof MEAL_CATEGORIES)[number];
-  plan: NonNullable<FunctionReturnType<typeof api.mealPlans.getMealPlan>>;
+  plan: NonNullable<FunctionReturnType<typeof api.plans.getMealPlan>>;
 }
 
 function MealCard({ plannedMeal, category, plan }: MealCardProps) {
@@ -82,7 +82,7 @@ function MealCard({ plannedMeal, category, plan }: MealCardProps) {
   const tMeal = useTranslations("meal");
 
   const mealPlanMutation = useConvexMutation(
-    api.mealPlans.updatePlannedMealByCategory,
+    api.plans.updatePlannedMealByCategory,
   );
 
   const handleMealSelected = async (mealId: Id<"meals">) => {

@@ -113,7 +113,7 @@ export const getShoppingList = authQuery({
 
 export const generateShoppingList = authMutation({
   args: {
-    mealPlanId: v.id("mealPlans"),
+    mealPlanId: v.id("plans"),
   },
   handler: async (ctx, args) => {
     return await ShoppingList.generateShoppingList(ctx, args);

@@ -3,7 +3,7 @@ import type { AuthMutationCtx } from "../custom/mutation";
 
 export async function generateShoppingList(
   ctx: AuthMutationCtx,
-  { mealPlanId }: { mealPlanId: Id<"mealPlans"> },
+  { mealPlanId }: { mealPlanId: Id<"plans"> },
 ) {
   try {
     const userId = ctx.user.id;
@@ -20,7 +20,7 @@ export async function generateShoppingList(
     const mealPlanDate = mealPlan.date;
 
     const plannedMeals = await ctx.db
-      .query("plannedMeals")
+      .query("planMeals")
       .withIndex("by_plan_and_category", (q) => q.eq("mealPlanId", mealPlanId))
       .collect();
 
@@ -97,7 +97,7 @@ export async function upsertShoppingList(
   {
     mealPlanId,
     mealPlanDate,
-  }: { mealPlanId: Id<"mealPlans">; mealPlanDate: number },
+  }: { mealPlanId: Id<"plans">; mealPlanDate: number },
 ) {
   const existingList = await ctx.db
     .query("shoppingLists")

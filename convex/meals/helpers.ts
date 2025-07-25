@@ -27,7 +27,7 @@ export const handleCategoryChanges = internalMutation({
     }
 
     const currentMealPlannedMeals = await ctx.db
-      .query("plannedMeals")
+      .query("planMeals")
       .withIndex("by_meal", (q) => q.eq("mealId", mealId))
       .collect();
 

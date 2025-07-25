@@ -90,8 +90,7 @@ export const mealSchema = z.object({
   calories: z.number().optional(),
   servings: z.number().optional(),
   category: z.enum(MEAL_CATEGORIES).optional(),
-  // TODO: should be required
-  categories: z.array(z.enum(MEAL_CATEGORIES)).optional(),
+  categories: z.array(z.enum(MEAL_CATEGORIES)),
   imageUrl: z.string().optional(),
   isPublic: z.boolean().default(false),
   createdBy: zid("users"),
@@ -112,7 +111,7 @@ export const mealPlanSchema = z.object({
 export const mealPlanValidator = zodOutputToConvex(mealPlanSchema);
 
 export const plannedMealSchema = z.object({
-  mealPlanId: zid("mealPlans"),
+  mealPlanId: zid("plans"),
   mealId: zid("meals"),
   servingAmount: z.number().optional(),
   category: z.enum(MEAL_CATEGORIES).optional(),
@@ -124,7 +123,7 @@ const plannedMealValidator = zodOutputToConvex(plannedMealSchema);
 
 export const shoppingListValidator = v.object({
   userId: v.id("users"),
-  mealPlanId: v.id("mealPlans"),
+  mealPlanId: v.id("plans"),
   date: v.number(),
   createdAt: v.number(),
   updatedAt: v.number(),
@@ -158,14 +157,12 @@ export default defineSchema({
     .index("by_meal", ["mealId"])
     .index("by_ingredient", ["ingredientId"]),
 
-  // TODO: change to plans
-  mealPlans: defineTable(mealPlanValidator).index("by_user_and_date", [
+  plans: defineTable(mealPlanValidator).index("by_user_and_date", [
     "userId",
     "date",
   ]),
 
-  // TODO: change to mealPlanJoin
-  plannedMeals: defineTable(plannedMealValidator)
+  planMeals: defineTable(plannedMealValidator)
     .index("by_plan_and_category", ["mealPlanId", "category"])
     .index("by_meal", ["mealId"]),
 
