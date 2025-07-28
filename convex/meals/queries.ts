@@ -1,5 +1,6 @@
 import { paginationOptsValidator } from "convex/server";
 import { v } from "convex/values";
+import { filter } from "convex-helpers/server/filter";
 import { authQuery } from "../custom/query";
 import { MEAL_CATEGORIES } from "../schema";
 
@@ -22,27 +23,37 @@ export const getMeals = authQuery({
     { paginationOpts, search = "", filter: categoryFilter },
   ) => {
     const trimmedSearch = search.trim();
-    let query;
+    const isSearching = !!trimmedSearch;
+    const isFiltering = !!categoryFilter;
+    const pagination = paginationOpts ?? { numItems: 10, cursor: null };
 
-    if (trimmedSearch) {
-      query = ctx.db.query("meals").withSearchIndex("search_name", (q) => {
-        let builder = q.search("name", trimmedSearch);
-        if (categoryFilter) {
-          builder = builder.eq("categories", [categoryFilter]);
-        }
-        return builder;
-      });
-    } else if (categoryFilter) {
-      query = ctx.db
-        .query("meals")
-        .withIndex("by_categories", (q) =>
-          q.eq("categories", [categoryFilter]),
-        );
-    } else {
-      query = ctx.db.query("meals");
+    if (isSearching && isFiltering) {
+      return await filter(ctx.db.query("meals"), (meal) =>
+        categoryFilter ? !!meal.categories?.includes(categoryFilter) : true,
+      )
+        .withSearchIndex("search_name", (q) => {
+          return q.search("name", trimmedSearch);
+        })
+        .paginate(pagination);
     }
 
-    return await query.paginate(paginationOpts);
+    if (isSearching) {
+      return await ctx.db
+        .query("meals")
+        .withSearchIndex("search_name", (q) => {
+          return q.search("name", trimmedSearch);
+        })
+        .paginate(pagination);
+    }
+
+    if (isFiltering) {
+      return await filter(
+        ctx.db.query("meals"),
+        (meal) => !!meal.categories?.includes(categoryFilter),
+      ).paginate(pagination);
+    }
+
+    return await ctx.db.query("meals").paginate(pagination);
   },
 });
 
