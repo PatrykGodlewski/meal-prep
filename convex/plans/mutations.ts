@@ -1,118 +1,11 @@
 import { v } from "convex/values";
 import { addDays } from "date-fns";
-import type { Id } from "./_generated/dataModel";
-import { authMutation } from "./custom/mutation";
-import { authQuery } from "./custom/query";
-import * as ShoppingList from "./model/shoppingList";
-import { MEAL_CATEGORIES } from "./schema";
+import type { Id } from "../_generated/dataModel";
+import { authMutation } from "../custom/mutation";
+import * as ShoppingList from "../model/shoppingList";
+import { MEAL_CATEGORIES } from "../schema";
 
-export const getMealPlans = authQuery({
-  handler: async (ctx) => {
-    const plans = await ctx.db
-      .query("plans")
-      .withIndex("by_user_and_date", (q) => q.eq("userId", ctx.user.id))
-      .collect();
-
-    return plans;
-  },
-});
-
-export const getMealPlan = authQuery({
-  args: { mealPlanId: v.id("plans") },
-  handler: async (ctx, { mealPlanId: planId }) => {
-    const mealPlan = await ctx.db.get(planId);
-
-    if (!mealPlan) {
-      return null;
-    }
-
-    const planMeals = await ctx.db
-      .query("planMeals")
-      // TODO: use both category and meal pland id if possible and necessary
-      .withIndex("by_plan_and_category", (q) => q.eq("planId", planId))
-      .collect();
-
-    const mealIds = planMeals.map((pm) => pm.mealId);
-
-    const meals = (
-      await Promise.all(mealIds.map((id) => ctx.db.get(id)))
-    ).filter((meal): meal is NonNullable<typeof meal> => meal !== null);
-
-    const mealMap = new Map(meals.map((meal) => [meal._id, meal]));
-
-    const planMealsWithDetails = planMeals.map((pm) => ({
-      ...pm,
-      meal: mealMap.get(pm.mealId) || null,
-    }));
-
-    return {
-      mealPlan,
-      planMeals: planMealsWithDetails,
-    };
-  },
-});
-
-export const getWeeklyMealPlan = authQuery({
-  args: { weekStart: v.number() },
-  handler: async (ctx, { weekStart }) => {
-    const startOfWeekTimestamp = weekStart;
-    const endOfWeekTimestamp = addDays(weekStart, 6).getTime();
-
-    const weeklyPlans = await ctx.db
-      .query("plans")
-      .withIndex("by_user_and_date", (q) =>
-        q
-          .eq("userId", ctx.user.id)
-          .gte("date", startOfWeekTimestamp)
-          .lte("date", endOfWeekTimestamp),
-      )
-      .collect();
-
-    const results = await Promise.all(
-      weeklyPlans.map(async (mealPlan) => {
-        // Fetch planMeals for this mealPlan
-        const planMeals = await ctx.db
-          .query("planMeals")
-          // TODO: use both category and meal pland id if possible and necessary
-          .withIndex("by_plan_and_category", (q) =>
-            q.eq("planId", mealPlan._id),
-          )
-          .collect();
-
-        // Fetch all mealIds for this mealPlan
-        const mealIds = planMeals.map((pm) => pm.mealId);
-
-        // Fetch all meals in one go (batch)
-        const meals = await Promise.all(mealIds.map((id) => ctx.db.get(id)));
-
-        // Attach meal data to each planMeal
-        const planMealsWithMeal = planMeals.map((pm) => ({
-          ...pm,
-          meal: meals.find((m) => m && m._id === pm.mealId) || null,
-        }));
-
-        return {
-          ...mealPlan,
-          planMeals: planMealsWithMeal.sort((a, b) => {
-            const indexA = a.category ? MEAL_CATEGORIES.indexOf(a.category) : 0;
-            const indexB = b.category ? MEAL_CATEGORIES.indexOf(b.category) : 0;
-
-            if (indexA === -1 || indexB === -1) {
-              return 0;
-            }
-
-            return indexA - indexB;
-          }),
-        };
-      }),
-    );
-
-    // 5. Return the combined data
-    return results;
-  },
-});
-
-export const generateMealPlan = authMutation({
+export const generatePlan = authMutation({
   args: { weekStart: v.number() },
   handler: async (ctx, { weekStart }) => {
     const weekDates = Array.from({ length: 7 }, (_, i) =>
@@ -338,26 +231,49 @@ export const updatePlannedMealByCategory = authMutation({
   },
 });
 
-export const lockMealPlan = authMutation({
+export const lockPlan = authMutation({
   args: {
-    mealPlanId: v.id("plans"),
+    planId: v.id("plans"),
   },
-  handler: async (ctx, { mealPlanId }) => {
-    const mealPlan = await ctx.db.get(mealPlanId);
+  handler: async (ctx, { planId }) => {
+    const plan = await ctx.db.get(planId);
 
-    if (!mealPlan) {
+    if (!plan) {
       throw new Error("Meal plan not found.");
     }
 
-    if (mealPlan.userId !== ctx.user.id) {
+    if (plan.userId !== ctx.user.id) {
       throw new Error("You are not authorized to lock this meal plan.");
     }
 
-    await ctx.db.patch(mealPlanId, {
-      locked: !mealPlan.locked,
+    await ctx.db.patch(planId, {
+      locked: !plan.locked,
       updatedAt: Date.now(),
     });
 
-    return { success: true, locked: !mealPlan.locked };
+    return { success: true, locked: !plan.locked };
+  },
+});
+
+export const deleteMealFromPlan = authMutation({
+  args: { planId: v.id("plans"), planMealId: v.id("planMeals") },
+  handler: async (ctx, { planId, planMealId }) => {
+    const plan = await ctx.db.get(planId);
+
+    if (!plan) {
+      throw new Error("Plan not found");
+    }
+
+    const planMealToDelete = await ctx.db.get(planMealId);
+
+    if (plan.userId !== ctx.user.id) {
+      throw new Error("Unauthorized to modify this plan");
+    }
+
+    if (!planMealToDelete) {
+      throw new Error("Meal not found in this plan");
+    }
+
+    await ctx.db.delete(planMealToDelete._id);
   },
 });

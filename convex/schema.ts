@@ -143,7 +143,12 @@ export default defineSchema({
 
   profiles: defineTable(profileValidator).index("by_user", ["userId"]),
 
-  ingredients: defineTable(ingredientValidator).index("by_name", ["name"]),
+  ingredients: defineTable(ingredientValidator)
+    .index("by_name", ["name"])
+    .searchIndex("search_name", {
+      searchField: "name",
+      filterFields: ["category"],
+    }),
 
   meals: defineTable(mealValidator)
     .index("by_author", ["createdBy"])
@@ -164,7 +169,7 @@ export default defineSchema({
 
   planMeals: defineTable(planMealsValidator)
     .index("by_plan_and_category", ["planId", "category"])
-    .index("by_meal", ["mealId"]),
+    .index("by_meal_and_plan", ["mealId", "planId"]),
 
   shoppingLists: defineTable(shoppingListValidator)
     .index("by_user_and_date", ["userId", "date"]) // New index for date range queries

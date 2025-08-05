@@ -2,7 +2,7 @@
 import { useConvexMutation } from "@convex-dev/react-query";
 import { type Preloaded, usePreloadedQuery } from "convex/react";
 import type { FunctionReturnType } from "convex/server";
-import { UtensilsCrossed } from "lucide-react";
+import { UtensilsCrossed, XIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
@@ -16,14 +16,14 @@ import { cn } from "@/lib/utils";
 import { ModalMeals } from "./ModalMeals";
 
 interface Props {
-  preloadedMealPlan: Preloaded<typeof api.plans.getMealPlan>;
+  preloadedPlan: Preloaded<typeof api.plans.queries.getPlan>;
 }
 
-export function MealPlanDetail({ preloadedMealPlan }: Props) {
-  const mealPlan = usePreloadedQuery(preloadedMealPlan);
+export function MealPlanDetail({ preloadedPlan }: Props) {
+  const plan = usePreloadedQuery(preloadedPlan);
   const t = useTranslations("mealPlanDetail");
 
-  if (!mealPlan) {
+  if (!plan) {
     return (
       <p className="text-center text-gray-500 dark:text-gray-400">
         {t("noMealPlanDetails")}
@@ -37,7 +37,7 @@ export function MealPlanDetail({ preloadedMealPlan }: Props) {
   const plannedMealsByMealCategory = new Map(
     MEAL_CATEGORIES.map((category) => [
       category,
-      mealPlan.planMeals.find(
+      plan.planMeals.find(
         (plannedMeal) =>
           plannedMeal?.category?.toLowerCase() === category.toLowerCase(),
       ),
@@ -60,7 +60,7 @@ export function MealPlanDetail({ preloadedMealPlan }: Props) {
             key={category}
             category={category}
             plannedMeal={plannedMeal}
-            plan={mealPlan}
+            plan={plan}
           />
         )}
       </For>
@@ -70,10 +70,10 @@ export function MealPlanDetail({ preloadedMealPlan }: Props) {
 
 interface MealCardProps {
   plannedMeal?: NonNullable<
-    FunctionReturnType<typeof api.plans.getMealPlan>
+    FunctionReturnType<typeof api.plans.queries.getPlan>
   >["planMeals"][number];
   category: (typeof MEAL_CATEGORIES)[number];
-  plan: NonNullable<FunctionReturnType<typeof api.plans.getMealPlan>>;
+  plan: NonNullable<FunctionReturnType<typeof api.plans.queries.getPlan>>;
 }
 
 function MealCard({ plannedMeal, category, plan }: MealCardProps) {
@@ -81,12 +81,24 @@ function MealCard({ plannedMeal, category, plan }: MealCardProps) {
   const t = useTranslations("mealPlanDetail");
   const tMeal = useTranslations("meal");
 
-  const mealPlanMutation = useConvexMutation(
-    api.plans.updatePlannedMealByCategory,
+  const deleteMealFromPlan = useConvexMutation(
+    api.plans.mutations.deleteMealFromPlan,
   );
 
+  const updatePlannedMealByCategory = useConvexMutation(
+    api.plans.mutations.updatePlannedMealByCategory,
+  );
+
+  const handleDeleteMeal = async () => {
+    if (!plannedMeal?._id) return;
+    await deleteMealFromPlan({
+      planId: plan.mealPlan._id,
+      planMealId: plannedMeal._id,
+    });
+  };
+
   const handleMealSelected = async (mealId: Id<"meals">) => {
-    await mealPlanMutation({
+    await updatePlannedMealByCategory({
       date: plan.mealPlan.date,
       category: category,
       newMealId: mealId,
@@ -97,11 +109,21 @@ function MealCard({ plannedMeal, category, plan }: MealCardProps) {
 
   return (
     <div
-      className={cn("flex flex-col gap-4 rounded-md border p-4 shadow-sm ", {
-        "": isMeal,
-        "border-2 border-dashed text-neutral-500": !isMeal,
-      })}
+      className={cn(
+        "relative flex flex-col gap-4 rounded-md border p-4 shadow-sm ",
+        {
+          "": isMeal,
+          "border-2 border-dashed text-neutral-500": !isMeal,
+        },
+      )}
     >
+      <Button
+        variant={"destructive_ghost"}
+        onClick={handleDeleteMeal}
+        className=" absolute top-2 right-2"
+      >
+        <XIcon />
+      </Button>
       <ModalMeals
         isOpen={isModalOpen}
         onOpenChange={setIsModalOpen}

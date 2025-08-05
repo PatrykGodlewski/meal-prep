@@ -87,7 +87,7 @@ export const useMealPlanner = () => {
     isLoading: isMealPlanLoading,
     error: mealPlanError,
   } = useQuery(
-    convexQuery(api.plans.getWeeklyMealPlan, {
+    convexQuery(api.plans.queries.getWeeklyPlan, {
       weekStart: currentWeek.getTime(),
     }),
   );

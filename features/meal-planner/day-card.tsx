@@ -17,7 +17,7 @@ import { useMealPlanner } from "./store";
 const DATE_FORMAT_DISPLAY_CARD = "MMM dd";
 
 interface PlanCardProps {
-  plan?: FunctionReturnType<typeof api.plans.getWeeklyMealPlan>[number];
+  plan?: FunctionReturnType<typeof api.plans.queries.getWeeklyPlan>[number];
 }
 
 export function PlanCard({ plan }: PlanCardProps) {

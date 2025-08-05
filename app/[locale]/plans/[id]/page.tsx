@@ -15,7 +15,7 @@ export default async function PlanDetailPage({ params }: PlanDetailPageProps) {
   const planId = (await params).id;
 
   const preloadedMealPlan = await preloadQuery(
-    api.plans.getMealPlan,
+    api.plans.queries.getPlan,
     {
       mealPlanId: planId,
     },
@@ -32,7 +32,7 @@ export default async function PlanDetailPage({ params }: PlanDetailPageProps) {
     <div className="container mx-auto space-y-4 px-4 py-8">
       <BackButton />
       <h1 className="font-bold text-3xl">{t("header")}</h1>
-      <MealPlanDetail preloadedMealPlan={preloadedMealPlan} />
+      <MealPlanDetail preloadedPlan={preloadedMealPlan} />
     </div>
   );
 }

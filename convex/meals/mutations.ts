@@ -106,7 +106,7 @@ export const editMeal = authMutation({
       // TODO should update items in shopping list of affected ingredients in this meal, currently it is regenerating whole shopping list if meal was edited
       const plannedMealsEntries = await ctx.db
         .query("planMeals")
-        .withIndex("by_meal", (q) => q.eq("mealId", args.mealId))
+        .withIndex("by_meal_and_plan", (q) => q.eq("mealId", args.mealId))
         .collect();
 
       for (const { planId } of plannedMealsEntries) {

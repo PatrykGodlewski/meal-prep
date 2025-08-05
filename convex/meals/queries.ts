@@ -1,6 +1,7 @@
 import { paginationOptsValidator } from "convex/server";
 import { v } from "convex/values";
 import { filter } from "convex-helpers/server/filter";
+import type { Doc } from "../_generated/dataModel";
 import { authQuery } from "../custom/query";
 import { MEAL_CATEGORIES } from "../schema";
 
@@ -25,35 +26,89 @@ export const getMeals = authQuery({
     const trimmedSearch = search.trim();
     const isSearching = !!trimmedSearch;
     const isFiltering = !!categoryFilter;
-    const pagination = paginationOpts ?? { numItems: 10, cursor: null };
+    const { numItems = 10, cursor = null } = paginationOpts ?? {};
 
-    if (isSearching && isFiltering) {
-      return await filter(ctx.db.query("meals"), (meal) =>
+    if (!isSearching) {
+      if (isFiltering) {
+        return filter(ctx.db.query("meals"), (meal) =>
+          categoryFilter ? !!meal.categories?.includes(categoryFilter) : true,
+        ).paginate({ numItems, cursor });
+      }
+      return ctx.db.query("meals").paginate({ numItems, cursor });
+    }
+
+    const [mealsByName, matchingIngredients] = await Promise.all([
+      filter(ctx.db.query("meals"), (meal) =>
         categoryFilter ? !!meal.categories?.includes(categoryFilter) : true,
       )
-        .withSearchIndex("search_name", (q) => {
-          return q.search("name", trimmedSearch);
-        })
-        .paginate(pagination);
+        .withSearchIndex("search_name", (q) => q.search("name", trimmedSearch))
+        .collect(),
+
+      ctx.db
+        .query("ingredients")
+        .withSearchIndex("search_name", (q) => q.search("name", trimmedSearch))
+        .collect(),
+    ]);
+
+    let mealsByIngredient: Doc<"meals">[] = [];
+
+    if (matchingIngredients.length > 0) {
+      const ingredientIds = matchingIngredients.map((i) => i._id);
+
+      const mealIngredientsResults = await Promise.all(
+        ingredientIds.map((id) =>
+          ctx.db
+            .query("mealIngredients")
+            .withIndex("by_ingredient", (q) => q.eq("ingredientId", id))
+            .collect(),
+        ),
+      );
+
+      const mealIngredients = mealIngredientsResults.flat();
+      const mealIds = [...new Set(mealIngredients.map((mi) => mi.mealId))];
+
+      if (mealIds.length > 0) {
+        mealsByIngredient = (
+          await Promise.all(mealIds.map((id) => ctx.db.get(id)))
+        ).filter(Boolean) as Doc<"meals">[];
+
+        if (isFiltering) {
+          mealsByIngredient = mealsByIngredient.filter((meal) =>
+            meal.categories?.includes(categoryFilter),
+          );
+        }
+      }
     }
 
-    if (isSearching) {
-      return await ctx.db
-        .query("meals")
-        .withSearchIndex("search_name", (q) => {
-          return q.search("name", trimmedSearch);
-        })
-        .paginate(pagination);
+    const combinedResults = [
+      ...mealsByName,
+      ...mealsByIngredient.filter(
+        (m) => !mealsByName.some((meal) => meal._id === m._id),
+      ),
+    ];
+
+    let startIndex = 0;
+
+    if (cursor) {
+      startIndex = combinedResults.findIndex((m) => m._id === cursor) + 1;
+      if (startIndex === 0) startIndex = 0;
     }
 
-    if (isFiltering) {
-      return await filter(
-        ctx.db.query("meals"),
-        (meal) => !!meal.categories?.includes(categoryFilter),
-      ).paginate(pagination);
-    }
+    const paginatedResults = combinedResults.slice(
+      startIndex,
+      startIndex + numItems,
+    );
 
-    return await ctx.db.query("meals").paginate(pagination);
+    const nextCursor =
+      paginatedResults.length === numItems
+        ? paginatedResults[paginatedResults.length - 1]._id
+        : null;
+
+    return {
+      page: paginatedResults,
+      isDone: !nextCursor,
+      continueCursor: nextCursor,
+    };
   },
 });
 
