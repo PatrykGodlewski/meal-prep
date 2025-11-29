@@ -6,11 +6,6 @@ import { MEAL_CATEGORIES } from "../schema";
 
 /**
  * Get a paginated list of meals, with optional search and filtering.
- *
- * @param {object} paginationOpts - The pagination options.
- * @param {string} [search] - The search query.
- * @param {string} [filter] - The category to filter by.
- * @returns {Promise<object>} A paginated list of meals.
  */
 export const getMeals = authQuery({
   args: {
@@ -27,32 +22,36 @@ export const getMeals = authQuery({
     const isFiltering = !!categoryFilter;
     const pagination = paginationOpts ?? { numItems: 10, cursor: null };
 
-    if (isSearching && isFiltering) {
-      return await filter(ctx.db.query("meals"), (meal) =>
-        categoryFilter ? !!meal.categories?.includes(categoryFilter) : true,
-      )
-        .withSearchIndex("search_name", (q) => {
-          return q.search("name", trimmedSearch);
-        })
-        .paginate(pagination);
-    }
-
+    // CASE 1: Searching (with or without Filter)
+    // We use the 'searchContent' field to find matches in Name OR Ingredients instantly.
     if (isSearching) {
-      return await ctx.db
+      const searchQ = ctx.db
         .query("meals")
         .withSearchIndex("search_name", (q) => {
-          return q.search("name", trimmedSearch);
-        })
-        .paginate(pagination);
+          // This searches the DENORMALIZED field (Name + Ingredients)
+          return q.search("searchContent", trimmedSearch);
+        });
+
+      // If we also need to filter by category, we wrap the search query
+      // with the filter helper. This avoids TypeScript 'any' errors.
+      if (isFiltering) {
+        return await filter(searchQ, (meal) =>
+          meal.categories.includes(categoryFilter),
+        ).paginate(pagination);
+      }
+
+      return await searchQ.paginate(pagination);
     }
 
+    // CASE 2: Filtering Only (No Text Search)
+    // We use the helper here to maintain type safety without casting to 'any'
     if (isFiltering) {
-      return await filter(
-        ctx.db.query("meals"),
-        (meal) => !!meal.categories?.includes(categoryFilter),
+      return await filter(ctx.db.query("meals"), (meal) =>
+        meal.categories.includes(categoryFilter),
       ).paginate(pagination);
     }
 
+    // CASE 3: Fetch All
     return await ctx.db.query("meals").paginate(pagination);
   },
 });

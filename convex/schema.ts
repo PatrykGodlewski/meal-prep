@@ -93,6 +93,7 @@ export const mealSchema = z.object({
   categories: z.array(z.enum(MEAL_CATEGORIES)),
   imageUrl: z.string().optional(),
   isPublic: z.boolean().default(false),
+  searchContent: z.string().optional(),
   createdBy: zid("users"),
   createdAt: z.number(),
   updatedAt: z.number(),
@@ -149,7 +150,7 @@ export default defineSchema({
     .index("by_author", ["createdBy"])
     .index("by_categories", ["categories"])
     .searchIndex("search_name", {
-      searchField: "name",
+      searchField: "searchContent",
       filterFields: ["categories"],
     }),
 

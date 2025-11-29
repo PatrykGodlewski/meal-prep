@@ -7,14 +7,6 @@ import {
   mutationMealEditValidator,
 } from "./validators";
 
-/**
- * Adds a new meal to the database.
- *
- * @param {object} args - The arguments.
- * @param {object} args.mealData - The meal data.
- * @param {object[]} args.ingredients - The meal ingredients.
- * @returns {Promise<object>} An object with the success status and the new meal's ID.
- */
 export const addMeal = authMutation({
   args: mutationMealAddValidator,
   handler: async (ctx, args) => {
@@ -24,8 +16,12 @@ export const addMeal = authMutation({
 
       const { ingredients, ...mealData } = args;
 
+      const ingredientNames = ingredients.map((i) => i.name).join(" ");
+      const searchContent = `${mealData.name} ${ingredientNames}`;
+
       const mealId = await ctx.db.insert("meals", {
         ...mealData,
+        searchContent,
         createdBy: userId,
         createdAt: now,
         updatedAt: now,
@@ -35,9 +31,7 @@ export const addMeal = authMutation({
         ingredients.map(async (ingredient) => {
           const finalIngredientId = await ctx.runMutation(
             internal.ingredients.mutations.upsertIngredient,
-            {
-              ingredient,
-            },
+            { ingredient },
           );
 
           return ctx.db.insert("mealIngredients", {
@@ -55,40 +49,34 @@ export const addMeal = authMutation({
       return { success: true, mealId };
     } catch (error) {
       console.error(error);
-      if (error instanceof Error) {
-        return { success: false, error: error.message };
-      }
-      return { success: false, error: "An unknown error occurred." };
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : "Unknown error",
+      };
     }
   },
 });
 
-/**
- * Edits an existing meal in the database.
- *
- * @param {object} args - The arguments.
- * @param {string} args.mealId - The ID of the meal to edit.
- * @param {object} args.newMeal - The new meal data.
- * @param {object[]} args.ingredients - The new meal ingredients.
- * @returns {Promise<object>} An object with the success status.
- */
 export const editMeal = authMutation({
   args: mutationMealEditValidator,
   handler: async (ctx, args) => {
     try {
       const meal = await ctx.db.get(args.mealId);
-      if (!meal) {
-        throw new Error("Meal not found");
-      }
-      if (meal.createdBy !== ctx.user.id) {
-        throw new Error("You are not authorized to edit this meal");
-      }
+      if (!meal) throw new Error("Meal not found");
+      if (meal.createdBy !== ctx.user.id) throw new Error("Unauthorized");
 
       const now = Date.now();
       const { ingredients, mealId, ...newMeal } = args;
 
+      const finalName = newMeal.name ?? meal.name;
+
+      const ingredientNames = ingredients.map((i) => i.name).join(" ");
+
+      const searchContent = `${finalName} ${ingredientNames}`;
+
       await ctx.db.patch(args.mealId, {
         ...newMeal,
+        searchContent,
         updatedAt: now,
       });
 
@@ -103,50 +91,41 @@ export const editMeal = authMutation({
         ingredients,
       });
 
-      // TODO should update items in shopping list of affected ingredients in this meal, currently it is regenerating whole shopping list if meal was edited
       const plannedMealsEntries = await ctx.db
         .query("planMeals")
         .withIndex("by_meal", (q) => q.eq("mealId", args.mealId))
         .collect();
 
-      for (const { planId } of plannedMealsEntries) {
-        await ShoppingList.generateShoppingList(ctx, { planId });
-      }
+      await Promise.all(
+        plannedMealsEntries.map(({ planId }) =>
+          ShoppingList.generateShoppingList(ctx, { planId }),
+        ),
+      );
 
       return { success: true };
     } catch (error) {
       console.error(error);
-      if (error instanceof Error) {
-        return { success: false, error: error.message };
-      }
-      return { success: false, error: "An unknown error occurred." };
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : "Unknown error",
+      };
     }
   },
 });
 
-/**
- * Deletes a meal from the database.
- *
- * @param {object} args - The arguments.
- * @param {string} args.mealId - The ID of the meal to delete.
- * @returns {Promise<object>} An object with the success status.
- */
 export const deleteMeal = authMutation({
   args: { mealId: v.id("meals") },
   handler: async (ctx, { mealId }) => {
     try {
       const meal = await ctx.db.get(mealId);
-      if (!meal) {
-        throw new Error("Meal not found");
-      }
-      if (meal.createdBy !== ctx.user.id) {
-        throw new Error("You are not authorized to delete this meal");
-      }
+      if (!meal) throw new Error("Meal not found");
+      if (meal.createdBy !== ctx.user.id) throw new Error("Unauthorized");
 
       const mealIngredients = await ctx.db
         .query("mealIngredients")
         .withIndex("by_meal", (q) => q.eq("mealId", mealId))
         .collect();
+
       await Promise.all(mealIngredients.map((mi) => ctx.db.delete(mi._id)));
 
       await ctx.db.delete(mealId);
@@ -154,10 +133,10 @@ export const deleteMeal = authMutation({
       return { success: true };
     } catch (error) {
       console.error(error);
-      if (error instanceof Error) {
-        return { success: false, error: error.message };
-      }
-      return { success: false, error: "An unknown error occurred." };
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : "Unknown error",
+      };
     }
   },
 });
