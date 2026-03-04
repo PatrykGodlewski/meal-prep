@@ -6,20 +6,23 @@ import {
 import createMiddleware from "next-intl/middleware";
 import { routing } from "./i18n/routing";
 
-const isSignInPage = createRouteMatcher([
+const isAuthPage = createRouteMatcher([
   "/sign-in",
   "/en/sign-in",
   "/pl/sign-in",
+  "/forgot-password",
+  "/en/forgot-password",
+  "/pl/forgot-password",
 ]);
 // const isProtectedRoute = createRouteMatcher(["/"]);
 
 const intlMiddleware = createMiddleware(routing);
 
 export default convexAuthNextjsMiddleware(async (request, { convexAuth }) => {
-  if (isSignInPage(request) && (await convexAuth.isAuthenticated())) {
+  if (isAuthPage(request) && (await convexAuth.isAuthenticated())) {
     return nextjsMiddlewareRedirect(request, "/");
   }
-  if (!isSignInPage(request) && !(await convexAuth.isAuthenticated())) {
+  if (!isAuthPage(request) && !(await convexAuth.isAuthenticated())) {
     return nextjsMiddlewareRedirect(request, "/sign-in");
   }
 

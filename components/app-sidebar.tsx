@@ -1,4 +1,5 @@
 "use client";
+import { useQuery } from "convex/react";
 import { useConvexAuth } from "convex/react";
 import {
   CalendarCog,
@@ -20,11 +21,16 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
+import { api } from "@/convex/_generated/api";
 import { NavGuest } from "./nav-guest";
 import { NavList } from "./nav-list";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { isAuthenticated } = useConvexAuth();
+  const currentUser = useQuery(
+    api.users.queries.getCurrentUser,
+    isAuthenticated ? {} : "skip",
+  );
 
   return (
     <Sidebar collapsible="offcanvas" {...props}>
@@ -51,8 +57,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         {!!isAuthenticated && (
           <NavUser
             user={{
-              name: "User missing",
-              email: "Email missing",
+              name: currentUser?.name ?? "User",
+              email: currentUser?.email ?? "",
+              avatar: currentUser?.image,
             }}
           />
         )}

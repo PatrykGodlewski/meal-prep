@@ -74,8 +74,16 @@ export const getMeal = authQuery({
       .withIndex("by_meal", (q) => q.eq("mealId", mealId))
       .collect();
 
+    const author = meal.createdBy
+      ? await ctx.db.get(meal.createdBy)
+      : null;
+    const authorDisplayName = author
+      ? author.name ?? author.email ?? "Unknown"
+      : "Unknown";
+
     const mealWithIngredients = {
       ...meal,
+      authorDisplayName,
       mealIngredients: await Promise.all(
         mealIngredients.map(async (mi) => {
           const ingredient = mi.ingredientId

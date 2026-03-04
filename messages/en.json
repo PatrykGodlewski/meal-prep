@@ -210,7 +210,17 @@
     "alreadyHaveAccount": "Already have an account?",
     "signUpInstead": "Sign up instead",
     "signInInstead": "Sign in instead",
-    "errorSigningIn": "Error signing in: {error}"
+    "errorSigningIn": "Error signing in: {error}",
+    "forgotPassword": "Forgot password?",
+    "forgotPasswordDescription": "Enter your email and we'll send you a code to reset your password.",
+    "resetPassword": "Reset password",
+    "resetPasswordDescription": "Enter the code from your email and your new password.",
+    "sendResetCode": "Send code",
+    "resetCodePlaceholder": "Reset code",
+    "newPasswordPlaceholder": "New password",
+    "resetPasswordButton": "Reset password",
+    "backToSignIn": "Back to sign in",
+    "cancel": "Cancel"
   },
   "layout": {
     "description": "The fastest way to plan meals for a week"

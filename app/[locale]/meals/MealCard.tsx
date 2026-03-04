@@ -1,8 +1,10 @@
+import { useQuery } from "convex/react";
 import { format } from "date-fns";
 import { ChefHat, Clock, Flame, Users, UtensilsCrossed } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
+import { api } from "@/convex/_generated/api";
 import type { Doc } from "@/convex/_generated/dataModel";
 import { DATE_FORMAT_DISPLAY_CARD } from "@/features/meal-planner/utils";
 import { useDateLocale } from "@/hooks/use-date-locale";
@@ -15,10 +17,12 @@ export function MealCard({ meal }: Props) {
   const t = useTranslations("mealDetails");
   const tMeal = useTranslations("meal");
   const dateLocale = useDateLocale();
+  const authorDisplayName = useQuery(api.users.queries.getUserDisplayName, {
+    userId: meal.createdBy,
+  });
 
   const totalTime = (meal.prepTimeMinutes || 0) + (meal.cookTimeMinutes || 0);
-
-  const displayAuthor = meal.createdBy || "Skibidi Obiadex";
+  const displayAuthor = authorDisplayName ?? "Unknown";
 
   return (
     <Link href={`/meals/${meal._id}`}>

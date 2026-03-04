@@ -40,7 +40,7 @@ export const MealDisplayDetails: React.FC<MealDisplayDetailsProps> = React.memo(
     const dateLocale = useDateLocale();
 
     const totalTime = (meal.prepTimeMinutes || 0) + (meal.cookTimeMinutes || 0);
-    const authorName = meal.createdBy;
+    const authorName = meal.authorDisplayName ?? "Unknown";
     const caloriesByIngredients = mealIngredients.reduce(
       (acc, mealIng) => (mealIng.ingredient?.calories ?? 0) + acc,
       0,

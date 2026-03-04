@@ -8,6 +8,7 @@
  * @module
  */
 
+import type * as PasswordResetProvider from "../PasswordResetProvider.js";
 import type * as auth from "../auth.js";
 import type * as custom_mutation from "../custom/mutation.js";
 import type * as custom_query from "../custom/query.js";
@@ -24,6 +25,7 @@ import type * as model_shoppingList from "../model/shoppingList.js";
 import type * as planAndList from "../planAndList.js";
 import type * as plans from "../plans.js";
 import type * as shoppingList from "../shoppingList.js";
+import type * as users_queries from "../users/queries.js";
 
 import type {
   ApiFromModules,
@@ -31,15 +33,8 @@ import type {
   FunctionReference,
 } from "convex/server";
 
-/**
- * A utility for referencing Convex functions in your app's API.
- *
- * Usage:
- * ```js
- * const myFunctionReference = api.myModule.myFunction;
- * ```
- */
 declare const fullApi: ApiFromModules<{
+  PasswordResetProvider: typeof PasswordResetProvider;
   auth: typeof auth;
   "custom/mutation": typeof custom_mutation;
   "custom/query": typeof custom_query;
@@ -56,15 +51,32 @@ declare const fullApi: ApiFromModules<{
   planAndList: typeof planAndList;
   plans: typeof plans;
   shoppingList: typeof shoppingList;
+  "users/queries": typeof users_queries;
 }>;
-declare const fullApiWithMounts: typeof fullApi;
 
+/**
+ * A utility for referencing Convex functions in your app's public API.
+ *
+ * Usage:
+ * ```js
+ * const myFunctionReference = api.myModule.myFunction;
+ * ```
+ */
 export declare const api: FilterApi<
-  typeof fullApiWithMounts,
+  typeof fullApi,
   FunctionReference<any, "public">
 >;
+
+/**
+ * A utility for referencing Convex functions in your app's internal API.
+ *
+ * Usage:
+ * ```js
+ * const myFunctionReference = internal.myModule.myFunction;
+ * ```
+ */
 export declare const internal: FilterApi<
-  typeof fullApiWithMounts,
+  typeof fullApi,
   FunctionReference<any, "internal">
 >;
 

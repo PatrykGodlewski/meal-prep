@@ -210,7 +210,17 @@
     "alreadyHaveAccount": "Masz już konto?",
     "signUpInstead": "Zarejestruj się",
     "signInInstead": "Zaloguj się",
-    "errorSigningIn": "Błąd logowania: {error}"
+    "errorSigningIn": "Błąd logowania: {error}",
+    "forgotPassword": "Zapomniałeś hasła?",
+    "forgotPasswordDescription": "Wprowadź swój email, a wyślemy Ci kod do zresetowania hasła.",
+    "resetPassword": "Zresetuj hasło",
+    "resetPasswordDescription": "Wprowadź kod z emaila i nowe hasło.",
+    "sendResetCode": "Wyślij kod",
+    "resetCodePlaceholder": "Kod resetowania",
+    "newPasswordPlaceholder": "Nowe hasło",
+    "resetPasswordButton": "Zresetuj hasło",
+    "backToSignIn": "Powrót do logowania",
+    "cancel": "Anuluj"
   },
   "layout": {
     "description": "Najszybszy sposób na zaplanowanie posiłków na tydzień"
