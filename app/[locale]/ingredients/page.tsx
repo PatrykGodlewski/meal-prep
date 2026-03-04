@@ -1,30 +1,46 @@
-import { convexAuthNextjsToken } from "@convex-dev/auth/nextjs/server";
-import { preloadQuery } from "convex/nextjs";
-import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
-import { api } from "@/convex/_generated/api";
-import { IngredientList } from "./IngredientList";
+import { Suspense } from "react";
+import { Skeleton } from "@/components/ui/skeleton";
+import PaginatedIngredientList from "./PaginatedIngredientList";
+import { IngredientSearchInput } from "./IngredientSearchInput";
+
+const ListSkeleton = () => (
+  <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+    {Array.from({ length: 6 }).map((_, index) => (
+      <div
+        key={index}
+        className="flex flex-wrap justify-between gap-8 rounded-lg bg-white p-4 shadow-sm dark:bg-neutral-900"
+      >
+        <div className="space-y-2">
+          <Skeleton className="h-8 w-3/4" />
+          <div className="space-y-1">
+            <Skeleton className="h-4 w-32" />
+            <Skeleton className="h-4 w-36" />
+          </div>
+        </div>
+        <div className="flex gap-2">
+          <Skeleton className="h-10 w-20" />
+          <Skeleton className="h-10 w-24" />
+        </div>
+      </div>
+    ))}
+  </div>
+);
 
 export default async function IngredientsPage() {
-  const preloadedIngredients = await preloadQuery(
-    api.ingredients.queries.getIngredients,
-    {},
-    { token: await convexAuthNextjsToken() },
-  );
-
-  if (!preloadedIngredients) {
-    // TODO: check if should be early returned
-    return notFound();
-  }
-
-  const t = await getTranslations("planList");
+  const t = await getTranslations("ingredientList");
 
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="mb-6 flex items-center justify-between">
         <h1 className="font-bold text-3xl">{t("header")}</h1>
       </div>
-      <IngredientList preloadedIngredients={preloadedIngredients} />
+
+      <IngredientSearchInput />
+
+      <Suspense fallback={<ListSkeleton />}>
+        <PaginatedIngredientList />
+      </Suspense>
     </div>
   );
 }

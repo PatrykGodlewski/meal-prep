@@ -96,12 +96,15 @@ export const useMealPlanner = () => {
     data: shoppingListData,
     isLoading: isShoppingListLoading,
     error: shoppingListError,
-  } = useQuery(
-    convexQuery(api.shoppingList.getShoppingList, {
+  } = useQuery({
+    ...convexQuery(api.shoppingList.getShoppingList, {
       startDate,
       endDate,
     }),
-  );
+    // Keep subscription active briefly after unmount so switching fridge↔meal planner
+    // feels instant when Convex pushes updates.
+    gcTime: 30_000,
+  });
 
   const { mutate: generatePlanAndShoppingListMutate, isPending: isGenerating } =
     useMutation({
@@ -122,6 +125,11 @@ export const useMealPlanner = () => {
               : t("generatePlanErrorUnknown"),
         });
       },
+    });
+
+  const { mutate: addFridgeItemsMutate, isPending: isAddingToFridge } =
+    useMutation({
+      mutationFn: useConvexMutation(api.fridge.addFridgeItems),
     });
 
   const { mutate: lockPlanMutate, isPending: isLocking } = useMutation({
@@ -163,6 +171,29 @@ export const useMealPlanner = () => {
     generatePlanAndShoppingListMutate({ weekStart });
   };
 
+  const handleGenerateWithExistingIngredients = (
+    existingIngredients: { ingredientId: Id<"ingredients">; amount: number }[],
+  ) => {
+    const weekStart = mealPlannerState$.currentWeek.get().getTime();
+    addFridgeItemsMutate(
+      { items: existingIngredients },
+      {
+        onSuccess: () => {
+          generatePlanAndShoppingListMutate({ weekStart });
+        },
+        onError: (error) => {
+          console.error("Error adding to fridge:", error);
+          toast(t("toast.errorTitle"), {
+            description:
+              error instanceof Error
+                ? error.message
+                : t("generatePlanErrorUnknown"),
+          });
+        },
+      },
+    );
+  };
+
   const lockMealPlan = (mealPlanId: Id<"plans">) => {
     lockPlanMutate({ mealPlanId });
   };
@@ -199,7 +230,9 @@ export const useMealPlanner = () => {
     handleNavigateToday,
 
     handleGenerateMealPlan,
+    handleGenerateWithExistingIngredients,
     isGenerating,
+    isGeneratingWithExisting: isAddingToFridge,
     lockMealPlan,
     isLocking,
     isBusy,

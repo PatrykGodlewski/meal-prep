@@ -54,11 +54,13 @@ export const updateMealIngredients = internalMutation({
         name: v.string(),
         quantity: v.number(),
         calories: v.optional(v.number()),
-        // TODO: come back to this
         unit: v.optional(v.string()),
         category: v.optional(v.string()),
         isOptional: v.optional(v.boolean()),
         notes: v.optional(v.string()),
+        allowedReplacements: v.optional(
+          v.array(v.object({ ingredientId: v.id("ingredients"), ratio: v.optional(v.number()) })),
+        ),
       }),
     ),
   },
@@ -92,6 +94,7 @@ export const updateMealIngredients = internalMutation({
           quantity: ingredient.quantity,
           isOptional: ingredient.isOptional ?? false,
           notes: ingredient.notes,
+          allowedReplacements: ingredient.allowedReplacements,
           createdAt: now,
           updatedAt: now,
         });

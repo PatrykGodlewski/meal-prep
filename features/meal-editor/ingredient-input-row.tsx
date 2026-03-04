@@ -1,350 +1,104 @@
 "use client";
 
-import { Check, ChevronsUpDown, X } from "lucide-react";
+import { X } from "lucide-react";
 import { useTranslations } from "next-intl";
-import React, { useCallback, useState } from "react";
+import React, { useMemo } from "react";
 import type { Control, UseFormSetValue } from "react-hook-form";
+import { useWatch } from "react-hook-form";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Checkbox } from "@/components/ui/checkbox";
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "@/components/ui/command";
-import {
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import type { Doc } from "@/convex/_generated/dataModel";
-import { INGREDIENT_CATEGORIES, UNITS } from "@/convex/schema";
-import { cn } from "@/lib/utils";
+import { IngredientBasicFields } from "./components/ingredient-basic-fields";
+import { IngredientReplacementsField } from "./components/ingredient-replacements-field";
+import { IngredientSelector } from "./components/ingredient-selector";
 
 interface IngredientInputRowProps {
   index: number;
-  // biome-ignore lint/suspicious/noExplicitAny: <explanation>
-  control: Control<any>; // Accept either form type
+  control: Control<any>;
   availableIngredients: Doc<"ingredients">[];
   onRemove: () => void;
-  // Pass setValue and watch down from the parent form
-  // biome-ignore lint/suspicious/noExplicitAny: <explanation>
   setValue: UseFormSetValue<any>;
-  // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+  // biome-ignore lint/suspicious/noExplicitAny: useFieldArray field
   field: any;
 }
 
-export const IngredientInputRow: React.FC<IngredientInputRowProps> = React.memo(
-  ({ index, control, availableIngredients, onRemove, setValue, field }) => {
-    const [popoverOpen, setPopoverOpen] = useState(false);
-    const t = useTranslations("ingredient");
+export const IngredientInputRow = React.memo(function IngredientInputRow({
+  index,
+  control,
+  availableIngredients,
+  onRemove,
+  setValue,
+  field,
+}: IngredientInputRowProps) {
+  const tMeal = useTranslations("mealEditor");
 
-    const ingredientDefId = field.id;
+  const ingredientId = useWatch({ control, name: `ingredients.${index}.ingredientId` });
+  const ingredientDefId = ingredientId ?? field.ingredientId ?? field.id;
 
-    // Callback to populate fields when an existing ingredient is selected
-    const handleSelectExistingIngredient = useCallback(
-      (ingredientId: string | undefined) => {
-        const selected = availableIngredients.find(
-          (ing) => ing._id === ingredientId,
-        );
-        if (selected) {
-          setValue(`ingredients.${index}.id`, selected._id, {
-            shouldDirty: true,
-          });
-          setValue(`ingredients.${index}.name`, selected.name, {
-            shouldDirty: true,
-            shouldValidate: true,
-          });
-          setValue(
-            `ingredients.${index}.category`,
-            selected.category ?? "other",
-            { shouldDirty: true },
-          );
-          setValue(`ingredients.${index}.unit`, selected.unit ?? "g", {
-            shouldDirty: true,
-          });
-          setValue(`ingredients.${index}.calories`, selected.calories ?? 0, {
-            shouldDirty: true,
-          });
-        } else {
-          setValue(`ingredients.${index}._id`, undefined, {
-            shouldDirty: true,
-          });
-        }
-        setPopoverOpen(false);
-      },
-      [availableIngredients, index, setValue],
+  const selectedIngredient = useMemo(
+    () => availableIngredients.find((ing) => ing._id === ingredientId),
+    [availableIngredients, ingredientId],
+  );
+
+  const defaultReplacementEntries =
+    (selectedIngredient as { replacements?: { ingredientId: string; ratio?: number }[] })
+      ?.replacements ??
+    ((selectedIngredient as { replacementIds?: string[] })?.replacementIds ?? []).map(
+      (id) => ({ ingredientId: id, ratio: 1 }),
     );
+  const hasReplacements = defaultReplacementEntries.length > 0;
+  const replacementOptions = hasReplacements
+    ? defaultReplacementEntries
+        .map((entry) => {
+          const ing = availableIngredients.find((i) => i._id === entry.ingredientId);
+          return ing
+            ? { label: ing.name, value: ing._id, defaultRatio: entry.ratio ?? 1 }
+            : null;
+        })
+        .filter((o) => o !== null) as {
+          label: string;
+          value: string;
+          defaultRatio: number;
+        }[]
+    : availableIngredients
+        .filter((i) => i._id !== ingredientDefId)
+        .map((i) => ({ label: i.name, value: i._id, defaultRatio: 1 }));
 
-    return (
-      <Card className="border bg-gray-50 p-4 dark:border-neutral-700 dark:bg-neutral-800/50">
-        <div className="mb-3 flex items-center justify-between">
-          <span className="font-medium text-gray-700 text-sm dark:text-gray-300">
-            Ingredient #{index + 1}
-          </span>
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            onClick={onRemove}
-            className="h-6 w-6 text-red-500 hover:bg-red-100 dark:hover:bg-red-900/50"
-            aria-label="Remove Ingredient"
-          >
-            <X className="h-4 w-4" />
-          </Button>
-        </div>
-        <div className="grid grid-cols-1 items-start gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {/* Ingredient Combobox */}
-          <FormField
-            control={control}
-            name={`ingredients.${index}.name`}
-            render={({ field }) => (
-              <FormItem className="flex flex-col sm:col-span-2 lg:col-span-1">
-                <FormLabel className="text-xs">Ingredient*</FormLabel>
-                <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
-                  <PopoverTrigger asChild>
-                    <FormControl>
-                      <Button
-                        variant="outline"
-                        aria-expanded={popoverOpen}
-                        className={cn(
-                          "w-full justify-between font-normal",
-                          !field.value && "text-muted-foreground",
-                        )}
-                      >
-                        {field.value
-                          ? field.value // Display the current value directly
-                          : "Select or type..."}
-                        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                      </Button>
-                    </FormControl>
-                  </PopoverTrigger>
-                  <PopoverContent className="max-h-(--radix-popover-content-available-height) w-(--radix-popover-trigger-width) p-0">
-                    <Command shouldFilter={true}>
-                      {/* Input tracks the name field */}
-                      <CommandInput
-                        placeholder="Search or type new..."
-                        value={field.value}
-                        onValueChange={(search) => {
-                          field.onChange(search); // Update the name field
-                          // // If typing a new name, clear the ID
-                          // const match = availableIngredients.find(
-                          //   (ing) =>
-                          //     ing.name.toLowerCase() === search.toLowerCase(),
-                          // );
-                          // if (!match && ingredientDefId) {
-                          //   handleSelectExistingIngredient(undefined); // Clear ID if no match found
-                          // } else if (match && ingredientDefId !== match._id) {
-                          //   // If a match is found but ID is different, update everything
-                          //   handleSelectExistingIngredient(match._id);
-                          // }
-                        }}
-                      />
-                      <CommandList>
-                        <CommandEmpty>
-                          No ingredient found. Type to add new.
-                        </CommandEmpty>
-                        <CommandGroup>
-                          {availableIngredients.map((ing) => (
-                            <CommandItem
-                              key={ing._id}
-                              value={ing.name} // Value used for filtering/selection
-                              onSelect={() => {
-                                // On selecting an existing item, populate all fields
-                                handleSelectExistingIngredient(ing._id);
-                              }}
-                            >
-                              <Check
-                                className={cn(
-                                  "mr-2 h-4 w-4",
-                                  ingredientDefId === ing._id
-                                    ? "opacity-100"
-                                    : "opacity-0",
-                                )}
-                              />
-                              {ing.name} {ing.unit ? `(${ing.unit})` : ""}
-                            </CommandItem>
-                          ))}
-                        </CommandGroup>
-                      </CommandList>
-                    </Command>
-                  </PopoverContent>
-                </Popover>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+  return (
+    <div className="overflow-hidden rounded-xl border border-border/60 bg-card/50 py-0 shadow-sm transition-shadow hover:shadow-md dark:border-border/40 dark:bg-card/30">
+      <div className="flex items-center justify-between gap-3 border-b border-border/50 bg-muted/30 px-4 py-2 dark:bg-muted/20">
+        <span className="rounded-full bg-primary/10 px-2.5 py-0.5 font-medium text-primary text-xs dark:bg-primary/20">
+          {tMeal("ingredientIndex", { index: index + 1 })}
+        </span>
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon"
+          onClick={onRemove}
+          className="h-8 w-8 shrink-0 rounded-full text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
+          aria-label="Remove Ingredient"
+        >
+          <X className="h-4 w-4" />
+        </Button>
+      </div>
 
-          {/* Quantity */}
-          <FormField
-            control={control}
-            name={`ingredients.${index}.quantity`}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="text-xs">Quantity*</FormLabel>
-                <FormControl>
-                  <Input
-                    type="number" // Ensure numeric input
-                    step="any" // Allow decimals if needed
-                    placeholder="e.g., 2"
-                    {...field}
-                    onChange={(e) => field.onChange(e.target.valueAsNumber)} // Use valueAsNumber
-                    value={field.value ?? ""}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+      <div className="grid grid-cols-1 items-start gap-4 px-4 py-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        <IngredientSelector
+          index={index}
+          control={control}
+          availableIngredients={availableIngredients}
+          setValue={setValue}
+          selectedIngredientId={ingredientDefId}
+        />
+        <IngredientBasicFields index={index} control={control} />
+      </div>
 
-          <FormField
-            control={control}
-            name={`ingredients.${index}.unit`}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="text-xs">Unit*</FormLabel>
-                <Select
-                  value={field.value ?? "g"} // Default to 'g'
-                  onValueChange={field.onChange}
-                >
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select unit" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {UNITS.map((unit) => (
-                      <SelectItem key={unit} value={unit}>
-                        {t(unit)}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={control}
-            name={`ingredients.${index}.category`}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="text-xs">Category*</FormLabel>
-                <Select
-                  value={field.value ?? "other"}
-                  onValueChange={field.onChange}
-                >
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select category" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {INGREDIENT_CATEGORIES.map((cat) => (
-                      <SelectItem key={cat} value={cat} className="capitalize">
-                        {t(cat)}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          {/* Notes */}
-          <FormField
-            control={control}
-            name={`ingredients.${index}.notes`}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="text-xs">Notes</FormLabel>
-                <FormControl>
-                  <Input
-                    {...field}
-                    value={field.value ?? ""}
-                    placeholder="e.g., finely chopped"
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          {/* Optional */}
-          <FormField
-            control={control}
-            name={`ingredients.${index}.isOptional`}
-            render={({ field }) => (
-              <FormItem className="mb-1 flex flex-row items-center space-x-2 self-end pt-5">
-                {" "}
-                {/* Align with bottom of inputs */}
-                <FormControl>
-                  <Checkbox
-                    checked={field.value}
-                    onCheckedChange={field.onChange}
-                    id={`ing-opt-${index}`}
-                  />
-                </FormControl>
-                <Label
-                  htmlFor={`ing-opt-${index}`}
-                  className="font-normal text-xs"
-                >
-                  Optional
-                </Label>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={control}
-            name={`ingredients.${index}.calories`}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Calories</FormLabel>
-                <FormControl>
-                  <Input
-                    type="number"
-                    placeholder="4"
-                    {...field}
-                    value={field.value ?? ""}
-                    onChange={(e) =>
-                      field.onChange(
-                        e.target.value === ""
-                          ? null
-                          : Number.parseInt(e.target.value),
-                      )
-                    }
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-      </Card>
-    );
-  },
-);
-IngredientInputRow.displayName = "IngredientInputRow";
+      <IngredientReplacementsField
+        key={ingredientDefId ?? index}
+        index={index}
+        control={control}
+        replacementOptions={replacementOptions}
+        hasDefaultReplacements={hasReplacements}
+      />
+    </div>
+  );
+});

@@ -16,6 +16,14 @@ export const getUserDisplayName = query({
 });
 
 /**
+ * Get current user's Convex user id (e.g. for passing to actions like meal planner).
+ */
+export const getCurrentUserId = authQuery({
+  args: {},
+  handler: async (ctx) => ctx.user.id,
+});
+
+/**
  * Get current user info for the sidebar/nav.
  */
 export const getCurrentUser = authQuery({

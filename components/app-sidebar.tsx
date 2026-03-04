@@ -5,6 +5,7 @@ import {
   CalendarCog,
   LayoutDashboardIcon,
   ListIcon,
+  Refrigerator,
   SquareStack,
   Triangle,
 } from "lucide-react";
@@ -79,6 +80,11 @@ function Nav() {
   ];
 
   const entityList = [
+    {
+      title: t("fridge"),
+      url: "/fridge",
+      icon: Refrigerator,
+    },
     {
       title: t("meals"),
       url: "/meals",

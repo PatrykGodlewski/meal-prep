@@ -3,6 +3,7 @@ import { useDebounceFn } from "ahooks";
 import { Loader2 } from "lucide-react";
 import { type ChangeEvent, type ReactNode, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
   DialogContent,
@@ -15,6 +16,7 @@ import { Input } from "@/components/ui/input";
 import type { Id } from "@/convex/_generated/dataModel";
 import type { MEAL_CATEGORIES } from "@/convex/schema";
 import { usePaginatedMeals } from "@/hooks/use-paginated-meals";
+import { useTranslations } from "next-intl";
 
 interface ModalMealsProps {
   isOpen: boolean;
@@ -33,6 +35,11 @@ export function ModalMeals({
 }: ModalMealsProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [inputValue, setInputValue] = useState("");
+  const [showAllMeals, setShowAllMeals] = useState(false);
+
+  const t = useTranslations("modalMeals");
+
+  const effectiveFilter = showAllMeals ? undefined : filter;
 
   const {
     allMeals,
@@ -40,8 +47,12 @@ export function ModalMeals({
     isFetching,
     isFetchingNextPage,
     hasNextPage,
-    loadMore,
-  } = usePaginatedMeals({ clientSearch: searchTerm, categoryFilter: filter });
+    loadMoreRef,
+  } = usePaginatedMeals({
+    clientSearch: searchTerm,
+    categoryFilter: effectiveFilter,
+    enabled: isOpen,
+  });
 
   const debouncedUpdateSearchQuery = useDebounceFn(
     (term: string) => {
@@ -53,18 +64,16 @@ export function ModalMeals({
   const handleSelectMeal = (mealId: Id<"meals">) => {
     setSearchTerm("");
     setInputValue("");
+    setShowAllMeals(false);
     onMealSelect(mealId);
     onOpenChange(false);
   };
 
   useEffect(() => {
-    if (!allMeals.length) loadMore(20);
-  }, [allMeals]);
-
-  useEffect(() => {
     if (!isOpen) {
       setInputValue("");
       setSearchTerm("");
+      setShowAllMeals(false);
     }
   }, [isOpen]);
 
@@ -82,16 +91,14 @@ export function ModalMeals({
   return (
     <Dialog modal open={isOpen} onOpenChange={onOpenChange}>
       {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
-      <DialogContent className="flex max-h-[80vh] flex-col sm:max-w-[425px] md:max-w-2xl">
+      <DialogContent className="!flex max-h-[80vh] flex-col overflow-hidden sm:max-w-[425px] md:max-w-2xl">
         <DialogHeader>
-          <DialogTitle>Select a Meal</DialogTitle>
-          <DialogDescription>
-            Search for a meal and click on it to add it to your plan.
-          </DialogDescription>
+          <DialogTitle>{t("title")}</DialogTitle>
+          <DialogDescription>{t("description")}</DialogDescription>
         </DialogHeader>
         <div className="flex flex-col gap-4 border-b py-4 sm:flex-row sm:gap-2">
           <Input
-            placeholder="Search meals by name..."
+            placeholder={t("searchPlaceholder")}
             value={inputValue}
             onChange={handleInputValue}
           />
@@ -99,10 +106,30 @@ export function ModalMeals({
             className="w-full sm:w-auto sm:basis-1/4"
             onClick={handleClearInput}
           >
-            Clear
+            {t("clear")}
           </Button>
         </div>
-        <div className="grow space-y-2 overflow-y-auto">
+        {filter && (
+          <div className="flex items-center space-x-2 border-b pb-4">
+            <Checkbox
+              id="show-all-meals"
+              checked={showAllMeals}
+              onCheckedChange={(checked) =>
+                setShowAllMeals(checked === true)
+              }
+            />
+            <label
+              htmlFor="show-all-meals"
+              className="cursor-pointer text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+            >
+              {t("showAllMeals")}
+            </label>
+          </div>
+        )}
+        <div
+          data-scroll-container
+          className="min-h-0 flex-1 space-y-2 overflow-y-auto overscroll-contain pb-4"
+        >
           {isFetching && status !== "LoadingMore" && (
             <div className="flex h-32 items-center justify-center">
               <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -111,7 +138,7 @@ export function ModalMeals({
 
           {!isFetching && allMeals.length === 0 && (
             <p className="py-4 text-center text-gray-500 dark:text-gray-400">
-              No meals found matching your search.
+              {t("noMealsFound")}
             </p>
           )}
 
@@ -120,7 +147,7 @@ export function ModalMeals({
               key={meal._id}
               className="flex cursor-pointer items-center justify-between rounded-md border p-3 hover:bg-accent hover:text-accent-foreground"
               onClick={() => handleSelectMeal(meal._id)}
-              // biome-ignore lint/a11y/useSemanticElements: <explanation>
+              // biome-ignore lint/a11y/useSemanticElements: clickable row for meal selection
               role="button"
               tabIndex={0}
               onKeyDown={(e) => {
@@ -131,25 +158,29 @@ export function ModalMeals({
             >
               <div>
                 <p className="font-medium">{meal.name}</p>
-                <div className="flex gap-1">
+                <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
                   {meal.categories?.map((cat, idx) => (
-                    <p
+                    <span
                       key={idx}
                       className="text-muted-foreground text-sm capitalize"
                     >
                       {cat}
-                    </p>
+                    </span>
                   ))}
+                  {meal.calories != null && (
+                    <span className="text-muted-foreground text-sm">
+                      • {meal.calories} kcal
+                      {meal.servings && meal.servings > 1
+                        ? ` / serving`
+                        : ""}
+                    </span>
+                  )}
                 </div>
               </div>
             </div>
           ))}
 
-          {hasNextPage && (
-            <Button onClick={() => loadMore(20)} className="mt-2 w-full">
-              Load More
-            </Button>
-          )}
+          <div ref={loadMoreRef} className="h-4 min-h-4" aria-hidden />
 
           {isFetchingNextPage && (
             <div className="flex items-center justify-center py-4">
@@ -159,7 +190,7 @@ export function ModalMeals({
 
           {!hasNextPage && allMeals.length > 0 && (
             <p className="py-4 text-center text-muted-foreground text-sm">
-              No more meals to load.
+              {t("noMoreMeals")}
             </p>
           )}
         </div>

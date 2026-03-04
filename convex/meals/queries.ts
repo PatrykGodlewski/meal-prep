@@ -1,11 +1,15 @@
 import { paginationOptsValidator } from "convex/server";
 import { v } from "convex/values";
 import { filter } from "convex-helpers/server/filter";
+import { stream } from "convex-helpers/server/stream";
 import { authQuery } from "../custom/query";
+import schema from "../schema";
 import { MEAL_CATEGORIES } from "../schema";
 
 /**
  * Get a paginated list of meals, with optional search and filtering.
+ * Uses pre-filter pagination for category filter (stream + filterWith) so we get
+ * the correct number of results instead of filtering after pagination.
  */
 export const getMeals = authQuery({
   args: {
@@ -32,23 +36,32 @@ export const getMeals = authQuery({
           return q.search("searchContent", trimmedSearch);
         });
 
-      // If we also need to filter by category, we wrap the search query
-      // with the filter helper. This avoids TypeScript 'any' errors.
+      // If we also need to filter by category: convex-helpers filter applies
+      // AFTER pagination (post-filter), so we request more items to compensate.
       if (isFiltering) {
+        const expandedPagination = {
+          ...pagination,
+          numItems: Math.max(pagination.numItems * 5, 50),
+        };
         return await filter(searchQ, (meal) =>
           meal.categories.includes(categoryFilter),
-        ).paginate(pagination);
+        ).paginate(expandedPagination);
       }
 
       return await searchQ.paginate(pagination);
     }
 
     // CASE 2: Filtering Only (No Text Search)
-    // We use the helper here to maintain type safety without casting to 'any'
+    // Use stream + filterWith for PRE-filter pagination - filter is applied
+    // before picking the page, so we get the correct number of matching meals.
     if (isFiltering) {
-      return await filter(ctx.db.query("meals"), (meal) =>
-        meal.categories.includes(categoryFilter),
-      ).paginate(pagination);
+      const mealsStream = stream(ctx.db, schema)
+        .query("meals")
+        .filterWith(async (meal) => meal.categories.includes(categoryFilter));
+      return await mealsStream.paginate({
+        ...pagination,
+        maximumRowsRead: 500,
+      });
     }
 
     // CASE 3: Fetch All
@@ -89,7 +102,32 @@ export const getMeal = authQuery({
           const ingredient = mi.ingredientId
             ? await ctx.db.get(mi.ingredientId)
             : null;
-          return { ...mi, ingredient };
+          // Effective replacements: meal override or ingredient default
+          const effectiveEntries =
+            mi.allowedReplacements !== undefined
+              ? mi.allowedReplacements
+              : ingredient?.replacements ??
+                (ingredient?.replacementIds ?? []).map((id) => ({
+                  ingredientId: id,
+                  ratio: undefined,
+                }));
+          const replacementInfos = await Promise.all(
+            effectiveEntries.map(async (entry) => {
+              const rep = await ctx.db.get(entry.ingredientId);
+              return rep
+                ? { name: rep.name, ratio: entry.ratio ?? 1 }
+                : null;
+            }),
+          );
+          const validReplacementInfos = replacementInfos.filter(
+            (r): r is { name: string; ratio: number } => r !== null,
+          );
+          return {
+            ...mi,
+            ingredient,
+            replacementNames: validReplacementInfos.map((r) => r.name),
+            replacementInfos: validReplacementInfos,
+          };
         }),
       ),
     };

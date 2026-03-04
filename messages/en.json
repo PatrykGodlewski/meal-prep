@@ -17,6 +17,8 @@
     "notCreated": "Not created",
     "shoppingList": "Shopping list",
     "noIngredients": "No ingredients",
+    "forMeals": "For meals",
+    "showMealBreakdown": "Show which meals use this ingredient",
     "noRecipes": "No recipes",
     "noMealsPlanned": "No meals planned",
     "mealPlan": "Meal plan",
@@ -40,13 +42,57 @@
     "unlockPlanSuccessDescription": "Meal plan unlocked successfully!",
     "unlockPlanErrorFallback": "Failed to unlock meal plan.",
     "lockPlan": "Lock plan",
-    "unlockPlan": "Unlock plan"
+    "unlockPlan": "Unlock plan",
+    "markAsEaten": "Mark as eaten",
+    "unmarkAsEaten": "Unmark as eaten",
+    "changeMeal": "Change meal",
+    "generateOptions": "Generate options",
+    "generateWithExistingIngredients": "Generate with existing ingredients",
+    "partialAmountNote": "Buy only this amount or more — you already have some"
+  },
+  "generateWithExistingIngredients": {
+    "title": "Generate plan with ingredients you have",
+    "description": "Add ingredients you already have in your fridge. The plan will prioritize meals using them, and they'll be removed from the shopping list.",
+    "addIngredient": "Add ingredient",
+    "searchPlaceholder": "Search ingredients...",
+    "searching": "Searching...",
+    "noIngredientsFound": "No ingredients found.",
+    "ingredientsYouHave": "Ingredients you have",
+    "remove": "Remove",
+    "generate": "Generate plan"
+  },
+  "modalMeals": {
+    "title": "Select a Meal",
+    "description": "Search for a meal and click on it to add it to your plan.",
+    "searchPlaceholder": "Search meals by name...",
+    "clear": "Clear",
+    "showAllMeals": "Show all meals",
+    "noMealsFound": "No meals found matching your search.",
+    "loadMore": "Load More",
+    "noMoreMeals": "No more meals to load."
+  },
+  "fridge": {
+    "header": "My Fridge",
+    "description": "Ingredients you have at home. The shopping list will automatically subtract these so you don't buy them again or too much.",
+    "emptyHint": "Use the search above to add what you have.",
+    "addIngredient": "Add ingredient",
+    "searchPlaceholder": "Search ingredients...",
+    "searching": "Searching...",
+    "noIngredientsFound": "No ingredients found.",
+    "amount": "Amount",
+    "empty": "Your fridge is empty. Add ingredients you have at home.",
+    "remove": "Remove",
+    "addSuccess": "Added to fridge",
+    "addError": "Failed to add to fridge",
+    "updateError": "Failed to update",
+    "removeError": "Failed to remove"
   },
   "appSidebar": {
     "features": "Features",
     "mealPlanner": "Meal Planner",
     "shoppingList": "Shopping List",
     "ingredients": "Ingredients",
+    "fridge": "My Fridge",
     "meals": "Meals",
     "settings": "Settings",
     "plans": "Meal Plans",
@@ -58,6 +104,7 @@
     "dinner": "Dinner",
     "snack": "Snack",
     "dessert": "Dessert",
+    "drinks": "Drinks",
     "all": "All"
   },
   "mealDetails": {
@@ -66,10 +113,12 @@
     "totalTime": "{count, plural, =1 {# minute total} other {# minutes total}}",
     "servings": "{count, plural, =1 {# serving} other {# servings}}",
     "calories": "{count, plural, =1 {# calorie} other {# calories}}",
-    "caloriesByIngredients": "{count} calories by ingredients [dev mode]",
+    "caloriesManual": "{count} kcal (manual)",
+    "caloriesByIngredients": "{count} kcal (from ingredients)",
     "descriptionTitle": "Description",
     "ingredientsTitle": "Ingredients",
     "optionalMarker": "(optional)",
+    "substitutesLabel": "Substitutes",
     "noIngredients": "No ingredients listed.",
     "instructionsTitle": "Instructions",
     "noInstructions": "No instructions provided.",
@@ -83,7 +132,10 @@
   "planList": {
     "header": "Meal Plans",
     "noMealPlans": "No meal plans found. Start by creating one!",
+    "noIngredients": "No ingredients found.",
     "viewPlan": "View Plan",
+    "viewIngredient": "View ingredient",
+    "delete": "Delete",
     "createdAt": "Created at",
     "lastUpdate": "Last updated",
     "id": "ID"
@@ -92,8 +144,45 @@
     "meals": "Meals",
     "addMeal": "Add Meal"
   },
+  "generateMealAI": {
+    "title": "Generate meal with AI",
+    "description": "Describe what kind of meal you want. The AI will create a recipe using your preferences and similar meals in your library.",
+    "placeholder": "e.g. Light vegetarian dinner under 400 calories",
+    "generate": "Generate",
+    "generating": "Generating...",
+    "success": "Meal created successfully!",
+    "viewMeal": "View meal",
+    "generateAnother": "Generate another",
+    "error": "Generation failed",
+    "tryAgain": "Try again"
+  },
+  "ingredientList": {
+    "header": "Ingredients"
+  },
+  "ingredientEditor": {
+    "editIngredient": "Edit ingredient",
+    "replacementsLabel": "Default replacements",
+    "replacementsPlaceholder": "Select ingredients that can replace this one",
+    "replacementsHelp": "These substitutes can be used in recipes. Ratio = replacement qty per 1 unit original (e.g. 1.2 = 100g needs 120g).",
+    "replacementsNoOptions": "Add more ingredients first to define substitutes.",
+    "ratioLabel": "Ratio",
+    "ratioHelp": "How much replacement per 1 unit original (e.g. 1.2 = 100g needs 120g)",
+    "nameLabel": "Name",
+    "namePlaceholder": "Enter ingredient name",
+    "categoryLabel": "Category",
+    "categoryPlaceholder": "Select category",
+    "unitLabel": "Unit",
+    "unitPlaceholder": "Select unit",
+    "caloriesLabel": "Calories (per unit)",
+    "caloriesPlaceholder": "e.g., 100",
+    "saveChanges": "Save Changes",
+    "saving": "Saving...",
+    "updateSuccess": "Ingredient updated successfully.",
+    "updateError": "Failed to update ingredient."
+  },
   "searchInput": {
     "searchMealsByName": "Search meals by name...",
+    "searchIngredientsByName": "Search ingredients by name...",
     "filterByCategory": "Filter by category"
   },
   "mealEditor": {
@@ -106,6 +195,12 @@
     "deleting": "Deleting...",
     "imageUrlLabel": "Image URL",
     "imageUrlPlaceholder": "Enter image URL (e.g., https://...)",
+    "imageUploadFile": "Upload image",
+    "imageUploading": "Uploading...",
+    "imageUrlOrUpload": "Or enter URL",
+    "imageUploadInvalidType": "Please select a JPEG, PNG, WebP or GIF image.",
+    "imageUploadTooLarge": "Image must be under {max}MB.",
+    "imageUploadError": "Upload failed. Please try again.",
     "mealNameLabel": "Meal Name",
     "mealNamePlaceholder": "Enter the name of the meal",
     "prepTimeLabel": "Prep Time (minutes)",
@@ -122,7 +217,27 @@
     "descriptionLabel": "Description",
     "descriptionPlaceholder": "Write a short description of the meal...",
     "ingredientsTitle": "Ingredients",
+    "ingredientIndex": "Ingredient #{index}",
     "addIngredientButton": "Add Ingredient",
+    "ingredientLabel": "Ingredient",
+    "ingredientSelectPlaceholder": "Select or type...",
+    "ingredientSearchPlaceholder": "Search or type new...",
+    "ingredientEmptyState": "No ingredient found. Type to add new.",
+    "quantityLabel": "Quantity",
+    "unitLabel": "Unit",
+    "categoryLabel": "Category",
+    "quantityPlaceholder": "e.g., 2",
+    "notesLabel": "Notes",
+    "notesPlaceholder": "e.g., finely chopped",
+    "optionalLabel": "Optional",
+    "caloriesPerUnitLabel": "kcal per 100g",
+    "caloriesPerUnitPlaceholder": "e.g. 100",
+    "overrideReplacements": "Replacements for this recipe",
+    "overrideReplacementsHelp": "Select which replacements are allowed for this meal (default: all)",
+    "addReplacementsHelp": "Select substitutes that can replace this ingredient in this recipe.",
+    "replacementRatioHelp": "Ratio = replacement qty per 1 unit original (e.g. 1.2 = 100g needs 120g).",
+    "ratioLabel": "Ratio",
+    "overrideReplacementsPlaceholder": "Select replacements...",
     "instructionsLabel": "Instructions",
     "instructionsPlaceholder": "Enter the preparation and cooking steps...",
     "toastErrorTitle": "Error",
@@ -189,6 +304,17 @@
     "other": "Other",
     "spiceHerb": "Spice/Herb"
   },
+  "planExtras": {
+    "addExtra": "Add extra item",
+    "addExtraDescription": "Add drinks and other meals from your library. Create new meals in the Meals section if needed.",
+    "nameLabel": "Name",
+    "namePlaceholder": "e.g. Coffee with milk",
+    "caloriesLabel": "Calories",
+    "caloriesPlaceholder": "e.g. 80",
+    "add": "Add",
+    "cancel": "Cancel",
+    "remove": "Remove"
+  },
   "mealPlanDetail": {
     "header": "Meal Plan",
     "noMealPlanDetails": "No meal plan found. Start by creating one!",
@@ -222,7 +348,136 @@
     "backToSignIn": "Back to sign in",
     "cancel": "Cancel"
   },
+  "settings": {
+    "preferencesTitle": "Preferences",
+    "preferencesDescription": "Manage your dietary preferences, ingredients, and meal habits. Changes are saved automatically."
+  },
   "layout": {
     "description": "The fastest way to plan meals for a week"
+  },
+  "onboarding": {
+    "step1": {
+      "title": "Tell us about yourself",
+      "subtitle": "We use this to personalize your meal plans.",
+      "ageLabel": "Age",
+      "agePlaceholder": "e.g. 30",
+      "genderLabel": "Gender",
+      "genderPlaceholder": "e.g. male, female",
+      "heightLabel": "Height (cm)",
+      "heightPlaceholder": "e.g. 170",
+      "weightLabel": "Weight (kg)",
+      "weightPlaceholder": "e.g. 70",
+      "activityLevelLabel": "Activity level",
+      "activityLevelPlaceholder": "Select",
+      "activityLevels": {
+        "sedentary": "Sedentary (little or no exercise)",
+        "light": "Light (1-3 days/week)",
+        "moderate": "Moderate (3-5 days/week)",
+        "active": "Active (6-7 days/week)",
+        "very_active": "Very active (intense daily)"
+      },
+      "primaryGoalLabel": "Primary goal",
+      "primaryGoalPlaceholder": "Select",
+      "primaryGoals": {
+        "weight_loss": "Weight loss",
+        "maintenance": "Maintain weight",
+        "muscle_gain": "Build muscle"
+      }
+    },
+    "step2": {
+      "title": "Dietary restrictions",
+      "subtitle": "Tell us about diets and allergies.",
+      "strictDietsLabel": "Strict diets",
+      "strictDietsPlaceholder": "Select",
+      "allergiesLabel": "Allergies",
+      "allergiesPlaceholder": "Select",
+      "diets": {
+        "vegan": "Vegan",
+        "vegetarian": "Vegetarian",
+        "keto": "Keto",
+        "paleo": "Paleo",
+        "mediterranean": "Mediterranean",
+        "low_carb": "Low carb",
+        "halal": "Halal",
+        "kosher": "Kosher",
+        "none": "None"
+      },
+      "allergies": {
+        "peanuts": "Peanuts",
+        "tree_nuts": "Tree nuts",
+        "shellfish": "Shellfish",
+        "fish": "Fish",
+        "gluten": "Gluten",
+        "dairy": "Dairy",
+        "eggs": "Eggs",
+        "soy": "Soy",
+        "sesame": "Sesame",
+        "none": "None"
+      }
+    },
+    "step3": {
+      "title": "Food type preferences",
+      "subtitle": "Types of dishes you prefer or avoid – e.g. like salads but not creamy soups.",
+      "preferredTypesLabel": "I prefer these types of food",
+      "avoidedTypesLabel": "I usually avoid these types",
+      "dishTypes": {
+        "soup": "Soups",
+        "salad": "Salads",
+        "stir_fry": "Stir-fries",
+        "casserole": "Casseroles",
+        "roasted": "Roasted dishes",
+        "grilled": "Grilled",
+        "baked": "Baked",
+        "stew": "Stews",
+        "curry": "Curries",
+        "raw": "Raw / fresh",
+        "fried": "Fried",
+        "sandwich_wrap": "Sandwiches & wraps",
+        "bowl": "Bowls",
+        "none": "None"
+      }
+    },
+    "step4": {
+      "title": "Logistics & habits",
+      "subtitle": "How do you usually eat and cook?",
+      "mealsPerDayLabel": "Meals per day",
+      "mealsPerDayPlaceholder": "e.g. 3",
+      "snacksPerDayLabel": "Snacks per day",
+      "snacksPerDayPlaceholder": "e.g. 1",
+      "maxCookingTimeLabel": "Max cooking time per meal",
+      "maxCookingTimePlaceholder": "Select",
+      "cookingSkillLabel": "Cooking skill",
+      "cookingSkillPlaceholder": "Select",
+      "budgetLabel": "Budget",
+      "budgetPlaceholder": "Select",
+      "cookingTimes": {
+        "15": "Under 15 min",
+        "30": "Up to 30 min",
+        "45": "Up to 45 min",
+        "60": "Up to 1 hour",
+        "90": "1 hour or more"
+      },
+      "cookingSkills": {
+        "beginner": "Beginner",
+        "intermediate": "Intermediate",
+        "advanced": "Advanced"
+      },
+      "budgets": {
+        "cheap": "Budget-friendly",
+        "moderate": "Moderate",
+        "premium": "Premium"
+      }
+    },
+    "step5": {
+      "title": "Appetite & variety",
+      "subtitle": "How do you like to eat during the week?",
+      "prefersMealPrepLabel": "Meal prepping",
+      "prefersMealPrepHelp": "Same meal multiple days",
+      "prefersVarietyLabel": "Daily variety",
+      "prefersVarietyHelp": "Different meals each day"
+    },
+    "next": "Next",
+    "back": "Back",
+    "completing": "Completing..."
   }
 }

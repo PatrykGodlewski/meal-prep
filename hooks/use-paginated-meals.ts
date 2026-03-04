@@ -1,45 +1,20 @@
 import { usePaginatedQuery } from "convex/react";
 import { useSearchParams } from "next/navigation";
-import { type RefObject, useEffect, useRef, useState } from "react";
+import { useRef } from "react";
 import { z } from "zod";
 import { api } from "@/convex/_generated/api";
 import { MEAL_CATEGORIES } from "@/convex/schema";
+import { useInfiniteScrollLoadMore } from "./use-infinite-scroll";
 
 export const SEARCH_PARAM_KEY = "q";
 export const FILTER_PARAM_KEY = "f";
 const PAGE_SIZE = 10;
 
-function useIntersection(
-  ref: RefObject<HTMLDivElement | null>,
-  options: IntersectionObserverInit = { rootMargin: "0px 0px 600px 0px" },
-): boolean {
-  const [isIntersecting, setIntersecting] = useState(false);
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => setIntersecting(entry.isIntersecting),
-      options,
-    );
-
-    const currentElement = ref.current;
-
-    if (currentElement) {
-      observer.observe(currentElement);
-    }
-
-    return () => {
-      if (currentElement) {
-        observer.unobserve(currentElement);
-      }
-    };
-  }, [ref, options, options.root, options.rootMargin, options.threshold]);
-
-  return isIntersecting;
-}
-
 type Props = {
   clientSearch?: string;
-  categoryFilter?: (typeof MEAL_CATEGORIES)[number]; // Add the filter prop
+  categoryFilter?: (typeof MEAL_CATEGORIES)[number];
+  /** When false (e.g. modal closed), disables infinite scroll. Omit for page usage. */
+  enabled?: boolean;
 };
 
 const categorySchema = z.enum(MEAL_CATEGORIES);
@@ -47,6 +22,7 @@ const categorySchema = z.enum(MEAL_CATEGORIES);
 export function usePaginatedMeals({
   clientSearch,
   categoryFilter,
+  enabled: enabledProp,
 }: Props = {}) {
   const loadMoreRef = useRef<HTMLDivElement>(null);
   const searchParams = useSearchParams();
@@ -67,13 +43,17 @@ export function usePaginatedMeals({
 
   const hasNextPage = status === "CanLoadMore";
   const isFetchingNextPage = status === "LoadingMore";
-  const isIntersecting = useIntersection(loadMoreRef);
+  const sentinelVisible = status !== "LoadingFirstPage";
+  const enabled = (enabledProp ?? true) && sentinelVisible;
 
-  useEffect(() => {
-    if (isIntersecting && hasNextPage && !isFetchingNextPage) {
-      loadMore(PAGE_SIZE);
-    }
-  }, [isIntersecting, hasNextPage, isFetchingNextPage, loadMore]);
+  useInfiniteScrollLoadMore({
+    loadMoreRef,
+    loadMore,
+    hasNextPage,
+    isFetchingNextPage,
+    pageSize: PAGE_SIZE,
+    enabled,
+  });
 
   const allMeals = results ?? [];
 

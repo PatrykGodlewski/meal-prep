@@ -10,6 +10,7 @@ const unitEnum = z.enum(UNITS);
 export const IngredientFormSchema = z.object({
   // ID of the ingredient definition (if existing)
   id: z.any().optional(),
+  ingredientId: z.string().optional(),
   // Name is required, used for lookup or creation
   name: z.string().min(1, "Ingredient name is required"),
   // Category and Unit are required for new ingredients, populated for existing
@@ -20,6 +21,10 @@ export const IngredientFormSchema = z.object({
   calories: z.coerce.number().nonnegative("Quantity must be non-negative"), // Use coerce for input type="number"
   isOptional: z.boolean().default(false),
   notes: z.string().optional(),
+  // Override replacements for this meal (undefined = use ingredient default). ratio = replacement qty per 1 unit original.
+  allowedReplacements: z
+    .array(z.object({ ingredientId: z.string(), ratio: z.number().optional() }))
+    .optional(),
 });
 
 // Base schema for common meal fields

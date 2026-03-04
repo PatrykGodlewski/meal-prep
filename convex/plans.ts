@@ -26,16 +26,25 @@ export const getMealPlan = authQuery({
       return null;
     }
 
-    const planMeals = await ctx.db
-      .query("planMeals")
-      // TODO: use both category and meal pland id if possible and necessary
-      .withIndex("by_plan_and_category", (q) => q.eq("planId", planId))
-      .collect();
+    const [planMeals, planExtras] = await Promise.all([
+      ctx.db
+        .query("planMeals")
+        .withIndex("by_plan_and_category", (q) => q.eq("planId", planId))
+        .collect(),
+      ctx.db
+        .query("planExtras")
+        .withIndex("by_plan", (q) => q.eq("planId", planId))
+        .collect(),
+    ]);
 
-    const mealIds = planMeals.map((pm) => pm.mealId);
-
+    const allMealIds = [
+      ...planMeals.map((pm) => pm.mealId),
+      ...planExtras.map((pe) => pe.mealId),
+    ];
     const meals = (
-      await Promise.all(mealIds.map((id) => ctx.db.get(id)))
+      await Promise.all(
+        [...new Set(allMealIds)].map((id) => ctx.db.get(id)),
+      )
     ).filter((meal): meal is NonNullable<typeof meal> => meal !== null);
 
     const mealMap = new Map(meals.map((meal) => [meal._id, meal]));
@@ -45,9 +54,15 @@ export const getMealPlan = authQuery({
       meal: mealMap.get(pm.mealId) || null,
     }));
 
+    const planExtrasWithMeal = planExtras.map((pe) => ({
+      ...pe,
+      meal: mealMap.get(pe.mealId) || null,
+    }));
+
     return {
       mealPlan,
       planMeals: planMealsWithDetails,
+      planExtras: planExtrasWithMeal,
     };
   },
 });
@@ -70,25 +85,38 @@ export const getWeeklyMealPlan = authQuery({
 
     const results = await Promise.all(
       weeklyPlans.map(async (mealPlan) => {
-        // Fetch planMeals for this mealPlan
-        const planMeals = await ctx.db
-          .query("planMeals")
-          // TODO: use both category and meal pland id if possible and necessary
-          .withIndex("by_plan_and_category", (q) =>
-            q.eq("planId", mealPlan._id),
-          )
-          .collect();
+        const [planMeals, planExtras] = await Promise.all([
+          ctx.db
+            .query("planMeals")
+            .withIndex("by_plan_and_category", (q) =>
+              q.eq("planId", mealPlan._id),
+            )
+            .collect(),
+          ctx.db
+            .query("planExtras")
+            .withIndex("by_plan", (q) => q.eq("planId", mealPlan._id))
+            .collect(),
+        ]);
 
-        // Fetch all mealIds for this mealPlan
-        const mealIds = planMeals.map((pm) => pm.mealId);
+        const allMealIds = [
+          ...planMeals.map((pm) => pm.mealId),
+          ...planExtras.map((pe) => pe.mealId),
+        ];
+        const meals = await Promise.all(
+          [...new Set(allMealIds)].map((id) => ctx.db.get(id)),
+        );
+        const mealMap = new Map(
+          meals.filter((m): m is NonNullable<typeof m> => m !== null).map((m) => [m._id, m]),
+        );
 
-        // Fetch all meals in one go (batch)
-        const meals = await Promise.all(mealIds.map((id) => ctx.db.get(id)));
-
-        // Attach meal data to each planMeal
         const planMealsWithMeal = planMeals.map((pm) => ({
           ...pm,
-          meal: meals.find((m) => m && m._id === pm.mealId) || null,
+          meal: mealMap.get(pm.mealId) || null,
+        }));
+
+        const planExtrasWithMeal = planExtras.map((pe) => ({
+          ...pe,
+          meal: mealMap.get(pe.mealId) || null,
         }));
 
         return {
@@ -103,6 +131,7 @@ export const getWeeklyMealPlan = authQuery({
 
             return indexA - indexB;
           }),
+          planExtras: planExtrasWithMeal,
         };
       }),
     );
@@ -113,8 +142,11 @@ export const getWeeklyMealPlan = authQuery({
 });
 
 export const generateMealPlan = authMutation({
-  args: { weekStart: v.number() },
-  handler: async (ctx, { weekStart }) => {
+  args: {
+    weekStart: v.number(),
+    existingIngredientIds: v.optional(v.array(v.id("ingredients"))),
+  },
+  handler: async (ctx, { weekStart, existingIngredientIds }) => {
     const weekDates = Array.from({ length: 7 }, (_, i) =>
       addDays(weekStart, i).getTime(),
     );
@@ -168,6 +200,7 @@ export const generateMealPlan = authMutation({
       dinner: [],
       snack: [],
       dessert: [],
+      drinks: [],
     };
 
     for (const meal of allMeals) {
@@ -229,13 +262,38 @@ export const generateMealPlan = authMutation({
           );
           continue; // Skip if no meals are available for this category
         }
-        // Select a random meal from the filtered list for this category
-        const randomMeal =
-          availableMeals[Math.floor(Math.random() * availableMeals.length)];
+        // Prefer meals that use existing ingredients when provided
+        let selectedMeal: (typeof availableMeals)[0];
+        if (existingIngredientIds && existingIngredientIds.length > 0) {
+          const mealsWithScores = await Promise.all(
+            availableMeals.map(async (meal) => {
+              const mealIngredients = await ctx.db
+                .query("mealIngredients")
+                .withIndex("by_meal", (q) => q.eq("mealId", meal._id))
+                .collect();
+              const matchingCount = mealIngredients.filter(
+                (mi) =>
+                  mi.ingredientId &&
+                  existingIngredientIds.includes(mi.ingredientId),
+              ).length;
+              return { meal, score: matchingCount };
+            }),
+          );
+          const maxScore = Math.max(...mealsWithScores.map((m) => m.score));
+          const bestMeals =
+            maxScore > 0
+              ? mealsWithScores.filter((m) => m.score === maxScore)
+              : mealsWithScores;
+          selectedMeal =
+            bestMeals[Math.floor(Math.random() * bestMeals.length)].meal;
+        } else {
+          selectedMeal =
+            availableMeals[Math.floor(Math.random() * availableMeals.length)];
+        }
 
         await ctx.db.insert("planMeals", {
           planId,
-          mealId: randomMeal._id,
+          mealId: selectedMeal._id,
           category: category, // Store the category for which this meal was chosen
           createdAt: Date.now(),
           updatedAt: Date.now(),
@@ -335,6 +393,74 @@ export const updatePlannedMealByCategory = authMutation({
 
     // 6. --- Return Result ---
     return { success: true, plannedMealId: plannedMealIdToReturn };
+  },
+});
+
+export const markPlanMealAsEaten = authMutation({
+  args: {
+    planMealId: v.id("planMeals"),
+    eaten: v.boolean(),
+  },
+  handler: async (ctx, { planMealId, eaten }) => {
+    const planMeal = await ctx.db.get(planMealId);
+    if (!planMeal) throw new Error("Planned meal not found.");
+
+    const plan = await ctx.db.get(planMeal.planId);
+    if (!plan || plan.userId !== ctx.user.id) {
+      throw new Error("Not authorized to update this plan.");
+    }
+
+    await ctx.db.patch(planMealId, {
+      eatenAt: eaten ? Date.now() : null,
+      updatedAt: Date.now(),
+    });
+
+    return { success: true };
+  },
+});
+
+export const addPlanExtra = authMutation({
+  args: {
+    planId: v.id("plans"),
+    mealId: v.id("meals"),
+    servingAmount: v.optional(v.number()),
+  },
+  handler: async (ctx, { planId, mealId, servingAmount }) => {
+    const plan = await ctx.db.get(planId);
+    if (!plan || plan.userId !== ctx.user.id) {
+      throw new Error("Plan not found or not authorized.");
+    }
+
+    const meal = await ctx.db.get(mealId);
+    if (!meal) {
+      throw new Error("Meal not found.");
+    }
+
+    await ctx.db.insert("planExtras", {
+      planId,
+      mealId,
+      servingAmount,
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
+    });
+
+    return { success: true };
+  },
+});
+
+export const removePlanExtra = authMutation({
+  args: { planExtraId: v.id("planExtras") },
+  handler: async (ctx, { planExtraId }) => {
+    const extra = await ctx.db.get(planExtraId);
+    if (!extra) throw new Error("Extra not found.");
+
+    const plan = await ctx.db.get(extra.planId);
+    if (!plan || plan.userId !== ctx.user.id) {
+      throw new Error("Not authorized to remove this extra.");
+    }
+
+    await ctx.db.delete(planExtraId);
+    return { success: true };
   },
 });
 

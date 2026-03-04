@@ -1,17 +1,24 @@
 "use client";
+import { useConvexMutation } from "@convex-dev/react-query";
 import type { FunctionReturnType } from "convex/server";
 import { format, isValid, toDate } from "date-fns";
 import { camelCase } from "lodash";
-import { Flame, Lock, Unlock } from "lucide-react"; // Import Unlock icon
+import { Check, Flame, Lock, Minus, Pencil, Plus, Unlock } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useTranslations } from "use-intl";
+import { useTranslations } from "next-intl";
+import { useState } from "react";
 import { For } from "@/components/for-each";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import type { api } from "@/convex/_generated/api";
+import { Progress } from "@/components/ui/progress";
+import { api } from "@/convex/_generated/api";
+import type { Id } from "@/convex/_generated/dataModel";
+import type { MEAL_CATEGORIES } from "@/convex/schema";
 import { useDateLocale } from "@/hooks/use-date-locale";
+import { getExtraKcal, getPlanTotals } from "@/lib/plan-kcal";
 import { cn } from "@/lib/utils";
+import { ModalMeals } from "./ModalMeals";
 import { useMealPlanner } from "./store";
 
 const DATE_FORMAT_DISPLAY_CARD = "MMM dd";
@@ -21,18 +28,49 @@ interface PlanCardProps {
 }
 
 export function PlanCard({ plan }: PlanCardProps) {
-  const { lockMealPlan, isLocking } = useMealPlanner();
+  const { lockMealPlan, isLocking, servings } = useMealPlanner();
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isExtraModalOpen, setIsExtraModalOpen] = useState(false);
+  const [editingCategory, setEditingCategory] = useState<
+    (typeof MEAL_CATEGORIES)[number] | null
+  >(null);
+  const markEatenMutation = useConvexMutation(api.plans.markPlanMealAsEaten);
+  const updateMealMutation = useConvexMutation(
+    api.plans.updatePlannedMealByCategory,
+  );
+  const addExtraMutation = useConvexMutation(api.plans.addPlanExtra);
+  const removeExtraMutation = useConvexMutation(api.plans.removePlanExtra);
   const t = useTranslations("mealPlanner");
   const tMeal = useTranslations("meal");
+  const tExtras = useTranslations("planExtras");
   const dateLocale = useDateLocale();
 
-  const summarizedCalories = plan?.planMeals.reduce(
-    (previousValue, currentValue) => {
-      const calories = currentValue.meal?.calories ?? 0;
-      return previousValue + calories;
-    },
-    0,
-  );
+  const handleOpenChangeMeal = (category: (typeof MEAL_CATEGORIES)[number]) => {
+    setEditingCategory(category);
+    setIsModalOpen(true);
+  };
+
+  const handleMealSelect = async (mealId: Id<"meals">) => {
+    if (!plan?.date || !editingCategory) return;
+    await updateMealMutation({
+      date: plan.date,
+      category: editingCategory,
+      newMealId: mealId,
+    });
+    setIsModalOpen(false);
+  };
+
+  const handleExtraMealSelect = async (mealId: Id<"meals">) => {
+    if (!plan) return;
+    await addExtraMutation({ planId: plan._id, mealId });
+    setIsExtraModalOpen(false);
+  };
+
+  const { total: totalKcal, eaten: eatenKcal } = plan?.planMeals
+    ? getPlanTotals(plan.planMeals, servings, plan.planExtras)
+    : { total: 0, eaten: 0 };
+  const progressPercent =
+    totalKcal > 0 ? Math.min(100, Math.round((eatenKcal / totalKcal) * 100)) : 0;
 
   if (!plan) {
     return (
@@ -101,6 +139,17 @@ export function PlanCard({ plan }: PlanCardProps) {
         </CardTitle>
       </CardHeader>
       <CardContent className="flex grow flex-col justify-between space-y-2 p-3">
+        <ModalMeals
+          isOpen={isModalOpen}
+          onOpenChange={setIsModalOpen}
+          onMealSelect={handleMealSelect}
+          filter={editingCategory ?? undefined}
+        />
+        <ModalMeals
+          isOpen={isExtraModalOpen}
+          onOpenChange={setIsExtraModalOpen}
+          onMealSelect={handleExtraMealSelect}
+        />
         <div className="flex items-end justify-between gap-4">
           <ul className="group flex flex-1 flex-wrap justify-between gap-4 text-xs">
             <For
@@ -113,6 +162,9 @@ export function PlanCard({ plan }: PlanCardProps) {
             >
               {(plannedMeal) => {
                 const isPlannedMeal = plannedMeal.meal?.name;
+                const isEaten = !!plannedMeal.eatenAt;
+                const category =
+                  plannedMeal.category as (typeof MEAL_CATEGORIES)[number];
                 return (
                   <li
                     className={cn("flex-1", {
@@ -122,31 +174,75 @@ export function PlanCard({ plan }: PlanCardProps) {
                     key={`${plan._id}-${plannedMeal.meal?.categories?.toString}-${plannedMeal._id}`}
                   >
                     {isPlannedMeal ? (
-                      <Link
-                        className="relative flex h-full min-w-24 flex-wrap items-center justify-center rounded-xl border-2 border-neutral-700 border-dashed bg-white p-2 hover:underline dark:bg-neutral-950"
-                        href={`/meals/${plannedMeal.meal?._id}`}
-                      >
-                        <Image
-                          src={plannedMeal.meal?.imageUrl ?? "/placeholder.png"}
-                          width={128}
-                          height={128}
-                          className={"rounded-lg"}
-                          alt={"Meal image"}
-                        />
-                        <span className="absolute top-2 right-2 rounded-full bg-neutral-200 px-2 py-1 font-semibold capitalize shadow-xs dark:bg-neutral-900/25">
-                          {tMeal(camelCase(plannedMeal.category))}
-                        </span>
-                        <p className="w-full px-2">
-                          {plannedMeal.meal?.name.trim()}
-                        </p>
-                      </Link>
+                      <div className="relative flex flex-col gap-1">
+                        <Link
+                          className="relative flex h-full min-w-24 flex-wrap items-center justify-center rounded-xl border-2 border-neutral-700 border-dashed bg-white p-2 hover:underline dark:bg-neutral-950"
+                          href={`/meals/${plannedMeal.meal?._id}`}
+                        >
+                          <Image
+                            src={plannedMeal.meal?.imageUrl ?? "/placeholder.png"}
+                            width={128}
+                            height={128}
+                            className={cn("rounded-lg", isEaten && "opacity-60")}
+                            alt={"Meal image"}
+                          />
+                          <span className="absolute top-2 right-2 rounded-full bg-neutral-200 px-2 py-1 font-semibold capitalize shadow-xs dark:bg-neutral-900/25">
+                            {tMeal(camelCase(plannedMeal.category))}
+                          </span>
+                          <p className="w-full px-2">
+                            {plannedMeal.meal?.name.trim()}
+                          </p>
+                        </Link>
+                        <div className="flex items-center gap-1">
+                          <Button
+                            size="icon"
+                            variant={isEaten ? "default" : "outline"}
+                            className="h-8 w-8 shrink-0"
+                            aria-label={
+                              isEaten ? t("unmarkAsEaten") : t("markAsEaten")
+                            }
+                            onClick={(e) => {
+                              e.preventDefault();
+                              markEatenMutation({
+                                planMealId: plannedMeal._id,
+                                eaten: !isEaten,
+                              });
+                            }}
+                          >
+                            <Check className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            size="icon"
+                            variant="outline"
+                            className="h-8 w-8 shrink-0"
+                            aria-label={t("changeMeal")}
+                            onClick={(e) => {
+                              e.preventDefault();
+                              handleOpenChangeMeal(category);
+                            }}
+                          >
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
                     ) : (
-                      <Link
-                        className="text-neutral-500 underline"
-                        href={`/plans/${plan._id}`}
-                      >
-                        {t("plannedMealMissing")}
-                      </Link>
+                      <div className="flex flex-col items-center gap-2">
+                        <Button
+                          size="icon"
+                          variant="outline"
+                          className="h-8 w-8 shrink-0"
+                          aria-label={t("changeMeal")}
+                          onClick={() => handleOpenChangeMeal(category)}
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                        <Link
+                          className="text-neutral-500 underline"
+                          href={`/plans/${plan._id}`}
+                        >
+                          {t("plannedMealMissing")}
+                        </Link>
+                      </div>
                     )}
                   </li>
                 );
@@ -155,12 +251,68 @@ export function PlanCard({ plan }: PlanCardProps) {
           </ul>
         </div>
 
-        {/* // Statistics component  */}
-        <div className="flex justify-end py-4">
-          <p className="flex items-center gap-2 rounded-xl border border-neutral-400 border-dashed px-3 py-2">
-            {summarizedCalories} Kcal
-            <Flame size={18} className="mb-[2px]" />
-          </p>
+        {/* Extras */}
+        {plan.planExtras && plan.planExtras.length > 0 && (
+          <div className="flex flex-wrap gap-2">
+            {plan.planExtras.map((extra) => {
+              const extraKcal = getExtraKcal(extra);
+              return (
+                <span
+                  key={extra._id}
+                  className="flex items-center gap-1 rounded-lg border border-neutral-400 border-dashed bg-neutral-100 px-2 py-1 text-xs dark:bg-neutral-900"
+                >
+                  {extra.meal ? (
+                    <Link
+                      href={`/meals/${extra.meal._id}`}
+                      className="hover:underline"
+                    >
+                      {extra.meal.name}
+                    </Link>
+                  ) : (
+                    "—"
+                  )}{" "}
+                  ({extraKcal} kcal)
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    className="h-5 w-5 shrink-0"
+                    aria-label={tExtras("remove")}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      removeExtraMutation({ planExtraId: extra._id });
+                    }}
+                  >
+                    <Minus className="h-3 w-3" />
+                  </Button>
+                </span>
+              );
+            })}
+          </div>
+        )}
+
+        {/* // Kcal stats & progress */}
+        <div className="space-y-2 py-4">
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex items-center gap-2">
+              <p className="flex items-center gap-2 rounded-xl border border-neutral-400 border-dashed px-3 py-2 text-sm">
+                <Flame size={18} className="mb-[2px]" />
+                {eatenKcal}/{totalKcal} kcal
+              </p>
+              <Button
+                size="sm"
+                variant="outline"
+                className="h-8 shrink-0"
+                aria-label={tExtras("addExtra")}
+                onClick={() => setIsExtraModalOpen(true)}
+              >
+                <Plus className="mr-1 h-3 w-3" />
+                {tExtras("addExtra")}
+              </Button>
+            </div>
+          </div>
+          {totalKcal > 0 && (
+            <Progress value={progressPercent} className="h-2" />
+          )}
         </div>
 
         <Button size={"sm"} asChild>

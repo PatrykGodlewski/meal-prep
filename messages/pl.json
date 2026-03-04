@@ -17,6 +17,8 @@
     "notCreated": "Nie utworzono",
     "shoppingList": "Lista zakupów",
     "noIngredients": "Brak składników",
+    "forMeals": "Dla posiłków",
+    "showMealBreakdown": "Pokaż, do jakich posiłków jest ten składnik",
     "noRecipes": "Brak przepisów",
     "noMealsPlanned": "Brak zaplanowanych posiłków",
     "mealPlan": "Plan posiłków",
@@ -40,13 +42,57 @@
     "unlockPlanSuccessDescription": "Plan posiłków został pomyślnie odblokowany!",
     "unlockPlanErrorFallback": "Nie udało się odblokować planu posiłków.",
     "lockPlan": "Zablokuj plan",
-    "unlockPlan": "Odblokuj plan"
+    "unlockPlan": "Odblokuj plan",
+    "markAsEaten": "Oznacz jako zjedzone",
+    "unmarkAsEaten": "Cofnij oznaczenie",
+    "changeMeal": "Zmień posiłek",
+    "generateOptions": "Opcje generowania",
+    "generateWithExistingIngredients": "Wygeneruj na podstawie posiadanych składników",
+    "partialAmountNote": "Kup tylko tę ilość lub więcej — część już masz"
+  },
+  "generateWithExistingIngredients": {
+    "title": "Wygeneruj plan na podstawie posiadanych składników",
+    "description": "Dodaj składniki, które już masz w lodówce. Plan będzie priorytetyzował posiłki z tymi składnikami, a one zostaną usunięte z listy zakupów.",
+    "addIngredient": "Dodaj składnik",
+    "searchPlaceholder": "Szukaj składników...",
+    "searching": "Szukam...",
+    "noIngredientsFound": "Nie znaleziono składników.",
+    "ingredientsYouHave": "Składniki, które masz",
+    "remove": "Usuń",
+    "generate": "Wygeneruj plan"
+  },
+  "modalMeals": {
+    "title": "Wybierz posiłek",
+    "description": "Wyszukaj posiłek i kliknij, aby dodać go do planu.",
+    "searchPlaceholder": "Szukaj posiłków po nazwie...",
+    "clear": "Wyczyść",
+    "showAllMeals": "Pokaż wszystkie posiłki",
+    "noMealsFound": "Nie znaleziono posiłków spełniających kryteria.",
+    "loadMore": "Załaduj więcej",
+    "noMoreMeals": "Brak kolejnych posiłków."
+  },
+  "fridge": {
+    "header": "Moja lodówka",
+    "emptyHint": "Użyj wyszukiwarki powyżej, aby dodać to, co masz.",
+    "description": "Składniki, które masz w domu. Lista zakupów automatycznie odejmie je, żebyś nie kupował ich ponownie lub za dużo.",
+    "addIngredient": "Dodaj składnik",
+    "searchPlaceholder": "Szukaj składników...",
+    "searching": "Szukam...",
+    "noIngredientsFound": "Nie znaleziono składników.",
+    "amount": "Ilość",
+    "empty": "Twoja lodówka jest pusta. Dodaj składniki, które masz w domu.",
+    "remove": "Usuń",
+    "addSuccess": "Dodano do lodówki",
+    "addError": "Nie udało się dodać do lodówki",
+    "updateError": "Nie udało się zaktualizować",
+    "removeError": "Nie udało się usunąć"
   },
   "appSidebar": {
     "features": "Funkcje",
     "mealPlanner": "Planner Posiłków",
     "shoppingList": "Lista zakupów",
     "ingredients": "Składniki",
+    "fridge": "Moja lodówka",
     "meals": "Posiłki",
     "settings": "Ustawienia",
     "plans": "Plany posiłków",
@@ -58,7 +104,8 @@
     "lunch": "Obiad",
     "dinner": "Kolacja",
     "snack": "Przekąska",
-    "dessert": "Deser"
+    "dessert": "Deser",
+    "drinks": "Napoje"
   },
   "mealDetails": {
     "noImage": "Brak dostępnego zdjęcia",
@@ -66,10 +113,12 @@
     "totalTime": "{count, plural, =1 {# minuta} other {# minuty} few {# minuty} many {# minut}} łącznie",
     "servings": "{count, plural, =1 {# porcja} other {# porcje} few {# porcje} many {# porcji}}",
     "calories": "{count, plural, =1 {# kaloria} other {# kalorie} few {# kalorie} many {# kalorii}}",
-    "caloriesByIngredients": "{count} kalorii ze składników [tryb deweloperski]",
+    "caloriesManual": "{count} kcal (ręcznie)",
+    "caloriesByIngredients": "{count} kcal (ze składników)",
     "descriptionTitle": "Opis",
     "ingredientsTitle": "Składniki",
     "optionalMarker": "(opcjonalnie)",
+    "substitutesLabel": "Zamienniki",
     "noIngredients": "Brak składników.",
     "instructionsTitle": "Instrukcje",
     "noInstructions": "Brak instrukcji.",
@@ -83,7 +132,10 @@
   "planList": {
     "header": "Plany posiłków",
     "noMealPlans": "Nie znaleziono planów posiłków. Zacznij od utworzenia jednego!",
+    "noIngredients": "Nie znaleziono składników.",
     "viewPlan": "Zobacz Plan",
+    "viewIngredient": "Zobacz składnik",
+    "delete": "Usuń",
     "createdAt": "Utworzono",
     "lastUpdate": "Ostatnia aktualizacja",
     "id": "ID"
@@ -92,8 +144,45 @@
     "meals": "Posiłki",
     "addMeal": "Dodaj Posiłek"
   },
+  "generateMealAI": {
+    "title": "Wygeneruj posiłek z AI",
+    "description": "Opisz, jakiego posiłku szukasz. AI stworzy przepis na podstawie Twoich preferencji i podobnych posiłków w bibliotece.",
+    "placeholder": "np. Lekka wegetariańska kolacja poniżej 400 kcal",
+    "generate": "Generuj",
+    "generating": "Generowanie...",
+    "success": "Posiłek utworzony pomyślnie!",
+    "viewMeal": "Zobacz posiłek",
+    "generateAnother": "Generuj kolejny",
+    "error": "Generowanie nie powiodło się",
+    "tryAgain": "Spróbuj ponownie"
+  },
+  "ingredientList": {
+    "header": "Składniki"
+  },
+  "ingredientEditor": {
+    "editIngredient": "Edytuj składnik",
+    "replacementsLabel": "Domyślne zamienniki",
+    "replacementsPlaceholder": "Wybierz składniki, które mogą zastąpić ten",
+    "replacementsHelp": "Te zamienniki mogą być używane w przepisach. Współczynnik = ile zamiennika na 1 jednostkę oryginału (np. 1.2 = 100g wymaga 120g).",
+    "replacementsNoOptions": "Dodaj najpierw więcej składników, aby zdefiniować zamienniki.",
+    "ratioLabel": "Współczynnik",
+    "ratioHelp": "Ile zamiennika na 1 jednostkę oryginału (np. 1.2 = 100g wymaga 120g)",
+    "nameLabel": "Nazwa",
+    "namePlaceholder": "Wprowadź nazwę składnika",
+    "categoryLabel": "Kategoria",
+    "categoryPlaceholder": "Wybierz kategorię",
+    "unitLabel": "Jednostka",
+    "unitPlaceholder": "Wybierz jednostkę",
+    "caloriesLabel": "Kalorie (na jednostkę)",
+    "caloriesPlaceholder": "np. 100",
+    "saveChanges": "Zapisz zmiany",
+    "saving": "Zapisywanie...",
+    "updateSuccess": "Składnik zaktualizowany pomyślnie.",
+    "updateError": "Nie udało się zaktualizować składnika."
+  },
   "searchInput": {
     "searchMealsByName": "Szukaj posiłków po nazwie...",
+    "searchIngredientsByName": "Szukaj składników po nazwie...",
     "filterByCategory": "Filtruj według kategorii"
   },
   "mealEditor": {
@@ -106,6 +195,12 @@
     "deleting": "Usuwanie...",
     "imageUrlLabel": "Adres URL obrazu",
     "imageUrlPlaceholder": "Wprowadź adres URL obrazu (np. https://...)",
+    "imageUploadFile": "Prześlij zdjęcie",
+    "imageUploading": "Przesyłanie...",
+    "imageUrlOrUpload": "Lub wprowadź adres URL",
+    "imageUploadInvalidType": "Wybierz obraz w formacie JPEG, PNG, WebP lub GIF.",
+    "imageUploadTooLarge": "Obraz musi mieć mniej niż {max}MB.",
+    "imageUploadError": "Przesyłanie nie powiodło się. Spróbuj ponownie.",
     "mealNameLabel": "Nazwa Posiłku",
     "mealNamePlaceholder": "Wprowadź nazwę posiłku",
     "prepTimeLabel": "Czas przygotowania (minuty)",
@@ -122,7 +217,27 @@
     "descriptionLabel": "Opis",
     "descriptionPlaceholder": "Napisz krótki opis posiłku...",
     "ingredientsTitle": "Składniki",
+    "ingredientIndex": "Składnik #{index}",
     "addIngredientButton": "Dodaj Składnik",
+    "ingredientLabel": "Składnik",
+    "ingredientSelectPlaceholder": "Wybierz lub wpisz...",
+    "ingredientSearchPlaceholder": "Szukaj lub wpisz nowy...",
+    "ingredientEmptyState": "Nie znaleziono. Wpisz, aby dodać nowy.",
+    "quantityLabel": "Ilość",
+    "unitLabel": "Jednostka",
+    "categoryLabel": "Kategoria",
+    "quantityPlaceholder": "np., 2",
+    "notesLabel": "Notatki",
+    "notesPlaceholder": "np., drobno pokrojone",
+    "optionalLabel": "Opcjonalnie",
+    "caloriesPerUnitLabel": "kcal na 100g",
+    "caloriesPerUnitPlaceholder": "np. 100",
+    "overrideReplacements": "Zamienniki w tym przepisie",
+    "overrideReplacementsHelp": "Wybierz, które zamienniki są dozwolone w tym posiłku (domyślnie: wszystkie)",
+    "addReplacementsHelp": "Wybierz składniki, które mogą zastąpić ten w tym przepisie.",
+    "replacementRatioHelp": "Współczynnik = ile zamiennika na 1 jednostkę oryginału (np. 1.2 = 100g wymaga 120g).",
+    "ratioLabel": "Współczynnik",
+    "overrideReplacementsPlaceholder": "Wybierz zamienniki...",
     "instructionsLabel": "Instrukcje",
     "instructionsPlaceholder": "Wprowadź etapy przygotowania i gotowania...",
     "toastErrorTitle": "Błąd",
@@ -189,6 +304,17 @@
     "other": "Inne",
     "spiceHerb": "Przyprawy/Zioła"
   },
+  "planExtras": {
+    "addExtra": "Dodaj dodatkowy posiłek",
+    "addExtraDescription": "Dodaj napoje i inne posiłki z biblioteki. Utwórz nowe posiłki w sekcji Posiłki, jeśli potrzeba.",
+    "nameLabel": "Nazwa",
+    "namePlaceholder": "np. Kawa z mlekiem",
+    "caloriesLabel": "Kalorie",
+    "caloriesPlaceholder": "np. 80",
+    "add": "Dodaj",
+    "cancel": "Anuluj",
+    "remove": "Usuń"
+  },
   "mealPlanDetail": {
     "header": "Plan Posiłków",
     "noMealPlanDetails": "Nie znaleziono planu posiłków. Zacznij od utworzenia jednego!",
@@ -222,7 +348,136 @@
     "backToSignIn": "Powrót do logowania",
     "cancel": "Anuluj"
   },
+  "settings": {
+    "preferencesTitle": "Preferencje",
+    "preferencesDescription": "Zarządzaj dietą, składnikami i nawykami żywieniowymi. Zmiany zapisują się automatycznie."
+  },
   "layout": {
     "description": "Najszybszy sposób na zaplanowanie posiłków na tydzień"
+  },
+  "onboarding": {
+    "step1": {
+      "title": "Opowiedz o sobie",
+      "subtitle": "Użyjemy tych danych do personalizacji planów posiłków.",
+      "ageLabel": "Wiek",
+      "agePlaceholder": "np. 30",
+      "genderLabel": "Płeć",
+      "genderPlaceholder": "np. mężczyzna, kobieta",
+      "heightLabel": "Wzrost (cm)",
+      "heightPlaceholder": "np. 170",
+      "weightLabel": "Waga (kg)",
+      "weightPlaceholder": "np. 70",
+      "activityLevelLabel": "Poziom aktywności",
+      "activityLevelPlaceholder": "Wybierz",
+      "activityLevels": {
+        "sedentary": "Siedzący (mało lub brak ćwiczeń)",
+        "light": "Lekki (1-3 dni/tydz.)",
+        "moderate": "Umiarkowany (3-5 dni/tydz.)",
+        "active": "Aktywny (6-7 dni/tydz.)",
+        "very_active": "Bardzo aktywny (codziennie intensywnie)"
+      },
+      "primaryGoalLabel": "Główny cel",
+      "primaryGoalPlaceholder": "Wybierz",
+      "primaryGoals": {
+        "weight_loss": "Utrata wagi",
+        "maintenance": "Utrzymanie wagi",
+        "muscle_gain": "Budowanie mięśni"
+      }
+    },
+    "step2": {
+      "title": "Ograniczenia dietetyczne",
+      "subtitle": "Opowiedz o dietach i alergiach.",
+      "strictDietsLabel": "Ścisłe diety",
+      "strictDietsPlaceholder": "Wybierz",
+      "allergiesLabel": "Alergie",
+      "allergiesPlaceholder": "Wybierz",
+      "diets": {
+        "vegan": "Wegańska",
+        "vegetarian": "Wegetariańska",
+        "keto": "Keto",
+        "paleo": "Paleo",
+        "mediterranean": "Śródziemnomorska",
+        "low_carb": "Niskowęglowodanowa",
+        "halal": "Halal",
+        "kosher": "Koszerna",
+        "none": "Brak"
+      },
+      "allergies": {
+        "peanuts": "Orzechy ziemne",
+        "tree_nuts": "Orzechy",
+        "shellfish": "Skorupiaki",
+        "fish": "Ryby",
+        "gluten": "Gluten",
+        "dairy": "Nabiał",
+        "eggs": "Jaja",
+        "soy": "Soja",
+        "sesame": "Sezam",
+        "none": "Brak"
+      }
+    },
+    "step3": {
+      "title": "Preferencje typów dań",
+      "subtitle": "Rodzaje dań, które preferujesz lub unikasz – np. lubię sałatki, ale nie kremowe zupy.",
+      "preferredTypesLabel": "Wolę te rodzaje dań",
+      "avoidedTypesLabel": "Unikam tych rodzajów dań",
+      "dishTypes": {
+        "soup": "Zupy",
+        "salad": "Sałatki",
+        "stir_fry": "Duszone / stir-fry",
+        "casserole": "Zapiekanki",
+        "roasted": "Pieczone",
+        "grilled": "Z grilla",
+        "baked": "Pieczone",
+        "stew": "Gulasze",
+        "curry": "Curry",
+        "raw": "Surowe / świeże",
+        "fried": "Smażone",
+        "sandwich_wrap": "Kanapki i wrapy",
+        "bowl": "Bowle",
+        "none": "Brak"
+      }
+    },
+    "step4": {
+      "title": "Logistyka i nawyki",
+      "subtitle": "Jak zwykle jesz i gotujesz?",
+      "mealsPerDayLabel": "Posiłków dziennie",
+      "mealsPerDayPlaceholder": "np. 3",
+      "snacksPerDayLabel": "Przekąsek dziennie",
+      "snacksPerDayPlaceholder": "np. 1",
+      "maxCookingTimeLabel": "Maks. czas gotowania na posiłek",
+      "maxCookingTimePlaceholder": "Wybierz",
+      "cookingSkillLabel": "Umiejętności kulinarne",
+      "cookingSkillPlaceholder": "Wybierz",
+      "budgetLabel": "Budżet",
+      "budgetPlaceholder": "Wybierz",
+      "cookingTimes": {
+        "15": "Do 15 min",
+        "30": "Do 30 min",
+        "45": "Do 45 min",
+        "60": "Do 1 godz.",
+        "90": "1 godz. lub więcej"
+      },
+      "cookingSkills": {
+        "beginner": "Początkujący",
+        "intermediate": "Średniozaawansowany",
+        "advanced": "Zaawansowany"
+      },
+      "budgets": {
+        "cheap": "Oszczędny",
+        "moderate": "Umiarkowany",
+        "premium": "Premium"
+      }
+    },
+    "step5": {
+      "title": "Apetyt i różnorodność",
+      "subtitle": "Jak lubisz jeść w ciągu tygodnia?",
+      "prefersMealPrepLabel": "Meal prep",
+      "prefersMealPrepHelp": "Ten sam posiłek przez kilka dni",
+      "prefersVarietyLabel": "Codzienna różnorodność",
+      "prefersVarietyHelp": "Różne posiłki każdego dnia"
+    },
+    "next": "Dalej",
+    "back": "Wstecz",
+    "completing": "Kończenie..."
   }
 }

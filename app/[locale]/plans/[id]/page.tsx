@@ -3,6 +3,7 @@ import { preloadQuery } from "convex/nextjs";
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { BackButton } from "@/components/back-button";
+import ServingController from "@/components/serving-controller";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
 import { MealPlanDetail } from "./MealPlanDetailClient";
@@ -31,7 +32,10 @@ export default async function PlanDetailPage({ params }: PlanDetailPageProps) {
   return (
     <div className="container mx-auto space-y-4 px-4 py-8">
       <BackButton />
-      <h1 className="font-bold text-3xl">{t("header")}</h1>
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <h1 className="font-bold text-3xl">{t("header")}</h1>
+        <ServingController />
+      </div>
       <MealPlanDetail preloadedMealPlan={preloadedMealPlan} />
     </div>
   );

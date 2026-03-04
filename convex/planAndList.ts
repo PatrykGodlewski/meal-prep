@@ -9,10 +9,18 @@ export const generatePlanAndShoppingList = authMutation({
   },
   handler: async (ctx, { weekStart }) => {
     try {
+      const fridgeItems = await ctx.db
+        .query("fridgeItems")
+        .withIndex("by_user", (q) => q.eq("userId", ctx.user.id))
+        .collect();
+      const existingIngredientIds = fridgeItems.map((fi) => fi.ingredientId);
+
       const { mealPlanIds } = await ctx.runMutation(
         api.plans.generateMealPlan,
         {
           weekStart,
+          existingIngredientIds:
+            existingIngredientIds.length > 0 ? existingIngredientIds : undefined,
         },
       );
 
@@ -25,11 +33,7 @@ export const generatePlanAndShoppingList = authMutation({
       return { success: true };
     } catch (error) {
       console.error("Error generating plan and shopping list:", error);
-      // TODO:
-      // Propagate the error or return a specific error structure
-      // For simplicity, re-throwing allows the client's onError to catch it.
-      // Alternatively: return { success: false, error: error instanceof Error ? error.message : "Unknown error" };
-      throw error; // Let the client handle the error state
+      throw error;
     }
   },
 });

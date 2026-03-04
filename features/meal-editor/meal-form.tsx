@@ -45,6 +45,12 @@ const mapMealToFormValues = (
         quantity: mi.quantity,
         isOptional: mi.isOptional ?? false,
         notes: mi.notes ?? "",
+        allowedReplacements:
+          ((mi as { allowedReplacements?: { ingredientId: string; ratio?: number }[] })
+            .allowedReplacements ??
+          (mi as { allowedReplacementIds?: string[] }).allowedReplacementIds?.map(
+            (id) => ({ ingredientId: id, ratio: 1 }),
+          )) as MutationMealEditValues["ingredients"][number]["allowedReplacements"],
       }),
     ) ?? [];
 
@@ -144,7 +150,7 @@ export function MealForm({
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
           <div className="overflow-hidden rounded-lg bg-white shadow-md dark:bg-neutral-900">
-            <MealFormImage control={form.control} />
+            <MealFormImage control={form.control} setValue={form.setValue} />
             <div className="space-y-8 p-6">
               <MealFormDetails control={form.control} />
               <MealFormIngredients

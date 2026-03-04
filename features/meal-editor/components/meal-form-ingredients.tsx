@@ -48,15 +48,15 @@ export function MealFormIngredients({
   };
 
   return (
-    <div className="space-y-6 border-t pt-6">
-      <div className="flex items-center justify-between">
-        <h3 className="font-semibold text-xl">{t("ingredientsTitle")}</h3>
+    <div className="space-y-6 border-t border-border/60 pt-6">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <h3 className="font-semibold text-xl tracking-tight">{t("ingredientsTitle")}</h3>
         <Button
           type="button"
           variant="outline"
           size="sm"
           onClick={handleAddIngredient}
-          className="flex items-center gap-1"
+          className="flex gap-1.5 rounded-lg border-primary/30 transition-colors hover:border-primary/50 hover:bg-primary/5"
         >
           <Plus className="h-4 w-4" /> {t("addIngredientButton")}
         </Button>

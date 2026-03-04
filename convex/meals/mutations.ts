@@ -27,6 +27,10 @@ export const addMeal = authMutation({
         updatedAt: now,
       });
 
+      ctx.scheduler.runAfter(0, internal.ai.embeddings.generateAndStoreEmbedding, {
+        mealId,
+      });
+
       await Promise.all(
         ingredients.map(async (ingredient) => {
           const finalIngredientId = await ctx.runMutation(
@@ -40,6 +44,7 @@ export const addMeal = authMutation({
             quantity: ingredient.quantity,
             isOptional: ingredient.isOptional ?? false,
             notes: ingredient.notes,
+            allowedReplacements: ingredient.allowedReplacements,
             createdAt: now,
             updatedAt: now,
           });
@@ -78,6 +83,10 @@ export const editMeal = authMutation({
         ...newMeal,
         searchContent,
         updatedAt: now,
+      });
+
+      ctx.scheduler.runAfter(0, internal.ai.embeddings.generateAndStoreEmbedding, {
+        mealId: args.mealId,
       });
 
       await ctx.runMutation(internal.meals.helpers.handleCategoryChanges, {

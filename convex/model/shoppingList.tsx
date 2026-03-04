@@ -1,9 +1,18 @@
 import type { Id } from "../_generated/dataModel";
 import type { AuthMutationCtx } from "../custom/mutation";
 
+/** Map of ingredientId -> amount user has. Mutated in place as amounts are "used" per day. */
+type RemainingIngredients = Map<Id<"ingredients">, number>;
+
 export async function generateShoppingList(
   ctx: AuthMutationCtx,
-  { planId }: { planId: Id<"plans"> },
+  {
+    planId,
+    remainingIngredients,
+  }: {
+    planId: Id<"plans">;
+    remainingIngredients?: RemainingIngredients;
+  },
 ) {
   try {
     const userId = ctx.user.id;
@@ -61,18 +70,51 @@ export async function generateShoppingList(
     await Promise.all(existingItems.map((item) => ctx.db.delete(item._id)));
 
     const now = Date.now();
+    const itemsToInsert: Array<{
+      ingredientId: Id<"ingredients">;
+      amount: number;
+      existingAmountUsed?: number;
+    }> = [];
+
+    for (const [ingredientId, needed] of aggregatedIngredients.entries()) {
+      let amountToAdd = needed;
+      let existingAmountUsed: number | undefined;
+
+      if (remainingIngredients) {
+        const has = remainingIngredients.get(ingredientId) ?? 0;
+        if (has >= needed) {
+          // User has enough - remove from list entirely, subtract from remaining
+          remainingIngredients.set(ingredientId, has - needed);
+          continue;
+        }
+        if (has > 0) {
+          // Partial - add remainder to list, mark as partial
+          amountToAdd = needed - has;
+          existingAmountUsed = has;
+          remainingIngredients.set(ingredientId, 0);
+        }
+      }
+
+      itemsToInsert.push({
+        ingredientId,
+        amount: amountToAdd,
+        ...(existingAmountUsed !== undefined && { existingAmountUsed }),
+      });
+    }
 
     await Promise.all(
-      Array.from(aggregatedIngredients.entries()).map(
-        ([ingredientId, amount]) =>
-          ctx.db.insert("shoppingListItems", {
-            shoppingListId: currentListId,
-            ingredientId,
-            amount,
-            isChecked: false,
-            createdAt: now,
-            updatedAt: now,
+      itemsToInsert.map((item) =>
+        ctx.db.insert("shoppingListItems", {
+          shoppingListId: currentListId,
+          ingredientId: item.ingredientId,
+          amount: item.amount,
+          isChecked: false,
+          ...(item.existingAmountUsed !== undefined && {
+            existingAmountUsed: item.existingAmountUsed,
           }),
+          createdAt: now,
+          updatedAt: now,
+        }),
       ),
     );
 

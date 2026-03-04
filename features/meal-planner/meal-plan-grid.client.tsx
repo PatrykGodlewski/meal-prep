@@ -1,12 +1,20 @@
 "use client";
 
 import { addDays, format, isToday } from "date-fns";
-import { ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, Loader2, Plus } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { useDateLocale } from "@/hooks/use-date-locale";
 import { cn } from "@/lib/utils";
 import { PlanCard } from "./day-card";
+import { GenerateWithExistingIngredientsModal } from "./GenerateWithExistingIngredientsModal";
 import { useMealPlanner } from "./store";
 
 export const MealPlanDisplay = () => {
@@ -93,12 +101,16 @@ export const MealPlanDisplay = () => {
 };
 
 export function MealPlannerHeader() {
+  const [existingIngredientsModalOpen, setExistingIngredientsModalOpen] =
+    useState(false);
   const {
     currentWeek,
     isGenerating,
+    isGeneratingWithExisting,
     handleNavigateNext,
     handleNavigatePrevious,
     handleGenerateMealPlan,
+    handleGenerateWithExistingIngredients,
     handleNavigateToday,
     isBusy,
   } = useMealPlanner();
@@ -138,7 +150,7 @@ export function MealPlannerHeader() {
         </Button>
       </div>
 
-      <div className="flex flex-col flex-wrap gap-4 sm:flex-row">
+      <div className="flex flex-col flex-wrap items-center gap-4 sm:flex-row">
         <Button
           variant="outline"
           onClick={handleNavigateToday}
@@ -148,13 +160,43 @@ export function MealPlannerHeader() {
           {t("today")}
         </Button>
 
-        <Button
-          onClick={handleGenerateMealPlan}
-          disabled={isBusy || isGenerating}
-        >
-          {isGenerating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-          {t("generateThisWeek")}
-        </Button>
+        <div className="flex items-center gap-1">
+          <Button
+            onClick={handleGenerateMealPlan}
+            disabled={isBusy || isGenerating || isGeneratingWithExisting}
+          >
+            {(isGenerating || isGeneratingWithExisting) && (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            )}
+            {t("generateThisWeek")}
+          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="outline"
+                size="icon"
+                disabled={isBusy || isGenerating || isGeneratingWithExisting}
+                aria-label={t("generateOptions")}
+              >
+                <Plus className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem
+                onSelect={() => setExistingIngredientsModalOpen(true)}
+              >
+                {t("generateWithExistingIngredients")}
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+
+        <GenerateWithExistingIngredientsModal
+          isOpen={existingIngredientsModalOpen}
+          onOpenChange={setExistingIngredientsModalOpen}
+          onGenerate={handleGenerateWithExistingIngredients}
+          isGenerating={isGeneratingWithExisting}
+        />
       </div>
     </div>
   );

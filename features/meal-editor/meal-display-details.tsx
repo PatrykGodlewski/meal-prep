@@ -6,6 +6,7 @@ import React from "react";
 import { For } from "@/components/for-each";
 import ServingController from "@/components/serving-controller";
 import { useDateLocale } from "@/hooks/use-date-locale";
+import { calculateIngredientKcal } from "@/lib/nutrition";
 import { useMealPlanner } from "../meal-planner/store";
 import { DATE_FORMAT_FULL } from "../meal-planner/utils";
 import type { Meal, MealIngredients } from "./types";
@@ -41,10 +42,27 @@ export const MealDisplayDetails: React.FC<MealDisplayDetailsProps> = React.memo(
 
     const totalTime = (meal.prepTimeMinutes || 0) + (meal.cookTimeMinutes || 0);
     const authorName = meal.authorDisplayName ?? "Unknown";
-    const caloriesByIngredients = mealIngredients.reduce(
-      (acc, mealIng) => (mealIng.ingredient?.calories ?? 0) + acc,
+
+    // Kcal from ingredients: sum (quantity in grams / 100) * calories per 100g for each ingredient
+    const baseKcalFromIngredients = mealIngredients.reduce(
+      (acc, mealIng) =>
+        acc +
+        calculateIngredientKcal(
+          mealIng.quantity,
+          mealIng.ingredient?.unit ?? "g",
+          mealIng.ingredient?.calories,
+        ),
       0,
     );
+
+    const recipeServings = meal.servings ?? 1;
+    const scaleFactor = servings / recipeServings;
+
+    const kcalFromIngredients = Math.round(baseKcalFromIngredients * scaleFactor);
+    // meal.calories = kcal per serving; total = per-serving * number of servings
+    const manualKcal = meal.calories
+      ? Math.round(meal.calories * servings)
+      : null;
 
     return (
       <div className="overflow-hidden rounded-lg bg-white shadow-md dark:bg-neutral-900">
@@ -98,18 +116,20 @@ export const MealDisplayDetails: React.FC<MealDisplayDetailsProps> = React.memo(
                 text={t("totalTime", { count: totalTime })}
               />
             )}
-            {meal.calories && (
+            {manualKcal != null && (
               <MealLabel
                 icon={Flame}
-                text={t("calories", { count: meal.calories * servings })}
+                text={t("caloriesManual", { count: manualKcal })}
               />
             )}
-            <MealLabel
-              icon={Flame}
-              text={t("caloriesByIngredients", {
-                count: caloriesByIngredients,
-              })}
-            />
+            {kcalFromIngredients > 0 && (
+              <MealLabel
+                icon={Flame}
+                text={t("caloriesByIngredients", {
+                  count: kcalFromIngredients,
+                })}
+              />
+            )}
           </div>
 
           {meal.description && (
@@ -142,6 +162,9 @@ export const MealDisplayDetails: React.FC<MealDisplayDetailsProps> = React.memo(
                 >
                   {(mealIngredient) => {
                     const ingredient = mealIngredient.ingredient;
+                    const replacementNames = (
+                      mealIngredient as { replacementNames?: string[] }
+                    ).replacementNames;
                     return (
                       <li
                         key={ingredient?._id}
@@ -169,6 +192,35 @@ export const MealDisplayDetails: React.FC<MealDisplayDetailsProps> = React.memo(
                               {mealIngredient.notes}
                             </p>
                           )}
+                          {replacementNames &&
+                            replacementNames.length > 0 && (
+                              <div className="mt-1">
+                                <span className="text-gray-500 text-xs dark:text-neutral-400">
+                                  {t("substitutesLabel")}:
+                                </span>
+                                <ul className="mt-0.5 list-none border-l-2 border-gray-300 pl-4 text-gray-500 text-xs dark:border-neutral-500 dark:text-neutral-400">
+                                  {((
+                                    mealIngredient as {
+                                      replacementInfos?: { name: string; ratio: number }[];
+                                    }
+                                  ).replacementInfos ?? replacementNames.map((n) => ({ name: n, ratio: 1 }))).map(
+                                    ({ name, ratio }) => {
+                                      const baseQty = mealIngredient.quantity * servings;
+                                      const calculatedQty = Math.round(baseQty * ratio);
+                                      const unit = tIngredient(ingredient?.unit ?? "g");
+                                      return (
+                                        <li key={name}>
+                                          {name}
+                                          <span className="text-gray-400 ml-1">
+                                            ({calculatedQty} {unit})
+                                          </span>
+                                        </li>
+                                      );
+                                    },
+                                  )}
+                                </ul>
+                              </div>
+                            )}
                         </div>
                       </li>
                     );

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import { Suspense } from "react";
 import { Skeleton } from "@/components/ui/skeleton"; // Import Skeleton for page level suspense
+import { GenerateMealWithAI } from "@/features/ai/GenerateMealWithAI";
 import PaginatedMealList from "./PaginatedMealList"; // Import the new component
 import { SearchInput } from "./SearchInput";
 
@@ -49,6 +50,8 @@ export default async function MealsPage() {
           {t("addMeal")}
         </Link>
       </div>
+
+      <GenerateMealWithAI />
 
       <SearchInput />
 

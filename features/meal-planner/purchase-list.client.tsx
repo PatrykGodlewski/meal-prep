@@ -4,10 +4,11 @@ import { useConvexMutation } from "@convex-dev/react-query";
 import { use$ } from "@legendapp/state/react";
 import { useMutation } from "@tanstack/react-query";
 import { camelCase } from "lodash";
-import { Eye, EyeOff, ShoppingCart } from "lucide-react";
+import { ChevronRight, Eye, EyeOff, ShoppingCart } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useId } from "react";
 import { toast } from "sonner";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { For } from "@/components/for-each";
 import ServingController from "@/components/serving-controller";
 import { Button } from "@/components/ui/button";
@@ -18,6 +19,7 @@ import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
 import { cn } from "@/lib/utils";
 import type { IngredientCategory } from "@/validators";
+import { format } from "date-fns";
 import { DatePickerWithPresets } from "./date-picker";
 import { useMealPlanner } from "./store";
 
@@ -52,6 +54,7 @@ export function ShoppingListDisplay() {
     useMealPlanner();
   const isHiddenCheckedItems = use$(hideCheckedShoppingListItems$);
   const t = useTranslations("mealPlanner");
+  const tMeal = useTranslations("meal");
   const tIngredient = useTranslations("ingredient");
 
   const items = list?.items ?? [];
@@ -114,6 +117,10 @@ export function ShoppingListDisplay() {
                       name={item.ingredient?.name}
                       isChecked={item.isChecked}
                       ids={item.itemIds}
+                      mealBreakdown={item.mealBreakdown ?? []}
+                      existingAmountUsed={item.existingAmountUsed}
+                      tMeal={tMeal}
+                      tPlanner={t}
                     />
                   )}
                 </For>
@@ -126,15 +133,36 @@ export function ShoppingListDisplay() {
   );
 }
 
+type MealBreakdownItem = {
+  mealName: string;
+  category: string;
+  planDate: number;
+  quantity: number;
+};
+
 type Props = {
   amount: number;
   unit?: string;
   name?: string;
   isChecked: boolean;
   ids: Id<"shoppingListItems">[];
+  mealBreakdown: MealBreakdownItem[];
+  existingAmountUsed?: number;
+  tMeal: (key: string) => string;
+  tPlanner: (key: string) => string;
 };
 
-function ShoppingListItem({ amount, unit, name, isChecked, ids }: Props) {
+function ShoppingListItem({
+  amount,
+  unit,
+  name,
+  isChecked,
+  ids,
+  mealBreakdown,
+  existingAmountUsed,
+  tMeal,
+  tPlanner,
+}: Props) {
   const { mealPlannerState$, hideCheckedShoppingListItems$, servings } =
     useMealPlanner();
 
@@ -202,39 +230,94 @@ function ShoppingListItem({ amount, unit, name, isChecked, ids }: Props) {
     return null;
   }
 
+  const hasMealBreakdown = mealBreakdown.length > 0;
+  const isPartial = existingAmountUsed != null && existingAmountUsed > 0;
+
   return (
     <li>
-      <Label
-        htmlFor={uniqueId}
-        id={labelId}
-        className={cn(
-          "flex items-center justify-between rounded-md border border-neutral-700 bg-neutral-0 p-3 shadow-xs transition-colors dark:bg-neutral-950",
-          "cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-800",
-        )}
-      >
-        <div className="flex items-center gap-2">
-          <Checkbox
-            id={uniqueId}
-            checked={isChecked}
-            onCheckedChange={handleCheckChange}
-            aria-labelledby={labelId}
-          />
-          <span
-            className={cn("font-medium text-sm", {
-              "text-neutral-500 line-through": isChecked,
-            })}
-          >
-            {name}
-          </span>
-        </div>
-        <span
-          className={cn("text-sm italic", {
-            "text-gray-400": isChecked,
-          })}
+      <Collapsible className="group/collapsible">
+        <div
+          className={cn(
+            "flex items-center justify-between gap-2 rounded-md border p-3 shadow-xs transition-colors",
+            isPartial
+              ? "border-yellow-500 bg-yellow-50 dark:border-yellow-600 dark:bg-yellow-950/30"
+              : "border-neutral-700 bg-neutral-0 dark:border-neutral-950 dark:bg-neutral-950",
+            "hover:bg-neutral-100 dark:hover:bg-neutral-800",
+          )}
         >
-          {servings * amount} {unit}
-        </span>
-      </Label>
+          <div className="flex min-w-0 flex-1 items-center gap-2">
+            <Checkbox
+              id={uniqueId}
+              checked={isChecked}
+              onCheckedChange={handleCheckChange}
+              aria-labelledby={labelId}
+            />
+            <Label
+              htmlFor={uniqueId}
+              id={labelId}
+              className={cn(
+                "flex min-w-0 flex-1 cursor-pointer font-medium text-sm",
+                {
+                  "text-neutral-500 line-through": isChecked,
+                },
+              )}
+            >
+              <span className="truncate">{name}</span>
+            </Label>
+          </div>
+          <div className="flex shrink-0 flex-col items-end gap-0.5">
+            <span
+              className={cn("text-sm italic", {
+                "text-gray-400": isChecked,
+                "text-yellow-700 dark:text-yellow-400": isPartial && !isChecked,
+              })}
+            >
+              {servings * amount} {unit}
+            </span>
+            {isPartial && !isChecked && (
+              <span className="text-yellow-700 text-xs dark:text-yellow-400">
+                {tPlanner("partialAmountNote")}
+              </span>
+            )}
+          </div>
+          {hasMealBreakdown && (
+            <CollapsibleTrigger asChild>
+              <button
+                type="button"
+                className="shrink-0 rounded p-1 hover:bg-neutral-200 dark:hover:bg-neutral-700"
+                aria-label={tPlanner("showMealBreakdown")}
+              >
+                <ChevronRight className="size-4 transition-transform group-data-[state=open]/collapsible:rotate-90" />
+              </button>
+            </CollapsibleTrigger>
+          )}
+        </div>
+        {hasMealBreakdown && (
+          <CollapsibleContent>
+            <div className="ml-8 mt-1 space-y-1 border-l-2 border-neutral-200 pl-3 py-1 dark:border-neutral-700">
+              <p className="text-muted-foreground text-xs font-medium">
+                {tPlanner("forMeals")}:
+              </p>
+              {mealBreakdown.map((entry, idx) => (
+                <div
+                  key={`${entry.mealName}-${entry.category}-${entry.planDate}-${idx}`}
+                  className="text-muted-foreground flex flex-wrap items-center gap-x-2 gap-y-0 text-xs"
+                >
+                  <span className="font-medium text-foreground">
+                    {entry.mealName}
+                  </span>
+                  <span>
+                    ({tMeal(entry.category as never)} • {format(entry.planDate, "EEE")})
+                  </span>
+                  <span>
+                    {servings * entry.quantity} {unit}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </CollapsibleContent>
+        )}
+      </Collapsible>
     </li>
   );
 }

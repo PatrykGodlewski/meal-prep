@@ -1,10 +1,72 @@
 import { Migrations } from "@convex-dev/migrations";
+import type { Id } from "./_generated/dataModel.js";
 import { components, internal } from "./_generated/api.js";
 import type { DataModel } from "./_generated/dataModel.js";
 import { internalMutation } from "./_generated/server";
 import { MEAL_CATEGORIES } from "./schema.js";
 
 export const migrations = new Migrations<DataModel>(components.migrations);
+
+export const backfillIngredientNameLower = internalMutation({
+  args: {},
+  handler: async (ctx) => {
+    const ingredients = await ctx.db.query("ingredients").collect();
+    let count = 0;
+
+    for (const ing of ingredients) {
+      if (!ing.nameLower) {
+        await ctx.db.patch(ing._id, {
+          nameLower: ing.name.toLowerCase().trim(),
+        });
+        count++;
+      }
+    }
+
+    return `Backfilled nameLower for ${count} ingredients.`;
+  },
+});
+
+export const migrateReplacementsToRatio = internalMutation({
+  args: {},
+  handler: async (ctx) => {
+    let ingredientsCount = 0;
+    let mealIngredientsCount = 0;
+
+    // ingredients: replacementIds -> replacements
+    const ingredients = await ctx.db.query("ingredients").collect();
+    for (const ing of ingredients) {
+      const doc = ing as { replacementIds?: string[]; replacements?: { ingredientId: string; ratio: number }[] };
+      if (doc.replacementIds && doc.replacementIds.length > 0 && !doc.replacements) {
+        await ctx.db.patch(ing._id, {
+          replacements: doc.replacementIds.map((id) => ({
+            ingredientId: id as Id<"ingredients">,
+            ratio: 1,
+          })),
+          replacementIds: undefined,
+        });
+        ingredientsCount++;
+      }
+    }
+
+    // mealIngredients: allowedReplacementIds -> allowedReplacements
+    const mealIngredients = await ctx.db.query("mealIngredients").collect();
+    for (const mi of mealIngredients) {
+      const doc = mi as { allowedReplacementIds?: string[]; allowedReplacements?: { ingredientId: string; ratio: number }[] };
+      if (doc.allowedReplacementIds && doc.allowedReplacementIds.length > 0 && !doc.allowedReplacements) {
+        await ctx.db.patch(mi._id, {
+          allowedReplacements: doc.allowedReplacementIds.map((id) => ({
+            ingredientId: id as Id<"ingredients">,
+            ratio: 1,
+          })),
+          allowedReplacementIds: undefined,
+        });
+        mealIngredientsCount++;
+      }
+    }
+
+    return `Migrated ${ingredientsCount} ingredients and ${mealIngredientsCount} mealIngredients to replacement ratio format.`;
+  },
+});
 
 export const backfillSearchContent = internalMutation({
   args: {},
