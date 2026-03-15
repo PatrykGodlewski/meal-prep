@@ -1,4 +1,4 @@
-# Skibidi Obiadex
+# Obiadex
 
 bun dev:frontend
 bun dev:backend
