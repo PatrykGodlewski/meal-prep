@@ -6,6 +6,7 @@
     "emptyShoppingList": "Twoja lista zakupów jest pusta.",
     "today": "Dziś",
     "header": "Planner Posiłków",
+    "pageDescription": "Zaplanuj posiłki na tydzień i wygeneruj listę zakupów.",
     "generateThisWeek": "Wygeneruj posiłki na ten tydzień",
     "weekOf": "Tydzień od {week}",
     "goToPlan": "Przejdź do planu",
@@ -96,6 +97,7 @@
     "meals": "Posiłki",
     "settings": "Ustawienia",
     "plans": "Plany posiłków",
+    "diet": "Moja dieta",
     "entities": "Zasoby"
   },
   "meal": {
@@ -144,6 +146,38 @@
     "meals": "Posiłki",
     "addMeal": "Dodaj Posiłek"
   },
+  "personalizedDiet": {
+    "pageTitle": "Moja dieta",
+    "pageDescription": "Twój spersonalizowany plan żywieniowy na podstawie profilu, celów i preferencji.",
+    "title": "Spersonalizowany plan żywieniowy",
+    "generate": "Wygeneruj dietę",
+    "regenerate": "Wygeneruj ponownie",
+    "print": "Drukuj / Zapisz jako PDF",
+    "generating": "Generowanie diety...",
+    "emptyTitle": "Brak diety",
+    "emptyDescription": "Uzupełnij profil (wiek, wzrost, waga, poziom aktywności, cele) w Ustawieniach, a następnie wygeneruj dietę.",
+    "tryAgain": "Spróbuj ponownie",
+    "errorGeneric": "Coś poszło nie tak.",
+    "targetsTitle": "Cele kaloryczne i makroskładniki",
+    "tdee": "TDEE",
+    "dailyTarget": "Cel dzienny",
+    "protein": "Białko",
+    "carbs": "Węglowodany",
+    "fat": "Tłuszcze",
+    "mealsTitle": "Dzienny plan posiłków",
+    "prepTime": "{mins} min przygotowania",
+    "ingredients": "Składniki",
+    "prepInstructions": "Przygotowanie",
+    "hydrationTitle": "Nawodnienie",
+    "micronutrientTitle": "Kluczowe mikroelementy",
+    "shoppingList": "Lista zakupów",
+    "dateFilterToday": "Dziś",
+    "dateFilterNext3": "Następne 3 dni",
+    "dateFilterFullWeek": "Cały tydzień",
+    "swap": "Zamień",
+    "generateFirstPlan": "Wygeneruj swój pierwszy plan",
+    "today": "Dziś"
+  },
   "generateMealAI": {
     "title": "Wygeneruj posiłek z AI",
     "description": "Opisz, jakiego posiłku szukasz. AI stworzy przepis na podstawie Twoich preferencji i podobnych posiłków w bibliotece.",
@@ -183,7 +217,16 @@
   "searchInput": {
     "searchMealsByName": "Szukaj posiłków po nazwie...",
     "searchIngredientsByName": "Szukaj składników po nazwie...",
-    "filterByCategory": "Filtruj według kategorii"
+    "filterByCategory": "Filtruj według kategorii",
+    "sortBy": "Sortuj według",
+    "sortDefault": "Domyślnie",
+    "sortByFavourites": "Najczęściej ulubione"
+  },
+  "favourites": {
+    "addToFavourites": "Dodaj do ulubionych",
+    "removeFromFavourites": "Usuń z ulubionych",
+    "showFavouritesOnly": "Pokaż tylko moje ulubione",
+    "showAllMeals": "Pokaż wszystkie posiłki"
   },
   "mealEditor": {
     "saving": "Zapisywanie...",

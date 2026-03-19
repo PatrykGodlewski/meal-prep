@@ -46,6 +46,19 @@
 
   --animate-accordion-down: accordion-down 0.2s ease-out;
   --animate-accordion-up: accordion-up 0.2s ease-out;
+  --animate-heart-pop: heart-pop 0.35s ease-out;
+
+  @keyframes heart-pop {
+    0% {
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(1.12);
+    }
+    100% {
+      transform: scale(1.05);
+    }
+  }
 
   @keyframes accordion-down {
     from {
@@ -95,25 +108,29 @@
 }
 
 :root {
-  --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
+  --radius: 1rem;
+  --radius-lg: 1.25rem;
+  --radius-xl: 1.5rem;
+  --radius-2xl: 1.75rem;
+  --radius-3xl: 2rem;
+  --background: oklch(0.985 0.002 155);
+  --foreground: oklch(0.22 0.02 155);
+  --card: oklch(1 0 0 / 0.7);
+  --card-foreground: oklch(0.22 0.02 155);
+  --popover: oklch(1 0 0 / 0.95);
+  --popover-foreground: oklch(0.22 0.02 155);
+  --primary: oklch(0.45 0.12 155);
+  --primary-foreground: oklch(0.99 0 0);
+  --secondary: oklch(0.94 0.02 155);
+  --secondary-foreground: oklch(0.3 0.03 155);
+  --muted: oklch(0.96 0.01 155);
+  --muted-foreground: oklch(0.5 0.02 155);
+  --accent: oklch(0.93 0.03 155);
+  --accent-foreground: oklch(0.25 0.03 155);
   --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
+  --border: oklch(0.9 0.01 155);
+  --input: oklch(0.9 0.01 155);
+  --ring: oklch(0.45 0.12 155);
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
   --chart-3: oklch(0.398 0.07 227.392);
@@ -127,17 +144,21 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
+  /* Diet dashboard design tokens */
+  --shadow-soft: 0 2px 8px oklch(0.2 0.02 155 / 0.06);
+  --shadow-card: 0 4px 16px oklch(0.2 0.02 155 / 0.08);
+  --shadow-elevated: 0 8px 24px oklch(0.2 0.02 155 / 0.1);
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
+  --background: oklch(0.15 0.01 155);
+  --foreground: oklch(0.95 0.005 155);
+  --card: oklch(0.22 0.015 155 / 0.6);
+  --card-foreground: oklch(0.95 0.005 155);
+  --popover: oklch(0.22 0.015 155);
+  --popover-foreground: oklch(0.95 0.005 155);
+  --primary: oklch(0.55 0.12 155);
+  --primary-foreground: oklch(0.99 0 0);
   --secondary: oklch(0.269 0 0);
   --secondary-foreground: oklch(0.985 0 0);
   --muted: oklch(0.269 0 0);
@@ -218,5 +239,34 @@
   }
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+/* Glassmorphism for diet dashboard cards */
+.glass-card {
+  background: oklch(1 0 0 / 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.dark .glass-card {
+  background: oklch(0.22 0.015 155 / 0.55);
+}
+
+/* Print styles for diet page – hide UI chrome, show only diet content */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  .diet-print-content,
+  .diet-print-content * {
+    visibility: visible;
+  }
+  .diet-print-content {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    padding: 0;
   }
 }

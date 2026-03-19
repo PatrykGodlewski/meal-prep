@@ -8,6 +8,7 @@ import {
   Refrigerator,
   SquareStack,
   Triangle,
+  UtensilsCrossed,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { NavMain } from "@/components/nav-main";
@@ -94,6 +95,11 @@ function Nav() {
       title: t("plans"),
       url: "/plans",
       icon: CalendarCog,
+    },
+    {
+      title: t("diet"),
+      url: "/diet",
+      icon: UtensilsCrossed,
     },
     {
       title: t("ingredients"),

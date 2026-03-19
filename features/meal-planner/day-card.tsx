@@ -3,8 +3,7 @@ import { useConvexMutation } from "@convex-dev/react-query";
 import type { FunctionReturnType } from "convex/server";
 import { format, isValid, toDate } from "date-fns";
 import { camelCase } from "lodash";
-import { Check, Flame, Lock, Minus, Pencil, Plus, Unlock } from "lucide-react";
-import Image from "next/image";
+import { Flame, Lock, Minus, Pencil, Plus, Unlock } from "lucide-react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
@@ -14,11 +13,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
-import type { MEAL_CATEGORIES } from "@/convex/schema";
+import { MEAL_CATEGORIES } from "@/convex/schema";
 import { useDateLocale } from "@/hooks/use-date-locale";
 import { getExtraKcal, getPlanTotals } from "@/lib/plan-kcal";
 import { cn } from "@/lib/utils";
 import { ModalMeals } from "./ModalMeals";
+import { ACCENT_PRESETS, PlanMealCard } from "./PlanMealCard";
 import { useMealPlanner } from "./store";
 
 const DATE_FORMAT_DISPLAY_CARD = "MMM dd";
@@ -35,6 +35,9 @@ export function PlanCard({ plan }: PlanCardProps) {
     (typeof MEAL_CATEGORIES)[number] | null
   >(null);
   const markEatenMutation = useConvexMutation(api.plans.markPlanMealAsEaten);
+  const updateScheduledTimeMutation = useConvexMutation(
+    api.plans.updatePlanMealScheduledTime,
+  );
   const updateMealMutation = useConvexMutation(
     api.plans.updatePlannedMealByCategory,
   );
@@ -70,7 +73,9 @@ export function PlanCard({ plan }: PlanCardProps) {
     ? getPlanTotals(plan.planMeals, servings, plan.planExtras)
     : { total: 0, eaten: 0 };
   const progressPercent =
-    totalKcal > 0 ? Math.min(100, Math.round((eatenKcal / totalKcal) * 100)) : 0;
+    totalKcal > 0
+      ? Math.min(100, Math.round((eatenKcal / totalKcal) * 100))
+      : 0;
 
   if (!plan) {
     return (
@@ -150,106 +155,76 @@ export function PlanCard({ plan }: PlanCardProps) {
           onOpenChange={setIsExtraModalOpen}
           onMealSelect={handleExtraMealSelect}
         />
-        <div className="flex items-end justify-between gap-4">
-          <ul className="group flex flex-1 flex-wrap justify-between gap-4 text-xs">
-            <For
-              each={plan.planMeals}
-              empty={
-                <li className="pt-4 text-center text-gray-400 italic">
-                  {t("noMeals")}
-                </li>
-              }
-            >
-              {(plannedMeal) => {
-                const isPlannedMeal = plannedMeal.meal?.name;
-                const isEaten = !!plannedMeal.eatenAt;
-                const category =
-                  plannedMeal.category as (typeof MEAL_CATEGORIES)[number];
+        <ul className="flex flex-1 flex-col gap-4">
+          <For
+            each={plan.planMeals}
+            empty={
+              <li className="py-4 text-center text-muted-foreground italic">
+                {t("noMeals")}
+              </li>
+            }
+          >
+            {(plannedMeal, index) => {
+              const isPlannedMeal = !!plannedMeal.meal?.name;
+              const category =
+                plannedMeal.category as (typeof MEAL_CATEGORIES)[number];
+              const preset =
+                ACCENT_PRESETS[
+                  MEAL_CATEGORIES.indexOf(category) % ACCENT_PRESETS.length
+                ] ?? ACCENT_PRESETS[0];
+
+              if (!isPlannedMeal) {
                 return (
                   <li
-                    className={cn("flex-1", {
-                      "rounded-xl border-2 border-neutral-500 border-dashed p-2":
-                        !isPlannedMeal,
-                    })}
-                    key={`${plan._id}-${plannedMeal.meal?.categories?.toString}-${plannedMeal._id}`}
+                    key={`${plan._id}-empty-${plannedMeal._id}`}
+                    className="flex items-center gap-4 rounded-2xl border-2 border-border border-dashed bg-muted/30 p-4"
                   >
-                    {isPlannedMeal ? (
-                      <div className="relative flex flex-col gap-1">
-                        <Link
-                          className="relative flex h-full min-w-24 flex-wrap items-center justify-center rounded-xl border-2 border-neutral-700 border-dashed bg-white p-2 hover:underline dark:bg-neutral-950"
-                          href={`/meals/${plannedMeal.meal?._id}`}
-                        >
-                          <Image
-                            src={plannedMeal.meal?.imageUrl ?? "/placeholder.png"}
-                            width={128}
-                            height={128}
-                            className={cn("rounded-lg", isEaten && "opacity-60")}
-                            alt={"Meal image"}
-                          />
-                          <span className="absolute top-2 right-2 rounded-full bg-neutral-200 px-2 py-1 font-semibold capitalize shadow-xs dark:bg-neutral-900/25">
-                            {tMeal(camelCase(plannedMeal.category))}
-                          </span>
-                          <p className="w-full px-2">
-                            {plannedMeal.meal?.name.trim()}
-                          </p>
-                        </Link>
-                        <div className="flex items-center gap-1">
-                          <Button
-                            size="icon"
-                            variant={isEaten ? "default" : "outline"}
-                            className="h-8 w-8 shrink-0"
-                            aria-label={
-                              isEaten ? t("unmarkAsEaten") : t("markAsEaten")
-                            }
-                            onClick={(e) => {
-                              e.preventDefault();
-                              markEatenMutation({
-                                planMealId: plannedMeal._id,
-                                eaten: !isEaten,
-                              });
-                            }}
-                          >
-                            <Check className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            size="icon"
-                            variant="outline"
-                            className="h-8 w-8 shrink-0"
-                            aria-label={t("changeMeal")}
-                            onClick={(e) => {
-                              e.preventDefault();
-                              handleOpenChangeMeal(category);
-                            }}
-                          >
-                            <Pencil className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="flex flex-col items-center gap-2">
-                        <Button
-                          size="icon"
-                          variant="outline"
-                          className="h-8 w-8 shrink-0"
-                          aria-label={t("changeMeal")}
-                          onClick={() => handleOpenChangeMeal(category)}
-                        >
-                          <Pencil className="h-4 w-4" />
-                        </Button>
-                        <Link
-                          className="text-neutral-500 underline"
-                          href={`/plans/${plan._id}`}
-                        >
-                          {t("plannedMealMissing")}
-                        </Link>
-                      </div>
-                    )}
+                    <div className="hidden w-16 flex-shrink-0 sm:block" />
+                    <div className="flex flex-1 items-center justify-between gap-4">
+                      <span className="text-muted-foreground text-sm">
+                        {tMeal(camelCase(category))}
+                      </span>
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        aria-label={t("changeMeal")}
+                        onClick={() => handleOpenChangeMeal(category)}
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </li>
                 );
-              }}
-            </For>
-          </ul>
-        </div>
+              }
+
+              return (
+                <li key={`${plan._id}-${plannedMeal._id}`}>
+                  <PlanMealCard
+                    plannedMeal={plannedMeal}
+                    mealTypeLabel={tMeal(camelCase(category))}
+                    accentColor={preset.accentColor}
+                    accentBg={preset.accentBg}
+                    isLast={index === plan.planMeals!.length - 1}
+                    servings={servings}
+                    onSwap={() => handleOpenChangeMeal(category)}
+                    onMarkEaten={() =>
+                      markEatenMutation({
+                        planMealId: plannedMeal._id,
+                        eaten: !plannedMeal.eatenAt,
+                      })
+                    }
+                    onTimeChange={(scheduledTime) =>
+                      updateScheduledTimeMutation({
+                        planMealId: plannedMeal._id,
+                        scheduledTime,
+                      })
+                    }
+                  />
+                </li>
+              );
+            }}
+          </For>
+        </ul>
 
         {/* Extras */}
         {plan.planExtras && plan.planExtras.length > 0 && (

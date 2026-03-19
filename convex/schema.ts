@@ -176,6 +176,8 @@ export const mealSchema = z.object({
   allergens: z.array(z.string()).optional(),
   /** Community rating 0–5. Used as base score in planner (e.g. 4.5 → 45 points). */
   communityRating: z.number().min(0).max(5).optional(),
+  /** Denormalized count of users who favourited this meal. Updated on add/remove favourite. */
+  favouriteCount: z.number().optional(),
   /** Embedding vector for semantic search (768 dims, Google gemini-embedding-001). */
   embedding: z.optional(z.array(z.number())),
   createdBy: zid("users"),
@@ -184,6 +186,14 @@ export const mealSchema = z.object({
 });
 
 export const mealValidator = zodOutputToConvex(mealSchema);
+
+/** User favouriting a meal (one row per user–meal pair). */
+export const mealFavouritesValidator = v.object({
+  userId: v.id("users"),
+  mealId: v.id("meals"),
+  createdAt: v.number(),
+  updatedAt: v.number(),
+});
 
 export const planSchema = z.object({
   userId: zid("users"),
@@ -201,6 +211,7 @@ export const planMealsSchema = z.object({
   servingAmount: z.number().optional(),
   category: z.enum(MEAL_CATEGORIES).optional(),
   eatenAt: z.number().optional().nullable(), // timestamp when user marked meal as eaten
+  scheduledTime: z.string().optional(), // e.g. "12:00" when meal should be eaten
   createdAt: z.number(),
   updatedAt: z.number(),
 });
@@ -312,6 +323,7 @@ export default defineSchema({
     .index("by_author", ["createdBy"])
     .index("by_categories", ["categories"])
     .index("by_strict_diet", ["strictDietTags"])
+    .index("by_favourite_count", ["favouriteCount"])
     .searchIndex("search_name", {
       searchField: "searchContent",
       filterFields: ["categories"],
@@ -320,6 +332,11 @@ export default defineSchema({
       vectorField: "embedding",
       dimensions: 768,
     }),
+
+  mealFavourites: defineTable(mealFavouritesValidator)
+    .index("by_user", ["userId"])
+    .index("by_meal", ["mealId"])
+    .index("by_user_and_meal", ["userId", "mealId"]),
 
   /** Meal generation requests – workflow: mutation creates request, schedules action, action writes result. */
   mealGenerationRequests: defineTable({
@@ -416,4 +433,19 @@ export default defineSchema({
   })
     .index("by_user", ["userId"])
     .index("by_user_and_created", ["userId", "createdAt"]),
+
+  /** Personalized diet – one per user, overwritten on regenerate. */
+  personalizedDiets: defineTable({
+    userId: v.id("users"),
+    status: v.union(
+      v.literal("pending"),
+      v.literal("running"),
+      v.literal("completed"),
+      v.literal("failed"),
+    ),
+    result: v.optional(v.any()),
+    error: v.optional(v.string()),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  }).index("by_user", ["userId"]),
 });

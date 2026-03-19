@@ -135,7 +135,13 @@ export const deleteMeal = authMutation({
         .withIndex("by_meal", (q) => q.eq("mealId", mealId))
         .collect();
 
+      const mealFavs = await ctx.db
+        .query("mealFavourites")
+        .withIndex("by_meal", (q) => q.eq("mealId", mealId))
+        .collect();
+
       await Promise.all(mealIngredients.map((mi) => ctx.db.delete(mi._id)));
+      await Promise.all(mealFavs.map((f) => ctx.db.delete(f._id)));
 
       await ctx.db.delete(mealId);
 

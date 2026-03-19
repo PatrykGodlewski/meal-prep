@@ -164,6 +164,7 @@ export const generateMealWithContext = internalAction({
       const allergies = prefs.allergies;
       const likes = prefs.likes;
       const avoided = prefs.avoided;
+      const favouriteMealNames = prefs.favouriteMealNames ?? [];
 
       const embedding = await generateEmbedding(prompt);
 
@@ -200,6 +201,11 @@ export const generateMealWithContext = internalAction({
           ? `The user avoids these dish types: ${avoided.join(", ")}.`
           : "";
 
+      const favouritesHint =
+        favouriteMealNames.length > 0
+          ? `The user often enjoys these meals: ${favouriteMealNames.join(", ")}. Prefer recipes that are similar in style or ingredients when appropriate.`
+          : "";
+
       const languageName = locale ? LOCALE_TO_LANGUAGE[locale.toLowerCase()] ?? locale : null;
       const languageInstruction = languageName
         ? `CRITICAL: Write the ENTIRE recipe in ${languageName} only. Title, description, instructions, and ingredient names must all be in ${languageName}. Do not mix languages.`
@@ -214,6 +220,8 @@ ${allergyConstraint}
 ${likesHint}
 
 ${avoidedHint}
+
+${favouritesHint}
 
 Use these existing recipes as inspiration and reference for style, proportions, and techniques:
 

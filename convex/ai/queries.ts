@@ -3,7 +3,7 @@ import { internalQuery, query } from "../_generated/server";
 import { authQuery } from "../custom/query";
 
 /**
- * Internal query: fetch user preferences for RAG (allergies, likes).
+ * Internal query: fetch user preferences for RAG (allergies, likes, favourite meals).
  */
 export const getRAGInput = internalQuery({
   args: { userId: v.id("users") },
@@ -20,10 +20,21 @@ export const getRAGInput = internalQuery({
     const avoided =
       prefs?.dishTypes?.avoidedTypes ?? [];
 
+    const favouriteRows = await ctx.db
+      .query("mealFavourites")
+      .withIndex("by_user", (q) => q.eq("userId", userId))
+      .collect();
+    const favouriteMealNames: string[] = [];
+    for (const row of favouriteRows) {
+      const meal = await ctx.db.get(row.mealId);
+      if (meal?.name) favouriteMealNames.push(meal.name);
+    }
+
     return {
       allergies,
       likes,
       avoided,
+      favouriteMealNames,
     };
   },
 });

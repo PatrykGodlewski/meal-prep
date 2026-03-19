@@ -1,5 +1,6 @@
 "use client";
 import { useDebounceFn } from "ahooks";
+import { Heart } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useEffect } from "react";
@@ -13,13 +14,16 @@ import {
 } from "@/components/ui/select";
 import { MEAL_CATEGORIES } from "@/convex/schema";
 import {
+  FAV_PARAM_KEY,
   FILTER_PARAM_KEY,
   SEARCH_PARAM_KEY,
+  SORT_PARAM_KEY,
 } from "@/hooks/use-paginated-meals";
 import type { MealCategory } from "@/validators";
 
 export function SearchInput() {
   const t = useTranslations("searchInput");
+  const tFav = useTranslations("favourites");
   const tMeal = useTranslations("meal");
 
   const searchParams = useSearchParams();
@@ -49,6 +53,26 @@ export function SearchInput() {
     router.replace(`${pathname}?${params.toString()}`);
   };
 
+  const handleSortChange = (sort: string) => {
+    const params = new URLSearchParams(searchParams);
+    if (sort && sort !== "default") {
+      params.set(SORT_PARAM_KEY, sort);
+    } else {
+      params.delete(SORT_PARAM_KEY);
+    }
+    router.replace(`${pathname}?${params.toString()}`);
+  };
+
+  const toggleOnlyFavourites = () => {
+    const params = new URLSearchParams(searchParams);
+    if (params.get(FAV_PARAM_KEY) === "1") {
+      params.delete(FAV_PARAM_KEY);
+    } else {
+      params.set(FAV_PARAM_KEY, "1");
+    }
+    router.replace(`${pathname}?${params.toString()}`);
+  };
+
   useEffect(() => {
     const params = new URLSearchParams(searchParams);
     const filter = params.get(FILTER_PARAM_KEY) as MealCategory | null;
@@ -59,6 +83,8 @@ export function SearchInput() {
 
   const currentCategory =
     searchParams.get(FILTER_PARAM_KEY)?.toString() ?? "all";
+  const currentSort = searchParams.get(SORT_PARAM_KEY)?.toString() ?? "favourites";
+  const onlyFavourites = searchParams.get(FAV_PARAM_KEY) === "1";
 
   return (
     <div className="mb-6 flex flex-col gap-4 sm:flex-row">
@@ -82,6 +108,29 @@ export function SearchInput() {
           ))}
         </SelectContent>
       </Select>
+      <Select onValueChange={handleSortChange} value={currentSort}>
+        <SelectTrigger className="w-full border-neutral-300 bg-white sm:w-[180px] dark:border-neutral-600 dark:bg-neutral-800">
+          <SelectValue placeholder={t("sortBy")} />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="default">{t("sortDefault")}</SelectItem>
+          <SelectItem value="favourites">{t("sortByFavourites")}</SelectItem>
+        </SelectContent>
+      </Select>
+      <button
+        type="button"
+        onClick={toggleOnlyFavourites}
+        title={onlyFavourites ? tFav("showAllMeals") : tFav("showFavouritesOnly")}
+        aria-label={onlyFavourites ? tFav("showAllMeals") : tFav("showFavouritesOnly")}
+        aria-pressed={onlyFavourites}
+        className={`flex h-10 shrink-0 items-center justify-center rounded-md border px-3 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+          onlyFavourites
+            ? "border-red-500 bg-red-50 text-red-600 dark:border-red-600 dark:bg-red-950/50 dark:text-red-400"
+            : "border-neutral-300 bg-white text-neutral-600 hover:bg-neutral-50 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-400 dark:hover:bg-neutral-700"
+        }`}
+      >
+        <Heart className={`h-5 w-5 ${onlyFavourites ? "fill-current" : ""}`} />
+      </button>
     </div>
   );
 }

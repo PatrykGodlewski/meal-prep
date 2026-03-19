@@ -1,12 +1,10 @@
 "use client";
 
 import { usePathname } from "@/i18n/navigation";
-import { AppSidebar } from "@/components/app-sidebar";
-import { SiteHeader } from "@/components/site-header";
-import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
+import { AppHeader } from "@/components/app-header";
 
 /**
- * Renders app shell with sidebar for main app, or full-width for onboarding.
+ * Renders app shell with top header (no sidebar). Full-width content.
  */
 export function ConditionalAppShell({
   children,
@@ -27,23 +25,15 @@ export function ConditionalAppShell({
   }
 
   return (
-    <main className="flex flex-col gap-8">
-      <SidebarProvider>
-        <AppSidebar variant="inset" />
-        <SidebarInset>
-          <SiteHeader />
-          <div
-            data-scroll-container
-            className="flex min-h-0 flex-1 flex-col overflow-y-auto"
-          >
-            <div className="@container/main flex min-h-0 flex-1 flex-col gap-2">
-              <div className="flex min-h-0 flex-1 flex-col gap-4 pt-4 md:gap-6 md:py-6">
-                <div className="container min-w-0 flex-1">{children}</div>
-              </div>
-            </div>
+    <main className="flex min-h-screen flex-col">
+      <AppHeader />
+      <div className="flex min-h-0 flex-1 flex-col overflow-y-auto">
+        <div className="flex min-h-0 flex-1 flex-col gap-4 py-6 md:gap-6 md:py-8">
+          <div className="container min-w-0 flex-1 px-4 md:px-6">
+            {children}
           </div>
-        </SidebarInset>
-      </SidebarProvider>
+        </div>
+      </div>
     </main>
   );
 }
