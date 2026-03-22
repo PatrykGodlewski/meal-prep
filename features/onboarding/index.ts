@@ -5,10 +5,10 @@
  */
 
 export { AppWrapper } from "./AppWrapper";
-export { OnboardingGuard } from "./OnboardingGuard";
 export { ConditionalAppShell } from "./ConditionalAppShell";
-export { OnboardingProgress } from "./OnboardingProgress";
+export { OnboardingGuard } from "./OnboardingGuard";
 export { OnboardingLayout } from "./OnboardingLayout";
+export { OnboardingProgress } from "./OnboardingProgress";
 export { OnboardingRedirectPage } from "./OnboardingRedirectPage";
 export { Step1Form } from "./Step1Form";
 export { Step2Form } from "./Step2Form";

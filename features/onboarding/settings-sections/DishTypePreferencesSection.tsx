@@ -4,9 +4,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useDebounceFn } from "ahooks";
 import { useMutation, useQuery } from "convex/react";
 import { ChevronDown, ChevronRight } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -21,10 +21,10 @@ import {
   FormItem,
   FormLabel,
 } from "@/components/ui/form";
-import { DISH_TYPES } from "@/convex/schema";
 import { api } from "@/convex/_generated/api";
+import { DISH_TYPES } from "@/convex/schema";
 import { DEBOUNCE_MS } from "../constants";
-import { dishTypesSchema, type DishTypesValues } from "../schemas";
+import { type DishTypesValues, dishTypesSchema } from "../schemas";
 
 export function DishTypePreferencesSection({
   open,
@@ -36,9 +36,7 @@ export function DishTypePreferencesSection({
   const t = useTranslations("onboarding");
   const tStep = useTranslations("onboarding.step3");
   const data = useQuery(api.onboarding.queries.getPreferences);
-  const updateDishTypes = useMutation(
-    api.onboarding.mutations.updateDishTypes,
-  );
+  const updateDishTypes = useMutation(api.onboarding.mutations.updateDishTypes);
   const [hasSynced, setHasSynced] = useState(false);
 
   const form = useForm<DishTypesValues>({
@@ -50,7 +48,8 @@ export function DishTypePreferencesSection({
     async (values: DishTypesValues) => {
       await updateDishTypes({
         dishTypes: {
-          preferredTypes: values.preferredTypes as (typeof DISH_TYPES)[number][],
+          preferredTypes:
+            values.preferredTypes as (typeof DISH_TYPES)[number][],
           avoidedTypes: values.avoidedTypes as (typeof DISH_TYPES)[number][],
         },
       });
@@ -120,7 +119,12 @@ export function DishTypePreferencesSection({
                                       const current = field.value ?? [];
                                       field.onChange(
                                         checked
-                                          ? [...current.filter((x) => x !== "none"), type]
+                                          ? [
+                                              ...current.filter(
+                                                (x) => x !== "none",
+                                              ),
+                                              type,
+                                            ]
                                           : current.filter((x) => x !== type),
                                       );
                                     }
@@ -170,7 +174,12 @@ export function DishTypePreferencesSection({
                                       const current = field.value ?? [];
                                       field.onChange(
                                         checked
-                                          ? [...current.filter((x) => x !== "none"), type]
+                                          ? [
+                                              ...current.filter(
+                                                (x) => x !== "none",
+                                              ),
+                                              type,
+                                            ]
                                           : current.filter((x) => x !== type),
                                       );
                                     }

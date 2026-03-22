@@ -1,13 +1,21 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import type { FunctionReturnType } from "convex/server";
 import { useMutation, useQuery } from "convex/react";
+import type { FunctionReturnType } from "convex/server";
 import { useTranslations } from "next-intl";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Button } from "@/components/ui/button";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -16,9 +24,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Button } from "@/components/ui/button";
-import type { Id } from "@/convex/_generated/dataModel";
 import { api } from "@/convex/_generated/api";
+import type { Id } from "@/convex/_generated/dataModel";
 import { INGREDIENT_CATEGORIES, UNITS } from "@/convex/schema";
 import { ReplacementsEditor } from "./replacements-editor";
 
@@ -49,24 +56,34 @@ export function IngredientEditForm({
 }: IngredientEditFormProps) {
   const t = useTranslations("ingredient");
   const tEdit = useTranslations("ingredientEditor");
-  const updateIngredient = useMutation(api.ingredients.mutations.updateIngredient);
-  const allIngredients = useQuery(api.ingredients.queries.getIngredients, {}) ?? [];
+  const updateIngredient = useMutation(
+    api.ingredients.mutations.updateIngredient,
+  );
+  const allIngredients =
+    useQuery(api.ingredients.queries.getIngredients, {}) ?? [];
   const replacementOptions = allIngredients
     .filter((i) => i._id !== ingredient._id)
     .map((i) => ({ label: i.name, value: i._id }));
 
-  const replacementInfos = (ingredient as { replacementInfos?: { name: string; ratio: number }[] })
-    .replacementInfos;
-  const initialReplacements = (ingredient as { replacements?: { ingredientId: string; ratio?: number }[] })
-    .replacements ??
+  const replacementInfos = (
+    ingredient as { replacementInfos?: { name: string; ratio: number }[] }
+  ).replacementInfos;
+  const initialReplacements =
+    (
+      ingredient as {
+        replacements?: { ingredientId: string; ratio?: number }[];
+      }
+    ).replacements ??
     (ingredient as { replacementIds?: string[] }).replacementIds?.map((id) => ({
       ingredientId: id,
       ratio: 1,
     })) ??
-    replacementInfos?.map((r, i) => ({
-      ingredientId: allIngredients.find((a) => a.name === r.name)?._id ?? "",
-      ratio: r.ratio,
-    })).filter((r) => r.ingredientId) ??
+    replacementInfos
+      ?.map((r, _i) => ({
+        ingredientId: allIngredients.find((a) => a.name === r.name)?._id ?? "",
+        ratio: r.ratio,
+      }))
+      .filter((r) => r.ingredientId) ??
     [];
 
   const form = useForm<IngredientEditValues>({
@@ -134,18 +151,21 @@ export function IngredientEditForm({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>{tEdit("categoryLabel")}</FormLabel>
-                  <Select
-                    value={field.value}
-                    onValueChange={field.onChange}
-                  >
+                  <Select value={field.value} onValueChange={field.onChange}>
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder={tEdit("categoryPlaceholder")} />
+                        <SelectValue
+                          placeholder={tEdit("categoryPlaceholder")}
+                        />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
                       {INGREDIENT_CATEGORIES.map((cat) => (
-                        <SelectItem key={cat} value={cat} className="capitalize">
+                        <SelectItem
+                          key={cat}
+                          value={cat}
+                          className="capitalize"
+                        >
                           {t(cat)}
                         </SelectItem>
                       ))}
@@ -162,10 +182,7 @@ export function IngredientEditForm({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>{tEdit("unitLabel")}</FormLabel>
-                  <Select
-                    value={field.value}
-                    onValueChange={field.onChange}
-                  >
+                  <Select value={field.value} onValueChange={field.onChange}>
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder={tEdit("unitPlaceholder")} />
@@ -237,7 +254,10 @@ export function IngredientEditForm({
           />
 
           <div className="flex justify-end gap-2">
-            <Button type="submit" disabled={isPending || !form.formState.isDirty}>
+            <Button
+              type="submit"
+              disabled={isPending || !form.formState.isDirty}
+            >
               {isPending ? tEdit("saving") : tEdit("saveChanges")}
             </Button>
           </div>

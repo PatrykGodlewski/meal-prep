@@ -3,10 +3,9 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useDebounceFn } from "ahooks";
 import { useMutation, useQuery } from "convex/react";
-import { useRouter } from "@/i18n/navigation";
+import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import { useTranslations } from "next-intl";
 import {
   Form,
   FormControl,
@@ -23,16 +22,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { api } from "@/convex/_generated/api";
 import {
   BUDGET_TIERS,
   COOKING_SKILLS,
   MAX_COOKING_TIME_OPTIONS,
 } from "@/convex/schema";
-import { api } from "@/convex/_generated/api";
+import { useRouter } from "@/i18n/navigation";
 import { StepHeader } from "./components/StepHeader";
 import { StepNavigation } from "./components/StepNavigation";
 import { DEBOUNCE_MS } from "./constants";
-import { logisticsSchema, type LogisticsValues } from "./schemas";
+import { type LogisticsValues, logisticsSchema } from "./schemas";
 
 export function Step4Form() {
   const t = useTranslations("onboarding.step4");
@@ -192,7 +192,9 @@ export function Step4Form() {
                 >
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder={t("maxCookingTimePlaceholder")} />
+                      <SelectValue
+                        placeholder={t("maxCookingTimePlaceholder")}
+                      />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>

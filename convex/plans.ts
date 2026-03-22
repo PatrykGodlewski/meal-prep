@@ -42,9 +42,7 @@ export const getMealPlan = authQuery({
       ...planExtras.map((pe) => pe.mealId),
     ];
     const meals = (
-      await Promise.all(
-        [...new Set(allMealIds)].map((id) => ctx.db.get(id)),
-      )
+      await Promise.all([...new Set(allMealIds)].map((id) => ctx.db.get(id)))
     ).filter((meal): meal is NonNullable<typeof meal> => meal !== null);
 
     const mealMap = new Map(meals.map((meal) => [meal._id, meal]));
@@ -106,7 +104,9 @@ export const getWeeklyMealPlan = authQuery({
           [...new Set(allMealIds)].map((id) => ctx.db.get(id)),
         );
         const mealMap = new Map(
-          meals.filter((m): m is NonNullable<typeof m> => m !== null).map((m) => [m._id, m]),
+          meals
+            .filter((m): m is NonNullable<typeof m> => m !== null)
+            .map((m) => [m._id, m]),
         );
 
         const planMealsWithMeal = planMeals.map((pm) => ({
@@ -217,10 +217,12 @@ export const generateMealPlan = authMutation({
     }
 
     const userFavouriteMealIds = new Set(
-      (await ctx.db
-        .query("mealFavourites")
-        .withIndex("by_user", (q) => q.eq("userId", ctx.user.id))
-        .collect()).map((r) => r.mealId),
+      (
+        await ctx.db
+          .query("mealFavourites")
+          .withIndex("by_user", (q) => q.eq("userId", ctx.user.id))
+          .collect()
+      ).map((r) => r.mealId),
     );
 
     const generatedMealPlanIds: Id<"plans">[] = [];
@@ -270,7 +272,7 @@ export const generateMealPlan = authMutation({
           continue; // Skip if no meals are available for this category
         }
         // Prefer user favourites and high favouriteCount; then fridge overlap if provided
-        const preferFavourites = (candidates: (typeof availableMeals)) => {
+        const preferFavourites = (candidates: typeof availableMeals) => {
           const sorted = [...candidates].sort((a, b) => {
             const aFav = userFavouriteMealIds.has(a._id) ? 1 : 0;
             const bFav = userFavouriteMealIds.has(b._id) ? 1 : 0;

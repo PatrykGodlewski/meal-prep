@@ -3,6 +3,7 @@
 import { useTranslations } from "next-intl";
 import React from "react";
 import type { Control } from "react-hook-form";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   FormControl,
   FormField,
@@ -12,7 +13,6 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
 import {
   Select,
   SelectContent,
@@ -24,6 +24,7 @@ import { INGREDIENT_CATEGORIES, UNITS } from "@/convex/schema";
 
 interface IngredientBasicFieldsProps {
   index: number;
+  // biome-ignore lint/suspicious/noExplicitAny: react-hook-form Control requires form type; meal form type varies
   control: Control<any>;
 }
 
@@ -89,7 +90,10 @@ export const IngredientBasicFields = React.memo(function IngredientBasicFields({
         render={({ field }) => (
           <FormItem>
             <FormLabel className="text-xs">{tMeal("categoryLabel")}</FormLabel>
-            <Select value={field.value ?? "other"} onValueChange={field.onChange}>
+            <Select
+              value={field.value ?? "other"}
+              onValueChange={field.onChange}
+            >
               <FormControl>
                 <SelectTrigger className="h-10 rounded-lg">
                   <SelectValue />
@@ -152,7 +156,9 @@ export const IngredientBasicFields = React.memo(function IngredientBasicFields({
         name={`ingredients.${index}.calories`}
         render={({ field }) => (
           <FormItem>
-            <FormLabel className="text-xs">{tMeal("caloriesPerUnitLabel")}</FormLabel>
+            <FormLabel className="text-xs">
+              {tMeal("caloriesPerUnitLabel")}
+            </FormLabel>
             <FormControl>
               <Input
                 type="number"
@@ -162,7 +168,9 @@ export const IngredientBasicFields = React.memo(function IngredientBasicFields({
                 value={field.value ?? ""}
                 onChange={(e) =>
                   field.onChange(
-                    e.target.value === "" ? null : Number.parseInt(e.target.value),
+                    e.target.value === ""
+                      ? null
+                      : Number.parseInt(e.target.value),
                   )
                 }
               />

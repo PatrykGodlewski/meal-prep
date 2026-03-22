@@ -1,6 +1,7 @@
 "use client";
 import { useDebounceFn } from "ahooks";
 import { Loader2 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { type ChangeEvent, type ReactNode, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -16,7 +17,6 @@ import { Input } from "@/components/ui/input";
 import type { Id } from "@/convex/_generated/dataModel";
 import type { MEAL_CATEGORIES } from "@/convex/schema";
 import { usePaginatedMeals } from "@/hooks/use-paginated-meals";
-import { useTranslations } from "next-intl";
 
 interface ModalMealsProps {
   isOpen: boolean;
@@ -91,7 +91,7 @@ export function ModalMeals({
   return (
     <Dialog modal open={isOpen} onOpenChange={onOpenChange}>
       {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
-      <DialogContent className="!flex max-h-[80vh] flex-col overflow-hidden sm:max-w-[425px] md:max-w-2xl">
+      <DialogContent className="!flex max-h-[80vh] flex-col overflow-y-auto sm:max-w-[425px] md:max-w-2xl">
         <DialogHeader>
           <DialogTitle>{t("title")}</DialogTitle>
           <DialogDescription>{t("description")}</DialogDescription>
@@ -114,13 +114,11 @@ export function ModalMeals({
             <Checkbox
               id="show-all-meals"
               checked={showAllMeals}
-              onCheckedChange={(checked) =>
-                setShowAllMeals(checked === true)
-              }
+              onCheckedChange={(checked) => setShowAllMeals(checked === true)}
             />
             <label
               htmlFor="show-all-meals"
-              className="cursor-pointer text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+              className="cursor-pointer font-medium text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
             >
               {t("showAllMeals")}
             </label>
@@ -143,18 +141,11 @@ export function ModalMeals({
           )}
 
           {allMeals.map((meal) => (
-            <div
+            <button
+              type="button"
               key={meal._id}
-              className="flex cursor-pointer items-center justify-between rounded-md border p-3 hover:bg-accent hover:text-accent-foreground"
+              className="flex w-full cursor-pointer items-center justify-between rounded-md border p-3 text-left hover:bg-accent hover:text-accent-foreground"
               onClick={() => handleSelectMeal(meal._id)}
-              // biome-ignore lint/a11y/useSemanticElements: clickable row for meal selection
-              role="button"
-              tabIndex={0}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" || e.key === " ") {
-                  handleSelectMeal(meal._id);
-                }
-              }}
             >
               <div>
                 <p className="font-medium">{meal.name}</p>
@@ -170,14 +161,12 @@ export function ModalMeals({
                   {meal.calories != null && (
                     <span className="text-muted-foreground text-sm">
                       • {meal.calories} kcal
-                      {meal.servings && meal.servings > 1
-                        ? ` / serving`
-                        : ""}
+                      {meal.servings && meal.servings > 1 ? ` / serving` : ""}
                     </span>
                   )}
                 </div>
               </div>
-            </div>
+            </button>
           ))}
 
           <div ref={loadMoreRef} className="h-4 min-h-4" aria-hidden />

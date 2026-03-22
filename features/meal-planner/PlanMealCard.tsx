@@ -1,9 +1,8 @@
 "use client";
 
-import type { Doc } from "@/convex/_generated/dataModel";
 import {
-  ChevronDown,
   Check,
+  ChevronDown,
   Clock,
   Dumbbell,
   Flame,
@@ -20,22 +19,60 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { cn } from "@/lib/utils";
+import type { Doc } from "@/convex/_generated/dataModel";
 import { getMealKcal } from "@/lib/plan-kcal";
+import { cn } from "@/lib/utils";
 
 const ACCENT_PRESETS: { accentColor: string; accentBg: string }[] = [
-  { accentColor: "text-amber-600", accentBg: "bg-amber-50 dark:bg-amber-950/40" },
-  { accentColor: "text-emerald-700", accentBg: "bg-emerald-50 dark:bg-emerald-950/40" },
+  {
+    accentColor: "text-amber-600",
+    accentBg: "bg-amber-50 dark:bg-amber-950/40",
+  },
+  {
+    accentColor: "text-emerald-700",
+    accentBg: "bg-emerald-50 dark:bg-emerald-950/40",
+  },
   { accentColor: "text-sky-600", accentBg: "bg-sky-50 dark:bg-sky-950/40" },
   { accentColor: "text-pink-600", accentBg: "bg-pink-50 dark:bg-pink-950/40" },
-  { accentColor: "text-slate-600", accentBg: "bg-slate-100 dark:bg-slate-800/40" },
+  {
+    accentColor: "text-slate-600",
+    accentBg: "bg-slate-100 dark:bg-slate-800/40",
+  },
 ];
 
 const TIME_OPTIONS = [
-  "6:00", "6:30", "7:00", "7:30", "8:00", "8:30", "9:00", "9:30",
-  "10:00", "10:30", "11:00", "11:30", "12:00", "12:30", "13:00", "13:30",
-  "14:00", "14:30", "15:00", "15:30", "16:00", "16:30", "17:00", "17:30",
-  "18:00", "18:30", "19:00", "19:30", "20:00", "20:30", "21:00", "21:30",
+  "6:00",
+  "6:30",
+  "7:00",
+  "7:30",
+  "8:00",
+  "8:30",
+  "9:00",
+  "9:30",
+  "10:00",
+  "10:30",
+  "11:00",
+  "11:30",
+  "12:00",
+  "12:30",
+  "13:00",
+  "13:30",
+  "14:00",
+  "14:30",
+  "15:00",
+  "15:30",
+  "16:00",
+  "16:30",
+  "17:00",
+  "17:30",
+  "18:00",
+  "18:30",
+  "19:00",
+  "19:30",
+  "20:00",
+  "20:30",
+  "21:00",
+  "21:30",
 ];
 
 const DEFAULT_TIMES: Record<string, string> = {
@@ -101,9 +138,7 @@ export function PlanMealCard({
   }, [imageUrl]);
 
   const calories = meal ? Math.round(getMealKcal(plannedMeal, servings)) : 0;
-  const prepTime = meal?.prepTimeMinutes
-    ? `${meal.prepTimeMinutes} min`
-    : "—";
+  const prepTime = meal?.prepTimeMinutes ? `${meal.prepTimeMinutes} min` : "—";
 
   const handleTimeSelect = (newTime: string) => {
     setTime(newTime);
@@ -132,7 +167,10 @@ export function PlanMealCard({
               <ChevronDown className="h-3 w-3 text-muted-foreground" />
             </Button>
           </PopoverTrigger>
-          <PopoverContent align="center" className="max-h-48 w-24 overflow-y-auto p-1">
+          <PopoverContent
+            align="center"
+            className="max-h-48 w-24 overflow-y-auto p-1"
+          >
             {TIME_OPTIONS.map((opt) => (
               <Button
                 key={opt}
@@ -150,8 +188,15 @@ export function PlanMealCard({
           </PopoverContent>
         </Popover>
 
-        <div className={cn("mt-2 h-3 w-3 rounded-full border-2 border-background shadow-sm", dotBg)} />
-        {!isLast && <div className="mt-2 w-0.5 flex-1 rounded-full bg-border" />}
+        <div
+          className={cn(
+            "mt-2 h-3 w-3 rounded-full border-2 border-background shadow-sm",
+            dotBg,
+          )}
+        />
+        {!isLast && (
+          <div className="mt-2 w-0.5 flex-1 rounded-full bg-border" />
+        )}
       </div>
 
       {/* Meal card */}
@@ -226,7 +271,9 @@ export function PlanMealCard({
           <div className="mt-2 flex items-center gap-4">
             <div className="flex items-center gap-1">
               <Flame className="h-3.5 w-3.5 text-primary" />
-              <span className="font-bold text-foreground text-sm">{calories}</span>
+              <span className="font-bold text-foreground text-sm">
+                {calories}
+              </span>
               <span className="text-[10px] text-muted-foreground">kcal</span>
             </div>
             <div className="flex items-center gap-1">

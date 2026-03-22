@@ -29,7 +29,9 @@ export const biometricsSchema = z.object({
 });
 
 export const dietarySchema = z.object({
-  strictDiets: z.array(z.enum(STRICT_DIETS as unknown as [string, ...string[]])),
+  strictDiets: z.array(
+    z.enum(STRICT_DIETS as unknown as [string, ...string[]]),
+  ),
   allergies: z.array(z.enum(ALLERGIES as unknown as [string, ...string[]])),
 });
 

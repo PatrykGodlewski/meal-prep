@@ -49,11 +49,11 @@ export function usePaginatedMeals({
 
   const sortBy =
     sortByProp ??
-    (sortSchema.safeParse(searchParams.get(SORT_PARAM_KEY)).data ?? "favourites");
+    sortSchema.safeParse(searchParams.get(SORT_PARAM_KEY)).data ??
+    "favourites";
 
   const onlyFavourites =
-    onlyFavouritesProp ??
-    (searchParams.get(FAV_PARAM_KEY) === "1");
+    onlyFavouritesProp ?? searchParams.get(FAV_PARAM_KEY) === "1";
 
   const { results, status, loadMore, isLoading } = usePaginatedQuery(
     api.meals.queries.getMeals,

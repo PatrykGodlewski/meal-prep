@@ -42,7 +42,8 @@ export const getDietInput = internalQuery({
     for (const p of ingredientPrefs) {
       const ing = await ctx.db.get(p.ingredientId);
       if (ing?.name) {
-        if (p.preferenceType === "always_include") likedIngredients.push(ing.name);
+        if (p.preferenceType === "always_include")
+          likedIngredients.push(ing.name);
         else dislikedIngredients.push(ing.name);
       }
     }

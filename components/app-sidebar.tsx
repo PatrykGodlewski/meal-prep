@@ -1,6 +1,5 @@
 "use client";
-import { useQuery } from "convex/react";
-import { useConvexAuth } from "convex/react";
+import { useConvexAuth, useQuery } from "convex/react";
 import {
   CalendarCog,
   LayoutDashboardIcon,
@@ -8,7 +7,6 @@ import {
   Refrigerator,
   SquareStack,
   Triangle,
-  UtensilsCrossed,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { NavMain } from "@/components/nav-main";
@@ -95,11 +93,6 @@ function Nav() {
       title: t("plans"),
       url: "/plans",
       icon: CalendarCog,
-    },
-    {
-      title: t("diet"),
-      url: "/diet",
-      icon: UtensilsCrossed,
     },
     {
       title: t("ingredients"),

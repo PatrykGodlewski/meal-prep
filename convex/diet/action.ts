@@ -1,13 +1,13 @@
 "use node";
 
-import { v } from "convex/values";
-import { internalAction } from "../_generated/server";
-import { internal } from "../_generated/api";
-import { generateObject } from "ai";
 import { google } from "@ai-sdk/google";
 import { groq } from "@ai-sdk/groq";
-import { dietOutputSchema } from "../../lib/validations/diet";
+import { generateObject } from "ai";
+import { v } from "convex/values";
 import { computeTDEEOutput } from "../../lib/tdee";
+import { dietOutputSchema } from "../../lib/validations/diet";
+import { internal } from "../_generated/api";
+import { internalAction } from "../_generated/server";
 
 const LOCALE_TO_LANGUAGE: Record<string, string> = {
   pl: "Polish",
@@ -158,7 +158,8 @@ export const generateDiet = internalAction({
         await ctx.runMutation(internal.diet.mutations.recordDietResult, {
           userId,
           status: "failed",
-          error: "Complete your profile (age, height, weight, activity level) to generate a diet.",
+          error:
+            "Complete your profile (age, height, weight, activity level) to generate a diet.",
         });
         return;
       }

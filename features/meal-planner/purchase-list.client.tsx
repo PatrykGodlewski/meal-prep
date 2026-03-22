@@ -3,23 +3,27 @@
 import { useConvexMutation } from "@convex-dev/react-query";
 import { use$ } from "@legendapp/state/react";
 import { useMutation } from "@tanstack/react-query";
+import { format } from "date-fns";
 import { camelCase } from "lodash";
 import { ChevronRight, Eye, EyeOff, ShoppingCart } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useId } from "react";
 import { toast } from "sonner";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { For } from "@/components/for-each";
 import ServingController from "@/components/serving-controller";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
 import { cn } from "@/lib/utils";
 import type { IngredientCategory } from "@/validators";
-import { format } from "date-fns";
 import { DatePickerWithPresets } from "./date-picker";
 import { useMealPlanner } from "./store";
 
@@ -275,7 +279,7 @@ function ShoppingListItem({
               {servings * amount} {unit}
             </span>
             {isPartial && !isChecked && (
-              <span className="text-yellow-700 text-xs dark:text-yellow-400">
+              <span className="text-xs text-yellow-700 dark:text-yellow-400">
                 {tPlanner("partialAmountNote")}
               </span>
             )}
@@ -294,20 +298,21 @@ function ShoppingListItem({
         </div>
         {hasMealBreakdown && (
           <CollapsibleContent>
-            <div className="ml-8 mt-1 space-y-1 border-l-2 border-neutral-200 pl-3 py-1 dark:border-neutral-700">
-              <p className="text-muted-foreground text-xs font-medium">
+            <div className="mt-1 ml-8 space-y-1 border-neutral-200 border-l-2 py-1 pl-3 dark:border-neutral-700">
+              <p className="font-medium text-muted-foreground text-xs">
                 {tPlanner("forMeals")}:
               </p>
               {mealBreakdown.map((entry, idx) => (
                 <div
                   key={`${entry.mealName}-${entry.category}-${entry.planDate}-${idx}`}
-                  className="text-muted-foreground flex flex-wrap items-center gap-x-2 gap-y-0 text-xs"
+                  className="flex flex-wrap items-center gap-x-2 gap-y-0 text-muted-foreground text-xs"
                 >
                   <span className="font-medium text-foreground">
                     {entry.mealName}
                   </span>
                   <span>
-                    ({tMeal(entry.category as never)} • {format(entry.planDate, "EEE")})
+                    ({tMeal(entry.category as never)} •{" "}
+                    {format(entry.planDate, "EEE")})
                   </span>
                   <span>
                     {servings * entry.quantity} {unit}

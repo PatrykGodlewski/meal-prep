@@ -1,5 +1,5 @@
 import { v } from "convex/values";
-import { internalQuery, query } from "../_generated/server";
+import { internalQuery } from "../_generated/server";
 import { authQuery } from "../custom/query";
 
 /**
@@ -15,10 +15,8 @@ export const getRAGInput = internalQuery({
 
     const allergies =
       prefs?.dietary?.allergies?.filter((a) => a !== "none") ?? [];
-    const likes =
-      prefs?.dishTypes?.preferredTypes ?? [];
-    const avoided =
-      prefs?.dishTypes?.avoidedTypes ?? [];
+    const likes = prefs?.dishTypes?.preferredTypes ?? [];
+    const avoided = prefs?.dishTypes?.avoidedTypes ?? [];
 
     const favouriteRows = await ctx.db
       .query("mealFavourites")

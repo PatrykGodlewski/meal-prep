@@ -1,12 +1,11 @@
-import type { Doc, Id } from "../_generated/dataModel";
-import type { QueryCtx } from "../_generated/server";
 import { paginationOptsValidator } from "convex/server";
 import { v } from "convex/values";
 import { filter } from "convex-helpers/server/filter";
 import { stream } from "convex-helpers/server/stream";
+import type { Doc, Id } from "../_generated/dataModel";
+import type { QueryCtx } from "../_generated/server";
 import { authQuery } from "../custom/query";
-import schema from "../schema";
-import { MEAL_CATEGORIES } from "../schema";
+import schema, { MEAL_CATEGORIES } from "../schema";
 
 type CtxWithUser = QueryCtx & { user: { id: Id<"users"> } };
 
@@ -21,7 +20,9 @@ async function attachIsFavourited(
     .withIndex("by_user", (q) => q.eq("userId", ctx.user.id))
     .collect();
   const favouriteSet = new Set(
-    favouriteRows.filter((r) => mealIdsOnPage.has(r.mealId)).map((r) => r.mealId),
+    favouriteRows
+      .filter((r) => mealIdsOnPage.has(r.mealId))
+      .map((r) => r.mealId),
   );
   return page.map((meal) => ({
     ...meal,
@@ -33,7 +34,9 @@ function parseOffsetCursor(cursor: string | null): number {
   if (!cursor) return 0;
   try {
     const decoded = JSON.parse(atob(cursor)) as { offset?: number };
-    return typeof decoded?.offset === "number" ? Math.max(0, decoded.offset) : 0;
+    return typeof decoded?.offset === "number"
+      ? Math.max(0, decoded.offset)
+      : 0;
   } catch {
     return 0;
   }
@@ -57,7 +60,13 @@ export const getMeals = authQuery({
   },
   handler: async (
     ctx,
-    { paginationOpts, search = "", filter: categoryFilter, sortBy = "favourites", onlyFavourites = false },
+    {
+      paginationOpts,
+      search = "",
+      filter: categoryFilter,
+      sortBy = "favourites",
+      onlyFavourites = false,
+    },
   ) => {
     const trimmedSearch = search.trim();
     const isSearching = !!trimmedSearch;
@@ -65,7 +74,12 @@ export const getMeals = authQuery({
     const sortByFavourites = sortBy === "favourites";
     const pagination = paginationOpts ?? { numItems: 10, cursor: null };
 
-    type PaginatedMeals = { page: Doc<"meals">[]; status: string; isDone: boolean; continueCursor: string };
+    type PaginatedMeals = {
+      page: Doc<"meals">[];
+      status: string;
+      isDone: boolean;
+      continueCursor: string;
+    };
     let result: PaginatedMeals;
 
     // CASE 0: Only favourites – load user's favourites, filter, sort, paginate manually
@@ -76,12 +90,14 @@ export const getMeals = authQuery({
         .collect();
       const mealIds = favouriteRows.map((r) => r.mealId);
       const meals = (
-        await Promise.all(mealIds.map((id) => ctx.db.get(id))))
-        .filter((m): m is Doc<"meals"> => m !== null);
+        await Promise.all(mealIds.map((id) => ctx.db.get(id)))
+      ).filter((m): m is Doc<"meals"> => m !== null);
 
       let filtered = meals;
       if (isFiltering) {
-        filtered = filtered.filter((m) => m.categories.includes(categoryFilter));
+        filtered = filtered.filter((m) =>
+          m.categories.includes(categoryFilter),
+        );
       }
       if (isSearching) {
         const lower = trimmedSearch.toLowerCase();
@@ -90,7 +106,9 @@ export const getMeals = authQuery({
         );
       }
       if (sortByFavourites) {
-        filtered = [...filtered].sort((a, b) => (b.favouriteCount ?? 0) - (a.favouriteCount ?? 0));
+        filtered = [...filtered].sort(
+          (a, b) => (b.favouriteCount ?? 0) - (a.favouriteCount ?? 0),
+        );
       }
 
       const offset = parseOffsetCursor(pagination.cursor);
@@ -98,7 +116,12 @@ export const getMeals = authQuery({
       const hasMore = offset + pagination.numItems < filtered.length;
       const nextOffset = offset + pagination.numItems;
 
-      const pageWithFavourites = page.map((m) => ({ ...m, isFavourited: true } as Doc<"meals"> & { isFavourited: boolean }));
+      const pageWithFavourites = page.map(
+        (m) =>
+          ({ ...m, isFavourited: true }) as Doc<"meals"> & {
+            isFavourited: boolean;
+          },
+      );
       return {
         page: pageWithFavourites,
         status: hasMore ? "CanLoadMore" : "Exhausted",
@@ -163,7 +186,9 @@ export const getMeals = authQuery({
         maximumRowsRead: 500,
       })) as PaginatedMeals;
     } else {
-      result = (await ctx.db.query("meals").paginate(pagination)) as PaginatedMeals;
+      result = (await ctx.db
+        .query("meals")
+        .paginate(pagination)) as PaginatedMeals;
     }
 
     const pageWithFavourites = await attachIsFavourited(ctx, result.page);
@@ -189,11 +214,9 @@ export const getMeal = authQuery({
       .withIndex("by_meal", (q) => q.eq("mealId", mealId))
       .collect();
 
-    const author = meal.createdBy
-      ? await ctx.db.get(meal.createdBy)
-      : null;
+    const author = meal.createdBy ? await ctx.db.get(meal.createdBy) : null;
     const authorDisplayName = author
-      ? author.name ?? author.email ?? "Unknown"
+      ? (author.name ?? author.email ?? "Unknown")
       : "Unknown";
 
     const mealWithIngredients = {
@@ -208,17 +231,15 @@ export const getMeal = authQuery({
           const effectiveEntries =
             mi.allowedReplacements !== undefined
               ? mi.allowedReplacements
-              : ingredient?.replacements ??
+              : (ingredient?.replacements ??
                 (ingredient?.replacementIds ?? []).map((id) => ({
                   ingredientId: id,
                   ratio: undefined,
-                }));
+                })));
           const replacementInfos = await Promise.all(
             effectiveEntries.map(async (entry) => {
               const rep = await ctx.db.get(entry.ingredientId);
-              return rep
-                ? { name: rep.name, ratio: entry.ratio ?? 1 }
-                : null;
+              return rep ? { name: rep.name, ratio: entry.ratio ?? 1 } : null;
             }),
           );
           const validReplacementInfos = replacementInfos.filter(

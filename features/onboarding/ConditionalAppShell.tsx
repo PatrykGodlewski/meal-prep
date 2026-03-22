@@ -1,7 +1,7 @@
 "use client";
 
-import { usePathname } from "@/i18n/navigation";
 import { AppHeader } from "@/components/app-header";
+import { usePathname } from "@/i18n/navigation";
 
 /**
  * Renders app shell with top header (no sidebar). Full-width content.

@@ -3,11 +3,9 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useDebounceFn } from "ahooks";
 import { useMutation, useQuery } from "convex/react";
-import { useRouter } from "@/i18n/navigation";
+import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import { useTranslations } from "next-intl";
-import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
@@ -17,10 +15,11 @@ import {
 } from "@/components/ui/form";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { api } from "@/convex/_generated/api";
+import { useRouter } from "@/i18n/navigation";
 import { StepHeader } from "./components/StepHeader";
 import { StepNavigation } from "./components/StepNavigation";
 import { DEBOUNCE_MS } from "./constants";
-import { appetiteSchema, type AppetiteValues } from "./schemas";
+import { type AppetiteValues, appetiteSchema } from "./schemas";
 
 export function Step5Form() {
   const t = useTranslations("onboarding.step5");
@@ -94,7 +93,13 @@ export function Step5Form() {
                 <FormControl>
                   <RadioGroup
                     onValueChange={(v) =>
-                      field.onChange(v === "meal_prep" ? true : v === "variety" ? false : undefined)
+                      field.onChange(
+                        v === "meal_prep"
+                          ? true
+                          : v === "variety"
+                            ? false
+                            : undefined,
+                      )
                     }
                     value={
                       field.value === true

@@ -12,7 +12,6 @@ import {
   Settings,
   SquareStack,
   Triangle,
-  UtensilsCrossed,
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -46,7 +45,6 @@ const NAV_ITEMS = [
   { href: "/fridge", icon: Refrigerator, key: "fridge" },
   { href: "/meals", icon: List, key: "meals" },
   { href: "/plans", icon: CalendarCog, key: "plans" },
-  { href: "/diet", icon: UtensilsCrossed, key: "diet" },
   { href: "/ingredients", icon: SquareStack, key: "ingredients" },
 ] as const;
 

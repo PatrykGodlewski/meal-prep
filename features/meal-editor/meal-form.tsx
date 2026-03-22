@@ -45,12 +45,17 @@ const mapMealToFormValues = (
         quantity: mi.quantity,
         isOptional: mi.isOptional ?? false,
         notes: mi.notes ?? "",
-        allowedReplacements:
-          ((mi as { allowedReplacements?: { ingredientId: string; ratio?: number }[] })
-            .allowedReplacements ??
-          (mi as { allowedReplacementIds?: string[] }).allowedReplacementIds?.map(
-            (id) => ({ ingredientId: id, ratio: 1 }),
-          )) as MutationMealEditValues["ingredients"][number]["allowedReplacements"],
+        allowedReplacements: ((
+          mi as {
+            allowedReplacements?: { ingredientId: string; ratio?: number }[];
+          }
+        ).allowedReplacements ??
+          (
+            mi as { allowedReplacementIds?: string[] }
+          ).allowedReplacementIds?.map((id) => ({
+            ingredientId: id,
+            ratio: 1,
+          }))) as MutationMealEditValues["ingredients"][number]["allowedReplacements"],
       }),
     ) ?? [];
 

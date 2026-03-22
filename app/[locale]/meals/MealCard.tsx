@@ -83,12 +83,20 @@ export function MealCard({ meal }: Props) {
           <button
             type="button"
             onClick={handleFavouriteClick}
-            className="absolute top-2 left-2 rounded-full bg-white/20 p-2 text-white backdrop-blur-sm transition-transform duration-200 ease-out hover:scale-105 hover:bg-white/30 active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-white"
-            title={isFavourited ? tFav("removeFromFavourites") : tFav("addToFavourites")}
-            aria-label={isFavourited ? tFav("removeFromFavourites") : tFav("addToFavourites")}
+            className="absolute top-2 left-2 rounded-full bg-white/20 p-2 text-white backdrop-blur-sm transition-transform duration-200 ease-out hover:scale-105 hover:bg-white/30 focus:outline-none focus:ring-2 focus:ring-white active:scale-[0.98]"
+            title={
+              isFavourited
+                ? tFav("removeFromFavourites")
+                : tFav("addToFavourites")
+            }
+            aria-label={
+              isFavourited
+                ? tFav("removeFromFavourites")
+                : tFav("addToFavourites")
+            }
           >
             <Heart
-              className={`h-5 w-5 transition-all duration-300 ease-out ${isFavourited ? "fill-white scale-[1.05] animate-[heart-pop_0.35s_ease-out]" : "scale-100"}`}
+              className={`h-5 w-5 transition-all duration-300 ease-out ${isFavourited ? "scale-[1.05] animate-[heart-pop_0.35s_ease-out] fill-white" : "scale-100"}`}
             />
           </button>
         </div>

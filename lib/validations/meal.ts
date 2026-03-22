@@ -32,25 +32,33 @@ const categoryOptional = z
   .transform((s) => {
     if (s === undefined || s === null) return undefined;
     const lower = String(s).toLowerCase().trim();
-    return RAG_MEAL_CATEGORIES.includes(lower as (typeof RAG_MEAL_CATEGORIES)[number])
+    return RAG_MEAL_CATEGORIES.includes(
+      lower as (typeof RAG_MEAL_CATEGORIES)[number],
+    )
       ? (lower as (typeof RAG_MEAL_CATEGORIES)[number])
       : undefined;
   });
 
 /** Coerce any value to one of allowed units; default to "g" if invalid. */
-const unitWithFallback = z
-  .union([z.string(), z.number()])
-  .transform((s) => {
-    const lower = String(s ?? "").toLowerCase().trim();
-    return RAG_UNITS.includes(lower as (typeof RAG_UNITS)[number])
-      ? (lower as (typeof RAG_UNITS)[number])
-      : "g";
-  });
+const unitWithFallback = z.union([z.string(), z.number()]).transform((s) => {
+  const lower = String(s ?? "")
+    .toLowerCase()
+    .trim();
+  return RAG_UNITS.includes(lower as (typeof RAG_UNITS)[number])
+    ? (lower as (typeof RAG_UNITS)[number])
+    : "g";
+});
 
 /** Zod schema for AI-generated meal output (title, description, category, times, ingredients, instructions, macros). */
 export const ragMealOutputSchema = z.object({
-  title: z.union([z.string(), z.number()]).transform(String).pipe(z.string().min(1)),
-  description: z.union([z.string(), z.number()]).optional().transform((s) => (s == null ? undefined : String(s))),
+  title: z
+    .union([z.string(), z.number()])
+    .transform(String)
+    .pipe(z.string().min(1)),
+  description: z
+    .union([z.string(), z.number()])
+    .optional()
+    .transform((s) => (s == null ? undefined : String(s))),
   category: categoryOptional,
   prepTimeMinutes: z
     .union([z.number(), z.string()])
@@ -81,10 +89,22 @@ export const ragMealOutputSchema = z.object({
   ]),
   macros: z
     .object({
-      calories: z.union([z.number(), z.string()]).optional().transform((v) => (v == null ? undefined : Number(v))),
-      protein: z.union([z.number(), z.string()]).optional().transform((v) => (v == null ? undefined : Number(v))),
-      fat: z.union([z.number(), z.string()]).optional().transform((v) => (v == null ? undefined : Number(v))),
-      carbs: z.union([z.number(), z.string()]).optional().transform((v) => (v == null ? undefined : Number(v))),
+      calories: z
+        .union([z.number(), z.string()])
+        .optional()
+        .transform((v) => (v == null ? undefined : Number(v))),
+      protein: z
+        .union([z.number(), z.string()])
+        .optional()
+        .transform((v) => (v == null ? undefined : Number(v))),
+      fat: z
+        .union([z.number(), z.string()])
+        .optional()
+        .transform((v) => (v == null ? undefined : Number(v))),
+      carbs: z
+        .union([z.number(), z.string()])
+        .optional()
+        .transform((v) => (v == null ? undefined : Number(v))),
     })
     .optional(),
 });

@@ -2,7 +2,7 @@
 
 import { CheckIcon, ChevronsUpDown, X } from "lucide-react";
 import { useTranslations } from "next-intl";
-import React, { useState } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Command,
@@ -18,7 +18,6 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { cn } from "@/lib/utils";
 
 export interface ReplacementEntry {
   ingredientId: string;
@@ -58,9 +57,7 @@ export function ReplacementsEditor({
 
   const updateRatio = (ingredientId: string, ratio: number) => {
     onChange(
-      value.map((v) =>
-        v.ingredientId === ingredientId ? { ...v, ratio } : v,
-      ),
+      value.map((v) => (v.ingredientId === ingredientId ? { ...v, ratio } : v)),
     );
   };
 
@@ -72,15 +69,18 @@ export function ReplacementsEditor({
             const opt = options.find((o) => o.value === entry.ingredientId);
             const ratio = entry.ratio ?? 1;
             return (
-              <div
-                key={entry.ingredientId}
-                className="flex items-center gap-2"
-              >
-                <span className="flex-1 text-sm">{opt?.label ?? entry.ingredientId}</span>
-                <label className="text-muted-foreground text-xs whitespace-nowrap">
+              <div key={entry.ingredientId} className="flex items-center gap-2">
+                <span className="flex-1 text-sm">
+                  {opt?.label ?? entry.ingredientId}
+                </span>
+                <label
+                  htmlFor={`replacement-ratio-${entry.ingredientId}`}
+                  className="whitespace-nowrap text-muted-foreground text-xs"
+                >
                   {tEdit("ratioLabel")}:
                 </label>
                 <Input
+                  id={`replacement-ratio-${entry.ingredientId}`}
                   type="number"
                   step="0.1"
                   min="0.1"
@@ -94,7 +94,7 @@ export function ReplacementsEditor({
                       updateRatio(entry.ingredientId, v);
                   }}
                 />
-                <span className="text-muted-foreground text-xs shrink-0">
+                <span className="shrink-0 text-muted-foreground text-xs">
                   (100→{Math.round(100 * ratio)})
                 </span>
                 <Button
@@ -124,11 +124,16 @@ export function ReplacementsEditor({
               <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
             </Button>
           </PopoverTrigger>
-          <PopoverContent className="w-(--radix-popover-trigger-width) p-0" align="start">
+          <PopoverContent
+            className="w-(--radix-popover-trigger-width) p-0"
+            align="start"
+          >
             <Command shouldFilter>
               <CommandInput placeholder={tEdit("replacementsPlaceholder")} />
               <CommandList>
-                <CommandEmpty>{emptyOptionsMessage ?? "No results"}</CommandEmpty>
+                <CommandEmpty>
+                  {emptyOptionsMessage ?? "No results"}
+                </CommandEmpty>
                 <CommandGroup>
                   {availableOptions.map((opt) => (
                     <CommandItem

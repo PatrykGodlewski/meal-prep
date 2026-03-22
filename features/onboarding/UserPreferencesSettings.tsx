@@ -1,8 +1,8 @@
 "use client";
 
 import { useQuery } from "convex/react";
-import { useState } from "react";
 import { useTranslations } from "next-intl";
+import { useState } from "react";
 import { api } from "@/convex/_generated/api";
 import {
   AppetiteSection,
@@ -27,11 +27,7 @@ export function UserPreferencesSettings() {
   };
 
   if (data === undefined) {
-    return (
-      <div className="text-muted-foreground">
-        Loading preferences...
-      </div>
-    );
+    return <div className="text-muted-foreground">Loading preferences...</div>;
   }
 
   return (

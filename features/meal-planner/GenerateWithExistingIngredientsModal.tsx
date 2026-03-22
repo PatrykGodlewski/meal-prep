@@ -120,13 +120,13 @@ export function GenerateWithExistingIngredientsModal({
 
   return (
     <Dialog modal open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="flex max-h-[85vh] flex-col overflow-hidden sm:max-w-[500px]">
+      <DialogContent className="flex max-h-[85vh] flex-col overflow-y-auto sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle>{t("title")}</DialogTitle>
           <DialogDescription>{t("description")}</DialogDescription>
         </DialogHeader>
 
-        <div className="flex flex-col gap-4 overflow-hidden">
+        <div className="flex flex-col gap-4">
           <div className="flex flex-col gap-2">
             <label
               htmlFor="add-ingredient-combobox"

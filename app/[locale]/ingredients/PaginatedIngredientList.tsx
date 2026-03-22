@@ -1,15 +1,15 @@
 "use client";
 
-import { For } from "@/components/for-each";
-import { Skeleton } from "@/components/ui/skeleton";
-import { usePaginatedIngredients } from "@/hooks/use-paginated-ingredients";
-import { useDateLocale } from "@/hooks/use-date-locale";
+import { useMutation } from "convex/react";
 import { format } from "date-fns";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
+import { For } from "@/components/for-each";
 import { Button } from "@/components/ui/button";
-import { useMutation } from "convex/react";
+import { Skeleton } from "@/components/ui/skeleton";
 import { api } from "@/convex/_generated/api";
+import { useDateLocale } from "@/hooks/use-date-locale";
+import { usePaginatedIngredients } from "@/hooks/use-paginated-ingredients";
 
 const IngredientCardSkeleton = () => (
   <div className="flex flex-wrap justify-between gap-8 rounded-lg bg-white p-4 shadow-sm transition-shadow dark:bg-neutral-900 dark:shadow-neutral-700">

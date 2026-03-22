@@ -1,11 +1,11 @@
 "use client";
 
 import type { FunctionReturnType } from "convex/server";
+import { format } from "date-fns";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import type { api } from "@/convex/_generated/api";
 import { useDateLocale } from "@/hooks/use-date-locale";
-import { format } from "date-fns";
 
 type IngredientWithMeals = FunctionReturnType<
   typeof api.ingredients.queries.getIngredient
@@ -49,9 +49,7 @@ export function IngredientDisplayDetails({
               <dt className="text-neutral-500 text-sm dark:text-neutral-400">
                 {tEditor("caloriesLabel")}
               </dt>
-              <dd className="font-medium">
-                {ingredient.calories ?? 0} kcal
-              </dd>
+              <dd className="font-medium">{ingredient.calories ?? 0} kcal</dd>
             </div>
             <div>
               <dt className="text-neutral-500 text-sm dark:text-neutral-400">
@@ -74,30 +72,36 @@ export function IngredientDisplayDetails({
               </dd>
             </div>
             {(() => {
-              const infos = (ingredient as { replacementInfos?: { name: string; ratio: number }[] })
-                .replacementInfos;
+              const infos = (
+                ingredient as {
+                  replacementInfos?: { name: string; ratio: number }[];
+                }
+              ).replacementInfos;
               const names = (ingredient as { replacementNames?: string[] })
                 .replacementNames;
-              const list = infos ?? names?.map((n) => ({ name: n, ratio: 1 })) ?? [];
+              const list =
+                infos ?? names?.map((n) => ({ name: n, ratio: 1 })) ?? [];
               return list.length > 0 ? (
-              <div className="col-span-full">
-                <dt className="text-neutral-500 text-sm dark:text-neutral-400">
-                  {tEditor("replacementsLabel")}
-                </dt>
-                <dd className="font-medium">
-                  <ul className="mt-1 list-none border-l-2 border-gray-300 pl-4 text-sm dark:border-neutral-500">
-                    {list.map((r) => (
-                      <li key={r.name}>
-                        {r.name}
-                        {r.ratio !== 1 && (
-                          <span className="text-neutral-400 ml-1">({r.ratio}×)</span>
-                        )}
-                      </li>
-                    ))}
-                  </ul>
-                </dd>
-              </div>
-            ) : null;
+                <div className="col-span-full">
+                  <dt className="text-neutral-500 text-sm dark:text-neutral-400">
+                    {tEditor("replacementsLabel")}
+                  </dt>
+                  <dd className="font-medium">
+                    <ul className="mt-1 list-none border-gray-300 border-l-2 pl-4 text-sm dark:border-neutral-500">
+                      {list.map((r) => (
+                        <li key={r.name}>
+                          {r.name}
+                          {r.ratio !== 1 && (
+                            <span className="ml-1 text-neutral-400">
+                              ({r.ratio}×)
+                            </span>
+                          )}
+                        </li>
+                      ))}
+                    </ul>
+                  </dd>
+                </div>
+              ) : null;
             })()}
           </dl>
         </div>

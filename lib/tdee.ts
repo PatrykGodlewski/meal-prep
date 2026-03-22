@@ -44,7 +44,12 @@ export type TDEEOutput = {
  * Men: (10 × weightKg) + (6.25 × heightCm) - (5 × age) + 5
  * Women: (10 × weightKg) + (6.25 × heightCm) - (5 × age) - 161
  */
-export function calculateBMR(age: number, weightKg: number, heightCm: number, gender?: string): number {
+export function calculateBMR(
+  age: number,
+  weightKg: number,
+  heightCm: number,
+  gender?: string,
+): number {
   const base = 10 * weightKg + 6.25 * heightCm - 5 * age;
   const genderAdjustment = gender?.toLowerCase() === "female" ? -161 : 5;
   return Math.round(base + genderAdjustment);
@@ -61,8 +66,11 @@ export function calculateTDEE(bmr: number, activityLevel: string): number {
 /**
  * Daily calorie target = TDEE + goal adjustment.
  */
-export function calculateDailyKcalTarget(tdee: number, primaryGoal?: string): number {
-  const adjustment = primaryGoal ? GOAL_KCAL_ADJUSTMENT[primaryGoal] ?? 0 : 0;
+export function calculateDailyKcalTarget(
+  tdee: number,
+  primaryGoal?: string,
+): number {
+  const adjustment = primaryGoal ? (GOAL_KCAL_ADJUSTMENT[primaryGoal] ?? 0) : 0;
   return Math.max(1200, Math.round(tdee + adjustment));
 }
 
@@ -74,7 +82,7 @@ export function calculateDailyKcalTarget(tdee: number, primaryGoal?: string): nu
  */
 export function calculateMacroTargets(
   dailyKcal: number,
-  primaryGoal?: string
+  primaryGoal?: string,
 ): MacroTargets {
   const kcals = dailyKcal;
   let proteinPct: number;
@@ -92,7 +100,6 @@ export function calculateMacroTargets(
       carbPct = 0.45;
       fatPct = 0.2;
       break;
-    case "maintenance":
     default:
       proteinPct = 0.3;
       carbPct = 0.4;
@@ -115,11 +122,14 @@ export function computeTDEEOutput(input: TDEEInput): TDEEOutput {
     input.age,
     input.weightKg,
     input.heightCm,
-    input.gender
+    input.gender,
   );
   const tdee = calculateTDEE(bmr, input.activityLevel);
   const dailyKcalTarget = calculateDailyKcalTarget(tdee, input.primaryGoal);
-  const macroTargets = calculateMacroTargets(dailyKcalTarget, input.primaryGoal);
+  const macroTargets = calculateMacroTargets(
+    dailyKcalTarget,
+    input.primaryGoal,
+  );
 
   return {
     bmrKcal: bmr,

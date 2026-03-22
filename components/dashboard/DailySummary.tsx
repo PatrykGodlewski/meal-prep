@@ -34,7 +34,7 @@ export function DailySummary({
   const t = useTranslations("personalizedDiet");
 
   return (
-    <div className="flex flex-col gap-4 overflow-hidden rounded-2xl border border-border/60 bg-card/80 p-4 shadow-[var(--shadow-soft)]">
+    <div className="flex flex-col gap-4 rounded-2xl border border-border/60 bg-card/80 p-4 shadow-[var(--shadow-soft)]">
       <h3 className="font-semibold text-base">{t("targetsTitle")}</h3>
       <div className="space-y-4">
         <div>

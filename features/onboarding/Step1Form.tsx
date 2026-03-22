@@ -3,10 +3,9 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useDebounceFn } from "ahooks";
 import { useMutation, useQuery } from "convex/react";
-import { useRouter } from "@/i18n/navigation";
+import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import { useTranslations } from "next-intl";
 import {
   Form,
   FormControl,
@@ -23,12 +22,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ACTIVITY_LEVELS, PRIMARY_GOALS } from "@/convex/schema";
 import { api } from "@/convex/_generated/api";
+import { ACTIVITY_LEVELS, PRIMARY_GOALS } from "@/convex/schema";
+import { useRouter } from "@/i18n/navigation";
 import { StepHeader } from "./components/StepHeader";
 import { StepNavigation } from "./components/StepNavigation";
 import { DEBOUNCE_MS } from "./constants";
-import { biometricsSchema, type BiometricsValues } from "./schemas";
+import { type BiometricsValues, biometricsSchema } from "./schemas";
 
 export function Step1Form() {
   const t = useTranslations("onboarding.step1");
@@ -136,7 +136,9 @@ export function Step1Form() {
                     type="number"
                     placeholder={t("agePlaceholder")}
                     {...field}
-                    onChange={(e) => field.onChange(e.target.valueAsNumber ?? e.target.value)}
+                    onChange={(e) =>
+                      field.onChange(e.target.valueAsNumber ?? e.target.value)
+                    }
                   />
                 </FormControl>
                 <FormMessage />
@@ -216,7 +218,9 @@ export function Step1Form() {
                 >
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder={t("activityLevelPlaceholder")} />
+                      <SelectValue
+                        placeholder={t("activityLevelPlaceholder")}
+                      />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>

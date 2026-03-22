@@ -121,7 +121,12 @@ export const getShoppingList = authQuery({
     // Map ingredientId -> { mealName, category, planDate, quantity }[]
     const ingredientMealBreakdown = new Map<
       Id<"ingredients">,
-      { mealName: string; category: string; planDate: number; quantity: number }[]
+      {
+        mealName: string;
+        category: string;
+        planDate: number;
+        quantity: number;
+      }[]
     >();
 
     for (const detail of planDetails) {
@@ -171,8 +176,7 @@ export const getShoppingList = authQuery({
         }
 
         const ingredient = ingredientsMap.get(ingredientId) || null;
-        const mealBreakdown =
-          ingredientMealBreakdown.get(ingredientId) ?? [];
+        const mealBreakdown = ingredientMealBreakdown.get(ingredientId) ?? [];
         return {
           _id: ingredientId,
           itemIds: aggregatedData.originalItemIds,
@@ -180,9 +184,11 @@ export const getShoppingList = authQuery({
           amount: remainder,
           isChecked: aggregatedData.isChecked,
           existingAmountUsed:
-            fridgeAmount > 0 ? fridgeAmount : aggregatedData.existingAmountUsed > 0
-              ? aggregatedData.existingAmountUsed
-              : undefined,
+            fridgeAmount > 0
+              ? fridgeAmount
+              : aggregatedData.existingAmountUsed > 0
+                ? aggregatedData.existingAmountUsed
+                : undefined,
           ingredient: ingredient,
           mealBreakdown,
         };

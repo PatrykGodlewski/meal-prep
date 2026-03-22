@@ -69,6 +69,7 @@ export function DatePickerWithPresets() {
             "flex-1 justify-start text-left font-normal sm:max-w-[280px]",
             !shoppingListDate && "text-muted-foreground",
           )}
+          suppressHydrationWarning
         >
           <CalendarIcon />
           {shoppingListDate?.from ? (

@@ -1,9 +1,9 @@
 "use client";
 
 import { useConvexAuth, useQuery } from "convex/react";
-import { usePathname, useRouter } from "@/i18n/navigation";
 import { useEffect } from "react";
 import { api } from "@/convex/_generated/api";
+import { usePathname, useRouter } from "@/i18n/navigation";
 
 /**
  * Redirects logged-in users who haven't completed onboarding to /onboarding.

@@ -1,8 +1,10 @@
 {
   "private": true,
   "scripts": {
+    "dev": "concurrently \"bun run dev:frontend\" \"bun run dev:backend\"",
     "dev:frontend": "next dev",
     "dev:backend": "convex dev",
+    "lint": "biome check --write --unsafe",
     "predev": "convex dev --until-success && convex dev --once --run-sh \"node setup.mjs --once\" && convex dashboard",
     "deploy": "bunx convex deploy --cmd \"bun run build\" && bunx convex run migrations:run --prod",
     "build": "next build",
@@ -81,6 +83,7 @@
   },
   "devDependencies": {
     "@biomejs/biome": "2.1.2",
+    "concurrently": "^9.1.2",
     "@tailwindcss/postcss": "^4.1.11",
     "@types/lodash": "^4.17.20",
     "@types/node": "24.1.0",

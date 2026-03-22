@@ -1,6 +1,6 @@
 import { v } from "convex/values";
-import { authQuery } from "../custom/query";
 import { query } from "../_generated/server";
+import { authQuery } from "../custom/query";
 
 /**
  * Get display name for a user (name, or email, or fallback).

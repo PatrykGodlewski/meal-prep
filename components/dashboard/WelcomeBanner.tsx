@@ -2,12 +2,17 @@
 
 import { useTranslations } from "next-intl";
 
-export function WelcomeBanner() {
+type Props = {
+  /** Optional description override. When not provided, uses personalizedDiet.pageDescription */
+  description?: string;
+};
+
+export function WelcomeBanner({ description }: Props) {
   const t = useTranslations("personalizedDiet");
 
   return (
     <p className="text-muted-foreground text-sm sm:text-base">
-      {t("pageDescription")}
+      {description ?? t("pageDescription")}
     </p>
   );
 }

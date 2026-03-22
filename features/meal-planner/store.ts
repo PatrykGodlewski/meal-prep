@@ -8,16 +8,24 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import type { FunctionReturnType } from "convex/server";
 import { addDays, isToday, subDays } from "date-fns";
 import { useTranslations } from "next-intl";
+import { useEffect } from "react";
 import type { DateRange } from "react-day-picker";
 import { toast } from "sonner";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
-import { getMonday, getSaturday } from "./utils";
+import {
+  findPlanForDate,
+  getMonday,
+  getSaturday,
+  toWeekStartTimestamp,
+} from "./utils";
 
 type Store = {
   currentWeek: Date;
   shoppingListDate: DateRange | undefined;
   selectedPlanId: string | undefined;
+  /** Date of the selected day for viewing (used when day has no plan yet) */
+  selectedDate: Date;
   peopleAmount: number;
 };
 
@@ -31,6 +39,7 @@ const mealPlannerState$ = observable<Store>({
     to: getSaturday(today),
   },
   selectedPlanId: undefined,
+  selectedDate: today,
 });
 
 syncObservable(mealPlannerState$, {
@@ -52,6 +61,7 @@ const handleNavigatePrevious = () => {
   const previousWeekStart = subDays(currentMonday, 7);
   batch(() => {
     mealPlannerState$.selectedPlanId.set(undefined);
+    mealPlannerState$.selectedDate.set(previousWeekStart);
     mealPlannerState$.currentWeek.set(previousWeekStart);
     mealPlannerState$.shoppingListDate.set({
       from: previousWeekStart,
@@ -65,6 +75,7 @@ const handleNavigateNext = () => {
   const nextWeekStart = addDays(currentMonday, 7);
   batch(() => {
     mealPlannerState$.selectedPlanId.set(undefined);
+    mealPlannerState$.selectedDate.set(nextWeekStart);
     mealPlannerState$.currentWeek.set(nextWeekStart);
     mealPlannerState$.shoppingListDate.set({
       from: nextWeekStart,
@@ -82,13 +93,16 @@ export const useMealPlanner = () => {
 
   const t = useTranslations("mealPlanner");
 
+  const weekStartTs = toWeekStartTimestamp(currentWeek);
+  const currentWeekDate = new Date(weekStartTs);
+
   const {
     data: mealPlanData,
     isLoading: isMealPlanLoading,
     error: mealPlanError,
   } = useQuery(
     convexQuery(api.plans.getWeeklyMealPlan, {
-      weekStart: currentWeek.getTime(),
+      weekStart: weekStartTs,
     }),
   );
 
@@ -154,10 +168,11 @@ export const useMealPlanner = () => {
     const currentMonday = getMonday(today);
     const currentSaturday = getSaturday(today);
 
-    const todayId = mealPlanData?.find((plan) => isToday(plan.date))?._id;
+    const todayPlan = mealPlanData?.find((plan) => isToday(plan.date));
 
     batch(() => {
-      mealPlannerState$.selectedPlanId.set(todayId);
+      mealPlannerState$.selectedPlanId.set(todayPlan?._id);
+      mealPlannerState$.selectedDate.set(today);
       mealPlannerState$.currentWeek.set(currentMonday);
       mealPlannerState$.shoppingListDate.set({
         from: currentMonday,
@@ -203,14 +218,38 @@ export const useMealPlanner = () => {
   useWhenReady(mealPlanData, (plans) => {
     if (mealPlannerState$.selectedPlanId.get()) return;
 
+    const todayPlan = plans?.find((plan) => isToday(plan.date));
     const id =
-      plans?.find((plan) => isToday(plan.date))?._id ||
-      plans?.find((plan) => plan.date === currentWeek.getTime())?._id;
+      todayPlan?._id || plans?.find((plan) => plan.date === weekStartTs)?._id;
 
-    return mealPlannerState$.selectedPlanId.set(id);
+    batch(() => {
+      mealPlannerState$.selectedPlanId.set(id);
+      if (todayPlan?.date) {
+        mealPlannerState$.selectedDate.set(new Date(todayPlan.date));
+      }
+    });
   });
 
+  // When "Today" is clicked, mealPlanData may be for another week. Once the correct
+  // week's data loads, ensure we select today's plan if selectedDate is today.
+  useEffect(() => {
+    const selRaw = mealPlannerState$.selectedDate.get();
+    const sel =
+      selRaw instanceof Date ? selRaw : new Date(selRaw as string | number);
+    if (!isToday(sel)) return;
+
+    const todayPlan = findPlanForDate(mealPlanData, sel);
+    if (!todayPlan) return;
+
+    const currentId = mealPlannerState$.selectedPlanId.get();
+    if (currentId === todayPlan._id) return;
+
+    mealPlannerState$.selectedPlanId.set(todayPlan._id);
+  }, [mealPlanData]);
+
   const servings = use$(servings$);
+
+  const selectedDate = use$(mealPlannerState$.selectedDate);
 
   return {
     hideCheckedShoppingListItems$,
@@ -220,7 +259,8 @@ export const useMealPlanner = () => {
 
     mealPlannerState$,
     selectedPlanId,
-    currentWeek,
+    selectedDate,
+    currentWeek: currentWeekDate,
 
     // deprecate
     setCurrentWeek,

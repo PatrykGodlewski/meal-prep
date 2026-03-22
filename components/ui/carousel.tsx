@@ -118,6 +118,7 @@ function Carousel({
         canScrollNext,
       }}
     >
+      {/* biome-ignore lint/a11y/useSemanticElements: carousel needs role="region" + aria-roledescription; section doesn't support aria-roledescription */}
       <div
         onKeyDownCapture={handleKeyDown}
         className={cn("relative", className)}

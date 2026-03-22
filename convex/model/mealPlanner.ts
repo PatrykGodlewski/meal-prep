@@ -37,10 +37,7 @@ export function scoreMeal(
   const prepMins = meal.prepTimeMinutes ?? 0;
   const cookMins = meal.cookTimeMinutes ?? 0;
   const totalMins = prepMins + cookMins;
-  if (
-    maxCookingTimeMins !== undefined &&
-    totalMins > maxCookingTimeMins
-  ) {
+  if (maxCookingTimeMins !== undefined && totalMins > maxCookingTimeMins) {
     score -= (totalMins - maxCookingTimeMins) * PREP_TIME_PENALTY_PER_MIN_OVER;
   }
 

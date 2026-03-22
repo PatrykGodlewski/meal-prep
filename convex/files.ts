@@ -1,6 +1,6 @@
 import { v } from "convex/values";
-import { authMutation } from "./custom/mutation";
 import { query } from "./_generated/server";
+import { authMutation } from "./custom/mutation";
 
 export const generateUploadUrl = authMutation({
   args: {},

@@ -47,18 +47,15 @@ export default function FridgeList() {
 
   if (fridgeItems.length === 0) {
     return (
-      <div
+      <output
         className={cn(
           "flex flex-col items-center justify-center rounded-xl border border-dashed bg-muted/30 px-6 py-16 text-center",
         )}
-        role="status"
       >
         <Refrigerator className="mb-4 h-16 w-16 text-muted-foreground/50" />
         <p className="font-medium text-muted-foreground">{t("empty")}</p>
-        <p className="mt-1 text-muted-foreground text-sm">
-          {t("emptyHint")}
-        </p>
-      </div>
+        <p className="mt-1 text-muted-foreground text-sm">{t("emptyHint")}</p>
+      </output>
     );
   }
 
@@ -88,7 +85,7 @@ export default function FridgeList() {
             <h2 className="font-semibold text-muted-foreground text-sm uppercase tracking-wider">
               {categoryLabel}
             </h2>
-            <ul className="space-y-2" role="list">
+            <ul className="space-y-2">
               {sortedItems.map((item) => (
                 <FridgeItem key={item._id} item={item} />
               ))}

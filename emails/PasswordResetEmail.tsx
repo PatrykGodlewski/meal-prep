@@ -30,7 +30,10 @@ interface PasswordResetEmailProps {
   url: string;
 }
 
-export function PasswordResetEmail({ token, url }: PasswordResetEmailProps): React.ReactElement {
+export function PasswordResetEmail({
+  token,
+  url,
+}: PasswordResetEmailProps): React.ReactElement {
   return (
     <Html>
       <Head />
@@ -48,7 +51,8 @@ export function PasswordResetEmail({ token, url }: PasswordResetEmailProps): Rea
           </Link>
           <Hr style={hr} />
           <Text style={footer}>
-            If you didn&apos;t request a password reset, you can safely ignore this email.
+            If you didn&apos;t request a password reset, you can safely ignore
+            this email.
           </Text>
         </Container>
       </Body>
@@ -58,10 +62,25 @@ export function PasswordResetEmail({ token, url }: PasswordResetEmailProps): Rea
 
 const main = { backgroundColor: "#f6f9fc", fontFamily: "sans-serif" };
 const container = { margin: "0 auto", padding: "20px 0 48px" };
-const h1 = { color: "#333", fontSize: "24px", fontWeight: "bold", margin: "40px 0", padding: "0" };
+const h1 = {
+  color: "#333",
+  fontSize: "24px",
+  fontWeight: "bold",
+  margin: "40px 0",
+  padding: "0",
+};
 const text = { color: "#333", fontSize: "16px", lineHeight: "26px" };
-const codeSection = { background: "#f4f4f5", borderRadius: "4px", padding: "16px", margin: "24px 0" };
+const codeSection = {
+  background: "#f4f4f5",
+  borderRadius: "4px",
+  padding: "16px",
+  margin: "24px 0",
+};
 const code = { fontFamily: "monospace", fontSize: "24px", fontWeight: "bold" };
-const link = { color: "#2563eb", fontSize: "16px", textDecoration: "underline" };
+const link = {
+  color: "#2563eb",
+  fontSize: "16px",
+  textDecoration: "underline",
+};
 const hr = { borderColor: "#e6ebf1", margin: "20px 0" };
 const footer = { color: "#8898aa", fontSize: "12px" };

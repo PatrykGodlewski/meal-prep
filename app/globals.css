@@ -253,16 +253,19 @@
   background: oklch(0.22 0.015 155 / 0.55);
 }
 
-/* Print styles for diet page – hide UI chrome, show only diet content */
+/* Print styles – hide UI chrome, show only printable content */
 @media print {
   body * {
     visibility: hidden;
   }
   .diet-print-content,
-  .diet-print-content * {
+  .diet-print-content *,
+  .meal-planner-print-content,
+  .meal-planner-print-content * {
     visibility: visible;
   }
-  .diet-print-content {
+  .diet-print-content,
+  .meal-planner-print-content {
     position: absolute;
     left: 0;
     top: 0;

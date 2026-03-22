@@ -117,7 +117,12 @@ export const ingredientSchema = z.object({
   calories: z.number().optional(),
   /** Default replacement ingredients with ratio (e.g. onion -> red onion 1:1, banana->apple 1.2:1). ratio = replacement qty per 1 unit original. */
   replacements: z
-    .array(z.object({ ingredientId: zid("ingredients"), ratio: z.number().optional() }))
+    .array(
+      z.object({
+        ingredientId: zid("ingredients"),
+        ratio: z.number().optional(),
+      }),
+    )
     .optional(),
   /** @deprecated use replacements. Kept for migration. */
   replacementIds: z.array(zid("ingredients")).optional(),
@@ -135,7 +140,12 @@ export const mealIngredientsSchema = z.object({
   notes: z.string().optional(),
   /** Override ingredient replacements for this meal (undefined = use default, [] = none). ratio = replacement qty per 1 unit original. */
   allowedReplacements: z
-    .array(z.object({ ingredientId: zid("ingredients"), ratio: z.number().optional() }))
+    .array(
+      z.object({
+        ingredientId: zid("ingredients"),
+        ratio: z.number().optional(),
+      }),
+    )
     .optional(),
   /** @deprecated use allowedReplacements. Kept for migration. */
   allowedReplacementIds: z.array(zid("ingredients")).optional(),
@@ -393,8 +403,9 @@ export default defineSchema({
     .index("by_user", ["userId"])
     .index("by_user_and_ingredient", ["userId", "ingredientId"]),
 
-  userPreferences: defineTable(userPreferencesValidator)
-    .index("by_user", ["userId"]),
+  userPreferences: defineTable(userPreferencesValidator).index("by_user", [
+    "userId",
+  ]),
 
   ingredientPreferences: defineTable(ingredientPreferenceValidator)
     .index("by_user_and_type", ["userId", "preferenceType"])

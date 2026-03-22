@@ -83,7 +83,8 @@ export function SearchInput() {
 
   const currentCategory =
     searchParams.get(FILTER_PARAM_KEY)?.toString() ?? "all";
-  const currentSort = searchParams.get(SORT_PARAM_KEY)?.toString() ?? "favourites";
+  const currentSort =
+    searchParams.get(SORT_PARAM_KEY)?.toString() ?? "favourites";
   const onlyFavourites = searchParams.get(FAV_PARAM_KEY) === "1";
 
   return (
@@ -120,8 +121,12 @@ export function SearchInput() {
       <button
         type="button"
         onClick={toggleOnlyFavourites}
-        title={onlyFavourites ? tFav("showAllMeals") : tFav("showFavouritesOnly")}
-        aria-label={onlyFavourites ? tFav("showAllMeals") : tFav("showFavouritesOnly")}
+        title={
+          onlyFavourites ? tFav("showAllMeals") : tFav("showFavouritesOnly")
+        }
+        aria-label={
+          onlyFavourites ? tFav("showAllMeals") : tFav("showFavouritesOnly")
+        }
         aria-pressed={onlyFavourites}
         className={`flex h-10 shrink-0 items-center justify-center rounded-md border px-3 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 ${
           onlyFavourites

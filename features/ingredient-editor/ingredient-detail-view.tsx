@@ -1,20 +1,18 @@
 "use client";
 
 import { type Preloaded, usePreloadedQuery } from "convex/react";
-import { useTranslations } from "next-intl";
 import { Edit, X } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { BackButton } from "@/components/back-button";
 import { Button } from "@/components/ui/button";
 import type { api } from "@/convex/_generated/api";
-import { IngredientEditForm } from "./ingredient-edit-form";
 import { IngredientDisplayDetails } from "./ingredient-display-details";
+import { IngredientEditForm } from "./ingredient-edit-form";
 
 interface IngredientDetailViewProps {
-  preloadedIngredient: Preloaded<
-    typeof api.ingredients.queries.getIngredient
-  >;
+  preloadedIngredient: Preloaded<typeof api.ingredients.queries.getIngredient>;
 }
 
 export default function IngredientDetailView({

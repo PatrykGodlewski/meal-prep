@@ -11,6 +11,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 
 interface MealFormInstructionsProps {
+  // biome-ignore lint/suspicious/noExplicitAny: react-hook-form Control requires form type; meal form type varies
   control: Control<any>;
 }
 

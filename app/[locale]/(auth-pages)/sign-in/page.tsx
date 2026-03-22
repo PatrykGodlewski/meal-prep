@@ -1,7 +1,6 @@
 "use client";
 
 import { useAuthActions } from "@convex-dev/auth/react";
-import { Link } from "@/i18n/navigation";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
@@ -15,6 +14,7 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Link } from "@/i18n/navigation";
 import { isSignUpEnabled } from "@/lib/feature-flags";
 
 export default function SignIn() {
@@ -30,7 +30,7 @@ export default function SignIn() {
     <div className="mx-auto flex min-h-[calc(100vh-8rem)] w-full max-w-md flex-col items-center justify-center px-4 py-12">
       <Card className="w-full shadow-md">
         <CardHeader className="space-y-1 text-center">
-          <CardTitle className="text-2xl font-semibold tracking-tight">
+          <CardTitle className="font-semibold text-2xl tracking-tight">
             {effectiveFlow === "signIn" ? t("signIn") : t("signUp")}
           </CardTitle>
           <CardDescription>{t("logInToSeeNumbers")}</CardDescription>
@@ -73,7 +73,9 @@ export default function SignIn() {
                 placeholder={t("passwordPlaceholder")}
                 required
                 autoComplete={
-                  effectiveFlow === "signIn" ? "current-password" : "new-password"
+                  effectiveFlow === "signIn"
+                    ? "current-password"
+                    : "new-password"
                 }
                 className="h-10"
               />
@@ -101,7 +103,7 @@ export default function SignIn() {
             </Button>
 
             {isSignUpEnabled && (
-              <div className="flex flex-wrap items-center justify-center gap-x-1.5 text-center text-sm text-muted-foreground">
+              <div className="flex flex-wrap items-center justify-center gap-x-1.5 text-center text-muted-foreground text-sm">
                 <span>
                   {effectiveFlow === "signIn"
                     ? t("dontHaveAccount")

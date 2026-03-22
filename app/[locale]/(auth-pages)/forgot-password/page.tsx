@@ -1,7 +1,6 @@
 "use client";
 
 import { useAuthActions } from "@convex-dev/auth/react";
-import { Link } from "@/i18n/navigation";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
@@ -15,6 +14,7 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Link } from "@/i18n/navigation";
 
 export default function ForgotPassword() {
   const { signIn } = useAuthActions();
@@ -27,7 +27,7 @@ export default function ForgotPassword() {
     <div className="mx-auto flex min-h-[calc(100vh-8rem)] w-full max-w-md flex-col items-center justify-center px-4 py-12">
       <Card className="w-full shadow-md">
         <CardHeader className="space-y-1 text-center">
-          <CardTitle className="text-2xl font-semibold tracking-tight">
+          <CardTitle className="font-semibold text-2xl tracking-tight">
             {t("forgotPassword")}
           </CardTitle>
           <CardDescription>{t("forgotPasswordDescription")}</CardDescription>
@@ -70,7 +70,7 @@ export default function ForgotPassword() {
               {t("sendResetCode")}
             </Button>
 
-            <div className="text-center text-sm text-muted-foreground">
+            <div className="text-center text-muted-foreground text-sm">
               <Link
                 href="/sign-in"
                 className="font-medium text-primary underline-offset-4 hover:underline"
@@ -86,7 +86,7 @@ export default function ForgotPassword() {
     <div className="mx-auto flex min-h-[calc(100vh-8rem)] w-full max-w-md flex-col items-center justify-center px-4 py-12">
       <Card className="w-full shadow-md">
         <CardHeader className="space-y-1 text-center">
-          <CardTitle className="text-2xl font-semibold tracking-tight">
+          <CardTitle className="font-semibold text-2xl tracking-tight">
             {t("resetPassword")}
           </CardTitle>
           <CardDescription>{t("resetPasswordDescription")}</CardDescription>
@@ -145,7 +145,7 @@ export default function ForgotPassword() {
               {t("resetPasswordButton")}
             </Button>
 
-            <div className="flex justify-between gap-2 text-sm text-muted-foreground">
+            <div className="flex justify-between gap-2 text-muted-foreground text-sm">
               <Button
                 type="button"
                 variant="link"

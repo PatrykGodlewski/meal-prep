@@ -1,9 +1,14 @@
 "use client";
 
-import { type Preloaded, useMutation, usePreloadedQuery, useQuery } from "convex/react";
+import {
+  type Preloaded,
+  useMutation,
+  usePreloadedQuery,
+  useQuery,
+} from "convex/react";
 import { Edit, Heart, HelpCircle, X } from "lucide-react";
-import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { BackButton } from "@/components/back-button";
 import { Button } from "@/components/ui/button";
@@ -76,14 +81,24 @@ export default function MealDetailView({
                   ? removeFromFavourites({ mealId: meal._id })
                   : addToFavourites({ mealId: meal._id })
               }
-              title={isFavourited ? tFav("removeFromFavourites") : tFav("addToFavourites")}
-              aria-label={isFavourited ? tFav("removeFromFavourites") : tFav("addToFavourites")}
+              title={
+                isFavourited
+                  ? tFav("removeFromFavourites")
+                  : tFav("addToFavourites")
+              }
+              aria-label={
+                isFavourited
+                  ? tFav("removeFromFavourites")
+                  : tFav("addToFavourites")
+              }
               className="transition-transform duration-200 hover:scale-[1.02] active:scale-[0.98]"
             >
               <Heart
-                className={`mr-1 h-4 w-4 transition-all duration-300 ease-out ${isFavourited ? "fill-red-500 scale-[1.05]" : "scale-100"}`}
+                className={`mr-1 h-4 w-4 transition-all duration-300 ease-out ${isFavourited ? "scale-[1.05] fill-red-500" : "scale-100"}`}
               />
-              {isFavourited ? tFav("removeFromFavourites") : tFav("addToFavourites")}
+              {isFavourited
+                ? tFav("removeFromFavourites")
+                : tFav("addToFavourites")}
             </Button>
             <Button variant="outline" onClick={toggleEditMode}>
               <Edit className="mr-1 h-4 w-4" /> Edit Meal

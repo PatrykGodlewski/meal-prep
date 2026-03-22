@@ -20,7 +20,9 @@ export const generatePlanAndShoppingList = authMutation({
         {
           weekStart,
           existingIngredientIds:
-            existingIngredientIds.length > 0 ? existingIngredientIds : undefined,
+            existingIngredientIds.length > 0
+              ? existingIngredientIds
+              : undefined,
         },
       );
 

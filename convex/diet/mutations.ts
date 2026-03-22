@@ -1,7 +1,7 @@
 import { v } from "convex/values";
+import { internal } from "../_generated/api";
 import { internalMutation } from "../_generated/server";
 import { authMutation } from "../custom/mutation";
-import { internal } from "../_generated/api";
 
 /**
  * Auth mutation: request diet generation. Creates or updates personalized diet
@@ -50,7 +50,7 @@ export const recordDietResult = internalMutation({
     status: v.union(
       v.literal("running"),
       v.literal("completed"),
-      v.literal("failed")
+      v.literal("failed"),
     ),
     result: v.optional(v.any()),
     error: v.optional(v.string()),

@@ -24,7 +24,7 @@ export function OnboardingProgress() {
         <div
           key={step.path}
           className={cn(
-            "flex h-9 w-9 items-center justify-center rounded-full text-sm font-medium transition-colors",
+            "flex h-9 w-9 items-center justify-center rounded-full font-medium text-sm transition-colors",
             i < activeIndex && "bg-primary text-primary-foreground",
             i === activeIndex &&
               "border-2 border-primary bg-primary font-bold text-primary-foreground",

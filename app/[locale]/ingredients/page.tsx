@@ -1,8 +1,8 @@
 import { getTranslations } from "next-intl/server";
 import { Suspense } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
-import PaginatedIngredientList from "./PaginatedIngredientList";
 import { IngredientSearchInput } from "./IngredientSearchInput";
+import PaginatedIngredientList from "./PaginatedIngredientList";
 
 const ListSkeleton = () => (
   <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">

@@ -13,10 +13,10 @@ import { Progress } from "@/components/ui/progress";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
 import { MEAL_CATEGORIES } from "@/convex/schema";
-import { getExtraKcal, getPlanTotals } from "@/lib/plan-kcal";
-import { cn } from "@/lib/utils";
 import { ModalMeals } from "@/features/meal-planner/ModalMeals";
 import { useMealPlanner } from "@/features/meal-planner/store";
+import { getExtraKcal, getPlanTotals } from "@/lib/plan-kcal";
+import { cn } from "@/lib/utils";
 
 interface Props {
   preloadedMealPlan: Preloaded<typeof api.plans.getMealPlan>;
@@ -27,6 +27,9 @@ export function MealPlanDetail({ preloadedMealPlan }: Props) {
   const { servings } = useMealPlanner();
   const t = useTranslations("mealPlanDetail");
   const tExtras = useTranslations("planExtras");
+  const addExtraMutation = useConvexMutation(api.plans.addPlanExtra);
+  const removeExtraMutation = useConvexMutation(api.plans.removePlanExtra);
+  const [isExtraModalOpen, setIsExtraModalOpen] = useState(false);
 
   if (!mealPlan) {
     return (
@@ -63,11 +66,9 @@ export function MealPlanDetail({ preloadedMealPlan }: Props) {
     mealPlan.planExtras,
   );
   const progressPercent =
-    totalKcal > 0 ? Math.min(100, Math.round((eatenKcal / totalKcal) * 100)) : 0;
-
-  const addExtraMutation = useConvexMutation(api.plans.addPlanExtra);
-  const removeExtraMutation = useConvexMutation(api.plans.removePlanExtra);
-  const [isExtraModalOpen, setIsExtraModalOpen] = useState(false);
+    totalKcal > 0
+      ? Math.min(100, Math.round((eatenKcal / totalKcal) * 100))
+      : 0;
 
   const handleExtraMealSelect = async (mealId: Id<"meals">) => {
     await addExtraMutation({ planId: mealPlan.mealPlan._id, mealId });
@@ -134,9 +135,7 @@ export function MealPlanDetail({ preloadedMealPlan }: Props) {
             })}
           </div>
         )}
-        {totalKcal > 0 && (
-          <Progress value={progressPercent} className="h-3" />
-        )}
+        {totalKcal > 0 && <Progress value={progressPercent} className="h-3" />}
       </div>
       <For each={sortedPlannedMeals}>
         {([category, plannedMeal]) => (
@@ -203,7 +202,7 @@ function MealCard({ plannedMeal, category, plan }: MealCardProps) {
             <Image
               alt={plannedMeal.meal.name}
               fill
-              className="object-cover rounded-lg"
+              className="rounded-lg object-cover"
               priority
               src={plannedMeal.meal.imageUrl}
             />
@@ -239,7 +238,9 @@ function MealCard({ plannedMeal, category, plan }: MealCardProps) {
           <Button
             size="icon"
             variant={isEaten ? "default" : "outline"}
-            aria-label={isEaten ? tPlanner("unmarkAsEaten") : tPlanner("markAsEaten")}
+            aria-label={
+              isEaten ? tPlanner("unmarkAsEaten") : tPlanner("markAsEaten")
+            }
             onClick={() =>
               markEatenMutation({
                 planMealId: plannedMeal._id,

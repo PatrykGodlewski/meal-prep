@@ -13,8 +13,8 @@
  */
 
 import { v } from "convex/values";
-import type { Id } from "./_generated/dataModel";
-import type { Doc } from "./_generated/dataModel";
+import { internal } from "./_generated/api";
+import type { Doc, Id } from "./_generated/dataModel";
 import {
   internalAction,
   internalMutation,
@@ -22,9 +22,8 @@ import {
 } from "./_generated/server";
 import { authMutation } from "./custom/mutation";
 import { authQuery } from "./custom/query";
-import { internal } from "./_generated/api";
-import { STRICT_DIETS } from "./schema";
 import * as MealPlanner from "./model/mealPlanner";
+import { STRICT_DIETS } from "./schema";
 
 const DEFAULT_TOP_N = 21;
 const BATCH_SIZE = 100;
@@ -52,7 +51,8 @@ export const getPlannerInput = internalQuery({
       prefs?.dietary?.strictDiets?.filter((d) => d !== "none") ?? [];
     const allergies =
       prefs?.dietary?.allergies?.filter((a) => a !== "none") ?? [];
-    const maxCookingTimeMins = prefs?.logistics?.maxCookingTimeMins ?? undefined;
+    const maxCookingTimeMins =
+      prefs?.logistics?.maxCookingTimeMins ?? undefined;
 
     const ingredientWeights: Record<string, number> = {
       ...(prefs?.ingredientWeights ?? {}),
@@ -71,9 +71,7 @@ export const getPlannerInput = internalQuery({
 
     // Convex eq() on array index expects full array, not containment.
     // Filter in code after take() to avoid unbounded collect.
-    const meals = await ctx.db
-      .query("meals")
-      .take(MAX_MEALS_WHEN_NO_DIET);
+    const meals = await ctx.db.query("meals").take(MAX_MEALS_WHEN_NO_DIET);
 
     const mealIds: Id<"meals">[] =
       validDiets.length === 0
@@ -180,13 +178,15 @@ export const runGeneration = internalAction({
     });
 
     try {
-      const input = await ctx.runQuery(
-        internal.mealPlanner.getPlannerInput,
-        { userId },
-      );
+      const input = await ctx.runQuery(internal.mealPlanner.getPlannerInput, {
+        userId,
+      });
 
-      const scored: { mealId: Id<"meals">; meal: Doc<"meals">; matchScore: number }[] =
-        [];
+      const scored: {
+        mealId: Id<"meals">;
+        meal: Doc<"meals">;
+        matchScore: number;
+      }[] = [];
 
       for (let i = 0; i < input.mealIds.length; i += BATCH_SIZE) {
         const batchIds = input.mealIds.slice(i, i + BATCH_SIZE);
@@ -196,7 +196,10 @@ export const runGeneration = internalAction({
         );
         for (const { mealId, meal, ingredientIds } of batch) {
           if (
-            !MealPlanner.mealPassesAllergyFilter(meal.allergens, input.allergies)
+            !MealPlanner.mealPassesAllergyFilter(
+              meal.allergens,
+              input.allergies,
+            )
           )
             continue;
           const matchScore = MealPlanner.scoreMeal(
@@ -263,15 +266,11 @@ export const requestWeeklyPlanGeneration = authMutation({
       updatedAt: now,
     });
 
-    await ctx.scheduler.runAfter(
-      0,
-      internal.mealPlanner.runGeneration,
-      {
-        requestId,
-        userId: ctx.user.id,
-        limit,
-      },
-    );
+    await ctx.scheduler.runAfter(0, internal.mealPlanner.runGeneration, {
+      requestId,
+      userId: ctx.user.id,
+      limit,
+    });
 
     return requestId;
   },
