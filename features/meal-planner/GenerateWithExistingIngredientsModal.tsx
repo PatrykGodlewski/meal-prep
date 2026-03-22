@@ -2,6 +2,7 @@
 
 import { useDebounceFn } from "ahooks";
 import { Loader2, Trash2 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -25,10 +26,8 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import type { Doc } from "@/convex/_generated/dataModel";
-import type { Id } from "@/convex/_generated/dataModel";
+import type { Doc, Id } from "@/convex/_generated/dataModel";
 import { usePaginatedIngredients } from "@/hooks/use-paginated-ingredients";
-import { useTranslations } from "next-intl";
 
 type ExistingIngredientEntry = {
   ingredientId: Id<"ingredients">;
@@ -63,10 +62,9 @@ export function GenerateWithExistingIngredientsModal({
     clientSearch: searchTerm,
   });
 
-  const debouncedSearch = useDebounceFn(
-    (term: string) => setSearchTerm(term),
-    { wait: 250 },
-  );
+  const debouncedSearch = useDebounceFn((term: string) => setSearchTerm(term), {
+    wait: 250,
+  });
 
   useEffect(() => {
     if (!isOpen) {
@@ -96,11 +94,12 @@ export function GenerateWithExistingIngredientsModal({
     setPopoverOpen(false);
   };
 
-  const handleAmountChange = (ingredientId: Id<"ingredients">, amount: number) => {
+  const handleAmountChange = (
+    ingredientId: Id<"ingredients">,
+    amount: number,
+  ) => {
     setEntries((prev) =>
-      prev.map((e) =>
-        e.ingredientId === ingredientId ? { ...e, amount } : e,
-      ),
+      prev.map((e) => (e.ingredientId === ingredientId ? { ...e, amount } : e)),
     );
   };
 
@@ -129,10 +128,17 @@ export function GenerateWithExistingIngredientsModal({
 
         <div className="flex flex-col gap-4 overflow-hidden">
           <div className="flex flex-col gap-2">
-            <label className="text-sm font-medium">{t("addIngredient")}</label>
+            <label
+              htmlFor="add-ingredient-combobox"
+              className="font-medium text-sm"
+            >
+              {t("addIngredient")}
+            </label>
             <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
               <PopoverTrigger asChild>
+                {/* biome-ignore lint/a11y/useSemanticElements: searchable Command popover; native <select> cannot async-search ingredients */}
                 <Button
+                  id="add-ingredient-combobox"
                   variant="outline"
                   role="combobox"
                   aria-expanded={popoverOpen}
@@ -141,7 +147,10 @@ export function GenerateWithExistingIngredientsModal({
                   {inputValue || t("searchPlaceholder")}
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="start">
+              <PopoverContent
+                className="w-[--radix-popover-trigger-width] p-0"
+                align="start"
+              >
                 <Command shouldFilter={false}>
                   <CommandInput
                     placeholder={t("searchPlaceholder")}
@@ -153,9 +162,7 @@ export function GenerateWithExistingIngredientsModal({
                   />
                   <CommandList>
                     <CommandEmpty>
-                      {isFetching
-                        ? t("searching")
-                        : t("noIngredientsFound")}
+                      {isFetching ? t("searching") : t("noIngredientsFound")}
                     </CommandEmpty>
                     <CommandGroup>
                       {filteredIngredients.map((ing) => (
@@ -179,7 +186,9 @@ export function GenerateWithExistingIngredientsModal({
 
           {entries.length > 0 && (
             <div className="space-y-2 overflow-y-auto">
-              <label className="text-sm font-medium">{t("ingredientsYouHave")}</label>
+              <span className="font-medium text-sm">
+                {t("ingredientsYouHave")}
+              </span>
               <div className="space-y-2 rounded-md border p-3">
                 {entries.map((entry) => (
                   <div
@@ -195,6 +204,7 @@ export function GenerateWithExistingIngredientsModal({
                         min={0.01}
                         step={0.5}
                         value={entry.amount}
+                        aria-label={`${entry.name} amount`}
                         onChange={(e) => {
                           const v = parseFloat(e.target.value);
                           if (!Number.isNaN(v) && v > 0) {
@@ -204,7 +214,7 @@ export function GenerateWithExistingIngredientsModal({
                         className="h-8 w-20 text-right"
                         placeholder="1"
                       />
-                      <span className="text-muted-foreground text-xs shrink-0">
+                      <span className="shrink-0 text-muted-foreground text-xs">
                         {entry.unit}
                       </span>
                     </div>
