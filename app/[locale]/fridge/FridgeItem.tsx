@@ -1,10 +1,10 @@
 "use client";
 
-import { useMutation } from "@tanstack/react-query";
 import { useConvexMutation } from "@convex-dev/react-query";
-import { useTranslations } from "next-intl";
+import { useMutation } from "@tanstack/react-query";
 import { Loader2, Trash2 } from "lucide-react";
-import { useState, useCallback } from "react";
+import { useTranslations } from "next-intl";
+import { useCallback, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -67,12 +67,15 @@ export function FridgeItem({ item, onUpdate }: Props) {
     }
   }, [editValue, item._id, item.amount, updateItem]);
 
-  const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter" || e.key === "Escape") {
-      if (e.key === "Escape") setEditValue(null);
-      (e.target as HTMLInputElement).blur();
-    }
-  }, []);
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent<HTMLInputElement>) => {
+      if (e.key === "Enter" || e.key === "Escape") {
+        if (e.key === "Escape") setEditValue(null);
+        (e.target as HTMLInputElement).blur();
+      }
+    },
+    [],
+  );
 
   const unit = item.ingredient?.unit ?? "piece";
   const unitLabel = tIngredient(unit as never) || unit;
@@ -87,7 +90,7 @@ export function FridgeItem({ item, onUpdate }: Props) {
       )}
     >
       <div className="min-w-0 flex-1">
-        <p className="font-medium truncate">
+        <p className="truncate font-medium">
           {item.ingredient?.name ?? "Unknown"}
         </p>
         <p className="text-muted-foreground text-sm">{unitLabel}</p>
@@ -103,13 +106,13 @@ export function FridgeItem({ item, onUpdate }: Props) {
             onBlur={handleBlur}
             onFocus={() => setEditValue(String(item.amount))}
             onKeyDown={handleKeyDown}
-            className="h-10 w-24 text-right tabular-nums pr-8"
+            className="h-10 w-24 pr-8 text-right tabular-nums"
             disabled={isBusy}
             aria-label={`${item.ingredient?.name ?? "Item"} amount`}
           />
           {isUpdating && (
             <div
-              className="absolute top-1/2 right-2 -translate-y-1/2"
+              className="-translate-y-1/2 absolute top-1/2 right-2"
               aria-hidden
             >
               <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />

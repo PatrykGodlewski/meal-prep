@@ -1,12 +1,12 @@
 "use node";
 
-import { v } from "convex/values";
-import { internalAction } from "../_generated/server";
-import { internal } from "../_generated/api";
-import { generateObject } from "ai";
 import { google } from "@ai-sdk/google";
 import { groq } from "@ai-sdk/groq";
+import { generateObject } from "ai";
+import { v } from "convex/values";
 import { ragMealOutputSchema } from "../../lib/validations/meal";
+import { internal } from "../_generated/api";
+import { internalAction } from "../_generated/server";
 import { generateEmbedding } from "./embeddings";
 
 const TOP_K = 5;
@@ -54,7 +54,8 @@ async function generateMealImageReplicate(
       Prefer: "wait=60",
     },
     body: JSON.stringify({
-      version: "5d891b49a17e1cdd6786d441e1e3a2f0f76daeeee0c59868bd598b4951d3c58a",
+      version:
+        "5d891b49a17e1cdd6786d441e1e3a2f0f76daeeee0c59868bd598b4951d3c58a",
       input: {
         prompt,
         output_format: "webp",
@@ -92,10 +93,13 @@ async function generateMealImageReplicate(
     imageUrl = out;
   } else if (Array.isArray(out) && out.length > 0) {
     const first = out[0];
-    imageUrl = typeof first === "string" ? first : first?.url ?? null;
+    imageUrl = typeof first === "string" ? first : (first?.url ?? null);
   }
   if (!imageUrl) {
-    console.warn("Replicate returned no image URL:", JSON.stringify(data).slice(0, 300));
+    console.warn(
+      "Replicate returned no image URL:",
+      JSON.stringify(data).slice(0, 300),
+    );
     return null;
   }
 
@@ -164,6 +168,7 @@ export const generateMealWithContext = internalAction({
       const allergies = prefs.allergies;
       const likes = prefs.likes;
       const avoided = prefs.avoided;
+      const favouriteMealNames = prefs.favouriteMealNames ?? [];
 
       const embedding = await generateEmbedding(prompt);
 
@@ -182,7 +187,9 @@ export const generateMealWithContext = internalAction({
 
       const referenceContext = mealDocs
         .filter((m): m is NonNullable<typeof m> => m !== null)
-        .map((m) => `- ${m.name}: ${m.searchContent || m.instructions || m.description || ""}`.trim())
+        .map((m) =>
+          `- ${m.name}: ${m.searchContent || m.instructions || m.description || ""}`.trim(),
+        )
         .join("\n");
 
       const allergyConstraint =
@@ -200,7 +207,14 @@ export const generateMealWithContext = internalAction({
           ? `The user avoids these dish types: ${avoided.join(", ")}.`
           : "";
 
-      const languageName = locale ? LOCALE_TO_LANGUAGE[locale.toLowerCase()] ?? locale : null;
+      const favouritesHint =
+        favouriteMealNames.length > 0
+          ? `The user often enjoys these meals: ${favouriteMealNames.join(", ")}. Prefer recipes that are similar in style or ingredients when appropriate.`
+          : "";
+
+      const languageName = locale
+        ? (LOCALE_TO_LANGUAGE[locale.toLowerCase()] ?? locale)
+        : null;
       const languageInstruction = languageName
         ? `CRITICAL: Write the ENTIRE recipe in ${languageName} only. Title, description, instructions, and ingredient names must all be in ${languageName}. Do not mix languages.`
         : `Write the recipe in the SAME language as the user's prompt (e.g. if the user writes in Polish, respond entirely in Polish: title, description, instructions, ingredient names). Do not mix languages.`;
@@ -214,6 +228,8 @@ ${allergyConstraint}
 ${likesHint}
 
 ${avoidedHint}
+
+${favouritesHint}
 
 Use these existing recipes as inspiration and reference for style, proportions, and techniques:
 
@@ -246,7 +262,10 @@ Respond with a valid meal object:
       });
 
       let imageUrl: string | undefined;
-      const imageResult = await generateMealImage(object.title, object.description);
+      const imageResult = await generateMealImage(
+        object.title,
+        object.description,
+      );
       if (imageResult) {
         if (imageResult.base64) {
           try {
@@ -256,11 +275,18 @@ Respond with a valid meal object:
             const url = await ctx.storage.getUrl(storageId);
             imageUrl = url ?? undefined;
           } catch (storeErr) {
-            console.warn("Failed to store meal image in Convex, using Replicate URL:", storeErr);
-            imageUrl = imageResult.url.startsWith("http") ? imageResult.url : undefined;
+            console.warn(
+              "Failed to store meal image in Convex, using Replicate URL:",
+              storeErr,
+            );
+            imageUrl = imageResult.url.startsWith("http")
+              ? imageResult.url
+              : undefined;
           }
         } else {
-          imageUrl = imageResult.url.startsWith("http") ? imageResult.url : undefined;
+          imageUrl = imageResult.url.startsWith("http")
+            ? imageResult.url
+            : undefined;
         }
       }
 

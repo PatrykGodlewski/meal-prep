@@ -3,10 +3,9 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useDebounceFn } from "ahooks";
 import { useMutation, useQuery } from "convex/react";
-import { useRouter } from "@/i18n/navigation";
+import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import { useTranslations } from "next-intl";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   Form,
@@ -16,12 +15,13 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { ALLERGIES, STRICT_DIETS } from "@/convex/schema";
 import { api } from "@/convex/_generated/api";
+import { ALLERGIES, STRICT_DIETS } from "@/convex/schema";
+import { useRouter } from "@/i18n/navigation";
 import { StepHeader } from "./components/StepHeader";
 import { StepNavigation } from "./components/StepNavigation";
 import { DEBOUNCE_MS } from "./constants";
-import { dietarySchema, type DietaryValues } from "./schemas";
+import { type DietaryValues, dietarySchema } from "./schemas";
 
 export function Step2Form() {
   const t = useTranslations("onboarding.step2");
@@ -111,13 +111,16 @@ export function Step2Form() {
                                 onCheckedChange={(checked) => {
                                   const current = field.value ?? [];
                                   const next = checked
-                                    ? [...current.filter((x) => x !== "none"), diet]
+                                    ? [
+                                        ...current.filter((x) => x !== "none"),
+                                        diet,
+                                      ]
                                     : current.filter((x) => x !== diet);
                                   field.onChange(next);
                                 }}
                               />
                             </FormControl>
-                            <FormLabel className="font-normal cursor-pointer">
+                            <FormLabel className="cursor-pointer font-normal">
                               {t(`diets.${diet}`)}
                             </FormLabel>
                           </FormItem>
@@ -133,14 +136,14 @@ export function Step2Form() {
                             <Checkbox
                               checked={
                                 field.value?.includes("none") ||
-                                (field.value?.length === 0)
+                                field.value?.length === 0
                               }
                               onCheckedChange={(checked) => {
                                 field.onChange(checked ? ["none"] : []);
                               }}
                             />
                           </FormControl>
-                          <FormLabel className="font-normal cursor-pointer">
+                          <FormLabel className="cursor-pointer font-normal">
                             {t("diets.none")}
                           </FormLabel>
                         </FormItem>
@@ -177,13 +180,16 @@ export function Step2Form() {
                                 onCheckedChange={(checked) => {
                                   const current = field.value ?? [];
                                   const next = checked
-                                    ? [...current.filter((x) => x !== "none"), allergy]
+                                    ? [
+                                        ...current.filter((x) => x !== "none"),
+                                        allergy,
+                                      ]
                                     : current.filter((x) => x !== allergy);
                                   field.onChange(next);
                                 }}
                               />
                             </FormControl>
-                            <FormLabel className="font-normal cursor-pointer">
+                            <FormLabel className="cursor-pointer font-normal">
                               {t(`allergies.${allergy}`)}
                             </FormLabel>
                           </FormItem>
@@ -199,14 +205,14 @@ export function Step2Form() {
                             <Checkbox
                               checked={
                                 field.value?.includes("none") ||
-                                (field.value?.length === 0)
+                                field.value?.length === 0
                               }
                               onCheckedChange={(checked) => {
                                 field.onChange(checked ? ["none"] : []);
                               }}
                             />
                           </FormControl>
-                          <FormLabel className="font-normal cursor-pointer">
+                          <FormLabel className="cursor-pointer font-normal">
                             {t("allergies.none")}
                           </FormLabel>
                         </FormItem>

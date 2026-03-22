@@ -20,9 +20,12 @@ const NEW_INGREDIENT_DEFAULT: IngredientFormValues = {
 };
 
 interface MealFormIngredientsProps {
+  // biome-ignore lint/suspicious/noExplicitAny: react-hook-form Control requires form type; meal form type varies
   control: Control<any>;
   availableIngredients: Doc<"ingredients">[];
+  // biome-ignore lint/suspicious/noExplicitAny: react-hook-form setValue requires form type
   setValue: UseFormSetValue<any>;
+  // biome-ignore lint/suspicious/noExplicitAny: react-hook-form FieldErrors requires form type
   errors: FieldErrors<any>;
 }
 
@@ -48,9 +51,11 @@ export function MealFormIngredients({
   };
 
   return (
-    <div className="space-y-6 border-t border-border/60 pt-6">
+    <div className="space-y-6 border-border/60 border-t pt-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h3 className="font-semibold text-xl tracking-tight">{t("ingredientsTitle")}</h3>
+        <h3 className="font-semibold text-xl tracking-tight">
+          {t("ingredientsTitle")}
+        </h3>
         <Button
           type="button"
           variant="outline"

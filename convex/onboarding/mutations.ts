@@ -1,5 +1,7 @@
 import { v } from "convex/values";
 import type { Id } from "../_generated/dataModel";
+import type { AuthMutationCtx } from "../custom/mutation";
+import { authMutation } from "../custom/mutation";
 import {
   ACTIVITY_LEVELS,
   ALLERGIES,
@@ -10,8 +12,6 @@ import {
   PRIMARY_GOALS,
   STRICT_DIETS,
 } from "../schema";
-import type { AuthMutationCtx } from "../custom/mutation";
-import { authMutation } from "../custom/mutation";
 
 const biometricsValidator = v.object({
   age: v.number(),
@@ -21,9 +21,7 @@ const biometricsValidator = v.object({
   activityLevel: v.optional(
     v.union(...ACTIVITY_LEVELS.map((l) => v.literal(l))),
   ),
-  primaryGoal: v.optional(
-    v.union(...PRIMARY_GOALS.map((g) => v.literal(g))),
-  ),
+  primaryGoal: v.optional(v.union(...PRIMARY_GOALS.map((g) => v.literal(g)))),
 });
 
 const dietaryValidator = v.object({
@@ -40,14 +38,10 @@ const logisticsValidator = v.object({
   cookingSkillLevel: v.optional(
     v.union(...COOKING_SKILLS.map((s) => v.literal(s))),
   ),
-  budgetTier: v.optional(
-    v.union(...BUDGET_TIERS.map((b) => v.literal(b))),
-  ),
+  budgetTier: v.optional(v.union(...BUDGET_TIERS.map((b) => v.literal(b)))),
 });
 
-const dishTypeLiteral = v.union(
-  ...DISH_TYPES.map((d) => v.literal(d)),
-);
+const dishTypeLiteral = v.union(...DISH_TYPES.map((d) => v.literal(d)));
 const dishTypesValidator = v.object({
   preferredTypes: v.array(dishTypeLiteral),
   avoidedTypes: v.array(dishTypeLiteral),

@@ -1,8 +1,8 @@
 "use node";
 
 import { v } from "convex/values";
-import { internalAction } from "../_generated/server";
 import { internal } from "../_generated/api";
+import { internalAction } from "../_generated/server";
 
 const EMBEDDING_MODEL = "gemini-embedding-001";
 const EMBEDDING_DIMENSIONS = 768;
@@ -20,16 +20,19 @@ export async function generateEmbedding(text: string): Promise<number[]> {
     );
   }
 
-  const res = await fetch(`${GOOGLE_EMBED_URL}?key=${encodeURIComponent(apiKey)}`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      content: {
-        parts: [{ text }],
-      },
-      outputDimensionality: EMBEDDING_DIMENSIONS,
-    }),
-  });
+  const res = await fetch(
+    `${GOOGLE_EMBED_URL}?key=${encodeURIComponent(apiKey)}`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        content: {
+          parts: [{ text }],
+        },
+        outputDimensionality: EMBEDDING_DIMENSIONS,
+      }),
+    },
+  );
 
   if (!res.ok) {
     const err = await res.text();
@@ -59,7 +62,9 @@ export const generateAndStoreEmbedding = internalAction({
       mealId,
     });
     if (!meal) return;
-    const textToEmbed = meal.searchContent || `${meal.name} ${meal.description ?? ""} ${meal.instructions ?? ""}`.trim();
+    const textToEmbed =
+      meal.searchContent ||
+      `${meal.name} ${meal.description ?? ""} ${meal.instructions ?? ""}`.trim();
     if (!textToEmbed) return;
     const embedding = await generateEmbedding(textToEmbed);
     await ctx.runMutation(internal.ai.mutations.patchMealEmbedding, {

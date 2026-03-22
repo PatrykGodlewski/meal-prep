@@ -14,9 +14,7 @@ export const getIngredientsPaginated = authQuery({
     if (trimmedSearch) {
       const searchQ = ctx.db
         .query("ingredients")
-        .withSearchIndex("search_name", (q) =>
-          q.search("name", trimmedSearch),
-        );
+        .withSearchIndex("search_name", (q) => q.search("name", trimmedSearch));
       return await searchQ.paginate(pagination);
     }
 
@@ -62,7 +60,10 @@ export const getIngredient = authQuery({
 
     const replacementEntries =
       ingredient.replacements ??
-      (ingredient.replacementIds ?? []).map((id) => ({ ingredientId: id, ratio: undefined }));
+      (ingredient.replacementIds ?? []).map((id) => ({
+        ingredientId: id,
+        ratio: undefined,
+      }));
     const replacementInfos = await Promise.all(
       replacementEntries.map(async (entry) => {
         const rep = await ctx.db.get(entry.ingredientId);

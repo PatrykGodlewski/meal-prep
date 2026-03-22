@@ -1,25 +1,29 @@
 "use client";
 
-import { useState } from "react";
 import { useMutation, useQuery } from "convex/react";
-import { api } from "@/convex/_generated/api";
-import type { Id } from "@/convex/_generated/dataModel";
 import { Loader2 } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
+import { useState } from "react";
+import { api } from "@/convex/_generated/api";
+import type { Id } from "@/convex/_generated/dataModel";
 
 export function GenerateMealWithAI() {
   const t = useTranslations("generateMealAI");
   const locale = useLocale();
-  const requestMealGeneration = useMutation(api.ai.mutations.requestMealGeneration);
+  const requestMealGeneration = useMutation(
+    api.ai.mutations.requestMealGeneration,
+  );
   const [prompt, setPrompt] = useState("");
-  const [requestId, setRequestId] = useState<Id<"mealGenerationRequests"> | null>(null);
+  const [requestId, setRequestId] =
+    useState<Id<"mealGenerationRequests"> | null>(null);
 
   const request = useQuery(
     api.ai.queries.getMealGenerationRequest,
     requestId ? { requestId } : "skip",
   );
 
-  const isPending = request?.status === "pending" || request?.status === "running";
+  const isPending =
+    request?.status === "pending" || request?.status === "running";
   const isCompleted = request?.status === "completed";
   const isFailed = request?.status === "failed";
 
@@ -39,7 +43,7 @@ export function GenerateMealWithAI() {
       <h3 className="font-medium text-neutral-900 dark:text-neutral-100">
         {t("title")}
       </h3>
-      <p className="text-sm text-neutral-600 dark:text-neutral-400">
+      <p className="text-neutral-600 text-sm dark:text-neutral-400">
         {t("description")}
       </p>
       <div className="flex gap-2">
@@ -56,7 +60,7 @@ export function GenerateMealWithAI() {
           type="button"
           onClick={handleGenerate}
           disabled={isPending || !prompt.trim()}
-          className="inline-flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
+          className="inline-flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2 font-medium text-sm text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
         >
           {isPending ? (
             <>
@@ -70,7 +74,7 @@ export function GenerateMealWithAI() {
       </div>
 
       {isCompleted && request?.mealId && (
-        <div className="rounded-md bg-green-50 p-3 text-sm text-green-800 dark:bg-green-900/30 dark:text-green-200">
+        <div className="rounded-md bg-green-50 p-3 text-green-800 text-sm dark:bg-green-900/30 dark:text-green-200">
           {t("success")}
           <a
             href={`/meals/${request.mealId}`}
@@ -89,7 +93,7 @@ export function GenerateMealWithAI() {
       )}
 
       {isFailed && (
-        <div className="rounded-md bg-red-50 p-3 text-sm text-red-800 dark:bg-red-900/30 dark:text-red-200">
+        <div className="rounded-md bg-red-50 p-3 text-red-800 text-sm dark:bg-red-900/30 dark:text-red-200">
           {t("error")}: {request?.error ?? "Unknown error"}
           <button
             type="button"

@@ -1,6 +1,13 @@
-import { useQuery } from "convex/react";
+import { useMutation, useQuery } from "convex/react";
 import { format } from "date-fns";
-import { ChefHat, Clock, Flame, Users, UtensilsCrossed } from "lucide-react";
+import {
+  ChefHat,
+  Clock,
+  Flame,
+  Heart,
+  Users,
+  UtensilsCrossed,
+} from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
@@ -9,20 +16,47 @@ import type { Doc } from "@/convex/_generated/dataModel";
 import { DATE_FORMAT_DISPLAY_CARD } from "@/features/meal-planner/utils";
 import { useDateLocale } from "@/hooks/use-date-locale";
 
+type MealWithFavourite = Doc<"meals"> & { isFavourited?: boolean };
+
 type Props = {
-  meal: Doc<"meals">;
+  meal: MealWithFavourite;
 };
 
 export function MealCard({ meal }: Props) {
   const t = useTranslations("mealDetails");
+  const tFav = useTranslations("favourites");
   const tMeal = useTranslations("meal");
   const dateLocale = useDateLocale();
   const authorDisplayName = useQuery(api.users.queries.getUserDisplayName, {
     userId: meal.createdBy,
   });
+  const isFavouritedFromQuery = useQuery(
+    api.favourites.queries.isFavourited,
+    "isFavourited" in meal && typeof meal.isFavourited === "boolean"
+      ? "skip"
+      : { mealId: meal._id },
+  );
+  const isFavourited =
+    typeof meal.isFavourited === "boolean"
+      ? meal.isFavourited
+      : (isFavouritedFromQuery ?? false);
+  const addToFavourites = useMutation(api.favourites.mutations.addToFavourites);
+  const removeFromFavourites = useMutation(
+    api.favourites.mutations.removeFromFavourites,
+  );
 
   const totalTime = (meal.prepTimeMinutes || 0) + (meal.cookTimeMinutes || 0);
   const displayAuthor = authorDisplayName ?? "Unknown";
+
+  const handleFavouriteClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (isFavourited) {
+      removeFromFavourites({ mealId: meal._id });
+    } else {
+      addToFavourites({ mealId: meal._id });
+    }
+  };
 
   return (
     <Link href={`/meals/${meal._id}`}>
@@ -33,7 +67,7 @@ export function MealCard({ meal }: Props) {
               src={meal.imageUrl}
               alt={meal.name}
               fill
-              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" // Add sizes prop for optimization
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
               className="object-cover"
             />
           ) : (
@@ -46,6 +80,25 @@ export function MealCard({ meal }: Props) {
               {tMeal(meal.category)}
             </span>
           )}
+          <button
+            type="button"
+            onClick={handleFavouriteClick}
+            className="absolute top-2 left-2 rounded-full bg-white/20 p-2 text-white backdrop-blur-sm transition-transform duration-200 ease-out hover:scale-105 hover:bg-white/30 focus:outline-none focus:ring-2 focus:ring-white active:scale-[0.98]"
+            title={
+              isFavourited
+                ? tFav("removeFromFavourites")
+                : tFav("addToFavourites")
+            }
+            aria-label={
+              isFavourited
+                ? tFav("removeFromFavourites")
+                : tFav("addToFavourites")
+            }
+          >
+            <Heart
+              className={`h-5 w-5 transition-all duration-300 ease-out ${isFavourited ? "scale-[1.05] animate-[heart-pop_0.35s_ease-out] fill-white" : "scale-100"}`}
+            />
+          </button>
         </div>
 
         <div className="flex grow flex-col p-4 text-neutral-700 dark:text-neutral-300">

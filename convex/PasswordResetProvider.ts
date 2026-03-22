@@ -23,8 +23,8 @@ export const PasswordResetProvider: EmailConfig = {
   type: "email",
   name: "PasswordReset",
   maxAge: 60 * 60, // 1 hour
-  async generateVerificationToken() {
-    return generateNumericCode(8);
+  generateVerificationToken() {
+    return Promise.resolve(generateNumericCode(8));
   },
   async sendVerificationRequest({ identifier: email, token, url }) {
     // TODO: Replace with Resend + React Email integration
@@ -32,6 +32,10 @@ export const PasswordResetProvider: EmailConfig = {
     // import { PasswordResetEmail } from "@/emails/password-reset";
     // const resend = new Resend(process.env.AUTH_RESEND_KEY);
     // await resend.emails.send({ from: "...", to: [email], react: PasswordResetEmail({ token, url }) });
-    console.log("[Password Reset] Code and URL for", email, ":", { token, url });
+    console.log("[Password Reset] Code and URL for", email, ":", {
+      token,
+      url,
+    });
+    await Promise.resolve();
   },
 };

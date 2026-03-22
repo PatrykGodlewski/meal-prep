@@ -1,8 +1,13 @@
 "use client";
 
+import { useConvexMutation } from "@convex-dev/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { useDebounceFn } from "ahooks";
 import { Plus } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useState } from "react";
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
 import {
   Command,
   CommandEmpty,
@@ -11,21 +16,16 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { api } from "@/convex/_generated/api";
 import type { Doc } from "@/convex/_generated/dataModel";
 import { usePaginatedIngredients } from "@/hooks/use-paginated-ingredients";
-import { useMutation } from "@tanstack/react-query";
-import { useConvexMutation } from "@convex-dev/react-query";
-import { useTranslations } from "next-intl";
-import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { api } from "@/convex/_generated/api";
 import { cn } from "@/lib/utils";
 
 export default function FridgeAddBar() {
@@ -55,10 +55,9 @@ export default function FridgeAddBar() {
     },
   });
 
-  const debouncedSearch = useDebounceFn(
-    (term: string) => setSearchTerm(term),
-    { wait: 250 },
-  );
+  const debouncedSearch = useDebounceFn((term: string) => setSearchTerm(term), {
+    wait: 250,
+  });
 
   useEffect(() => {
     if (!popoverOpen) {
@@ -81,11 +80,12 @@ export default function FridgeAddBar() {
     <div className="mb-6 rounded-xl border bg-card p-4 shadow-sm transition-colors hover:bg-muted/30">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end">
         <div className="min-w-0 flex-1 space-y-2">
-          <Label htmlFor="fridge-add" className="text-sm font-medium">
+          <Label htmlFor="fridge-add" className="font-medium text-sm">
             {t("addIngredient")}
           </Label>
           <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
             <PopoverTrigger asChild>
+              {/* biome-ignore lint/a11y/useSemanticElements: searchable Command popover; native <select> cannot async-search ingredients */}
               <Button
                 id="fridge-add"
                 variant="outline"
@@ -143,7 +143,7 @@ export default function FridgeAddBar() {
         </div>
         <div className="flex shrink-0 items-end gap-2">
           <div className="space-y-2">
-            <Label htmlFor="fridge-amount" className="text-sm font-medium">
+            <Label htmlFor="fridge-amount" className="font-medium text-sm">
               {t("amount")}
             </Label>
             <Input

@@ -1,8 +1,8 @@
 import { getTranslations } from "next-intl/server";
 import { Suspense } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
-import FridgeList from "./FridgeList";
 import FridgeAddBar from "./FridgeAddBar";
+import FridgeList from "./FridgeList";
 
 const FridgeSkeleton = () => (
   <div className="space-y-6">

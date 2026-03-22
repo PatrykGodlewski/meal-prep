@@ -3,10 +3,9 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useDebounceFn } from "ahooks";
 import { useMutation, useQuery } from "convex/react";
-import { useRouter } from "@/i18n/navigation";
+import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import { useTranslations } from "next-intl";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   Form,
@@ -15,16 +14,17 @@ import {
   FormItem,
   FormLabel,
 } from "@/components/ui/form";
-import { DISH_TYPES } from "@/convex/schema";
 import { api } from "@/convex/_generated/api";
+import { DISH_TYPES } from "@/convex/schema";
+import { useRouter } from "@/i18n/navigation";
 import { StepHeader } from "./components/StepHeader";
 import { StepNavigation } from "./components/StepNavigation";
 import { DEBOUNCE_MS } from "./constants";
-import { dishTypesSchema, type DishTypesValues } from "./schemas";
+import { type DishTypesValues, dishTypesSchema } from "./schemas";
 
 export function Step3Form() {
   const t = useTranslations("onboarding.step3");
-  const tCommon = useTranslations("onboarding");
+  const _tCommon = useTranslations("onboarding");
   const router = useRouter();
   const data = useQuery(api.onboarding.queries.getPreferencesForStep, {
     step: 3,
@@ -44,7 +44,8 @@ export function Step3Form() {
     async (values: DishTypesValues) => {
       await saveStep3({
         dishTypes: {
-          preferredTypes: values.preferredTypes as (typeof DISH_TYPES)[number][],
+          preferredTypes:
+            values.preferredTypes as (typeof DISH_TYPES)[number][],
           avoidedTypes: values.avoidedTypes as (typeof DISH_TYPES)[number][],
         },
       });
@@ -54,7 +55,10 @@ export function Step3Form() {
 
   useEffect(() => {
     if (!data?.dishTypes || hasSynced) return;
-    const d = data.dishTypes as { preferredTypes?: string[]; avoidedTypes?: string[] };
+    const d = data.dishTypes as {
+      preferredTypes?: string[];
+      avoidedTypes?: string[];
+    };
     form.reset({
       preferredTypes: d.preferredTypes ?? [],
       avoidedTypes: d.avoidedTypes ?? [],
@@ -111,13 +115,16 @@ export function Step3Form() {
                                 onCheckedChange={(checked) => {
                                   const current = field.value ?? [];
                                   const next = checked
-                                    ? [...current.filter((x) => x !== "none"), type]
+                                    ? [
+                                        ...current.filter((x) => x !== "none"),
+                                        type,
+                                      ]
                                     : current.filter((x) => x !== type);
                                   field.onChange(next);
                                 }}
                               />
                             </FormControl>
-                            <FormLabel className="font-normal cursor-pointer">
+                            <FormLabel className="cursor-pointer font-normal">
                               {t(`dishTypes.${type}`)}
                             </FormLabel>
                           </FormItem>
@@ -133,14 +140,14 @@ export function Step3Form() {
                             <Checkbox
                               checked={
                                 field.value?.includes("none") ||
-                                (field.value?.length === 0)
+                                field.value?.length === 0
                               }
                               onCheckedChange={(checked) => {
                                 field.onChange(checked ? ["none"] : []);
                               }}
                             />
                           </FormControl>
-                          <FormLabel className="font-normal cursor-pointer">
+                          <FormLabel className="cursor-pointer font-normal">
                             {t("dishTypes.none")}
                           </FormLabel>
                         </FormItem>
@@ -176,13 +183,16 @@ export function Step3Form() {
                                 onCheckedChange={(checked) => {
                                   const current = field.value ?? [];
                                   const next = checked
-                                    ? [...current.filter((x) => x !== "none"), type]
+                                    ? [
+                                        ...current.filter((x) => x !== "none"),
+                                        type,
+                                      ]
                                     : current.filter((x) => x !== type);
                                   field.onChange(next);
                                 }}
                               />
                             </FormControl>
-                            <FormLabel className="font-normal cursor-pointer">
+                            <FormLabel className="cursor-pointer font-normal">
                               {t(`dishTypes.${type}`)}
                             </FormLabel>
                           </FormItem>
@@ -198,14 +208,14 @@ export function Step3Form() {
                             <Checkbox
                               checked={
                                 field.value?.includes("none") ||
-                                (field.value?.length === 0)
+                                field.value?.length === 0
                               }
                               onCheckedChange={(checked) => {
                                 field.onChange(checked ? ["none"] : []);
                               }}
                             />
                           </FormControl>
-                          <FormLabel className="font-normal cursor-pointer">
+                          <FormLabel className="cursor-pointer font-normal">
                             {t("dishTypes.none")}
                           </FormLabel>
                         </FormItem>

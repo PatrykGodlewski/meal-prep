@@ -1,6 +1,5 @@
 "use client";
-import { useQuery } from "convex/react";
-import { useConvexAuth } from "convex/react";
+import { useConvexAuth, useQuery } from "convex/react";
 import {
   CalendarCog,
   LayoutDashboardIcon,

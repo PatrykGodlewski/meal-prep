@@ -1,9 +1,9 @@
 "use client";
 
 import { useQuery } from "convex/react";
-import { useRouter } from "@/i18n/navigation";
 import { useEffect } from "react";
 import { api } from "@/convex/_generated/api";
+import { useRouter } from "@/i18n/navigation";
 
 /**
  * Redirects to the appropriate onboarding step based on user progress.

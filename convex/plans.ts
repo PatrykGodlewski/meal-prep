@@ -42,9 +42,7 @@ export const getMealPlan = authQuery({
       ...planExtras.map((pe) => pe.mealId),
     ];
     const meals = (
-      await Promise.all(
-        [...new Set(allMealIds)].map((id) => ctx.db.get(id)),
-      )
+      await Promise.all([...new Set(allMealIds)].map((id) => ctx.db.get(id)))
     ).filter((meal): meal is NonNullable<typeof meal> => meal !== null);
 
     const mealMap = new Map(meals.map((meal) => [meal._id, meal]));
@@ -106,7 +104,9 @@ export const getWeeklyMealPlan = authQuery({
           [...new Set(allMealIds)].map((id) => ctx.db.get(id)),
         );
         const mealMap = new Map(
-          meals.filter((m): m is NonNullable<typeof m> => m !== null).map((m) => [m._id, m]),
+          meals
+            .filter((m): m is NonNullable<typeof m> => m !== null)
+            .map((m) => [m._id, m]),
         );
 
         const planMealsWithMeal = planMeals.map((pm) => ({
@@ -216,6 +216,15 @@ export const generateMealPlan = authMutation({
       }
     }
 
+    const userFavouriteMealIds = new Set(
+      (
+        await ctx.db
+          .query("mealFavourites")
+          .withIndex("by_user", (q) => q.eq("userId", ctx.user.id))
+          .collect()
+      ).map((r) => r.mealId),
+    );
+
     const generatedMealPlanIds: Id<"plans">[] = [];
     const lockedPlanDates = new Set(
       oldPlans.filter((plan) => plan.locked).map((plan) => plan.date),
@@ -262,7 +271,19 @@ export const generateMealPlan = authMutation({
           );
           continue; // Skip if no meals are available for this category
         }
-        // Prefer meals that use existing ingredients when provided
+        // Prefer user favourites and high favouriteCount; then fridge overlap if provided
+        const preferFavourites = (candidates: typeof availableMeals) => {
+          const sorted = [...candidates].sort((a, b) => {
+            const aFav = userFavouriteMealIds.has(a._id) ? 1 : 0;
+            const bFav = userFavouriteMealIds.has(b._id) ? 1 : 0;
+            if (bFav !== aFav) return bFav - aFav;
+            return (b.favouriteCount ?? 0) - (a.favouriteCount ?? 0);
+          });
+          const topHalf = Math.max(1, Math.ceil(sorted.length * 0.5));
+          const pool = sorted.slice(0, topHalf);
+          return pool[Math.floor(Math.random() * pool.length)];
+        };
+
         let selectedMeal: (typeof availableMeals)[0];
         if (existingIngredientIds && existingIngredientIds.length > 0) {
           const mealsWithScores = await Promise.all(
@@ -284,11 +305,10 @@ export const generateMealPlan = authMutation({
             maxScore > 0
               ? mealsWithScores.filter((m) => m.score === maxScore)
               : mealsWithScores;
-          selectedMeal =
-            bestMeals[Math.floor(Math.random() * bestMeals.length)].meal;
+          const fridgePool = bestMeals.map((m) => m.meal);
+          selectedMeal = preferFavourites(fridgePool);
         } else {
-          selectedMeal =
-            availableMeals[Math.floor(Math.random() * availableMeals.length)];
+          selectedMeal = preferFavourites(availableMeals);
         }
 
         await ctx.db.insert("planMeals", {
@@ -393,6 +413,29 @@ export const updatePlannedMealByCategory = authMutation({
 
     // 6. --- Return Result ---
     return { success: true, plannedMealId: plannedMealIdToReturn };
+  },
+});
+
+export const updatePlanMealScheduledTime = authMutation({
+  args: {
+    planMealId: v.id("planMeals"),
+    scheduledTime: v.string(),
+  },
+  handler: async (ctx, { planMealId, scheduledTime }) => {
+    const planMeal = await ctx.db.get(planMealId);
+    if (!planMeal) throw new Error("Planned meal not found.");
+
+    const plan = await ctx.db.get(planMeal.planId);
+    if (!plan || plan.userId !== ctx.user.id) {
+      throw new Error("Not authorized to update this plan.");
+    }
+
+    await ctx.db.patch(planMealId, {
+      scheduledTime,
+      updatedAt: Date.now(),
+    });
+
+    return { success: true };
   },
 });
 

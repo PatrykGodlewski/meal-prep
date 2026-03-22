@@ -3,9 +3,16 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useDebounceFn } from "ahooks";
 import { useMutation, useQuery } from "convex/react";
+import { ChevronDown, ChevronRight } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import { useTranslations } from "next-intl";
+import { Button } from "@/components/ui/button";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 import {
   Form,
   FormControl,
@@ -21,17 +28,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ChevronDown, ChevronRight } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
-import { ACTIVITY_LEVELS, PRIMARY_GOALS } from "@/convex/schema";
 import { api } from "@/convex/_generated/api";
+import { ACTIVITY_LEVELS, PRIMARY_GOALS } from "@/convex/schema";
 import { DEBOUNCE_MS } from "../constants";
-import { biometricsSchema, type BiometricsValues } from "../schemas";
+import { type BiometricsValues, biometricsSchema } from "../schemas";
 
 export function BiometricsSection({
   open,
@@ -114,132 +114,142 @@ export function BiometricsSection({
       </CollapsibleTrigger>
       <CollapsibleContent>
         <Form {...form}>
-      <form className="space-y-4 pt-4">
-        <FormField
-          control={form.control}
-          name="age"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>{t("ageLabel")}</FormLabel>
-              <FormControl>
-                <Input
-                  type="number"
-                  placeholder={t("agePlaceholder")}
-                  {...field}
-                  onChange={(e) =>
-                    field.onChange(e.target.valueAsNumber ?? e.target.value)
-                  }
-                />
-              </FormControl>
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="gender"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>{t("genderLabel")}</FormLabel>
-              <FormControl>
-                <Input placeholder={t("genderPlaceholder")} {...field} />
-              </FormControl>
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="heightCm"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>{t("heightLabel")}</FormLabel>
-              <FormControl>
-                <Input
-                  type="number"
-                  placeholder={t("heightPlaceholder")}
-                  value={field.value ?? ""}
-                  onChange={(e) =>
-                    field.onChange(
-                      Number.isNaN(e.target.valueAsNumber)
-                        ? undefined
-                        : e.target.valueAsNumber,
-                    )
-                  }
-                />
-              </FormControl>
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="weightKg"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>{t("weightLabel")}</FormLabel>
-              <FormControl>
-                <Input
-                  type="number"
-                  placeholder={t("weightPlaceholder")}
-                  value={field.value ?? ""}
-                  onChange={(e) =>
-                    field.onChange(
-                      Number.isNaN(e.target.valueAsNumber)
-                        ? undefined
-                        : e.target.valueAsNumber,
-                    )
-                  }
-                />
-              </FormControl>
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="activityLevel"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>{t("activityLevelLabel")}</FormLabel>
-              <Select onValueChange={field.onChange} value={field.value ?? ""}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder={t("activityLevelPlaceholder")} />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {ACTIVITY_LEVELS.map((l) => (
-                    <SelectItem key={l} value={l}>
-                      {t(`activityLevels.${l}`)}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="primaryGoal"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>{t("primaryGoalLabel")}</FormLabel>
-              <Select onValueChange={field.onChange} value={field.value ?? ""}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder={t("primaryGoalPlaceholder")} />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {PRIMARY_GOALS.map((g) => (
-                    <SelectItem key={g} value={g}>
-                      {t(`primaryGoals.${g}`)}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </FormItem>
-          )}
-        />
-      </form>
-    </Form>
+          <form className="space-y-4 pt-4">
+            <FormField
+              control={form.control}
+              name="age"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{t("ageLabel")}</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      placeholder={t("agePlaceholder")}
+                      {...field}
+                      onChange={(e) =>
+                        field.onChange(e.target.valueAsNumber ?? e.target.value)
+                      }
+                    />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="gender"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{t("genderLabel")}</FormLabel>
+                  <FormControl>
+                    <Input placeholder={t("genderPlaceholder")} {...field} />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="heightCm"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{t("heightLabel")}</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      placeholder={t("heightPlaceholder")}
+                      value={field.value ?? ""}
+                      onChange={(e) =>
+                        field.onChange(
+                          Number.isNaN(e.target.valueAsNumber)
+                            ? undefined
+                            : e.target.valueAsNumber,
+                        )
+                      }
+                    />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="weightKg"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{t("weightLabel")}</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      placeholder={t("weightPlaceholder")}
+                      value={field.value ?? ""}
+                      onChange={(e) =>
+                        field.onChange(
+                          Number.isNaN(e.target.valueAsNumber)
+                            ? undefined
+                            : e.target.valueAsNumber,
+                        )
+                      }
+                    />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="activityLevel"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{t("activityLevelLabel")}</FormLabel>
+                  <Select
+                    onValueChange={field.onChange}
+                    value={field.value ?? ""}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue
+                          placeholder={t("activityLevelPlaceholder")}
+                        />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {ACTIVITY_LEVELS.map((l) => (
+                        <SelectItem key={l} value={l}>
+                          {t(`activityLevels.${l}`)}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="primaryGoal"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{t("primaryGoalLabel")}</FormLabel>
+                  <Select
+                    onValueChange={field.onChange}
+                    value={field.value ?? ""}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue
+                          placeholder={t("primaryGoalPlaceholder")}
+                        />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {PRIMARY_GOALS.map((g) => (
+                        <SelectItem key={g} value={g}>
+                          {t(`primaryGoals.${g}`)}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </FormItem>
+              )}
+            />
+          </form>
+        </Form>
       </CollapsibleContent>
     </Collapsible>
   );

@@ -31,7 +31,9 @@ export const getPreferencesForStep = authQuery({
       .withIndex("by_user", (q) => q.eq("userId", ctx.user.id))
       .first();
 
-    const result: Record<string, unknown> = { step: prefs?.onboardingStep ?? 0 };
+    const result: Record<string, unknown> = {
+      step: prefs?.onboardingStep ?? 0,
+    };
 
     if (step === 1 && prefs?.biometrics) {
       result.biometrics = prefs.biometrics;
@@ -47,8 +49,10 @@ export const getPreferencesForStep = authQuery({
     }
 
     if (step === 3) {
-      result.dishTypes =
-        prefs?.dishTypes ?? { preferredTypes: [], avoidedTypes: [] };
+      result.dishTypes = prefs?.dishTypes ?? {
+        preferredTypes: [],
+        avoidedTypes: [],
+      };
     }
 
     return result;

@@ -1,6 +1,6 @@
 import { v } from "convex/values";
-import { internalMutation } from "../_generated/server";
 import { internal } from "../_generated/api";
+import { internalMutation } from "../_generated/server";
 import { authMutation } from "../custom/mutation";
 import { DEFAULT_INGREDIENT_CATEGORY, MEAL_CATEGORIES, UNITS } from "../schema";
 
@@ -60,7 +60,10 @@ export const persistGeneratedMeal = internalMutation({
     const searchContent = `${args.title} ${ingredientNames}`;
 
     const categories =
-      args.category && MEAL_CATEGORIES.includes(args.category as (typeof MEAL_CATEGORIES)[number])
+      args.category &&
+      MEAL_CATEGORIES.includes(
+        args.category as (typeof MEAL_CATEGORIES)[number],
+      )
         ? [args.category as (typeof MEAL_CATEGORIES)[number]]
         : [];
 

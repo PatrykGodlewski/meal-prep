@@ -1,8 +1,14 @@
 "use client";
 
-import { type Preloaded, usePreloadedQuery } from "convex/react";
-import { Edit, HelpCircle, X } from "lucide-react";
+import {
+  type Preloaded,
+  useMutation,
+  usePreloadedQuery,
+  useQuery,
+} from "convex/react";
+import { Edit, Heart, HelpCircle, X } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { BackButton } from "@/components/back-button";
 import { Button } from "@/components/ui/button";
@@ -12,7 +18,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import type { api } from "@/convex/_generated/api";
+import { api } from "@/convex/_generated/api";
 import { MealDisplayDetails } from "@/features/meal-editor/meal-display-details";
 import { MealEditForm } from "@/features/meal-editor/meal-editor-form";
 
@@ -30,6 +36,15 @@ export default function MealDetailView({
   const meal = usePreloadedQuery(preloadedMeal);
   const ingredientList = usePreloadedQuery(preloadedIngredients);
   const router = useRouter();
+  const tFav = useTranslations("favourites");
+  const isFavourited = useQuery(
+    api.favourites.queries.isFavourited,
+    meal ? { mealId: meal._id } : "skip",
+  );
+  const addToFavourites = useMutation(api.favourites.mutations.addToFavourites);
+  const removeFromFavourites = useMutation(
+    api.favourites.mutations.removeFromFavourites,
+  );
 
   const [isEditing, setIsEditing] = useState(false);
 
@@ -59,6 +74,32 @@ export default function MealDetailView({
         ) : (
           <div className="flex gap-2">
             <ServingsTooltip />
+            <Button
+              variant="outline"
+              onClick={() =>
+                isFavourited
+                  ? removeFromFavourites({ mealId: meal._id })
+                  : addToFavourites({ mealId: meal._id })
+              }
+              title={
+                isFavourited
+                  ? tFav("removeFromFavourites")
+                  : tFav("addToFavourites")
+              }
+              aria-label={
+                isFavourited
+                  ? tFav("removeFromFavourites")
+                  : tFav("addToFavourites")
+              }
+              className="transition-transform duration-200 hover:scale-[1.02] active:scale-[0.98]"
+            >
+              <Heart
+                className={`mr-1 h-4 w-4 transition-all duration-300 ease-out ${isFavourited ? "scale-[1.05] fill-red-500" : "scale-100"}`}
+              />
+              {isFavourited
+                ? tFav("removeFromFavourites")
+                : tFav("addToFavourites")}
+            </Button>
             <Button variant="outline" onClick={toggleEditMode}>
               <Edit className="mr-1 h-4 w-4" /> Edit Meal
             </Button>

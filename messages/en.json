@@ -6,6 +6,7 @@
     "emptyShoppingList": "Your shopping list is empty.",
     "today": "Today",
     "header": "Meal Planner",
+    "pageDescription": "Plan your weekly meals and generate a smart shopping list.",
     "generateThisWeek": "Generate meal for this week",
     "weekOf": "Week of {week}",
     "goToPlan": "Go to plan",
@@ -96,6 +97,7 @@
     "meals": "Meals",
     "settings": "Settings",
     "plans": "Meal Plans",
+    "diet": "My Diet",
     "entities": "Entities"
   },
   "meal": {
@@ -144,6 +146,38 @@
     "meals": "Meals",
     "addMeal": "Add Meal"
   },
+  "personalizedDiet": {
+    "pageTitle": "My Diet",
+    "pageDescription": "Your personalized diet plan based on your profile, goals, and preferences.",
+    "title": "Personalized Diet Plan",
+    "generate": "Generate diet",
+    "regenerate": "Regenerate",
+    "print": "Print / Save as PDF",
+    "generating": "Generating your diet...",
+    "emptyTitle": "No diet yet",
+    "emptyDescription": "Complete your profile (age, height, weight, activity level, goals) in Settings, then generate a personalized diet plan.",
+    "tryAgain": "Try again",
+    "errorGeneric": "Something went wrong.",
+    "targetsTitle": "Caloric & Macro Targets",
+    "tdee": "TDEE",
+    "dailyTarget": "Daily target",
+    "protein": "Protein",
+    "carbs": "Carbs",
+    "fat": "Fat",
+    "mealsTitle": "Daily Meal Plan",
+    "prepTime": "{mins} min prep",
+    "ingredients": "Ingredients",
+    "prepInstructions": "Preparation",
+    "hydrationTitle": "Hydration",
+    "micronutrientTitle": "Key Micronutrients",
+    "shoppingList": "Smart Shopping List",
+    "dateFilterToday": "Today",
+    "dateFilterNext3": "Next 3 Days",
+    "dateFilterFullWeek": "Full Week",
+    "swap": "Swap",
+    "generateFirstPlan": "Generate your first plan",
+    "today": "Today"
+  },
   "generateMealAI": {
     "title": "Generate meal with AI",
     "description": "Describe what kind of meal you want. The AI will create a recipe using your preferences and similar meals in your library.",
@@ -183,7 +217,16 @@
   "searchInput": {
     "searchMealsByName": "Search meals by name...",
     "searchIngredientsByName": "Search ingredients by name...",
-    "filterByCategory": "Filter by category"
+    "filterByCategory": "Filter by category",
+    "sortBy": "Sort by",
+    "sortDefault": "Default",
+    "sortByFavourites": "Most favourited"
+  },
+  "favourites": {
+    "addToFavourites": "Add to favourites",
+    "removeFromFavourites": "Remove from favourites",
+    "showFavouritesOnly": "Show only my favourites",
+    "showAllMeals": "Show all meals"
   },
   "mealEditor": {
     "saving": "Saving...",

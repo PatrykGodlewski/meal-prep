@@ -12,17 +12,20 @@ interface ReplacementOption {
 
 interface IngredientReplacementsFieldProps {
   index: number;
+  // biome-ignore lint/suspicious/noExplicitAny: react-hook-form Control requires form type; meal form type varies
   control: Control<any>;
   replacementOptions: ReplacementOption[];
   hasDefaultReplacements: boolean;
 }
 
 export const IngredientReplacementsField = React.memo(
-  function IngredientReplacementsField(props: IngredientReplacementsFieldProps) {
+  function IngredientReplacementsField(
+    props: IngredientReplacementsFieldProps,
+  ) {
     if (props.replacementOptions.length === 0) return null;
 
     return (
-      <div className="col-span-full px-4 pb-3 pt-1">
+      <div className="col-span-full px-4 pt-1 pb-3">
         <IngredientReplacementsSelector {...props} />
       </div>
     );

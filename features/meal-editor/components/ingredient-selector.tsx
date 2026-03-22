@@ -4,7 +4,6 @@ import { Check, ChevronsUpDown } from "lucide-react";
 import { useTranslations } from "next-intl";
 import React, { useCallback, useState } from "react";
 import type { Control, UseFormSetValue } from "react-hook-form";
-import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
 import {
   Command,
@@ -15,6 +14,13 @@ import {
   CommandList,
 } from "@/components/ui/command";
 import {
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import {
   Popover,
   PopoverContent,
   PopoverTrigger,
@@ -24,8 +30,10 @@ import { cn } from "@/lib/utils";
 
 interface IngredientSelectorProps {
   index: number;
+  // biome-ignore lint/suspicious/noExplicitAny: react-hook-form Control requires form type; meal form type varies
   control: Control<any>;
   availableIngredients: Doc<"ingredients">[];
+  // biome-ignore lint/suspicious/noExplicitAny: react-hook-form setValue requires form type
   setValue: UseFormSetValue<any>;
   selectedIngredientId: string | undefined;
 }
@@ -38,26 +46,42 @@ export const IngredientSelector = React.memo(function IngredientSelector({
   selectedIngredientId,
 }: IngredientSelectorProps) {
   const [popoverOpen, setPopoverOpen] = useState(false);
-  const t = useTranslations("ingredient");
+  const _t = useTranslations("ingredient");
   const tMeal = useTranslations("mealEditor");
 
   const handleSelect = useCallback(
     (ingredientId: string | undefined) => {
-      const selected = availableIngredients.find((ing) => ing._id === ingredientId);
+      const selected = availableIngredients.find(
+        (ing) => ing._id === ingredientId,
+      );
       if (selected) {
-        setValue(`ingredients.${index}.ingredientId`, selected._id, { shouldDirty: true });
+        setValue(`ingredients.${index}.ingredientId`, selected._id, {
+          shouldDirty: true,
+        });
         setValue(`ingredients.${index}.name`, selected.name, {
           shouldDirty: true,
           shouldValidate: true,
         });
-        setValue(`ingredients.${index}.category`, selected.category ?? "other", {
+        setValue(
+          `ingredients.${index}.category`,
+          selected.category ?? "other",
+          {
+            shouldDirty: true,
+          },
+        );
+        setValue(`ingredients.${index}.unit`, selected.unit ?? "g", {
           shouldDirty: true,
         });
-        setValue(`ingredients.${index}.unit`, selected.unit ?? "g", { shouldDirty: true });
-        setValue(`ingredients.${index}.calories`, selected.calories ?? 0, { shouldDirty: true });
-        setValue(`ingredients.${index}.allowedReplacementIds`, undefined, { shouldDirty: true });
+        setValue(`ingredients.${index}.calories`, selected.calories ?? 0, {
+          shouldDirty: true,
+        });
+        setValue(`ingredients.${index}.allowedReplacementIds`, undefined, {
+          shouldDirty: true,
+        });
       } else {
-        setValue(`ingredients.${index}.ingredientId`, undefined, { shouldDirty: true });
+        setValue(`ingredients.${index}.ingredientId`, undefined, {
+          shouldDirty: true,
+        });
       }
       setPopoverOpen(false);
     },
@@ -82,7 +106,9 @@ export const IngredientSelector = React.memo(function IngredientSelector({
                     !field.value && "text-muted-foreground",
                   )}
                 >
-                  {field.value ? field.value : tMeal("ingredientSelectPlaceholder")}
+                  {field.value
+                    ? field.value
+                    : tMeal("ingredientSelectPlaceholder")}
                   <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
               </FormControl>
@@ -104,7 +130,12 @@ export const IngredientSelector = React.memo(function IngredientSelector({
                         onSelect={() => handleSelect(ing._id as string)}
                       >
                         <Check
-                          className={cn("mr-2 h-4 w-4", (selectedIngredientId ?? "") === ing._id ? "opacity-100" : "opacity-0")}
+                          className={cn(
+                            "mr-2 h-4 w-4",
+                            (selectedIngredientId ?? "") === ing._id
+                              ? "opacity-100"
+                              : "opacity-0",
+                          )}
                         />
                         {ing.name} {ing.unit ? `(${ing.unit})` : ""}
                       </CommandItem>

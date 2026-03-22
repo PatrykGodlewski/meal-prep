@@ -59,7 +59,12 @@ export const updateMealIngredients = internalMutation({
         isOptional: v.optional(v.boolean()),
         notes: v.optional(v.string()),
         allowedReplacements: v.optional(
-          v.array(v.object({ ingredientId: v.id("ingredients"), ratio: v.optional(v.number()) })),
+          v.array(
+            v.object({
+              ingredientId: v.id("ingredients"),
+              ratio: v.optional(v.number()),
+            }),
+          ),
         ),
       }),
     ),

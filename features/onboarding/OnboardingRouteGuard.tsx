@@ -1,9 +1,9 @@
 "use client";
 
 import { useConvexAuth, useQuery } from "convex/react";
-import { useRouter } from "@/i18n/navigation";
-import { useEffect, type PropsWithChildren } from "react";
+import { type PropsWithChildren, useEffect } from "react";
 import { api } from "@/convex/_generated/api";
+import { useRouter } from "@/i18n/navigation";
 
 /**
  * Protects onboarding routes:
@@ -31,10 +31,7 @@ export function OnboardingRouteGuard({ children }: PropsWithChildren) {
   }, [isLoading, isAuthenticated, status?.completed, router]);
 
   const isBlocked =
-    isLoading ||
-    !isAuthenticated ||
-    status === undefined ||
-    status.completed;
+    isLoading || !isAuthenticated || status === undefined || status.completed;
 
   if (isBlocked) {
     return (

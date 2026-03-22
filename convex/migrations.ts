@@ -1,9 +1,7 @@
 import { Migrations } from "@convex-dev/migrations";
-import type { Id } from "./_generated/dataModel.js";
-import { components, internal } from "./_generated/api.js";
-import type { DataModel } from "./_generated/dataModel.js";
+import { components } from "./_generated/api.js";
+import type { DataModel, Id } from "./_generated/dataModel.js";
 import { internalMutation } from "./_generated/server";
-import { MEAL_CATEGORIES } from "./schema.js";
 
 export const migrations = new Migrations<DataModel>(components.migrations);
 
@@ -35,8 +33,15 @@ export const migrateReplacementsToRatio = internalMutation({
     // ingredients: replacementIds -> replacements
     const ingredients = await ctx.db.query("ingredients").collect();
     for (const ing of ingredients) {
-      const doc = ing as { replacementIds?: string[]; replacements?: { ingredientId: string; ratio: number }[] };
-      if (doc.replacementIds && doc.replacementIds.length > 0 && !doc.replacements) {
+      const doc = ing as {
+        replacementIds?: string[];
+        replacements?: { ingredientId: string; ratio: number }[];
+      };
+      if (
+        doc.replacementIds &&
+        doc.replacementIds.length > 0 &&
+        !doc.replacements
+      ) {
         await ctx.db.patch(ing._id, {
           replacements: doc.replacementIds.map((id) => ({
             ingredientId: id as Id<"ingredients">,
@@ -51,8 +56,15 @@ export const migrateReplacementsToRatio = internalMutation({
     // mealIngredients: allowedReplacementIds -> allowedReplacements
     const mealIngredients = await ctx.db.query("mealIngredients").collect();
     for (const mi of mealIngredients) {
-      const doc = mi as { allowedReplacementIds?: string[]; allowedReplacements?: { ingredientId: string; ratio: number }[] };
-      if (doc.allowedReplacementIds && doc.allowedReplacementIds.length > 0 && !doc.allowedReplacements) {
+      const doc = mi as {
+        allowedReplacementIds?: string[];
+        allowedReplacements?: { ingredientId: string; ratio: number }[];
+      };
+      if (
+        doc.allowedReplacementIds &&
+        doc.allowedReplacementIds.length > 0 &&
+        !doc.allowedReplacements
+      ) {
         await ctx.db.patch(mi._id, {
           allowedReplacements: doc.allowedReplacementIds.map((id) => ({
             ingredientId: id as Id<"ingredients">,

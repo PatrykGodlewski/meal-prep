@@ -14,9 +14,7 @@ export type PlanExtraWithMeal = {
   servingAmount?: number;
 };
 
-export function getExtraKcal(
-  planExtra: PlanExtraWithMeal,
-): number {
+export function getExtraKcal(planExtra: PlanExtraWithMeal): number {
   return getMealKcal(
     {
       _id: "",
@@ -34,8 +32,7 @@ export function getMealKcal(
 ): number {
   const meal = planMeal.meal;
   if (!meal?.calories) return 0;
-  const servings =
-    planMeal.servingAmount ?? peopleAmount ?? meal.servings ?? 1;
+  const servings = planMeal.servingAmount ?? peopleAmount ?? meal.servings ?? 1;
   return meal.calories * servings;
 }
 

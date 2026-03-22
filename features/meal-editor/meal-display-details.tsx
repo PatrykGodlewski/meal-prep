@@ -58,7 +58,9 @@ export const MealDisplayDetails: React.FC<MealDisplayDetailsProps> = React.memo(
     const recipeServings = meal.servings ?? 1;
     const scaleFactor = servings / recipeServings;
 
-    const kcalFromIngredients = Math.round(baseKcalFromIngredients * scaleFactor);
+    const kcalFromIngredients = Math.round(
+      baseKcalFromIngredients * scaleFactor,
+    );
     // meal.calories = kcal per serving; total = per-serving * number of servings
     const manualKcal = meal.calories
       ? Math.round(meal.calories * servings)
@@ -192,35 +194,46 @@ export const MealDisplayDetails: React.FC<MealDisplayDetailsProps> = React.memo(
                               {mealIngredient.notes}
                             </p>
                           )}
-                          {replacementNames &&
-                            replacementNames.length > 0 && (
-                              <div className="mt-1">
-                                <span className="text-gray-500 text-xs dark:text-neutral-400">
-                                  {t("substitutesLabel")}:
-                                </span>
-                                <ul className="mt-0.5 list-none border-l-2 border-gray-300 pl-4 text-gray-500 text-xs dark:border-neutral-500 dark:text-neutral-400">
-                                  {((
+                          {replacementNames && replacementNames.length > 0 && (
+                            <div className="mt-1">
+                              <span className="text-gray-500 text-xs dark:text-neutral-400">
+                                {t("substitutesLabel")}:
+                              </span>
+                              <ul className="mt-0.5 list-none border-gray-300 border-l-2 pl-4 text-gray-500 text-xs dark:border-neutral-500 dark:text-neutral-400">
+                                {(
+                                  (
                                     mealIngredient as {
-                                      replacementInfos?: { name: string; ratio: number }[];
+                                      replacementInfos?: {
+                                        name: string;
+                                        ratio: number;
+                                      }[];
                                     }
-                                  ).replacementInfos ?? replacementNames.map((n) => ({ name: n, ratio: 1 }))).map(
-                                    ({ name, ratio }) => {
-                                      const baseQty = mealIngredient.quantity * servings;
-                                      const calculatedQty = Math.round(baseQty * ratio);
-                                      const unit = tIngredient(ingredient?.unit ?? "g");
-                                      return (
-                                        <li key={name}>
-                                          {name}
-                                          <span className="text-gray-400 ml-1">
-                                            ({calculatedQty} {unit})
-                                          </span>
-                                        </li>
-                                      );
-                                    },
-                                  )}
-                                </ul>
-                              </div>
-                            )}
+                                  ).replacementInfos ??
+                                  replacementNames.map((n) => ({
+                                    name: n,
+                                    ratio: 1,
+                                  }))
+                                ).map(({ name, ratio }) => {
+                                  const baseQty =
+                                    mealIngredient.quantity * servings;
+                                  const calculatedQty = Math.round(
+                                    baseQty * ratio,
+                                  );
+                                  const unit = tIngredient(
+                                    ingredient?.unit ?? "g",
+                                  );
+                                  return (
+                                    <li key={name}>
+                                      {name}
+                                      <span className="ml-1 text-gray-400">
+                                        ({calculatedQty} {unit})
+                                      </span>
+                                    </li>
+                                  );
+                                })}
+                              </ul>
+                            </div>
+                          )}
                         </div>
                       </li>
                     );

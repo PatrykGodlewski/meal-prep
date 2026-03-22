@@ -3,10 +3,10 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useDebounceFn } from "ahooks";
 import { useMutation, useQuery } from "convex/react";
+import { ChevronDown, ChevronRight } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import { useTranslations } from "next-intl";
-import { ChevronDown, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Collapsible,
@@ -23,7 +23,7 @@ import {
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { api } from "@/convex/_generated/api";
 import { DEBOUNCE_MS } from "../constants";
-import { appetiteSchema, type AppetiteValues } from "../schemas";
+import { type AppetiteValues, appetiteSchema } from "../schemas";
 
 export function AppetiteSection({
   open,
@@ -34,9 +34,7 @@ export function AppetiteSection({
 }) {
   const t = useTranslations("onboarding.step5");
   const data = useQuery(api.onboarding.queries.getPreferences);
-  const updateAppetite = useMutation(
-    api.onboarding.mutations.updateAppetite,
-  );
+  const updateAppetite = useMutation(api.onboarding.mutations.updateAppetite);
   const [hasSynced, setHasSynced] = useState(false);
 
   const form = useForm<AppetiteValues>({
@@ -83,63 +81,63 @@ export function AppetiteSection({
       </CollapsibleTrigger>
       <CollapsibleContent>
         <Form {...form}>
-      <form className="space-y-4 pt-4">
-        <FormField
-          control={form.control}
-          name="prefersMealPrep"
-          render={({ field }) => (
-            <FormItem>
-              <FormControl>
-                <RadioGroup
-                  onValueChange={(v) =>
-                    field.onChange(
-                      v === "meal_prep"
-                        ? true
-                        : v === "variety"
-                          ? false
-                          : undefined,
-                    )
-                  }
-                  value={
-                    field.value === true
-                      ? "meal_prep"
-                      : field.value === false
-                        ? "variety"
-                        : ""
-                  }
-                  className="flex flex-col gap-4"
-                >
-                  <div className="flex items-center space-x-3 rounded-lg border p-4 hover:bg-muted/50">
-                    <RadioGroupItem value="meal_prep" id="meal_prep" />
-                    <FormLabel
-                      htmlFor="meal_prep"
-                      className="flex-1 cursor-pointer font-normal"
+          <form className="space-y-4 pt-4">
+            <FormField
+              control={form.control}
+              name="prefersMealPrep"
+              render={({ field }) => (
+                <FormItem>
+                  <FormControl>
+                    <RadioGroup
+                      onValueChange={(v) =>
+                        field.onChange(
+                          v === "meal_prep"
+                            ? true
+                            : v === "variety"
+                              ? false
+                              : undefined,
+                        )
+                      }
+                      value={
+                        field.value === true
+                          ? "meal_prep"
+                          : field.value === false
+                            ? "variety"
+                            : ""
+                      }
+                      className="flex flex-col gap-4"
                     >
-                      <div>{t("prefersMealPrepLabel")}</div>
-                      <div className="text-muted-foreground text-sm">
-                        {t("prefersMealPrepHelp")}
+                      <div className="flex items-center space-x-3 rounded-lg border p-4 hover:bg-muted/50">
+                        <RadioGroupItem value="meal_prep" id="meal_prep" />
+                        <FormLabel
+                          htmlFor="meal_prep"
+                          className="flex-1 cursor-pointer font-normal"
+                        >
+                          <div>{t("prefersMealPrepLabel")}</div>
+                          <div className="text-muted-foreground text-sm">
+                            {t("prefersMealPrepHelp")}
+                          </div>
+                        </FormLabel>
                       </div>
-                    </FormLabel>
-                  </div>
-                  <div className="flex items-center space-x-3 rounded-lg border p-4 hover:bg-muted/50">
-                    <RadioGroupItem value="variety" id="variety" />
-                    <FormLabel
-                      htmlFor="variety"
-                      className="flex-1 cursor-pointer font-normal"
-                    >
-                      <div>{t("prefersVarietyLabel")}</div>
-                      <div className="text-muted-foreground text-sm">
-                        {t("prefersVarietyHelp")}
+                      <div className="flex items-center space-x-3 rounded-lg border p-4 hover:bg-muted/50">
+                        <RadioGroupItem value="variety" id="variety" />
+                        <FormLabel
+                          htmlFor="variety"
+                          className="flex-1 cursor-pointer font-normal"
+                        >
+                          <div>{t("prefersVarietyLabel")}</div>
+                          <div className="text-muted-foreground text-sm">
+                            {t("prefersVarietyHelp")}
+                          </div>
+                        </FormLabel>
                       </div>
-                    </FormLabel>
-                  </div>
-                </RadioGroup>
-              </FormControl>
-            </FormItem>
-          )}
-        />
-      </form>
-    </Form>
+                    </RadioGroup>
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+          </form>
+        </Form>
       </CollapsibleContent>
     </Collapsible>
   );

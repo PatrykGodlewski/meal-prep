@@ -157,9 +157,7 @@ export const setFridgeItems = authMutation({
       .collect();
 
     const itemsByIngredient = new Map(
-      items
-        .filter((i) => i.amount > 0)
-        .map((i) => [i.ingredientId, i.amount]),
+      items.filter((i) => i.amount > 0).map((i) => [i.ingredientId, i.amount]),
     );
 
     for (const existing of existingItems) {

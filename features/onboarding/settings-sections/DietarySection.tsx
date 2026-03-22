@@ -3,10 +3,10 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useDebounceFn } from "ahooks";
 import { useMutation, useQuery } from "convex/react";
+import { ChevronDown, ChevronRight } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import { useTranslations } from "next-intl";
-import { ChevronDown, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -21,10 +21,10 @@ import {
   FormItem,
   FormLabel,
 } from "@/components/ui/form";
-import { ALLERGIES, STRICT_DIETS } from "@/convex/schema";
 import { api } from "@/convex/_generated/api";
+import { ALLERGIES, STRICT_DIETS } from "@/convex/schema";
 import { DEBOUNCE_MS } from "../constants";
-import { dietarySchema, type DietaryValues } from "../schemas";
+import { type DietaryValues, dietarySchema } from "../schemas";
 
 export function DietarySection({
   open,
@@ -86,109 +86,119 @@ export function DietarySection({
       </CollapsibleTrigger>
       <CollapsibleContent>
         <Form {...form}>
-      <form className="space-y-4 pt-4">
-        <FormField
-          control={form.control}
-          name="strictDiets"
-          render={() => (
-            <FormItem>
-              <FormLabel>{t("strictDietsLabel")}</FormLabel>
-              <FormControl>
-                <div className="flex flex-wrap gap-4 rounded-md border p-4">
-                  {STRICT_DIETS.map((diet) => (
-                    <FormField
-                      key={diet}
-                      control={form.control}
-                      name="strictDiets"
-                      render={({ field }) => (
-                        <FormItem className="flex items-center space-x-2 space-y-0">
-                          <FormControl>
-                            <Checkbox
-                              checked={
-                                diet === "none"
-                                  ? field.value?.length === 0 ||
-                                    field.value?.includes("none")
-                                  : field.value?.includes(diet) &&
-                                    !field.value?.includes("none")
-                              }
-                              onCheckedChange={(checked) => {
-                                if (diet === "none") {
-                                  field.onChange(checked ? ["none"] : []);
-                                } else {
-                                  const current = field.value ?? [];
-                                  field.onChange(
-                                    checked
-                                      ? [...current.filter((x) => x !== "none"), diet]
-                                      : current.filter((x) => x !== diet),
-                                  );
-                                }
-                              }}
-                            />
-                          </FormControl>
-                          <FormLabel className="cursor-pointer font-normal">
-                            {t(`diets.${diet}`)}
-                          </FormLabel>
-                        </FormItem>
-                      )}
-                    />
-                  ))}
-                </div>
-              </FormControl>
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="allergies"
-          render={() => (
-            <FormItem>
-              <FormLabel>{t("allergiesLabel")}</FormLabel>
-              <FormControl>
-                <div className="flex flex-wrap gap-4 rounded-md border p-4">
-                  {ALLERGIES.map((a) => (
-                    <FormField
-                      key={a}
-                      control={form.control}
-                      name="allergies"
-                      render={({ field }) => (
-                        <FormItem className="flex items-center space-x-2 space-y-0">
-                          <FormControl>
-                            <Checkbox
-                              checked={
-                                a === "none"
-                                  ? field.value?.length === 0 ||
-                                    field.value?.includes("none")
-                                  : field.value?.includes(a) &&
-                                    !field.value?.includes("none")
-                              }
-                              onCheckedChange={(checked) => {
-                                if (a === "none") {
-                                  field.onChange(checked ? ["none"] : []);
-                                } else {
-                                  const current = field.value ?? [];
-                                  field.onChange(
-                                    checked
-                                      ? [...current.filter((x) => x !== "none"), a]
-                                      : current.filter((x) => x !== a),
-                                  );
-                                }
-                              }}
-                            />
-                          </FormControl>
-                          <FormLabel className="cursor-pointer font-normal">
-                            {t(`allergies.${a}`)}
-                          </FormLabel>
-                        </FormItem>
-                      )}
-                    />
-                  ))}
-                </div>
-              </FormControl>
-            </FormItem>
-          )}
-        />
-      </form>
-    </Form>
+          <form className="space-y-4 pt-4">
+            <FormField
+              control={form.control}
+              name="strictDiets"
+              render={() => (
+                <FormItem>
+                  <FormLabel>{t("strictDietsLabel")}</FormLabel>
+                  <FormControl>
+                    <div className="flex flex-wrap gap-4 rounded-md border p-4">
+                      {STRICT_DIETS.map((diet) => (
+                        <FormField
+                          key={diet}
+                          control={form.control}
+                          name="strictDiets"
+                          render={({ field }) => (
+                            <FormItem className="flex items-center space-x-2 space-y-0">
+                              <FormControl>
+                                <Checkbox
+                                  checked={
+                                    diet === "none"
+                                      ? field.value?.length === 0 ||
+                                        field.value?.includes("none")
+                                      : field.value?.includes(diet) &&
+                                        !field.value?.includes("none")
+                                  }
+                                  onCheckedChange={(checked) => {
+                                    if (diet === "none") {
+                                      field.onChange(checked ? ["none"] : []);
+                                    } else {
+                                      const current = field.value ?? [];
+                                      field.onChange(
+                                        checked
+                                          ? [
+                                              ...current.filter(
+                                                (x) => x !== "none",
+                                              ),
+                                              diet,
+                                            ]
+                                          : current.filter((x) => x !== diet),
+                                      );
+                                    }
+                                  }}
+                                />
+                              </FormControl>
+                              <FormLabel className="cursor-pointer font-normal">
+                                {t(`diets.${diet}`)}
+                              </FormLabel>
+                            </FormItem>
+                          )}
+                        />
+                      ))}
+                    </div>
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="allergies"
+              render={() => (
+                <FormItem>
+                  <FormLabel>{t("allergiesLabel")}</FormLabel>
+                  <FormControl>
+                    <div className="flex flex-wrap gap-4 rounded-md border p-4">
+                      {ALLERGIES.map((a) => (
+                        <FormField
+                          key={a}
+                          control={form.control}
+                          name="allergies"
+                          render={({ field }) => (
+                            <FormItem className="flex items-center space-x-2 space-y-0">
+                              <FormControl>
+                                <Checkbox
+                                  checked={
+                                    a === "none"
+                                      ? field.value?.length === 0 ||
+                                        field.value?.includes("none")
+                                      : field.value?.includes(a) &&
+                                        !field.value?.includes("none")
+                                  }
+                                  onCheckedChange={(checked) => {
+                                    if (a === "none") {
+                                      field.onChange(checked ? ["none"] : []);
+                                    } else {
+                                      const current = field.value ?? [];
+                                      field.onChange(
+                                        checked
+                                          ? [
+                                              ...current.filter(
+                                                (x) => x !== "none",
+                                              ),
+                                              a,
+                                            ]
+                                          : current.filter((x) => x !== a),
+                                      );
+                                    }
+                                  }}
+                                />
+                              </FormControl>
+                              <FormLabel className="cursor-pointer font-normal">
+                                {t(`allergies.${a}`)}
+                              </FormLabel>
+                            </FormItem>
+                          )}
+                        />
+                      ))}
+                    </div>
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+          </form>
+        </Form>
       </CollapsibleContent>
     </Collapsible>
   );

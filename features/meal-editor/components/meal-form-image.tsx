@@ -1,10 +1,12 @@
 "use client";
 
 import { useMutation, useQuery } from "convex/react";
+import { Upload } from "lucide-react";
 import Image from "next/image";
-import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { Control, UseFormSetValue } from "react-hook-form";
+import { Button } from "@/components/ui/button";
 import {
   FormControl,
   FormField,
@@ -13,16 +15,21 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
-import { Upload } from "lucide-react";
 
-const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
+const ACCEPTED_IMAGE_TYPES = [
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+  "image/gif",
+];
 const MAX_FILE_SIZE_MB = 5;
 
 interface MealFormImageProps {
+  // biome-ignore lint/suspicious/noExplicitAny: react-hook-form Control requires form type; meal form type varies
   control: Control<any>;
+  // biome-ignore lint/suspicious/noExplicitAny: react-hook-form setValue requires form type
   setValue: UseFormSetValue<any>;
 }
 
@@ -30,7 +37,8 @@ export function MealFormImage({ control, setValue }: MealFormImageProps) {
   const t = useTranslations("mealEditor");
   const generateUploadUrl = useMutation(api.files.generateUploadUrl);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [pendingStorageId, setPendingStorageId] = useState<Id<"_storage"> | null>(null);
+  const [pendingStorageId, setPendingStorageId] =
+    useState<Id<"_storage"> | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [showUrlInput, setShowUrlInput] = useState(false);
@@ -92,7 +100,7 @@ export function MealFormImage({ control, setValue }: MealFormImageProps) {
       name="imageUrl"
       render={({ field }) => (
         <FormItem>
-          <div className="relative h-64 w-full overflow-hidden rounded-t-lg bg-gray-200 dark:bg-neutral-800 md:h-96">
+          <div className="relative h-64 w-full overflow-hidden rounded-t-lg bg-gray-200 md:h-96 dark:bg-neutral-800">
             {field.value ? (
               <div className="relative h-full w-full">
                 <Image

@@ -1,4 +1,5 @@
 import { v } from "convex/values";
+import { z } from "zod";
 import { internalMutation } from "../_generated/server";
 import { authMutation } from "../custom/mutation";
 import {
@@ -6,7 +7,6 @@ import {
   INGREDIENT_CATEGORIES,
   UNITS,
 } from "../schema";
-import { z } from "zod";
 import {
   mutationIngredientValidator,
   mutationMealIngredientsValidator,
@@ -105,7 +105,10 @@ export const updateIngredient = authMutation({
     calories: v.optional(v.number()),
     replacements: v.optional(v.array(replacementEntryValidator)),
   },
-  handler: async (ctx, { ingredientId, name, category, unit, calories, replacements }) => {
+  handler: async (
+    ctx,
+    { ingredientId, name, category, unit, calories, replacements },
+  ) => {
     const now = Date.now();
     const nameLower = name.toLowerCase().trim();
 
